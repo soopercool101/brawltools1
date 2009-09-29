@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using BrawlLib.SSBB.ResourceNodes;
 using System.Reflection;
 
-namespace SmashBox
+namespace BrawlBox
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     sealed class NodeActionAttribute : Attribute

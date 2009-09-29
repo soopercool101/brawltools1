@@ -1,4 +1,4 @@
-﻿namespace SmashBox
+﻿namespace BrawlBox
 {
     partial class PreviewPanel
     {

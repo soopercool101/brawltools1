@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using BrawlLib.Imaging;
 
-namespace SmashBox
+namespace BrawlBox
 {
     //interface IPreviewObject
     //{

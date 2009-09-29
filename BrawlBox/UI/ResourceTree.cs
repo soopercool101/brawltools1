@@ -5,7 +5,7 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using BrawlLib.SSBB.ResourceNodes;
 
-namespace SmashBox
+namespace BrawlBox
 {
     public class ResourceTree : TreeView
     {

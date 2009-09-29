@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using System.IO;
 using BrawlLib.IO;
 
-namespace SmashBox
+namespace BrawlBox
 {
     //Contains generic members inherited by all sub-classed nodes
     class GenericWrapper : BaseWrapper

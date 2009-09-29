@@ -8,12 +8,13 @@
     <ProjectGuid>{0B8588FD-74EE-4A7D-A397-91EA3F6A2C77}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SmashBox</RootNamespace>
-    <AssemblyName>SmashBox</AssemblyName>
+    <RootNamespace>BrawlBox</RootNamespace>
+    <AssemblyName>BrawlBox</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PlatformTarget>x86</PlatformTarget>
-    <StartupObject>SmashBox.Program</StartupObject>
+    <StartupObject>
+    </StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>

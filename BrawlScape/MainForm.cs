@@ -43,7 +43,7 @@ namespace BrawlScape
             }
         }
 
-        public MainForm() { InitializeComponent(); Text = Program.AssemblyDescription; }
+        public MainForm() { InitializeComponent(); Text = Program.AssemblyTitle; }
 
         private void InitFrame(Control frame)
         {

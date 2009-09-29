@@ -8,7 +8,7 @@ using BrawlLib.SSBB.ResourceNodes;
 using System.IO;
 using System.Diagnostics;
 
-namespace SmashBox
+namespace BrawlBox
 {
     static class Program
     {

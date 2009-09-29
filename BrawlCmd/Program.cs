@@ -2,7 +2,7 @@
 using BrawlLib.SSBB.ResourceNodes;
 using System.IO;
 
-namespace SmashCmd
+namespace BrawlCmd
 {
     class Program
     {

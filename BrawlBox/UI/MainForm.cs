@@ -12,7 +12,7 @@ using BrawlLib.SSBB.ResourceNodes;
 using BrawlLib.Imaging;
 using System.Reflection;
 
-namespace SmashBox
+namespace BrawlBox
 {
     public partial class MainForm : Form
     {

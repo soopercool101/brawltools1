@@ -8,8 +8,8 @@
     <ProjectGuid>{D6F2B214-C2EB-4629-86C5-765457A7BB99}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SmashCmd</RootNamespace>
-    <AssemblyName>SmashCmd</AssemblyName>
+    <RootNamespace>BrawlCmd</RootNamespace>
+    <AssemblyName>BrawlCmd</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PlatformTarget>x86</PlatformTarget>
