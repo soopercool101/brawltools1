@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>10.0.20506</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{462D0BBF-CE82-405B-8848-2F91E9E14C55}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BrawlLib</RootNamespace>
+    <AssemblyName>BrawlLib</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="System\ComponentModel\CustomPropertyDescriptor.cs" />
+    <None Include="System\ComponentModel\DelegatePropertyDescriptor.cs" />
+    <Compile Include="Imaging\DIB.cs" />
+    <Compile Include="Imaging\IImageSource.cs" />
+    <Compile Include="Imaging\PixelTypes.cs" />
+    <Compile Include="Imaging\TGAImage.cs" />
+    <Compile Include="Imaging\WeightedAverage.cs" />
+    <Compile Include="Platform\Linux.cs" />
+    <Compile Include="Platform\Win32.cs" />
+    <Compile Include="SSBB\ResourceNodes\BRESNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\CHR0Node.cs" />
+    <Compile Include="SSBB\ResourceNodes\CLR0Node.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0Node.cs" />
+    <Compile Include="SSBB\ResourceNodes\PAT0Node.cs" />
+    <Compile Include="SSBB\ResourceNodes\PLT0Node.cs" />
+    <Compile Include="SSBB\ResourceNodes\ResourceEntryNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\ResourceGroupNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\SCN0Node.cs" />
+    <Compile Include="SSBB\ResourceNodes\SRT0Node.cs" />
+    <Compile Include="SSBB\ResourceNodes\TEX0Node.cs" />
+    <Compile Include="SSBB\ResourceNodes\VIS0Node.cs" />
+    <Compile Include="SSBB\ResourceNodes\SHP0Node.cs" />
+    <Compile Include="System\Drawing\BitmapExtention.cs" />
+    <Compile Include="System\Drawing\Imaging\ColorPaletteExtension.cs" />
+    <Compile Include="System\Reflection\MemberInfoExtension.cs" />
+    <Compile Include="System\Reflection\MethodInfoExtension.cs" />
+    <Compile Include="Wii\Compression\Common.cs" />
+    <Compile Include="Wii\Compression\LZ77.cs" />
+    <Compile Include="System\IO\FileMap.cs" />
+    <Compile Include="System\IO\StreamExtension.cs" />
+    <Compile Include="System\IO\UnsafeStream.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SSBB\ResourceNodes\ARCNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\NodeFactory.cs" />
+    <Compile Include="SSBB\ResourceNodes\ResourceNode.cs" />
+    <Compile Include="SSBB\Types\ARC.cs" />
+    <Compile Include="SSBB\Types\BRES.cs" />
+    <Compile Include="SSBB\Types\CHR0.cs" />
+    <Compile Include="SSBB\Types\CLR0.cs" />
+    <Compile Include="SSBB\Types\Common.cs" />
+    <Compile Include="SSBB\Types\FighterDefinition.cs" />
+    <Compile Include="SSBB\Types\MDL0.cs" />
+    <Compile Include="SSBB\Types\PAT0.cs" />
+    <Compile Include="SSBB\Types\PLT0.cs" />
+    <Compile Include="SSBB\Types\ROOT.cs" />
+    <Compile Include="SSBB\Types\RSAR.cs" />
+    <Compile Include="SSBB\Types\RSTM.cs" />
+    <Compile Include="SSBB\Types\SCN0.cs" />
+    <Compile Include="SSBB\Types\SHP0.cs" />
+    <Compile Include="SSBB\Types\SRT0.cs" />
+    <Compile Include="SSBB\Types\TEX0.cs" />
+    <Compile Include="SSBB\Types\VIS0.cs" />
+    <Compile Include="System\BigEndianTypes.cs" />
+    <Compile Include="System\Int16Extension.cs" />
+    <Compile Include="System\Int32Extension.cs" />
+    <Compile Include="System\Int64Extension.cs" />
+    <Compile Include="System\Windows\Forms\IProgressTracker.cs" />
+    <Compile Include="System\Memory.cs" />
+    <Compile Include="System\SingleExtension.cs" />
+    <Compile Include="System\UInt16Extension.cs" />
+    <Compile Include="System\UInt32Extension.cs" />
+    <Compile Include="System\VoidPtr.cs" />
+    <Compile Include="System\Windows\Forms\GoodProgressBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\ProgressWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\ProgressWindow.designer.cs">
+      <DependentUpon>ProgressWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Wii\Compressor.cs" />
+    <Compile Include="Wii\Textures\CI4.cs" />
+    <Compile Include="Wii\Textures\CI8.cs" />
+    <Compile Include="Wii\Textures\CMP.cs" />
+    <Compile Include="Wii\Textures\I4.cs" />
+    <Compile Include="Wii\Textures\I8.cs" />
+    <Compile Include="Wii\Textures\IA4.cs" />
+    <Compile Include="Wii\Textures\IA8.cs" />
+    <Compile Include="Wii\Textures\PixelTypes.cs" />
+    <Compile Include="Wii\Textures\RGB565.cs" />
+    <Compile Include="Wii\Textures\RGB5A3.cs" />
+    <Compile Include="Wii\Textures\RGBA8.cs" />
+    <Compile Include="Wii\Textures\TextureFormat.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="System\Windows\Forms\ProgressWindow.resx">
+      <DependentUpon>ProgressWindow.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

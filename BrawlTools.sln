@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 10
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlLib", "BrawlLib\BrawlLib.csproj", "{462D0BBF-CE82-405B-8848-2F91E9E14C55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlBox", "BrawlBox\BrawlBox.csproj", "{0B8588FD-74EE-4A7D-A397-91EA3F6A2C77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlCmd", "BrawlCmd\BrawlCmd.csproj", "{D6F2B214-C2EB-4629-86C5-765457A7BB99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlScape", "BrawlScape\BrawlScape.csproj", "{70924130-7F97-44EC-8D22-DE472C505794}"
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{462D0BBF-CE82-405B-8848-2F91E9E14C55}.Debug|x86.ActiveCfg = Debug|x86
+		{462D0BBF-CE82-405B-8848-2F91E9E14C55}.Debug|x86.Build.0 = Debug|x86
+		{462D0BBF-CE82-405B-8848-2F91E9E14C55}.Release|x86.ActiveCfg = Release|x86
+		{462D0BBF-CE82-405B-8848-2F91E9E14C55}.Release|x86.Build.0 = Release|x86
+		{0B8588FD-74EE-4A7D-A397-91EA3F6A2C77}.Debug|x86.ActiveCfg = Debug|x86
+		{0B8588FD-74EE-4A7D-A397-91EA3F6A2C77}.Debug|x86.Build.0 = Debug|x86
+		{0B8588FD-74EE-4A7D-A397-91EA3F6A2C77}.Release|x86.ActiveCfg = Release|x86
+		{0B8588FD-74EE-4A7D-A397-91EA3F6A2C77}.Release|x86.Build.0 = Release|x86
+		{D6F2B214-C2EB-4629-86C5-765457A7BB99}.Debug|x86.ActiveCfg = Debug|x86
+		{D6F2B214-C2EB-4629-86C5-765457A7BB99}.Debug|x86.Build.0 = Debug|x86
+		{D6F2B214-C2EB-4629-86C5-765457A7BB99}.Release|x86.ActiveCfg = Release|x86
+		{D6F2B214-C2EB-4629-86C5-765457A7BB99}.Release|x86.Build.0 = Release|x86
+		{70924130-7F97-44EC-8D22-DE472C505794}.Debug|x86.ActiveCfg = Debug|x86
+		{70924130-7F97-44EC-8D22-DE472C505794}.Debug|x86.Build.0 = Debug|x86
+		{70924130-7F97-44EC-8D22-DE472C505794}.Release|x86.ActiveCfg = Release|x86
+		{70924130-7F97-44EC-8D22-DE472C505794}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

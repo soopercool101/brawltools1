@@ -1,0 +1,65 @@
+﻿
+BrawlScape Mod Manager - Version 0.01
+Copyright © 2009 - Bryan Moulton
+
+This program is provided as-is without any warranty, implied or otherwise.
+By using this program, the end user agrees to take full responsibility
+regarding its proper and lawful use. The authors/hosts/distributors cannot be 
+held responsible for any damage resulting in the use of this program, nor can 
+they be held accountable for the manner in which it is used.
+
+-Yet another program based on BrawlLib-
+
+For bug reports, support, and the latest version, check out our forum post at SmashBoards.com!
+http://www.smashboards.com/forumdisplay.php?f=209
+
+ ====================================
+|************ Change Log ************|
+ ====================================
+	
+- v0.01 - (09/28/2009)
+	. Original release
+
+ ====================================
+|************ How to Use ************|
+ ====================================
+
+1. First of all, you need to have the SSBB data files extracted to a folder on your computer. This will be your base data.
+2. Create a second folder either on your hard drive or an SD card (private\wii\app\RSBE\pf). This will be your working data.
+3. Open BrawlScape and direct the program to these two folders. Leave the program set to Project mode.
+4. Once your paths are set, continue on to the other tabs at the top of the window.
+5. Replace textures/files, using the right mouse button.
+6. When you're finished, return to the project tab and press Save. This will copy all changes to your Project folder.
+7. If using SD loader, simply remove the SD card (close the program!) and use it in SSBB.
+
+ ====================================
+|*********** Requirements ***********|
+ ====================================
+ 
+ * SSBB Data files (must be taken from game disc)
+ 
+ * Microsoft .Net Framework v3.5 SP1
+	http://www.microsoft.com/downloads/details.aspx?FamilyID=ab99342f-5d1a-413d-8319-81da479ab0d7&displaylang=en
+ 
+
+ ====================================
+|*********** Known Issues ***********|
+ ====================================
+
+* Startup page needs work. Make sure you set your paths before doing anything!
+
+* Please do not continue using the program after removing an SD card, it will most likely crash.
+
+* Avoid the reset button. This will clear all file references and may cause the program to stop working.
+
+
+ ====================================
+|********* Acknowledgements *********|
+ ====================================
+
+Super Smash Brothers Brawl is copyrighted property - © 2008 Nintendo and HAL Laboratory, Inc.
+
+Characters are copyrighted by the following:
+© Nintendo / HAL Laboratory, Inc. / Pokemon / Creatures Inc. / GAME FREAK Inc. / SHIGESATO ITOI / 
+APE Inc. / INTELLIGENT SYSTEMS / Konami Digital Entertainment Co., Ltd. / SEGA
+
