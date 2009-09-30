@@ -1,0 +1,20 @@
+﻿
+BrawlLib Resource Library - Version 0.02
+Copyright © 2009 - Bryan Moulton
+
+This program is provided as-is without any warranty, implied or otherwise.
+By using this program, the end user agrees to take full responsibility
+regarding its proper and lawful use. The authors/hosts/distributors cannot be 
+held responsible for any damage resulting in the use of this program, nor can 
+they be held accountable for the manner in which it is used.
+
+ ====================================
+|************ Change Log ************|
+ ====================================
+
+- v0.02 - (09/29/2009)
+	. Added the ability to construct a resource tree from scratch.
+	. Various properties from ResourceTreeNode, TEX0Node and PLT0Node can now be written to.
+
+- v0.01 - (09/28/2009)
+	. Initial release

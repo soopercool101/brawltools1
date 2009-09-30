@@ -11,12 +11,17 @@ they be held accountable for the manner in which it is used.
 -Yet another program based on BrawlLib-
 
 For bug reports, support, and the latest version, check out our forum post at SmashBoards.com!
-http://www.smashboards.com/forumdisplay.php?f=209
+http://www.smashboards.com/showthread.php?t=250568
 
  ====================================
 |************ Change Log ************|
  ====================================
-	
+
+- v0.02 - (09/29/2009)
+	. Added the ability to Import/Export/Replace whole costume files.
+	. Remade menus
+	. Added stability
+
 - v0.01 - (09/28/2009)
 	. Original release
 
@@ -35,8 +40,6 @@ http://www.smashboards.com/forumdisplay.php?f=209
  ====================================
 |*********** Requirements ***********|
  ====================================
- 
- * SSBB Data files (must be taken from game disc)
  
  * Microsoft .Net Framework v3.5 SP1
 	http://www.microsoft.com/downloads/details.aspx?FamilyID=ab99342f-5d1a-413d-8319-81da479ab0d7&displaylang=en
