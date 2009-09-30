@@ -22,7 +22,7 @@ namespace BrawlLib.IO
         public static FileMap FromFile(string path, FileMapProtect prot, int offset, int length)
         {
             FileAccess access = (prot == FileMapProtect.ReadWrite) ? FileAccess.ReadWrite : FileAccess.Read;
-            using (FileStream stream = new FileStream(path, FileMode.Open, access, FileShare.Read, 0x1000, FileOptions.RandomAccess))
+            using (FileStream stream = new FileStream(path, FileMode.Open, access, FileShare.Read, 8, FileOptions.RandomAccess))
                 return FromStream(stream, prot, offset, length);
         }
 
@@ -44,7 +44,7 @@ namespace BrawlLib.IO
         }
         public static FileMap FromTempFile(int length)
         {
-            using (FileStream stream = new FileStream(Path.GetTempFileName(), FileMode.Open, FileAccess.ReadWrite, FileShare.Read, 0x1000, FileOptions.RandomAccess | FileOptions.DeleteOnClose))
+            using (FileStream stream = new FileStream(Path.GetTempFileName(), FileMode.Open, FileAccess.ReadWrite, FileShare.Read, 8, FileOptions.RandomAccess | FileOptions.DeleteOnClose))
             {
                 stream.SetLength(length);
                 return FromStream(stream, FileMapProtect.ReadWrite, 0, length);

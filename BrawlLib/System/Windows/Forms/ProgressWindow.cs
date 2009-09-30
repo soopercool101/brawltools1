@@ -28,9 +28,9 @@ namespace System.Windows.Forms
             progressBar1.MaxValue = max;
             progressBar1.CurrentValue = current;
 
-            Owner = Form.ActiveForm;
-            Owner.Enabled = false;
-            Show(Owner);
+            //Owner = Form.ActiveForm;
+            //Owner.Enabled = false;
+            Show();
 
             //CenterToParent();
             Application.DoEvents();
@@ -43,7 +43,7 @@ namespace System.Windows.Forms
         }
         public void Finish()
         {
-            Owner.Enabled = true;
+            //Owner.Enabled = true;
             Close();
         }
         public void Cancel() { _cancelled = true; }

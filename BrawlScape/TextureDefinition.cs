@@ -152,5 +152,9 @@ namespace BrawlScape
         //        _texture = null;
         //    }
         //}
+
+        internal void Reset()
+        {
+        }
     }
 }

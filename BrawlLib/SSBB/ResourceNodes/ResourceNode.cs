@@ -144,7 +144,8 @@ namespace BrawlLib.SSBB.ResourceNodes
                 if (_children == null)
                 {
                     _children = new List<ResourceNode>();
-                    OnPopulate();
+                    if (WorkingRawSource != DataSource.Empty)
+                        OnPopulate();
                 }
                 return _children;
             }
@@ -263,7 +264,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         //Restores node to its original form using the backing tree. 
         public virtual void Restore()
         {
-            if (!IsDirty)
+            if ((!IsDirty) && (!IsBranch))
                 return;
 
             if (_children != null)
@@ -317,36 +318,6 @@ namespace BrawlLib.SSBB.ResourceNodes
         public unsafe virtual void Replace(string fileName)
         {
             ReplaceRaw(FileMap.FromFile(fileName, FileMapProtect.Read));
-            //if (_children != null)
-            //{
-            //    foreach (ResourceNode node in _children)
-            //        node.Dispose();
-            //    _children.Clear();
-            //    _children = null;
-            //}
-
-            //_replUncompSrc.Close();
-            //_replSrc.Close();
-
-            //FileMap map = FileMap.FromFile(fileName, FileMapProtect.Read);
-            //if (Compressor.IsDataCompressed(map.Address, map.Length))
-            //{
-            //    CompressionHeader* cmpr = (CompressionHeader*)map.Address;
-            //    FileMap tMap = FileMap.FromTempFile(cmpr->ExpandedSize);
-            //    Compressor.Expand(cmpr, tMap.Address, tMap.Length);
-
-            //    _compression = cmpr->Algorithm;
-            //    _replSrc = new DataSource(map, cmpr->Algorithm);
-            //    _replUncompSrc = new DataSource(tMap);
-            //}
-            //else
-            //{
-            //    _compression = CompressionType.None;
-            //    _replSrc = _replUncompSrc = new DataSource(map);
-            //}
-
-            //if (!OnInitialize())
-            //    _children = new List<ResourceNode>();
         }
         public unsafe virtual void ReplaceRaw(VoidPtr address, int length)
         {
@@ -392,7 +363,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         public unsafe virtual void Export(string outPath)
         {
-            using (FileStream stream = new FileStream(outPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.WriteThrough))
+            using (FileStream stream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.SequentialScan))
                 Export(stream);
         }
         public void Export(FileStream outStream)
@@ -404,7 +375,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         public virtual void ExportUncompressed(string outPath)
         {
-            using (FileStream stream = new FileStream(outPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.WriteThrough))
+            using (FileStream stream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.SequentialScan))
                 ExportUncompressed(stream);
         }
         public void ExportUncompressed(FileStream outStream)
@@ -569,9 +540,12 @@ namespace BrawlLib.SSBB.ResourceNodes
                 _origSource = _replSrc;
                 _replSrc = DataSource.Empty;
 
-                _uncompSource.Close();
-                _uncompSource = _replUncompSrc;
-                _replUncompSrc = DataSource.Empty;
+                if (_replUncompSrc != DataSource.Empty)
+                {
+                    _uncompSource.Close();
+                    _uncompSource = _replUncompSrc;
+                    _replUncompSrc = DataSource.Empty;
+                }
             }
         }
 

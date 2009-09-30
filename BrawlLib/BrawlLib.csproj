@@ -68,6 +68,9 @@
     <Compile Include="System\Drawing\Imaging\ColorPaletteExtension.cs" />
     <Compile Include="System\Reflection\MemberInfoExtension.cs" />
     <Compile Include="System\Reflection\MethodInfoExtension.cs" />
+    <Compile Include="System\Windows\Forms\GLControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Wii\Compression\Common.cs" />
     <Compile Include="Wii\Compression\LZ77.cs" />
     <Compile Include="System\IO\FileMap.cs" />

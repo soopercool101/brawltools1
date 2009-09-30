@@ -121,7 +121,8 @@ namespace BrawlScape
 
         private void ItemFrame_Load(object sender, EventArgs e)
         {
-            Initialize();
+            if (!DesignMode)
+                Initialize();
         }
     }
 }

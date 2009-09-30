@@ -16,18 +16,36 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         public override int DataAlign { get { return 0x20; } }
 
+        int _width, _height;
+        WiiPixelFormat _format;
+        int _lod;
+        bool _hasPalette;
+
         [Category("Texture")]
-        public short Width { get { return Header->_width; } }
+        public int Width { get { return _width; } set { _width = value; } }
         [Category("Texture")]
-        public short Height { get { return Header->_height; } }
+        public int Height { get { return _height; } set { _height = value; } }
         [Category("Texture")]
-        public WiiPixelFormat Format { get { return Header->PixelFormat; } }
+        public WiiPixelFormat Format { get { return _format; } set { _format = value; } }
         [Category("Texture")]
-        public int LevelOfDetail { get { return Header->_levelOfDetail; } }
+        public int LevelOfDetail { get { return _lod; } set { _lod = value; } }
         [Category("Texture")]
-        public bool HasPalette { get { return Header->HasPalette; } }
+        public bool HasPalette { get { return _hasPalette; } set { _hasPalette = value; } }
 
         public PLT0Node GetPaletteNode() { return _parent == null ? null : _parent._parent.FindChild("Palettes(NW4R)/" + this.Name, false) as PLT0Node; }
+
+        protected override bool OnInitialize()
+        {
+            base.OnInitialize();
+
+            _width = Header->_width;
+            _height = Header->_height;
+            _format = Header->PixelFormat;
+            _lod = Header->_levelOfDetail;
+            _hasPalette = Header->HasPalette;
+
+            return false;
+        }
 
         [Browsable(false)]
         public int ImageCount { get { return Header->_levelOfDetail; } }

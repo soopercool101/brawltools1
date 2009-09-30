@@ -14,11 +14,13 @@ namespace BrawlScape
     {
         private CharacterDefinition _character;
         private int _index;
+        private string _path;
 
         public CostumeDefinition(CharacterDefinition character, int index) : base("system\\common5.pac", character.CSPNode.FindChild("Textures(NW4R)", false).Children[index].TreePath)
         {
             _character = character;
             _index = index;
+            _path = _character.GetCostumePath(index);
         }
 
         private TextureDefinition[] _textures;
@@ -31,15 +33,14 @@ namespace BrawlScape
                     try
                     {
                         //Find outfit in fighter folder
-                        string path = _character.GetCostumePath(_index);
+                        //string path = _character.GetCostumePath(_index);
 
-                        ARCNode node = ResourceCache.FindNode(path, null) as ARCNode;
-                        node.IsPair = true;
+                        ARCNode node = ResourceCache.FindNode(_path, null) as ARCNode;
 
                         ResourceNode[] nodes = node.FindChildrenByType(null, ResourceType.TEX0);
                         TextureDefinition[] textures = new TextureDefinition[nodes.Length];
                         for (int i = 0; i < nodes.Length; i++)
-                            textures[i] = new TextureDefinition(path, nodes[i].TreePath);
+                            textures[i] = new TextureDefinition(_path, nodes[i].TreePath);
 
                         _textures = textures;
                     }
@@ -52,12 +53,12 @@ namespace BrawlScape
         internal void ExportCostume()
         {
             string outFile;
-            string path = _character.GetCostumePath(_index);
-            int filter = (Program.SaveFile(Filters.CostumeExportFilter, Path.GetFileName(path), out outFile, false));
+            //string path = _character.GetCostumePath(_index);
+            int filter = (Program.SaveFile(Filters.CostumeExportFilter, Path.GetFileName(_path), out outFile, false));
             if (filter == 0)
                 return;
 
-            ResourceNode node = ResourceCache.FindNode(path, null);
+            ResourceNode node = ResourceCache.FindNode(_path, null);
             if (node.IsDirty)
                 node.Rebuild(false);
 
@@ -69,17 +70,31 @@ namespace BrawlScape
             }
         }
 
-        internal void ImportCostume()
+        internal bool ImportCostume()
         {
-            //string inFile;
+            string inFile;
             //string path = _character.GetCostumePath(_index);
-            //if (Program.OpenFile(Filters.CostumeImportFilter, out inFile, false) == 0)
-            //    return;
+            if (Program.OpenFile(Filters.CostumeImportFilter, out inFile, false) == 0)
+                return false;
+
+            //Replace file in cache
+            ResourceCache.LoadExternal(_path, inFile);
+            return true;
         }
 
-        internal void RestoreCostume()
+        internal bool RestoreCostume()
         {
+            return ResourceCache.Restore(_path);
+        }
 
+        internal void Reset()
+        {
+            if (_textures != null)
+            {
+                foreach (TextureDefinition def in _textures)
+                    def.Reset();
+                _textures = null;
+            }
         }
     }
 }

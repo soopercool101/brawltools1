@@ -4,6 +4,9 @@ using System.Linq;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
+using BrawlLib.SSBB.ResourceNodes;
+using System.Drawing;
+using BrawlLib.Wii.Textures;
 
 namespace BrawlScape
 {
@@ -45,6 +48,10 @@ namespace BrawlScape
         {
             return path.StartsWith(_workingPath);
         }
+        public static bool IsDataPath(string path)
+        {
+            return path.StartsWith(_basePath);
+        }
 
         public static string GetDataPath(string workingPath)
         {
@@ -65,41 +72,48 @@ namespace BrawlScape
             return null;
         }
 
-        public static string GetFilePath(string partialPath)
+        public static string GetFilePath(string partialPath) { return GetFilePath(partialPath, true); }
+        public static string GetFilePath(string relativePath, bool findWorking)
         {
             string path;
-            string ext = Path.GetExtension(partialPath);
-            string name = partialPath.Substring(0, partialPath.LastIndexOf(ext));
-
-            if (ext.Equals(".pac", StringComparison.OrdinalIgnoreCase) || ext.Equals(".pcs", StringComparison.OrdinalIgnoreCase))
+            //PAC/PCS pair
+            if (!Path.HasExtension(relativePath))
             {
-                if (File.Exists(path = Path.Combine(_workingPath, name + ".pcs")))
-                    return path;
-                if (File.Exists(path = Path.Combine(_workingPath, name + ".pac")))
-                    return path;
-                if (File.Exists(path = Path.Combine(_workingPath, name + "_en.pcs")))
-                    return path;
-                if (File.Exists(path = Path.Combine(_workingPath, name + "_en.pac")))
-                    return path;
-                if (!_workingPath.Equals(_basePath, StringComparison.OrdinalIgnoreCase))
+                if (findWorking)
                 {
-                    if (File.Exists(path = Path.Combine(_basePath, name + ".pcs")))
+                    if (File.Exists(path = Path.Combine(_workingPath, relativePath + ".pcs")))
                         return path;
-                    if (File.Exists(path = Path.Combine(_basePath, name + ".pac")))
+                    if (File.Exists(path = Path.Combine(_workingPath, relativePath + ".pac")))
                         return path;
-                    if (File.Exists(path = Path.Combine(_basePath, name + "_en.pcs")))
+                    if (File.Exists(path = Path.Combine(_workingPath, relativePath + "_en.pcs")))
                         return path;
-                    if (File.Exists(path = Path.Combine(_basePath, name + "_en.pac")))
+                    if (File.Exists(path = Path.Combine(_workingPath, relativePath + "_en.pac")))
+                        return path;
+                }
+                if ((!_workingPath.Equals(_basePath, StringComparison.OrdinalIgnoreCase)) || (!findWorking))
+                {
+                    if (File.Exists(path = Path.Combine(_basePath, relativePath + ".pcs")))
+                        return path;
+                    if (File.Exists(path = Path.Combine(_basePath, relativePath + ".pac")))
+                        return path;
+                    if (File.Exists(path = Path.Combine(_basePath, relativePath + "_en.pcs")))
+                        return path;
+                    if (File.Exists(path = Path.Combine(_basePath, relativePath + "_en.pac")))
                         return path;
                 }
             }
             else
             {
-                if (File.Exists(path = Path.Combine(_workingPath, name + ext)))
-                    return path;
-                if (File.Exists(path = Path.Combine(_workingPath, name + "_en" + ext)))
-                    return path;
-                if (!_workingPath.Equals(_basePath, StringComparison.OrdinalIgnoreCase))
+                string ext = Path.GetExtension(relativePath);
+                string name = relativePath.Substring(0, relativePath.LastIndexOf("."));
+                if (findWorking)
+                {
+                    if (File.Exists(path = Path.Combine(_workingPath, name + ext)))
+                        return path;
+                    if (File.Exists(path = Path.Combine(_workingPath, name + "_en" + ext)))
+                        return path;
+                }
+                if ((!_workingPath.Equals(_basePath, StringComparison.OrdinalIgnoreCase)) || (!findWorking))
                 {
                     if (File.Exists(path = Path.Combine(_basePath, name + ext)))
                         return path;
@@ -109,7 +123,7 @@ namespace BrawlScape
             }
 
             //return null;
-            throw new FileNotFoundException(String.Format("Could not find file '{0}'. Please update your data folder to include this file and try again.", partialPath));
+            throw new FileNotFoundException(String.Format("Could not find file '{0}'. Please update your data folder to include this file and try again.", relativePath));
         }
 
         public static int OpenFile(string filter, out string fileName) { return OpenFile(filter, out fileName, true); }

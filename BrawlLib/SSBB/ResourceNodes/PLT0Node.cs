@@ -13,10 +13,24 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         public override int DataAlign { get { return 0x10; } }
 
+        private int _numColors;
+        private WiiPaletteFormat _format;
+
         [Category("Palette")]
-        public int Colors { get { return Header->_numEntries; } }
+        public int Colors { get { return _numColors; } set { _numColors = value; } }
         [Category("Palette")]
-        public WiiPaletteFormat Format { get { return Header->PaletteFormat; } }
+        public WiiPaletteFormat Format { get { return _format; } set { _format = value; } }
+
+
+        protected override bool OnInitialize()
+        {
+            base.OnInitialize();
+
+            _numColors = Header->_numEntries;
+            _format = Header->PaletteFormat;
+
+            return false;
+        }
 
         protected internal override void OnAfterRebuild(IDictionary<string, VoidPtr> strings)
         {

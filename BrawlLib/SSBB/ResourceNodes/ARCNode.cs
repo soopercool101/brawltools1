@@ -92,8 +92,17 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (Compression == CompressionType.LZ77)
                 Export(outPath);
             else
-                using (FileStream stream = new FileStream(outPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x2000, FileOptions.SequentialScan))
-                    Compressor.Compact(CompressionType.LZ77, WorkingSource.Address, WorkingSource.Length, stream);
+            {
+                using (FileStream inStream = new FileStream(Path.GetTempFileName(), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 0x2000, FileOptions.SequentialScan | FileOptions.DeleteOnClose))
+                using(FileStream outStream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.SequentialScan))
+                {
+                    Compressor.Compact(CompressionType.LZ77, WorkingSource.Address, WorkingSource.Length, inStream);
+                    outStream.SetLength(inStream.Length);
+                    using (FileMap map = FileMap.FromStream(inStream))
+                    using(FileMap outMap = FileMap.FromStream(outStream))
+                        Memory.Move(outMap.Address, map.Address, (uint)map.Length);
+                }
+            }
         }
 
         internal static ResourceNode TryParse(VoidPtr address) 
@@ -131,6 +140,9 @@ namespace BrawlLib.SSBB.ResourceNodes
                 _fileId = FileHeader->_id;
                 _name = String.Format("{0}[{1}]", _fileType, _fileIndex);
             }
+            else
+                Name = Path.GetFileName(_origPath);
+
             return false;
         }
     }

@@ -28,91 +28,116 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.btnCharacters = new System.Windows.Forms.ToolStripButton();
-            this.btnItems = new System.Windows.Forms.ToolStripButton();
-            this._framePanel = new System.Windows.Forms.Panel();
-            this.btnProject = new System.Windows.Forms.ToolStripButton();
-            this.toolStrip1.SuspendLayout();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.startupFrame1 = new BrawlScape.StartupFrame();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.characterFrame1 = new BrawlScape.CharacterFrame();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.itemFrame1 = new BrawlScape.ItemFrame();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
-            // toolStrip1
+            // tabControl1
             // 
-            this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnProject,
-            this.btnCharacters,
-            this.btnItems});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(677, 25);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(0, 0);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(677, 512);
+            this.tabControl1.TabIndex = 0;
             // 
-            // btnCharacters
+            // tabPage1
             // 
-            this.btnCharacters.Image = ((System.Drawing.Image)(resources.GetObject("btnCharacters.Image")));
-            this.btnCharacters.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnCharacters.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnCharacters.Name = "btnCharacters";
-            this.btnCharacters.Size = new System.Drawing.Size(83, 22);
-            this.btnCharacters.Text = "Characters";
-            this.btnCharacters.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnCharacters.Click += new System.EventHandler(this.toolStripButton1_Click);
+            this.tabPage1.Controls.Add(this.startupFrame1);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(669, 486);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "Project";
+            this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // btnItems
+            // startupFrame1
             // 
-            this.btnItems.Image = ((System.Drawing.Image)(resources.GetObject("btnItems.Image")));
-            this.btnItems.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnItems.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnItems.Name = "btnItems";
-            this.btnItems.Size = new System.Drawing.Size(56, 22);
-            this.btnItems.Text = "Items";
-            this.btnItems.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnItems.Click += new System.EventHandler(this.toolStripButton2_Click);
+            this.startupFrame1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.startupFrame1.Location = new System.Drawing.Point(3, 3);
+            this.startupFrame1.Name = "startupFrame1";
+            this.startupFrame1.Size = new System.Drawing.Size(663, 480);
+            this.startupFrame1.TabIndex = 0;
             // 
-            // _framePanel
+            // tabPage2
             // 
-            this._framePanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._framePanel.Location = new System.Drawing.Point(0, 25);
-            this._framePanel.Name = "_framePanel";
-            this._framePanel.Size = new System.Drawing.Size(677, 487);
-            this._framePanel.TabIndex = 2;
+            this.tabPage2.Controls.Add(this.characterFrame1);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(669, 486);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Characters";
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // btnProject
+            // characterFrame1
             // 
-            this.btnProject.Image = ((System.Drawing.Image)(resources.GetObject("btnProject.Image")));
-            this.btnProject.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnProject.Name = "btnProject";
-            this.btnProject.Size = new System.Drawing.Size(64, 22);
-            this.btnProject.Text = "Project";
-            this.btnProject.Click += new System.EventHandler(this.toolStripButton3_Click);
+            this.characterFrame1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.characterFrame1.Location = new System.Drawing.Point(3, 3);
+            this.characterFrame1.Margin = new System.Windows.Forms.Padding(0);
+            this.characterFrame1.Name = "characterFrame1";
+            this.characterFrame1.SelectedCharacter = null;
+            this.characterFrame1.Size = new System.Drawing.Size(663, 480);
+            this.characterFrame1.TabIndex = 0;
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.itemFrame1);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(669, 486);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Items";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // itemFrame1
+            // 
+            this.itemFrame1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.itemFrame1.Location = new System.Drawing.Point(3, 3);
+            this.itemFrame1.Name = "itemFrame1";
+            this.itemFrame1.SelectedTexture = null;
+            this.itemFrame1.Size = new System.Drawing.Size(663, 480);
+            this.itemFrame1.TabIndex = 0;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(677, 512);
-            this.Controls.Add(this._framePanel);
-            this.Controls.Add(this.toolStrip1);
+            this.Controls.Add(this.tabControl1);
             this.Name = "MainForm";
             this.Text = "BrawlScape";
-            this.Load += new System.EventHandler(this.MainForm_Load);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage3.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripButton btnCharacters;
-        private System.Windows.Forms.Panel _framePanel;
-        private System.Windows.Forms.ToolStripButton btnItems;
-        private System.Windows.Forms.ToolStripButton btnProject;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.TabPage tabPage3;
+        private StartupFrame startupFrame1;
+        private CharacterFrame characterFrame1;
+        private ItemFrame itemFrame1;
 
     }
 }

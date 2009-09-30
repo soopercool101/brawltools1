@@ -179,7 +179,7 @@ namespace BrawlScape
 
         internal string GetCostumePath(int index)
         {
-            return String.Format("fighter\\{0}\\Fit{1}{2:00}.pac", _fitPath.ToLower(), _fitPath, _costumeIds[_index,index]);
+            return String.Format("fighter\\{0}\\Fit{1}{2:00}", _fitPath.ToLower(), _fitPath, _costumeIds[_index,index]);
         }
     }
 }

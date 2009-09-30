@@ -51,6 +51,12 @@
     </Compile>
     <Compile Include="Config.cs" />
     <Compile Include="CostumeDefinition.cs" />
+    <Compile Include="CostumeFrame.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CostumeFrame.Designer.cs">
+      <DependentUpon>CostumeFrame.cs</DependentUpon>
+    </Compile>
     <Compile Include="Filters.cs" />
     <Compile Include="ItemDefinition.cs" />
     <Compile Include="ItemFrame.cs">
@@ -69,6 +75,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceCache.cs" />
     <Compile Include="ResourceDefinition.cs" />
+    <Compile Include="ResourceTree.cs" />
     <Compile Include="StartupFrame.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -78,6 +85,9 @@
     <Compile Include="TextureDefinition.cs" />
     <EmbeddedResource Include="CharacterFrame.resx">
       <DependentUpon>CharacterFrame.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CostumeFrame.resx">
+      <DependentUpon>CostumeFrame.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ItemFrame.resx">
       <DependentUpon>ItemFrame.cs</DependentUpon>
