@@ -9,101 +9,72 @@ using BrawlLib.Imaging;
 
 namespace BrawlScape
 {
-    public class CharacterDefinition : ListViewItem
+    public class CharacterDefinition : TextureDefinition
     {
         public static List<CharacterDefinition> List = new List<CharacterDefinition>();
         static CharacterDefinition()
         {
-            List.Add(new CharacterDefinition("Mario", "Mario", 0));
-            List.Add(new CharacterDefinition("Donkey Kong", "Donkey", 1));
-            List.Add(new CharacterDefinition("Link", "Link", 2));
-            List.Add(new CharacterDefinition("Samus", "Samus", 3));
-            List.Add(new CharacterDefinition("Yoshi", "Yoshi", 4));
-            List.Add(new CharacterDefinition("Kirby", "Kirby", 5));
-            List.Add(new CharacterDefinition("Fox", "Fox", 6));
-            List.Add(new CharacterDefinition("Pikachu", "Pikachu", 7));
-            List.Add(new CharacterDefinition("Luigi", "Luigi", 8));
-            List.Add(new CharacterDefinition("Captain Falcon", "Captain", 9));
-            List.Add(new CharacterDefinition("Ness", "Ness", 10));
-            List.Add(new CharacterDefinition("Bowser", "Koopa", 11));
-            List.Add(new CharacterDefinition("Peach", "Peach", 12));
-            List.Add(new CharacterDefinition("Zelda", "Zelda", 13));
-            List.Add(new CharacterDefinition("Sheik", "Sheik", 14));
-            List.Add(new CharacterDefinition("Ice Climbers", "Popo", 15));
-            List.Add(new CharacterDefinition("Marth", "Marth", 16));
-            List.Add(new CharacterDefinition("Game and Watch", "GameWatch", 17));
-            List.Add(new CharacterDefinition("Falco", "Falco", 18));
-            List.Add(new CharacterDefinition("Ganondorf", "Ganon", 19));
-            List.Add(new CharacterDefinition("Meta Knight", "Metaknight", 21));
-            List.Add(new CharacterDefinition("Pit", "Pit", 22));
-            List.Add(new CharacterDefinition("Zero Suit Samus", "SZeroSuit", 23));
-            List.Add(new CharacterDefinition("Olimar", "Pikmin", 24));
-            List.Add(new CharacterDefinition("Lucas", "Lucas", 25));
-            List.Add(new CharacterDefinition("Diddy Kong", "Diddy", 26));
-            List.Add(new CharacterDefinition("Pokemon Trainer", "PokeTrainer", 27));
-            List.Add(new CharacterDefinition("Charizard", "PokeLizardon", 28));
-            List.Add(new CharacterDefinition("Squirtle", "PokeZenigame", 29));
-            List.Add(new CharacterDefinition("Ivysaur", "PokeFushigisou", 30));
-            List.Add(new CharacterDefinition("King Dedede", "Dedede", 31));
-            List.Add(new CharacterDefinition("Lucario", "Lucario", 32));
-            List.Add(new CharacterDefinition("Ike", "Ike", 33));
-            List.Add(new CharacterDefinition("ROB", "Robot", 34));
-            List.Add(new CharacterDefinition("Jigglypuff", "Purin", 36));
-            List.Add(new CharacterDefinition("Wario", "Wario", 37));
-            List.Add(new CharacterDefinition("Toon Link", "ToonLink", 40));
-            List.Add(new CharacterDefinition("Wolf", "Wolf", 43));
-            List.Add(new CharacterDefinition("Snake", "Snake", 45));
-            List.Add(new CharacterDefinition("Sonic", "Sonic", 46));
+            List.Add(new CharacterDefinition("Mario", "Mario", 0, 6));
+            List.Add(new CharacterDefinition("Donkey Kong", "Donkey", 1, 6));
+            List.Add(new CharacterDefinition("Link", "Link", 2, 6));
+            List.Add(new CharacterDefinition("Samus", "Samus", 3, 6));
+            List.Add(new CharacterDefinition("Yoshi", "Yoshi", 4, 6));
+            List.Add(new CharacterDefinition("Kirby", "Kirby", 5, 6));
+            List.Add(new CharacterDefinition("Fox", "Fox", 6, 6));
+            List.Add(new CharacterDefinition("Pikachu", "Pikachu", 7, 4));
+            List.Add(new CharacterDefinition("Luigi", "Luigi", 8, 6));
+            List.Add(new CharacterDefinition("Captain Falcon", "Captain", 9, 6));
+            List.Add(new CharacterDefinition("Ness", "Ness", 10, 6));
+            List.Add(new CharacterDefinition("Bowser", "Koopa", 11, 6));
+            List.Add(new CharacterDefinition("Peach", "Peach", 12, 6));
+            List.Add(new CharacterDefinition("Zelda", "Zelda", 13, 6));
+            List.Add(new CharacterDefinition("Sheik", "Sheik", 14, 6));
+            List.Add(new CharacterDefinition("Ice Climbers", "Popo", 15, 6));
+            List.Add(new CharacterDefinition("Marth", "Marth", 16, 6));
+            List.Add(new CharacterDefinition("Game and Watch", "GameWatch", 17, 6));
+            List.Add(new CharacterDefinition("Falco", "Falco", 18, 6));
+            List.Add(new CharacterDefinition("Ganondorf", "Ganon", 19, 6));
+            List.Add(new CharacterDefinition("Meta Knight", "Metaknight", 21, 6));
+            List.Add(new CharacterDefinition("Pit", "Pit", 22, 6));
+            List.Add(new CharacterDefinition("Zero Suit Samus", "SZeroSuit", 23, 6));
+            List.Add(new CharacterDefinition("Olimar", "Pikmin", 24, 6));
+            List.Add(new CharacterDefinition("Lucas", "Lucas", 25, 6));
+            List.Add(new CharacterDefinition("Diddy Kong", "Diddy", 26, 6));
+            List.Add(new CharacterDefinition("Pokemon Trainer", "PokeTrainer", 27, 5));
+            List.Add(new CharacterDefinition("Charizard", "PokeLizardon", 28, 5));
+            List.Add(new CharacterDefinition("Squirtle", "PokeZenigame", 29, 5));
+            List.Add(new CharacterDefinition("Ivysaur", "PokeFushigisou", 30, 5));
+            List.Add(new CharacterDefinition("King Dedede", "Dedede", 31, 6));
+            List.Add(new CharacterDefinition("Lucario", "Lucario", 32, 5));
+            List.Add(new CharacterDefinition("Ike", "Ike", 33, 6));
+            List.Add(new CharacterDefinition("ROB", "Robot", 34, 6));
+            List.Add(new CharacterDefinition("Jigglypuff", "Purin", 36, 5));
+            List.Add(new CharacterDefinition("Wario", "Wario", 37, 12));
+            List.Add(new CharacterDefinition("Toon Link", "ToonLink", 40, 6));
+            List.Add(new CharacterDefinition("Wolf", "Wolf", 43, 6));
+            List.Add(new CharacterDefinition("Snake", "Snake", 45, 6));
+            List.Add(new CharacterDefinition("Sonic", "Sonic", 46, 5));
         }
 
-        //private ResourceNode _csfNode;
-        //private ResourceNode CSFNode 
-        //{
-        //    get
-        //    {
-        //        return ResourceCache.FindNode("system\\common5_en.pac", String.Format("sc_selcharacter_en/Type1[70]/MenSelchrChrFace.{0:000}", _csfIndex));
-        //    }
-        //}
 
-        private string _fitPath;
-        public string FighterPath { get { return _fitPath; } }
+        private string _fitName;
+        public string FighterName { get { return _fitName; } }
 
         private int _index;
         public int CharacterIndex { get { return _index; } }
-        //public int CSFIndex { get{return _csfIndex;} }
 
-        public TEX0Node CSFNode
-        {
-            get
-            {
-                return ResourceCache.FindNode("system\\common5.pac", String.Format("sc_selcharacter_en/Type1[70]/MenSelchrChrFace.{0:000}", _index + 1)) as TEX0Node;
-            }
-        }
+        public int PortraitId { get { return (_index * 10) + 1; } }
 
-        public BRESNode CSPNode
-        {
-            get
-            {
-                foreach (BRESNode node in ResourceCache.FindNode("system\\common5.pac", "sc_selcharacter_en/char_bust_tex_lz77").Children)
-                    if (node.FileIndex == _index)
-                        return node;
-                return null;
-            }
-        }
+        private int _costumeCount;
+        public int CostumeCount { get { return _costumeCount; } }
 
-        private CharacterDefinition(string name, string path, int index)
+        private CharacterDefinition(string name, string fitName, int index, int costumeCount)
+            : base("system\\common5.pac", String.Format("sc_selcharacter_en/Type1[70]/Textures(NW4R)/MenSelchrChrFace.{0:000}", index + 1))
         {
             Text = name;
-            _fitPath = path;
+            _fitName = fitName;
             _index = index;
-        }
-
-        public Image GetCSF()
-        {
-            ResourceNode n = CSFNode;
-            if (n is IImageSource)
-                return ((IImageSource)n).GetImage(0);
-            return null;
+            _costumeCount = costumeCount;
         }
 
         CostumeDefinition[] _costumes;
@@ -113,15 +84,9 @@ namespace BrawlScape
             {
                 if (_costumes == null)
                 {
-                    try
-                    {
-                        ResourceNode node = CSPNode.FindChild("Textures(NW4R)", false);
-
-                        _costumes = new CostumeDefinition[node.Children.Count];
-                        for (int i = 0; i < node.Children.Count; i++)
-                            _costumes[i] = new CostumeDefinition(this, i);
-                    }
-                    catch (Exception x) { MessageBox.Show(x.Message); _costumes = new CostumeDefinition[0]; }
+                    _costumes = new CostumeDefinition[_costumeCount];
+                    for (int i = 0; i < _costumeCount; i++)
+                        _costumes[i] = new CostumeDefinition(this, i);
                 }
                 return _costumes;
             }
@@ -179,7 +144,7 @@ namespace BrawlScape
 
         internal string GetCostumePath(int index)
         {
-            return String.Format("fighter\\{0}\\Fit{1}{2:00}", _fitPath.ToLower(), _fitPath, _costumeIds[_index,index]);
+            return String.Format("fighter\\{0}\\Fit{1}{2:00}", _fitName.ToLower(), _fitName, _costumeIds[_index,index]);
         }
     }
 }

@@ -31,28 +31,30 @@
             this.components = new System.ComponentModel.Container();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this._textureList = new System.Windows.Forms.ListView();
+            this.textureImages = new System.Windows.Forms.ImageList(this.components);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this._costumeList = new System.Windows.Forms.ListView();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.costumeContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuCostumeCSP = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuCSPReplace = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuCSPExport = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuCSPResore = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuCostume = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuCostumeExport = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuCostumeImport = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuCostumeRestore = new System.Windows.Forms.ToolStripMenuItem();
-            this.textureContext = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.mnuTextureReplace = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuTextureExport = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuTextureRestore = new System.Windows.Forms.ToolStripMenuItem();
             this.cspImages = new System.Windows.Forms.ImageList(this.components);
-            this.textureImages = new System.Windows.Forms.ImageList(this.components);
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.picStock = new System.Windows.Forms.PictureBox();
+            this.picGame = new System.Windows.Forms.PictureBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel2 = new System.Windows.Forms.Panel();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.costumeContext.SuspendLayout();
-            this.textureContext.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picStock)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picGame)).BeginInit();
+            this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox2
@@ -71,7 +73,6 @@
             this._textureList.AutoArrange = false;
             this._textureList.BackColor = System.Drawing.Color.Gainsboro;
             this._textureList.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this._textureList.ContextMenuStrip = this.textureContext;
             this._textureList.Dock = System.Windows.Forms.DockStyle.Fill;
             this._textureList.HideSelection = false;
             this._textureList.LargeImageList = this.textureImages;
@@ -82,6 +83,12 @@
             this._textureList.TabIndex = 0;
             this._textureList.UseCompatibleStateImageBehavior = false;
             this._textureList.SelectedIndexChanged += new System.EventHandler(this._textureList_SelectedIndexChanged);
+            // 
+            // textureImages
+            // 
+            this.textureImages.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.textureImages.ImageSize = new System.Drawing.Size(128, 128);
+            this.textureImages.TransparentColor = System.Drawing.Color.Transparent;
             // 
             // groupBox1
             // 
@@ -112,16 +119,6 @@
             this._costumeList.UseCompatibleStateImageBehavior = false;
             this._costumeList.SelectedIndexChanged += new System.EventHandler(this._costumeList_SelectedIndexChanged);
             // 
-            // groupBox3
-            // 
-            this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox3.Location = new System.Drawing.Point(201, 0);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(303, 496);
-            this.groupBox3.TabIndex = 5;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Models";
-            // 
             // costumeContext
             // 
             this.costumeContext.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -132,34 +129,10 @@
             // 
             // mnuCostumeCSP
             // 
-            this.mnuCostumeCSP.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuCSPReplace,
-            this.mnuCSPExport,
-            this.mnuCSPResore});
             this.mnuCostumeCSP.Name = "mnuCostumeCSP";
             this.mnuCostumeCSP.Size = new System.Drawing.Size(122, 22);
             this.mnuCostumeCSP.Text = "Portrait";
-            // 
-            // mnuCSPReplace
-            // 
-            this.mnuCSPReplace.Name = "mnuCSPReplace";
-            this.mnuCSPReplace.Size = new System.Drawing.Size(152, 22);
-            this.mnuCSPReplace.Text = "Replace...";
-            this.mnuCSPReplace.Click += new System.EventHandler(this.mnuCSPReplace_Click);
-            // 
-            // mnuCSPExport
-            // 
-            this.mnuCSPExport.Name = "mnuCSPExport";
-            this.mnuCSPExport.Size = new System.Drawing.Size(152, 22);
-            this.mnuCSPExport.Text = "Export...";
-            this.mnuCSPExport.Click += new System.EventHandler(this.mnuCSPExport_Click);
-            // 
-            // mnuCSPResore
-            // 
-            this.mnuCSPResore.Name = "mnuCSPResore";
-            this.mnuCSPResore.Size = new System.Drawing.Size(152, 22);
-            this.mnuCSPResore.Text = "Restore";
-            this.mnuCSPResore.Click += new System.EventHandler(this.mnuCSPResore_Click);
+            this.mnuCostumeCSP.DropDownOpening += new System.EventHandler(this.mnuCostumeCSP_DropDownOpening);
             // 
             // mnuCostume
             // 
@@ -168,59 +141,29 @@
             this.mnuCostumeImport,
             this.mnuCostumeRestore});
             this.mnuCostume.Name = "mnuCostume";
-            this.mnuCostume.Size = new System.Drawing.Size(152, 22);
+            this.mnuCostume.Size = new System.Drawing.Size(122, 22);
             this.mnuCostume.Text = "Costume";
             // 
             // mnuCostumeExport
             // 
             this.mnuCostumeExport.Name = "mnuCostumeExport";
-            this.mnuCostumeExport.Size = new System.Drawing.Size(152, 22);
+            this.mnuCostumeExport.Size = new System.Drawing.Size(119, 22);
             this.mnuCostumeExport.Text = "Export...";
             this.mnuCostumeExport.Click += new System.EventHandler(this.mnuCostumeExport_Click);
             // 
             // mnuCostumeImport
             // 
             this.mnuCostumeImport.Name = "mnuCostumeImport";
-            this.mnuCostumeImport.Size = new System.Drawing.Size(152, 22);
+            this.mnuCostumeImport.Size = new System.Drawing.Size(119, 22);
             this.mnuCostumeImport.Text = "Import...";
             this.mnuCostumeImport.Click += new System.EventHandler(this.mnuCostumeImport_Click);
             // 
             // mnuCostumeRestore
             // 
             this.mnuCostumeRestore.Name = "mnuCostumeRestore";
-            this.mnuCostumeRestore.Size = new System.Drawing.Size(152, 22);
+            this.mnuCostumeRestore.Size = new System.Drawing.Size(119, 22);
             this.mnuCostumeRestore.Text = "Restore";
             this.mnuCostumeRestore.Click += new System.EventHandler(this.mnuCostumeRestore_Click);
-            // 
-            // textureContext
-            // 
-            this.textureContext.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuTextureReplace,
-            this.mnuTextureExport,
-            this.mnuTextureRestore});
-            this.textureContext.Name = "textureContext";
-            this.textureContext.Size = new System.Drawing.Size(125, 70);
-            // 
-            // mnuTextureReplace
-            // 
-            this.mnuTextureReplace.Name = "mnuTextureReplace";
-            this.mnuTextureReplace.Size = new System.Drawing.Size(152, 22);
-            this.mnuTextureReplace.Text = "Replace...";
-            this.mnuTextureReplace.Click += new System.EventHandler(this.mnuTextureReplace_Click);
-            // 
-            // mnuTextureExport
-            // 
-            this.mnuTextureExport.Name = "mnuTextureExport";
-            this.mnuTextureExport.Size = new System.Drawing.Size(152, 22);
-            this.mnuTextureExport.Text = "Export...";
-            this.mnuTextureExport.Click += new System.EventHandler(this.mnuTextureExport_Click);
-            // 
-            // mnuTextureRestore
-            // 
-            this.mnuTextureRestore.Name = "mnuTextureRestore";
-            this.mnuTextureRestore.Size = new System.Drawing.Size(152, 22);
-            this.mnuTextureRestore.Text = "Restore";
-            this.mnuTextureRestore.Click += new System.EventHandler(this.mnuTextureRestore_Click);
             // 
             // cspImages
             // 
@@ -228,17 +171,74 @@
             this.cspImages.ImageSize = new System.Drawing.Size(128, 160);
             this.cspImages.TransparentColor = System.Drawing.Color.Transparent;
             // 
-            // textureImages
+            // groupBox3
             // 
-            this.textureImages.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            this.textureImages.ImageSize = new System.Drawing.Size(128, 128);
-            this.textureImages.TransparentColor = System.Drawing.Color.Transparent;
+            this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox3.Location = new System.Drawing.Point(201, 0);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(303, 410);
+            this.groupBox3.TabIndex = 5;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Models";
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox4.Controls.Add(this.panel2);
+            this.groupBox4.Location = new System.Drawing.Point(0, 0);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(120, 86);
+            this.groupBox4.TabIndex = 0;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Game/Stock Portrait";
+            // 
+            // picStock
+            // 
+            this.picStock.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picStock.Location = new System.Drawing.Point(70, 13);
+            this.picStock.Name = "picStock";
+            this.picStock.Size = new System.Drawing.Size(32, 32);
+            this.picStock.TabIndex = 2;
+            this.picStock.TabStop = false;
+            this.picStock.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picStock_MouseDown);
+            // 
+            // picGame
+            // 
+            this.picGame.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picGame.Location = new System.Drawing.Point(13, 5);
+            this.picGame.Name = "picGame";
+            this.picGame.Size = new System.Drawing.Size(48, 56);
+            this.picGame.TabIndex = 1;
+            this.picGame.TabStop = false;
+            this.picGame.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picGame_MouseDown);
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.groupBox4);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(201, 410);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(303, 86);
+            this.panel1.TabIndex = 6;
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.Gainsboro;
+            this.panel2.Controls.Add(this.picGame);
+            this.panel2.Controls.Add(this.picStock);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(3, 16);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(114, 67);
+            this.panel2.TabIndex = 1;
             // 
             // CostumeFrame
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.groupBox3);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.groupBox2);
             this.Name = "CostumeFrame";
@@ -247,7 +247,11 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.costumeContext.ResumeLayout(false);
-            this.textureContext.ResumeLayout(false);
+            this.groupBox4.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picStock)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picGame)).EndInit();
+            this.panel1.ResumeLayout(false);
+            this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -261,18 +265,16 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.ContextMenuStrip costumeContext;
         private System.Windows.Forms.ToolStripMenuItem mnuCostumeCSP;
-        private System.Windows.Forms.ToolStripMenuItem mnuCSPReplace;
-        private System.Windows.Forms.ToolStripMenuItem mnuCSPExport;
-        private System.Windows.Forms.ToolStripMenuItem mnuCSPResore;
         private System.Windows.Forms.ToolStripMenuItem mnuCostume;
         private System.Windows.Forms.ToolStripMenuItem mnuCostumeExport;
         private System.Windows.Forms.ToolStripMenuItem mnuCostumeImport;
         private System.Windows.Forms.ToolStripMenuItem mnuCostumeRestore;
-        private System.Windows.Forms.ContextMenuStrip textureContext;
-        private System.Windows.Forms.ToolStripMenuItem mnuTextureReplace;
-        private System.Windows.Forms.ToolStripMenuItem mnuTextureExport;
-        private System.Windows.Forms.ToolStripMenuItem mnuTextureRestore;
         private System.Windows.Forms.ImageList cspImages;
         private System.Windows.Forms.ImageList textureImages;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.PictureBox picStock;
+        private System.Windows.Forms.PictureBox picGame;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panel2;
     }
 }

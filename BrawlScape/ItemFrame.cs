@@ -15,7 +15,12 @@ namespace BrawlScape
         private ItemDefinition SelectedItem
         {
             get { return _selectedItem; }
-            set { _selectedItem = value; InitSelection(); }
+            set 
+            { 
+                _selectedItem = value;
+                MainForm._currentTextureNode = value == null ? null : value.Reference;
+                InitSelection(); 
+            }
         }
 
         private TextureDefinition _selectedTexture;
@@ -43,10 +48,9 @@ namespace BrawlScape
             {
                 foreach (ItemDefinition i in ItemDefinition.List)
                 {
-                    if ((img = i.GetIcon()) != null)
+                    if ((img = i.Texture) != null)
                     {
                         _iconList.Images.Add(img);
-                        img.Dispose();
                         i.ImageIndex = index++;
                     }
                     else
@@ -74,7 +78,6 @@ namespace BrawlScape
                     if ((img = t.Texture) != null)
                     {
                         _textureImageList.Images.Add(img);
-                        //img.Dispose();
                         t.ImageIndex = index++;
                     }
                     else
@@ -88,41 +91,15 @@ namespace BrawlScape
 
         private void _itemList_SelectedIndexChanged(object sender, EventArgs e) { SelectedItem = _itemList.SelectedItems.Count == 0 ? null : _itemList.SelectedItems[0] as ItemDefinition; }
 
-
-        private void mnuExport_Click(object sender, EventArgs e) { _selectedTexture.Export(); }
-        private void mnuReplace_Click(object sender, EventArgs e) { _selectedTexture.Replace(); }
-        private void restoreToolStripMenuItem_Click(object sender, EventArgs e) { _selectedTexture.Restore(); }
-        private void _textureList_SelectedIndexChanged(object sender, EventArgs e) { SelectedTexture = _textureList.SelectedItems.Count == 0 ? null : _textureList.SelectedItems[0] as TextureDefinition; }
-        private void ctxTexture_Opening(object sender, CancelEventArgs e)
-        {
-            if (_selectedTexture == null)
-                e.Cancel = true;
-            else
-            {
-                TEX0Node node = (TEX0Node)_selectedTexture.TextureNode;
-
-                mnuFileSize.Text = String.Format("File Size: {0}", node.WorkingSource.Length);
-                mnuFormat.Text = String.Format("Format: {0}", node.Format);
-                mnuLOD.Text = String.Format("LOD: {0}", node.LevelOfDetail);
-                mnuSize.Text = String.Format("Size: {0} x {1}", node.Width, node.Height);
-
-                PLT0Node pNode = node.GetPaletteNode();
-                if (pNode == null)
-                    mnuPalette.Text = "Palette: None";
-                else
-                    mnuPalette.Text = String.Format("Palette: {0}, {1} colors", pNode.Format, pNode.Colors);
-            }
-        }
-
-
-        private void ItemFrame_Enter(object sender, EventArgs e)
-        {
-        }
+        private void _textureList_SelectedIndexChanged(object sender, EventArgs e) { MainForm._currentTextureNode = _textureList.SelectedItems.Count == 0 ? null : ((TextureDefinition)_textureList.SelectedItems[0]).Reference; }
 
         private void ItemFrame_Load(object sender, EventArgs e)
         {
             if (!DesignMode)
                 Initialize();
+
+            _itemList.ContextMenuStrip = MainForm._textureContext;
+            _textureList.ContextMenuStrip = MainForm._textureContext;
         }
     }
 }

@@ -86,7 +86,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal int _calcSize;
 
         //Occurs when a property or value has changed, but not when the data itself changes.
-        public event ResourceEventHandler Dirty, Clean, Changed;
+        public event ResourceEventHandler Dirty, Clean, Changed, Disposed;
         public event ResourceChildEventHandler ChildChanged;
         //public event ResourceEventHandler Replaced;
         //public event ResourceEventHandler Restored;
@@ -111,7 +111,19 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Browsable(false)]
         public virtual ResourceType ResourceType { get { return ResourceType.Unknown; } }
         [Browsable(false)]
-        public virtual string TreePath { get { return _parent == null ? Name : _parent.TreePath + "/" + Name; } }
+        public virtual string TreePathAbsolute { get { return _parent == null ? Name : _parent.TreePathAbsolute + "/" + Name; } }
+        [Browsable(false)]
+        public virtual string TreePath 
+        { 
+            get 
+            {
+                string path = TreePathAbsolute;
+                int index = path.IndexOf('/');
+                if (index > 0)
+                    path = path.Substring(index + 1);
+                return path;
+            } 
+        }
         [Browsable(false)]
         public virtual int Level { get { return _parent == null ? 0 : _parent.Level + 1; } }
 
@@ -250,6 +262,9 @@ namespace BrawlLib.SSBB.ResourceNodes
             _origSource.Close();
             _replUncompSrc.Close();
             _replSrc.Close();
+
+            if (Disposed != null)
+                Disposed(this);
 
             GC.SuppressFinalize(this);
         }

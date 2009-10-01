@@ -7,7 +7,7 @@ using BrawlLib.Imaging;
 
 namespace BrawlScape
 {
-    class ItemDefinition : ListViewItem
+    class ItemDefinition : TextureDefinition
     {
         public static List<ItemDefinition> List = new List<ItemDefinition>();
         static ItemDefinition()
@@ -76,19 +76,20 @@ namespace BrawlScape
         private int _iconIndex;
 
         private ItemDefinition(string name, string resourceName, int iconIndex)
+            :base("system\\common5.pac", String.Format("sc_selcharacter2_en/MenuRule_en/ModelData[0]/Textures(NW4R)/MenMainItem.{0:00}", iconIndex))
         {
             Text = name;
             _resName = resourceName;
             _iconIndex = iconIndex;
         }
 
-        public Image GetIcon()
-        {
-            ResourceNode n = ResourceCache.FindNode("system\\common5.pac", String.Format("sc_selcharacter2_en/MenuRule_en/ModelData[0]/Textures(NW4R)/MenMainItem.{0:00}", _iconIndex));
-            if (n is IImageSource)
-                return ((IImageSource)n).GetImage(0);
-            return null;
-        }
+        //public Image GetIcon()
+        //{
+        //    ResourceNode n = ResourceCache.FindNode("system\\common5.pac", String.Format("sc_selcharacter2_en/MenuRule_en/ModelData[0]/Textures(NW4R)/MenMainItem.{0:00}", _iconIndex));
+        //    if (n is IImageSource)
+        //        return ((IImageSource)n).GetImage(0);
+        //    return null;
+        //}
 
         private TextureDefinition[] _textures;
         public TextureDefinition[] Textures

@@ -17,6 +17,7 @@ namespace BrawlScape
             set
             {
                 _selectedCharacter = value;
+                MainForm._currentTextureNode = value == null ? null : value.Reference;
                 if (CharacterChanged != null)
                     CharacterChanged(_selectedCharacter);
             }
@@ -41,7 +42,7 @@ namespace BrawlScape
 
                 foreach (CharacterDefinition def in CharacterDefinition.List)
                 {
-                    if ((im = def.GetCSF()) != null)
+                    if ((im = def.Texture) != null)
                     {
                         csfList.Images.Add(im);
                         def.ImageIndex = index++;
@@ -67,6 +68,8 @@ namespace BrawlScape
         {
             if (!DesignMode)
                 Initialize();
+
+            _charList.ContextMenuStrip = MainForm._textureContext;
         }
     }
 }

@@ -10,6 +10,9 @@ namespace BrawlScape
 {
     public static class ResourceCache
     {
+        public delegate void TreeLoadedEvent(ResourceTree tree);
+        public static event TreeLoadedEvent TreeLoaded;
+
         //private static Dictionary<string, ResourceNode> _resCache = new Dictionary<string, ResourceNode>();
         private static List<ResourceTree> _treeCache = new List<ResourceTree>();
         private static List<ResourceTree> _changedTrees = new List<ResourceTree>();
@@ -25,6 +28,10 @@ namespace BrawlScape
             ResourceNode node = NodeFactory.FromFile(null, Program.GetFilePath(relativePath, searchWorking));
             ResourceTree rt = new ResourceTree(relativePath, node);
             _treeCache.Add(rt);
+
+            if (TreeLoaded != null)
+                TreeLoaded(rt);
+
             return rt;
         }
 
@@ -182,6 +189,10 @@ namespace BrawlScape
             ResourceTree t = new ResourceTree(relativePath, node);
             _treeCache.Add(t);
             _changedTrees.Add(t);
+
+            if (TreeLoaded != null)
+                TreeLoaded(t);
+
             return t;
         }
     }

@@ -13,13 +13,15 @@ namespace BrawlScape
     public class CostumeDefinition : TextureDefinition
     {
         private CharacterDefinition _character;
-        private int _index;
+        private int _index, _portraitIndex;
         private string _path;
 
-        public CostumeDefinition(CharacterDefinition character, int index) : base("system\\common5.pac", character.CSPNode.FindChild("Textures(NW4R)", false).Children[index].TreePath)
+        public CostumeDefinition(CharacterDefinition character, int index) :
+            base("system\\common5.pac", String.Format("sc_selcharacter_en/char_bust_tex_lz77/Type1[{0}]/Textures(NW4R)/MenSelchrFaceB.{1:000}", character.CharacterIndex, character.PortraitId + index))
         {
             _character = character;
             _index = index;
+            _portraitIndex = _character.PortraitId + _index;
             _path = _character.GetCostumePath(index);
         }
 
@@ -94,6 +96,32 @@ namespace BrawlScape
                 foreach (TextureDefinition def in _textures)
                     def.Reset();
                 _textures = null;
+            }
+        }
+
+        private TextureReference _stockRef;
+        public TextureReference StockPortrait 
+        {
+            get
+            {
+                if (_stockRef == null)
+                {
+                    _stockRef = NodeReference.Get<TextureReference>("system\\common5.pac", String.Format("sc_selcharacter_en/Type1[90]/Textures(NW4R)/InfStc.{0:000}", _portraitIndex));
+                }
+                return _stockRef;
+            }
+        }
+
+        private TextureReference _gameRef;
+        public TextureReference GamePortrait 
+        {
+            get
+            {
+                if (_gameRef == null)
+                {
+                    _gameRef = NodeReference.Get<TextureReference>(String.Format("info\\portrite\\InfFace{0:000}.brres", _portraitIndex), String.Format("Textures(NW4R)/InfFace.{0:000}", _portraitIndex));
+                }
+                return _gameRef;
             }
         }
     }

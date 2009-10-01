@@ -25,6 +25,20 @@ namespace BrawlScape
             set { _selectedTexture = value; }
         }
 
+        private TextureReference _stockReference;
+            public TextureReference StockPortraitReference
+            {
+                get { return _stockReference; }
+                set                { _stockReference = value; InitStock(); }
+            }
+
+            private TextureReference _gameReference;
+            public TextureReference GamePortraitReference
+            {
+                get { return _gameReference; }
+                set { _gameReference = value; InitGame(); }
+            }
+
         public CostumeFrame()        
         {            
             InitializeComponent();
@@ -44,7 +58,7 @@ namespace BrawlScape
                     if ((im = def.Texture) != null)
                     {
                         cspImages.Images.Add(im);
-                        im.Dispose();
+                        //im.Dispose();
                         def.ImageIndex = index++;
                     }
                     else
@@ -69,12 +83,13 @@ namespace BrawlScape
             int index = 0;
             Image im;
             if (_selectedCostume != null)
+            {
                 foreach (TextureDefinition def in _selectedCostume.Textures)
                 {
                     if ((im = def.Texture) != null)
                     {
                         textureImages.Images.Add(im);
-                        im.Dispose();
+                        //im.Dispose();
                         def.ImageIndex = index++;
                     }
                     else
@@ -83,17 +98,42 @@ namespace BrawlScape
                     _textureList.Items.Add(def);
                 }
 
+                StockPortraitReference = _selectedCostume.StockPortrait;
+                GamePortraitReference = _selectedCostume.GamePortrait;
+            }
+            else
+            {
+                StockPortraitReference = null;
+                GamePortraitReference = null;
+            }
+
             _textureList.EndUpdate();
 
             if (_textureList.SelectedItems.Count == 0)
                 SelectedTexture = null;
         }
 
+        private void InitStock()
+        {
+            if (_stockReference != null)
+                picStock.Image = _stockReference.Texture;
+            else
+                picStock.Image = null;
+        }
+
+        private void InitGame()
+        {
+            if (_gameReference != null)
+                picGame.Image = _gameReference.Texture;
+            else
+                picGame.Image = null;
+        }
+
 
         private void _costumeList_SelectedIndexChanged(object sender, EventArgs e) { SelectedCostume = _costumeList.SelectedItems.Count == 0 ? null : _costumeList.SelectedItems[0] as CostumeDefinition; }
-        private void mnuCSPReplace_Click(object sender, EventArgs e) { _selectedCostume.Replace(); }
-        private void mnuCSPResore_Click(object sender, EventArgs e) { _selectedCostume.Restore(); }
-        private void mnuCSPExport_Click(object sender, EventArgs e) { _selectedCostume.Export(); }
+        private void mnuCSPReplace_Click(object sender, EventArgs e) { _selectedCostume.Reference.Replace(); }
+        private void mnuCSPResore_Click(object sender, EventArgs e) { _selectedCostume.Reference.Restore(); }
+        private void mnuCSPExport_Click(object sender, EventArgs e) { _selectedCostume.Reference.Export(); }
         private void costumeContext_Opening(object sender, CancelEventArgs e)
         {
             if (_selectedCostume == null)
@@ -103,44 +143,50 @@ namespace BrawlScape
             }
         }
 
-        private void _textureList_SelectedIndexChanged(object sender, EventArgs e) { SelectedTexture = _textureList.SelectedItems.Count == 0 ? null : _textureList.SelectedItems[0] as TextureDefinition; }
-        private void mnuTextureReplace_Click(object sender, EventArgs e) { _selectedTexture.Replace(); }
-        private void mnuTextureExport_Click(object sender, EventArgs e) { _selectedTexture.Export(); }
-        private void mnuTextureRestore_Click(object sender, EventArgs e) { _selectedTexture.Restore(); }
-        private void textureContext_Opening(object sender, CancelEventArgs e)
-        {
-            if (_selectedTexture == null)
-                e.Cancel = true;
-            else
-            {
-            }
-        }
+        private void _textureList_SelectedIndexChanged(object sender, EventArgs e) { MainForm._currentTextureNode = _textureList.SelectedItems.Count == 0 ? null : ((TextureDefinition)_textureList.SelectedItems[0]).Reference; }
+
 
         private void mnuCostumeExport_Click(object sender, EventArgs e) { _selectedCostume.ExportCostume(); }
         private void mnuCostumeImport_Click(object sender, EventArgs e)
         {
             CostumeDefinition cos = _selectedCostume;
-            if (_selectedCostume.ImportCostume())
-            {
-                cos.Selected = false;
+            cos.Selected = false;
+            if (cos.ImportCostume())
                 cos.Reset();
-                cos.Selected = true;
-            }
+            cos.Selected = true;
         }
         private void mnuCostumeRestore_Click(object sender, EventArgs e)
         {
             CostumeDefinition cos = _selectedCostume;
-            if (_selectedCostume.RestoreCostume())
-            {
-                cos.Selected = false;
+            cos.Selected = false;
+            if (cos.RestoreCostume())
                 cos.Reset();
-                cos.Selected = true;
-            }
+            cos.Selected = true;
         }
 
         private void CostumeFrame_Load(object sender, EventArgs e)
         {
             CharacterFrame.CharacterChanged += CharacterChanged;
+            _textureList.ContextMenuStrip = MainForm._textureContext;
+
+            mnuCostumeCSP.DropDown = MainForm._textureContext;
+            picGame.ContextMenuStrip = MainForm._textureContext;
+            picStock.ContextMenuStrip = MainForm._textureContext;
+        }
+
+        private void mnuCostumeCSP_DropDownOpening(object sender, EventArgs e)
+        {
+            MainForm._currentTextureNode = _selectedCostume.Reference;
+        }
+
+        private void picGame_MouseDown(object sender, MouseEventArgs e)
+        {
+            MainForm._currentTextureNode = _gameReference;
+        }
+
+        private void picStock_MouseDown(object sender, MouseEventArgs e)
+        {
+            MainForm._currentTextureNode = _stockReference;
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿
-BrawlScape Mod Manager - Version 0.01
+BrawlScape Mod Manager - Version 0.03
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -17,8 +17,15 @@ http://www.smashboards.com/showthread.php?t=250568
 |************ Change Log ************|
  ====================================
 
+- v0.03 - (09/30/2009)
+	. Added support for the following:
+		1. Item icons
+		2. Character select icons
+		3. Stock portraits
+		4. In-game portraits
+
 - v0.02 - (09/29/2009)
-	. Added the ability to Import/Export/Replace whole costume files.
+	. Added the ability to Import/Export/Restore whole costume files.
 	. Remade menus
 	. Added stability
 
