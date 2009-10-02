@@ -40,6 +40,11 @@ namespace System
         [DllImport("Kernel32.dll", EntryPoint = "RtlFillMemory", SetLastError = false)]
         public static extern void FillMemory(VoidPtr dest, uint length, byte value);
 
+        [DllImport("user32.dll", SetLastError=true)]
+        public static extern VoidPtr GetDC(VoidPtr hWnd);
+        [DllImport("user32.dll")]
+        public static extern int ReleaseDC(VoidPtr hWnd, VoidPtr hDC);
+
         #region File Mapping
         [DllImport("Kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern VoidPtr CreateFileMapping(VoidPtr hFile, VoidPtr lpAttributes, _FileMapProtect flProtect, uint dwMaximumSizeHigh, uint dwMaximumSizeLow, string lpName);
@@ -112,6 +117,7 @@ namespace System
             All = 0x000F001F
         }
         #endregion
+
 
     }
 }

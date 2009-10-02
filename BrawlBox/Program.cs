@@ -16,10 +16,10 @@ namespace BrawlBox
         public static string AssemblyDescription = ((AssemblyDescriptionAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)[0]).Description;
         public static string AssemblyCopyright = ((AssemblyCopyrightAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright;
 
-        private static OpenFileDialog _openDlg;
-        public static OpenFileDialog OpenDialog { get { return _openDlg == null ? _openDlg = new OpenFileDialog() : _openDlg; } }
-        private static SaveFileDialog _saveDlg;
-        public static SaveFileDialog SaveDialog { get { return _saveDlg == null ? _saveDlg = new SaveFileDialog() : _saveDlg; } }
+        private static OpenFileDialog _openDlg = new OpenFileDialog();
+        //public static OpenFileDialog OpenDialog { get { return _openDlg == null ? _openDlg = new OpenFileDialog() : _openDlg; } }
+        private static SaveFileDialog _saveDlg = new SaveFileDialog();
+        //public static SaveFileDialog SaveDialog { get { return _saveDlg == null ? _saveDlg = new SaveFileDialog() : _saveDlg; } }
 
         private static ResourceNode _rootNode;
         public static ResourceNode RootNode { get { return _rootNode; } }
@@ -110,6 +110,49 @@ namespace BrawlBox
                 catch (Exception x){ MessageBox.Show(x.Message);}
             }
             return false;
+        }
+
+        public static int OpenFile(string filter, out string fileName) { return OpenFile(filter, out fileName, true); }
+        public static int OpenFile(string filter, out string fileName, bool categorize)
+        {
+            _openDlg.Filter = filter;
+            if (_openDlg.ShowDialog() == DialogResult.OK)
+            {
+                fileName = _openDlg.FileName;
+                if ((categorize) && (_openDlg.FilterIndex == 1))
+                    return CategorizeFilter(_openDlg.FileName, filter);
+                else
+                    return _openDlg.FilterIndex;
+            }
+            fileName = null;
+            return 0;
+        }
+        public static int SaveFile(string filter, string name, out string fileName) { return SaveFile(filter, name, out fileName, true); }
+        public static int SaveFile(string filter, string name, out string fileName, bool categorize)
+        {
+            _saveDlg.Filter = filter;
+            _saveDlg.FileName = name;
+            if (_saveDlg.ShowDialog() == DialogResult.OK)
+            {
+                fileName = _saveDlg.FileName;
+                if ((categorize) && (_saveDlg.FilterIndex == 1))
+                    return CategorizeFilter(_saveDlg.FileName, filter);
+                else
+                    return _saveDlg.FilterIndex;
+            }
+            fileName = null;
+            return 0;
+        }
+        public static int CategorizeFilter(string path, string filter)
+        {
+            string ext = "*" + Path.GetExtension(path);
+
+            string[] split = filter.Split('|');
+            for (int i = 3; i < split.Length; i += 2)
+                foreach (string s in split[i].Split(';'))
+                    if (s.Equals(ext, StringComparison.OrdinalIgnoreCase))
+                        return (i + 1) / 2;
+            return 1;
         }
     }
 }

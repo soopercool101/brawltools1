@@ -124,10 +124,7 @@ namespace BrawlBox
             this.Close();
         }
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.OpenDialog.Filter =
-                    "All Supported Formats (*.pac,*.pcs,*.brres,*.plt0,*.tex0,*.brstm,*.brsar)|*.pac;*.pcs;*.brres;*.plt0;*.tex0;*.brstm;*.brsar|" +
+        private static string _inFilter = "All Supported Formats (*.pac,*.pcs,*.brres,*.plt0,*.tex0,*.brstm,*.brsar)|*.pac;*.pcs;*.brres;*.plt0;*.tex0;*.brstm;*.brsar|" +
                     "PAC File Archive (*.pac)|*.pac|" +
                     "Compressed File Package (*.pcs)|*.pcs|" +
                     "BRRES Resource Package (*.brres)|*.brres|" +
@@ -135,8 +132,12 @@ namespace BrawlBox
                     "TEX0 Raw Texture (*.tex0)|*.tex0|" +
                     "BRSTM Audio Stream (*.brstm)|*.brstm|" +
                     "BRSAR Audio Package (*.brsar)|*.brsar";
-            if (Program.OpenDialog.ShowDialog(this) == DialogResult.OK)
-                Program.Open(Program.OpenDialog.FileName);
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string inFile;
+            if(Program.OpenFile(_inFilter, out inFile) != 0)
+                Program.Open(inFile);
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)

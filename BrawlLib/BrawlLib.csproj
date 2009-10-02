@@ -49,6 +49,14 @@
     <Compile Include="Imaging\PixelTypes.cs" />
     <Compile Include="Imaging\TGAImage.cs" />
     <Compile Include="Imaging\WeightedAverage.cs" />
+    <Compile Include="OpenGL\Enums.cs" />
+    <Compile Include="OpenGL\GLContext.cs" />
+    <Compile Include="OpenGL\GLPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="OpenGL\wGL.cs" />
+    <Compile Include="OpenGL\wGlContext.cs" />
+    <Compile Include="OpenGL\wPixelFormatDescriptor.cs" />
     <Compile Include="Platform\Linux.cs" />
     <Compile Include="Platform\Win32.cs" />
     <Compile Include="SSBB\ResourceNodes\BRESNode.cs" />
@@ -68,8 +76,8 @@
     <Compile Include="System\Drawing\Imaging\ColorPaletteExtension.cs" />
     <Compile Include="System\Reflection\MemberInfoExtension.cs" />
     <Compile Include="System\Reflection\MethodInfoExtension.cs" />
-    <Compile Include="System\Windows\Forms\GLControl.cs">
-      <SubType>Component</SubType>
+    <Compile Include="System\Windows\Forms\ModelPanel.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Wii\Compression\Common.cs" />
     <Compile Include="Wii\Compression\LZ77.cs" />

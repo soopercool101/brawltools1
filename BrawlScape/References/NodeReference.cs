@@ -47,6 +47,19 @@ namespace BrawlScape
         protected NodeReference() { }
         private void Initialize(string relativePath, string nodePath)
         {
+            if (nodePath.StartsWith("sc_selcharacter"))
+            {
+                int sIndex = nodePath.IndexOf('/');
+                //Look for file in menu2 folder
+                string name = "menu2\\" + nodePath.Substring(0, sIndex) + ".pac";
+                name = name.Replace("_en", "");
+                if ((Program.GetFilePath(name, true, false) != null) || (Program.GetFilePath("system\\common5.pac", true, false) == null))
+                {
+                    relativePath = name;
+                    nodePath = nodePath.Substring(sIndex + 1);
+                }
+            }
+
             _relativePath = relativePath;
             _nodePath = nodePath;
 

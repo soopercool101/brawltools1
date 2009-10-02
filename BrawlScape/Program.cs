@@ -72,8 +72,9 @@ namespace BrawlScape
             return null;
         }
 
-        public static string GetFilePath(string partialPath) { return GetFilePath(partialPath, true); }
-        public static string GetFilePath(string relativePath, bool findWorking)
+        public static string GetFilePath(string partialPath) { return GetFilePath(partialPath, true, true); }
+        public static string GetFilePath(string partialPath, bool searchWorking) { return GetFilePath(partialPath, searchWorking, true); }
+        public static string GetFilePath(string relativePath, bool findWorking, bool findBase)
         {
             string path;
             //PAC/PCS pair
@@ -85,12 +86,12 @@ namespace BrawlScape
                         return path;
                     if (File.Exists(path = Path.Combine(_workingPath, relativePath + ".pac")))
                         return path;
-                    if (File.Exists(path = Path.Combine(_workingPath, relativePath + "_en.pcs")))
-                        return path;
-                    if (File.Exists(path = Path.Combine(_workingPath, relativePath + "_en.pac")))
-                        return path;
+                    //if (File.Exists(path = Path.Combine(_workingPath, relativePath + "_en.pcs")))
+                    //    return path;
+                    //if (File.Exists(path = Path.Combine(_workingPath, relativePath + "_en.pac")))
+                    //    return path;
                 }
-                if ((!_workingPath.Equals(_basePath, StringComparison.OrdinalIgnoreCase)) || (!findWorking))
+                if ((findBase) && ((!_workingPath.Equals(_basePath, StringComparison.OrdinalIgnoreCase)) || (!findWorking)))
                 {
                     if (File.Exists(path = Path.Combine(_basePath, relativePath + ".pcs")))
                         return path;
@@ -110,10 +111,10 @@ namespace BrawlScape
                 {
                     if (File.Exists(path = Path.Combine(_workingPath, name + ext)))
                         return path;
-                    if (File.Exists(path = Path.Combine(_workingPath, name + "_en" + ext)))
-                        return path;
+                    //if (File.Exists(path = Path.Combine(_workingPath, name + "_en" + ext)))
+                    //    return path;
                 }
-                if ((!_workingPath.Equals(_basePath, StringComparison.OrdinalIgnoreCase)) || (!findWorking))
+                if ((findBase) && ((!_workingPath.Equals(_basePath, StringComparison.OrdinalIgnoreCase)) || (!findWorking)))
                 {
                     if (File.Exists(path = Path.Combine(_basePath, name + ext)))
                         return path;
@@ -122,8 +123,8 @@ namespace BrawlScape
                 }
             }
 
-            //return null;
-            throw new FileNotFoundException(String.Format("Could not find file '{0}'. Please update your data folder to include this file and try again.", relativePath));
+            return null;
+            //throw new FileNotFoundException(String.Format("Could not find file '{0}'. Please update your data folder to include this file and try again.", relativePath));
         }
 
         public static int OpenFile(string filter, out string fileName) { return OpenFile(filter, out fileName, true); }

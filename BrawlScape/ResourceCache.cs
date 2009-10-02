@@ -68,10 +68,20 @@ namespace BrawlScape
 
         public static void SaveChanges()
         {
+            ResourceTree common5 = null;
+            foreach (ResourceTree t in _changedTrees)
+            {
+                if (t.RelativePath == "system\\common5.pac")
+                    common5 = t;
+            }
+
             while(_changedTrees.Count > 0)
             {
                 ResourceTree t = _changedTrees[0];
                 _changedTrees.Remove(t);
+
+                if (t == common5)
+                    continue;
 
                 ResourceNode n = t.Node;
                 n.Rebuild();
@@ -82,6 +92,14 @@ namespace BrawlScape
                     ((ARCNode)n).ExportPair(t.WorkingPath);
                 else
                     n.Export(t.WorkingPath);
+
+                if (t.RelativePath == "menu2\\sc_selcharacter.pac")
+                {
+                    if (common5 == null)
+                        common5 = GetTree("system\\common5.pac");
+
+                    common5.Node.FindChild("sc_selcharacter_en", false).ReplaceRaw(n.WorkingRawSource.Address, n.WorkingRawSource.Length);
+                }
 
                 //string path = t.FilePath;
                 //string dir =Path.GetDirectoryName(path);
@@ -97,6 +115,16 @@ namespace BrawlScape
                 //    ((ARCNode)n).ExportPair(path);
                 //else
                 //    n.Export(path);
+            }
+
+            if (common5 != null)
+            {
+                ResourceNode n = common5.Node;
+                n.Rebuild();
+                if (!n.HasMerged)
+                    n.Merge();
+
+                n.Export(common5.WorkingPath);
             }
 
             foreach(ResourceTree t in _restoredTrees)

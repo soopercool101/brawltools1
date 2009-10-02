@@ -42,27 +42,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CharacterDefinition.cs" />
-    <Compile Include="CharacterFrame.cs">
+    <Compile Include="Definitions\CharacterDefinition.cs" />
+    <Compile Include="Frames\CharacterFrame.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="CharacterFrame.Designer.cs">
+    <Compile Include="Frames\CharacterFrame.Designer.cs">
       <DependentUpon>CharacterFrame.cs</DependentUpon>
     </Compile>
     <Compile Include="Config.cs" />
-    <Compile Include="CostumeDefinition.cs" />
-    <Compile Include="CostumeFrame.cs">
+    <Compile Include="Definitions\CostumeDefinition.cs" />
+    <Compile Include="Frames\CostumeFrame.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="CostumeFrame.Designer.cs">
+    <Compile Include="Frames\CostumeFrame.Designer.cs">
       <DependentUpon>CostumeFrame.cs</DependentUpon>
     </Compile>
+    <Compile Include="Definitions\StageDefinition.cs" />
     <Compile Include="Filters.cs" />
-    <Compile Include="ItemDefinition.cs" />
-    <Compile Include="ItemFrame.cs">
+    <Compile Include="Definitions\ItemDefinition.cs" />
+    <Compile Include="Frames\ItemFrame.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ItemFrame.Designer.cs">
+    <Compile Include="Frames\ItemFrame.Designer.cs">
       <DependentUpon>ItemFrame.cs</DependentUpon>
     </Compile>
     <Compile Include="MainForm.cs">
@@ -71,27 +72,33 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="NodeReference.cs" />
+    <Compile Include="References\NodeReference.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceCache.cs" />
-    <Compile Include="ResourceDefinition.cs" />
+    <Compile Include="Definitions\ResourceDefinition.cs" />
     <Compile Include="ResourceTree.cs" />
-    <Compile Include="StartupFrame.cs">
+    <Compile Include="Frames\StageFrame.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="StartupFrame.Designer.cs">
+    <Compile Include="Frames\StageFrame.Designer.cs">
+      <DependentUpon>StageFrame.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Frames\StartupFrame.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Frames\StartupFrame.Designer.cs">
       <DependentUpon>StartupFrame.cs</DependentUpon>
     </Compile>
-    <Compile Include="TextureReference.cs" />
-    <Compile Include="TextureDefinition.cs" />
-    <EmbeddedResource Include="CharacterFrame.resx">
+    <Compile Include="References\TextureReference.cs" />
+    <Compile Include="Definitions\TextureDefinition.cs" />
+    <EmbeddedResource Include="Frames\CharacterFrame.resx">
       <DependentUpon>CharacterFrame.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CostumeFrame.resx">
+    <EmbeddedResource Include="Frames\CostumeFrame.resx">
       <DependentUpon>CostumeFrame.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ItemFrame.resx">
+    <EmbeddedResource Include="Frames\ItemFrame.resx">
       <DependentUpon>ItemFrame.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
@@ -106,7 +113,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="StartupFrame.resx">
+    <EmbeddedResource Include="Frames\StageFrame.resx">
+      <DependentUpon>StageFrame.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Frames\StartupFrame.resx">
       <DependentUpon>StartupFrame.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">

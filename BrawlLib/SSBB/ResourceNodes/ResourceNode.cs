@@ -175,13 +175,13 @@ namespace BrawlLib.SSBB.ResourceNodes
             get { return _changed; }
             set
             {
-                if (_changed != value)
-                {
+                //if (_changed != value)
+                //{
                     _changed = value;
                     SignalChange();
-                }
-                else if (value)
-                    SignalChange();
+                //}
+                //else if (value)
+                //    SignalChange();
             }
         }
 
@@ -373,7 +373,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (!OnInitialize())
                 _children = new List<ResourceNode>();
 
-            HasChanged = true;
+            HasChanged = false;
         }
 
         public unsafe virtual void Export(string outPath)
@@ -452,30 +452,51 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal protected virtual void Rebuild(VoidPtr address, int length, bool force)
         {
             if (!IsDirty && !force)
-            {
-                Memory.Move(address, WorkingSource.Address, (uint)WorkingSource.Length);
-                DataSource newsrc = new DataSource(address, WorkingSource.Length);
-                _replSrc.Close();
-                _replUncompSrc.Close();
-                _replSrc = _replUncompSrc = newsrc;
-            }
+                MoveRaw(address, length);
             else
                 OnRebuild(address, length, force);
 
             HasChanged = false;
         }
-
-
         //Overridden by parent nodes in order to rebuild children.
         //Size is the value returned by OnCalculateSize (or _calcSize)
         //Node MUST dispose of and assign both repl sources before exiting.
-        internal protected virtual void OnRebuild(VoidPtr address, int size, bool force)
+        internal protected virtual void OnRebuild(VoidPtr address, int length, bool force) { MoveRaw(address, length); }
+
+        private void MoveRaw(VoidPtr address, int length)
         {
-            Memory.Move(address, WorkingSource.Address, (uint)WorkingSource.Length);
-            DataSource newsrc = new DataSource(address, WorkingSource.Length);
+            Memory.Move(address, WorkingSource.Address, (uint)length);
+            DataSource newsrc = new DataSource(address, length);
+            if (_children != null)
+            {
+                int offset = address - WorkingSource.Address;
+                foreach (ResourceNode n in _children)
+                    n.OnParentMoved(offset);
+            }
             _replSrc.Close();
             _replUncompSrc.Close();
             _replSrc = _replUncompSrc = newsrc;
+        }
+        internal virtual void OnParentMoved(int offset)
+        {
+            if (_compression == CompressionType.None)
+            {
+                if (_replSrc != DataSource.Empty)
+                    _replSrc.Address = _replUncompSrc.Address += offset;
+                else if (_origSource != DataSource.Empty)
+                    _origSource.Address = _uncompSource.Address += offset;
+
+                if (_children != null)
+                    foreach (ResourceNode n in _children)
+                        n.OnParentMoved(offset);
+            }
+            else
+            {
+                if (_replSrc != DataSource.Empty)
+                    _replSrc.Address += offset;
+                else if (_origSource != DataSource.Empty)
+                    _origSource.Address += offset;
+            }
         }
 
         //Calculate size to be passed to parent node.

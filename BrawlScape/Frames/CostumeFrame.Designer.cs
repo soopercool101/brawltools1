@@ -42,19 +42,21 @@
             this.mnuCostumeRestore = new System.Windows.Forms.ToolStripMenuItem();
             this.cspImages = new System.Windows.Forms.ImageList(this.components);
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.modelPanel1 = new System.Windows.Forms.ModelPanel();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.picStock = new System.Windows.Forms.PictureBox();
-            this.picGame = new System.Windows.Forms.PictureBox();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.picGame = new System.Windows.Forms.PictureBox();
+            this.picStock = new System.Windows.Forms.PictureBox();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.costumeContext.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picStock)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picGame)).BeginInit();
-            this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picGame)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picStock)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox2
@@ -173,6 +175,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.modelPanel1);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox3.Location = new System.Drawing.Point(201, 0);
             this.groupBox3.Name = "groupBox3";
@@ -180,6 +183,14 @@
             this.groupBox3.TabIndex = 5;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Models";
+            // 
+            // modelPanel1
+            // 
+            this.modelPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.modelPanel1.Location = new System.Drawing.Point(3, 16);
+            this.modelPanel1.Name = "modelPanel1";
+            this.modelPanel1.Size = new System.Drawing.Size(297, 391);
+            this.modelPanel1.TabIndex = 0;
             // 
             // groupBox4
             // 
@@ -193,15 +204,16 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Game/Stock Portrait";
             // 
-            // picStock
+            // panel2
             // 
-            this.picStock.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picStock.Location = new System.Drawing.Point(70, 13);
-            this.picStock.Name = "picStock";
-            this.picStock.Size = new System.Drawing.Size(32, 32);
-            this.picStock.TabIndex = 2;
-            this.picStock.TabStop = false;
-            this.picStock.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picStock_MouseDown);
+            this.panel2.BackColor = System.Drawing.Color.Gainsboro;
+            this.panel2.Controls.Add(this.picGame);
+            this.panel2.Controls.Add(this.picStock);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(3, 16);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(114, 67);
+            this.panel2.TabIndex = 1;
             // 
             // picGame
             // 
@@ -213,6 +225,16 @@
             this.picGame.TabStop = false;
             this.picGame.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picGame_MouseDown);
             // 
+            // picStock
+            // 
+            this.picStock.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picStock.Location = new System.Drawing.Point(70, 13);
+            this.picStock.Name = "picStock";
+            this.picStock.Size = new System.Drawing.Size(32, 32);
+            this.picStock.TabIndex = 2;
+            this.picStock.TabStop = false;
+            this.picStock.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picStock_MouseDown);
+            // 
             // panel1
             // 
             this.panel1.Controls.Add(this.groupBox4);
@@ -221,17 +243,6 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(303, 86);
             this.panel1.TabIndex = 6;
-            // 
-            // panel2
-            // 
-            this.panel2.BackColor = System.Drawing.Color.Gainsboro;
-            this.panel2.Controls.Add(this.picGame);
-            this.panel2.Controls.Add(this.picStock);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(3, 16);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(114, 67);
-            this.panel2.TabIndex = 1;
             // 
             // CostumeFrame
             // 
@@ -247,11 +258,12 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.costumeContext.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.picStock)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picGame)).EndInit();
-            this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picGame)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picStock)).EndInit();
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -276,5 +288,6 @@
         private System.Windows.Forms.PictureBox picGame;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.ModelPanel modelPanel1;
     }
 }

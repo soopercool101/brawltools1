@@ -46,11 +46,14 @@
             this.mnuPalette = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuLOD = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFileSize = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.stageFrame1 = new BrawlScape.StageFrame();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.textureContext.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -58,6 +61,7 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -202,6 +206,26 @@
             this.mnuFileSize.Size = new System.Drawing.Size(152, 22);
             this.mnuFileSize.Text = "File Size:";
             // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.stageFrame1);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(669, 486);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Melee Stages";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // stageFrame1
+            // 
+            this.stageFrame1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.stageFrame1.Location = new System.Drawing.Point(3, 3);
+            this.stageFrame1.Name = "stageFrame1";
+            this.stageFrame1.SelectedStage = null;
+            this.stageFrame1.Size = new System.Drawing.Size(663, 480);
+            this.stageFrame1.TabIndex = 0;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -215,6 +239,7 @@
             this.tabPage2.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.textureContext.ResumeLayout(false);
+            this.tabPage4.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -238,6 +263,8 @@
         private System.Windows.Forms.ToolStripMenuItem mnuPalette;
         private System.Windows.Forms.ToolStripMenuItem mnuLOD;
         private System.Windows.Forms.ToolStripMenuItem mnuFileSize;
+        private System.Windows.Forms.TabPage tabPage4;
+        private StageFrame stageFrame1;
 
     }
 }

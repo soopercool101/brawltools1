@@ -15,9 +15,12 @@ namespace BrawlScape
 
         public ResourceDefinition(string treePath, string nodePath)
         {
-            _nodeRef = NodeReference.Get<T>(treePath, nodePath);
-            Text = _nodeRef.Name;
-            _nodeRef.DataChanged += OnChanged;
+            if ((treePath != null) && (nodePath != null))
+            {
+                _nodeRef = NodeReference.Get<T>(treePath, nodePath);
+                Text = _nodeRef.Name;
+                _nodeRef.DataChanged += OnChanged;
+            }
         }
 
         protected virtual void OnChanged(object sender, EventArgs e)        {        }

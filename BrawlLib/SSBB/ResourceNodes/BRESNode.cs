@@ -89,10 +89,14 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected internal override void OnRebuild(VoidPtr address, int size, bool force)
         {
-            _replSrc.Close();
-            _replUncompSrc.Close();
-            _replSrc = _replUncompSrc = new DataSource(address, size);
+            BRESHeader* header = (BRESHeader*)address;
+            *header = new BRESHeader(size, _numEntries + 1);
 
+            ROOTHeader* rootHeader = header->First;
+            *rootHeader = new ROOTHeader(_rootSize, Children.Count);
+
+            ResourceGroup* pMaster = &rootHeader->_master;
+            ResourceGroup* rGroup = (ResourceGroup*)pMaster->EndAddress;
             BRESString* pStr = (BRESString*)(address + _strOffset);
 
             string[] strings = new string[_stringTable.Count];
@@ -104,13 +108,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                 pStr = pStr->Next;
             }
 
-            *Header = new BRESHeader(size, _numEntries + 1);
-            *RootHeader = new ROOTHeader(_rootSize, Children.Count);
-
-            VoidPtr dataAddr = (VoidPtr)RootHeader + _rootSize;
-
-            ResourceGroup* pMaster = &RootHeader->_master;
-            ResourceGroup* rGroup = (ResourceGroup*)pMaster->EndAddress;
+            VoidPtr dataAddr = (VoidPtr)rootHeader + _rootSize;
 
             pMaster->_first = new ResourceEntry(_gId, _gPrev, _gNext, 0);
 
@@ -145,6 +143,10 @@ namespace BrawlLib.SSBB.ResourceNodes
                 rGroup = (ResourceGroup*)rGroup->EndAddress;
             }
             _stringTable.Clear();
+
+            _replSrc.Close();
+            _replUncompSrc.Close();
+            _replSrc = _replUncompSrc = new DataSource(address, size);
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((BRESHeader*)address)->_tag == BRESHeader.Tag ? new BRESNode() : null; }

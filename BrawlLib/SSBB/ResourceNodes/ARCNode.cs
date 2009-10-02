@@ -56,14 +56,10 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         internal protected override void OnRebuild(VoidPtr address, int size, bool force)
         {
-            ARCHeader hdr = new ARCHeader((ushort)Children.Count, Name);
+            ARCHeader* header = (ARCHeader*)address;
+            *header = new ARCHeader((ushort)Children.Count, Name);
 
-            _replSrc.Close();
-            _replUncompSrc.Close();
-            _replSrc = _replUncompSrc = new DataSource(address, size);
-
-            *Header = hdr;
-            ARCFileHeader* entry = Header->First;
+            ARCFileHeader* entry = header->First;
             foreach(ARCEntryNode node in Children)
             {
                 *entry = new ARCFileHeader(node.FileType, node.FileIndex, node._calcSize, node.FileFlags, node.FileId);
@@ -73,6 +69,10 @@ namespace BrawlLib.SSBB.ResourceNodes
                     node.Rebuild(entry->Data, entry->Length, force);
                 entry = entry->Next;
             }
+
+            _replSrc.Close();
+            _replUncompSrc.Close();
+            _replSrc = _replUncompSrc = new DataSource(address, size);
         }
 
         public void ExportPair(string path)
@@ -132,16 +132,19 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            if (FileHeader != null)
+            if (!IsBranch)
             {
-                _fileType = FileHeader->FileType;
-                _fileIndex = FileHeader->_index;
-                _fileFlags = FileHeader->_flags;
-                _fileId = FileHeader->_id;
-                _name = String.Format("{0}[{1}]", _fileType, _fileIndex);
+                if (FileHeader != null)
+                {
+                    _fileType = FileHeader->FileType;
+                    _fileIndex = FileHeader->_index;
+                    _fileFlags = FileHeader->_flags;
+                    _fileId = FileHeader->_id;
+                    _name = String.Format("{0}[{1}]", _fileType, _fileIndex);
+                }
+                else
+                    Name = Path.GetFileName(_origPath);
             }
-            else
-                Name = Path.GetFileName(_origPath);
 
             return false;
         }

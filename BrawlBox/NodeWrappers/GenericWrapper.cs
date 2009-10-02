@@ -11,7 +11,7 @@ namespace BrawlBox
     //Contains generic members inherited by all sub-classed nodes
     class GenericWrapper : BaseWrapper
     {
-        public virtual string ExportFilter { get { return "All Files (*.*)|*.*"; } }
+        public virtual string ExportFilter { get { return "Raw Data File (*.*)|*.*"; } }
         public virtual string ReplaceFilter { get { return ExportFilter; } }
         public static int CategorizeFilter(string path, string filter)
         {
@@ -28,18 +28,11 @@ namespace BrawlBox
         [NodeAction("&Export", ShortcutKeys = Keys.Control | Keys.E)]
         public virtual void Export()
         {
-            Program.SaveDialog.Filter = ExportFilter;
-            Program.SaveDialog.FileName = this.Text;
-            if (Program.SaveDialog.ShowDialog() == DialogResult.OK)
-            {
-                //Parse generic filter
-                if (Program.SaveDialog.FilterIndex == 1)
-                    Program.SaveDialog.FilterIndex = CategorizeFilter(Program.SaveDialog.FileName, ExportFilter);
-
-                //Export data
-                using (FileStream stream = new FileStream(Program.SaveDialog.FileName, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.RandomAccess))
-                    OnExport(stream, Program.SaveDialog.FilterIndex);
-            }
+            string outPath;
+            int index = Program.SaveFile(ExportFilter, Text, out outPath);
+            if (index != 0)
+                using (FileStream stream = new FileStream(outPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.RandomAccess))
+                    OnExport(stream, index);
         }
         public virtual void OnExport(FileStream outStream, int filterIndex)
         {
@@ -48,9 +41,26 @@ namespace BrawlBox
         }
 
         [NodeAction("&Replace", ShortcutKeys = Keys.Control | Keys.R)]
-        public void Test1()
+        public virtual void Replace()
         {
-            MessageBox.Show("Test1");
+            string inPath;
+            int index = Program.OpenFile(ReplaceFilter, out inPath);
+            if (index != 0)
+                OnReplace(inPath, index);
+        }
+
+        public virtual void OnReplace(string inStream, int filterIndex)
+        {
+            ResourceNode.Replace(inStream);
+        }
+
+        [NodeAction("&Delete")]
+        public void Delete()
+        {
+            this.Remove();
+            ResourceNode.Remove();
+            ResourceNode.Dispose();
+            this.Unlink();
         }
     }
 }
