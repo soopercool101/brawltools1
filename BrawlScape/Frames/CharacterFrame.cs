@@ -60,16 +60,24 @@ namespace BrawlScape
 
         private void _charList_SelectedIndexChanged(object sender, EventArgs e) { SelectedCharacter = _charList.SelectedItems.Count == 0 ? null : _charList.SelectedItems[0] as CharacterDefinition; }
 
-        private void CharacterFrame_Enter(object sender, EventArgs e)
-        {
-        }
-
         private void CharacterFrame_Load(object sender, EventArgs e)
         {
             if (!DesignMode)
                 Initialize();
 
-            _charList.ContextMenuStrip = MainForm._textureContext;
+            //_charList.ContextMenuStrip = MainForm._textureContext;
+            mnuCharIcon.DropDown = MainForm._textureContext;
+            mnuNameStrip.DropDown = MainForm._textureContext;
+        }
+
+        private void mnuCharIcon_DropDownOpening(object sender, EventArgs e)
+        {
+            MainForm._currentTextureNode = _selectedCharacter.Reference;
+        }
+
+        private void mnuNameStrip_DropDownOpening(object sender, EventArgs e)
+        {
+            MainForm._currentTextureNode = _selectedCharacter.NameReference;
         }
     }
 }

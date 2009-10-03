@@ -34,6 +34,7 @@ namespace BrawlScape
             if (!DesignMode)
                 Initialize();
 
+            stageList.ContextMenuStrip = MainForm._textureContext;
         }
 
         private void Initialize()

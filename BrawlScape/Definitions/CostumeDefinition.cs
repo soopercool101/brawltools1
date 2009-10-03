@@ -52,6 +52,23 @@ namespace BrawlScape
             }
         }
 
+        private ModelDefinition[] _models;
+        public ModelDefinition[] Models
+        {
+            get
+            {
+                if (_models == null)
+                {
+                    ResourceNode[] nodes = ResourceCache.FindNodeByType(_path, null, ResourceType.MDL0);
+                    ModelDefinition[] models = new ModelDefinition[nodes.Length];
+                    for (int i = 0; i < nodes.Length; i++)
+                        models[i] = new ModelDefinition(_path, nodes[i].TreePath);
+                    _models = models;
+                }
+                return _models;
+            }
+        }
+
         internal void ExportCostume()
         {
             string outFile;
@@ -107,6 +124,8 @@ namespace BrawlScape
                 if (_stockRef == null)
                 {
                     _stockRef = NodeReference.Get<TextureReference>("system\\common5.pac", String.Format("sc_selcharacter_en/Type1[90]/Textures(NW4R)/InfStc.{0:000}", _portraitIndex));
+                    _stockRef.Watches.Add(NodeReference.Get<TextureReference>("system\\common5.pac", String.Format("sc_selmap_en/Type1[40]/Textures(NW4R)/InfStc.{0:000}", _portraitIndex)));
+                    _stockRef.Watches.Add(NodeReference.Get<TextureReference>("stage\\melee\\STGRESULT.PAC", String.Format("2/Type1[120]/Textures(NW4R)/InfStc.{0:000}", _portraitIndex)));
                 }
                 return _stockRef;
             }

@@ -14,6 +14,8 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         internal MDL0* Header { get { return (MDL0*)WorkingSource.Address; } }
 
+        public override ResourceType ResourceType { get { return ResourceType.MDL0; } }
+
         public override int DataAlign { get { return 0x20; } }
         //public override uint DataPad { get { return 0x4; } }
 

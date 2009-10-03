@@ -43,15 +43,18 @@
             this.cspImages = new System.Windows.Forms.ImageList(this.components);
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.modelPanel1 = new System.Windows.Forms.ModelPanel();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.modelList = new System.Windows.Forms.ComboBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.picGame = new System.Windows.Forms.PictureBox();
-            this.picStock = new System.Windows.Forms.PictureBox();
+            this.picGame = new ReferencedPictureBox();
+            this.picStock = new ReferencedPictureBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.costumeContext.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picGame)).BeginInit();
@@ -176,6 +179,7 @@
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.modelPanel1);
+            this.groupBox3.Controls.Add(this.panel3);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox3.Location = new System.Drawing.Point(201, 0);
             this.groupBox3.Name = "groupBox3";
@@ -187,10 +191,30 @@
             // modelPanel1
             // 
             this.modelPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.modelPanel1.Location = new System.Drawing.Point(3, 16);
+            this.modelPanel1.Location = new System.Drawing.Point(3, 46);
             this.modelPanel1.Name = "modelPanel1";
-            this.modelPanel1.Size = new System.Drawing.Size(297, 391);
+            this.modelPanel1.Size = new System.Drawing.Size(297, 361);
             this.modelPanel1.TabIndex = 0;
+            // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.modelList);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel3.Location = new System.Drawing.Point(3, 16);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(297, 30);
+            this.panel3.TabIndex = 1;
+            // 
+            // modelList
+            // 
+            this.modelList.Dock = System.Windows.Forms.DockStyle.Top;
+            this.modelList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.modelList.FormattingEnabled = true;
+            this.modelList.Location = new System.Drawing.Point(0, 0);
+            this.modelList.Name = "modelList";
+            this.modelList.Size = new System.Drawing.Size(297, 21);
+            this.modelList.TabIndex = 0;
+            this.modelList.SelectedIndexChanged += new System.EventHandler(this.modelList_SelectedIndexChanged);
             // 
             // groupBox4
             // 
@@ -223,7 +247,6 @@
             this.picGame.Size = new System.Drawing.Size(48, 56);
             this.picGame.TabIndex = 1;
             this.picGame.TabStop = false;
-            this.picGame.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picGame_MouseDown);
             // 
             // picStock
             // 
@@ -233,7 +256,6 @@
             this.picStock.Size = new System.Drawing.Size(32, 32);
             this.picStock.TabIndex = 2;
             this.picStock.TabStop = false;
-            this.picStock.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picStock_MouseDown);
             // 
             // panel1
             // 
@@ -259,6 +281,7 @@
             this.groupBox1.ResumeLayout(false);
             this.costumeContext.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
+            this.panel3.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.picGame)).EndInit();
@@ -284,10 +307,12 @@
         private System.Windows.Forms.ImageList cspImages;
         private System.Windows.Forms.ImageList textureImages;
         private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.PictureBox picStock;
-        private System.Windows.Forms.PictureBox picGame;
+        private ReferencedPictureBox picStock;
+        private ReferencedPictureBox picGame;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ModelPanel modelPanel1;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.ComboBox modelList;
     }
 }

@@ -22,7 +22,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            if ((_parent != null) && (_parent.WorkingRawSource != DataSource.Empty))
+            if ((_parent != null) && (!_initialized))
             {
                 ResourceEntry* entry = EntryData;
 

@@ -66,10 +66,12 @@ namespace BrawlLib.SSBB.ResourceNodes
         BRES = 0x0102,
         TEX0 = 0x0203,
         PLT0 = 0x0204,
+        MDL0 = 0x0205,
         //BRESGroup = 0x0003,
 
         ARCEntry = 0x0100,
-        BRESEntry = 0x0200
+        BRESEntry = 0x0200,
+        BRESGroup = 0x0300
     }
 
     public abstract class ResourceNode : IDisposable//, ICustomTypeDescriptor
@@ -77,7 +79,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal protected DataSource _origSource, _uncompSource;
         internal protected DataSource _replSrc, _replUncompSrc;
 
-        internal protected bool _changed, _merged;
+        internal protected bool _changed, _merged, _initialized = true;
         internal protected CompressionType _compression;
 
         internal protected string _name, _origPath;
@@ -313,8 +315,11 @@ namespace BrawlLib.SSBB.ResourceNodes
                 _origPath = origSource.Map.FilePath;
 
             Parent = parent;
+
+            _initialized = false;
             if (!OnInitialize())
                 _children = new List<ResourceNode>();
+            _initialized = true;
         }
 
         public virtual void Remove()

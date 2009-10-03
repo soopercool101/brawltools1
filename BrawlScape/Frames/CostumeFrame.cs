@@ -25,24 +25,14 @@ namespace BrawlScape
             set { _selectedTexture = value; }
         }
 
-        private TextureReference _stockReference;
-            public TextureReference StockPortraitReference
-            {
-                get { return _stockReference; }
-                set                { _stockReference = value; InitStock(); }
-            }
-
-            private TextureReference _gameReference;
-            public TextureReference GamePortraitReference
-            {
-                get { return _gameReference; }
-                set { _gameReference = value; InitGame(); }
-            }
-
-        public CostumeFrame()        
-        {            
-            InitializeComponent();
+        private ModelDefinition _selectedModel;
+        public ModelDefinition SelectedModel
+        {
+            get { return _selectedModel; }
+            set { _selectedModel = value; InitModel(); }
         }
+
+        public CostumeFrame() { InitializeComponent(); }
 
         private void CharacterChanged(CharacterDefinition character)
         {
@@ -58,7 +48,6 @@ namespace BrawlScape
                     if ((im = def.Texture) != null)
                     {
                         cspImages.Images.Add(im);
-                        //im.Dispose();
                         def.ImageIndex = index++;
                     }
                     else
@@ -79,6 +68,10 @@ namespace BrawlScape
 
             _textureList.Clear();
             textureImages.Images.Clear();
+            modelList.Items.Clear();
+
+            picStock.Reference = null;
+            picGame.Reference = null;
 
             int index = 0;
             Image im;
@@ -89,7 +82,6 @@ namespace BrawlScape
                     if ((im = def.Texture) != null)
                     {
                         textureImages.Images.Add(im);
-                        //im.Dispose();
                         def.ImageIndex = index++;
                     }
                     else
@@ -98,13 +90,13 @@ namespace BrawlScape
                     _textureList.Items.Add(def);
                 }
 
-                StockPortraitReference = _selectedCostume.StockPortrait;
-                GamePortraitReference = _selectedCostume.GamePortrait;
-            }
-            else
-            {
-                StockPortraitReference = null;
-                GamePortraitReference = null;
+                foreach (ModelDefinition def in _selectedCostume.Models)
+                {
+                    modelList.Items.Add(def);
+                }
+
+                picStock.Reference = _selectedCostume.StockPortrait;
+                picGame.Reference = _selectedCostume.GamePortrait;
             }
 
             _textureList.EndUpdate();
@@ -113,20 +105,8 @@ namespace BrawlScape
                 SelectedTexture = null;
         }
 
-        private void InitStock()
+        private void InitModel()
         {
-            if (_stockReference != null)
-                picStock.Image = _stockReference.Texture;
-            else
-                picStock.Image = null;
-        }
-
-        private void InitGame()
-        {
-            if (_gameReference != null)
-                picGame.Image = _gameReference.Texture;
-            else
-                picGame.Image = null;
         }
 
 
@@ -170,23 +150,10 @@ namespace BrawlScape
             _textureList.ContextMenuStrip = MainForm._textureContext;
 
             mnuCostumeCSP.DropDown = MainForm._textureContext;
-            picGame.ContextMenuStrip = MainForm._textureContext;
-            picStock.ContextMenuStrip = MainForm._textureContext;
         }
 
-        private void mnuCostumeCSP_DropDownOpening(object sender, EventArgs e)
-        {
-            MainForm._currentTextureNode = _selectedCostume.Reference;
-        }
+        private void mnuCostumeCSP_DropDownOpening(object sender, EventArgs e) { MainForm._currentTextureNode = _selectedCostume.Reference; }
 
-        private void picGame_MouseDown(object sender, MouseEventArgs e)
-        {
-            MainForm._currentTextureNode = _gameReference;
-        }
-
-        private void picStock_MouseDown(object sender, MouseEventArgs e)
-        {
-            MainForm._currentTextureNode = _stockReference;
-        }
+        private void modelList_SelectedIndexChanged(object sender, EventArgs e) { SelectedModel = modelList.SelectedItem is ModelDefinition ? modelList.SelectedItem as ModelDefinition : null; }
     }
 }

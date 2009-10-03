@@ -1,5 +1,5 @@
 ﻿
-BrawlScape Mod Manager - Version 0.03
+BrawlScape Mod Manager - Version 0.04
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -16,6 +16,14 @@ http://www.smashboards.com/showthread.php?t=250568
  ====================================
 |************ Change Log ************|
  ====================================
+
+- v0.04 - (10/03/2009)
+	. Added support for loading sc_selcharacter from menu2 folder.
+	. Added support for stage icons.
+	. Added support for miscellaneous items. (no icons for these)
+	. Added character name strips.
+	. Fixed various bugs with stock photos.
+	. Stock photos will now save to multiple locations.
 
 - v0.03 - (09/30/2009)
 	. Added support for the following:

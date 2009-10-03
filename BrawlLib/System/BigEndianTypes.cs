@@ -52,15 +52,31 @@ namespace System
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BVec2
+    {
+        public bfloat _x;
+        public bfloat _y;
+
+        public BVec2(float x, float y) { _x = x; _y = y; }
+
+        public override string ToString() { return String.Format("({0}, {1})", (float)_x, (float)_y); }
+
+        public static implicit operator Vector2(BVec2 v) { return new Vector2(v._x, v._y); }
+        public static implicit operator BVec2(Vector2 v) { return new BVec2(v._x, v._y); }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BVec3
     {
         public bfloat _x;
         public bfloat _y;
         public bfloat _z;
 
-        public override string ToString()
-        {
-            return String.Format("({0}, {1}, {2})", (float)_x, (float)_y, (float)_z);
-        }
+        public BVec3(float x, float y, float z) { _x = x; _y = y; _z = z; }
+
+        public override string ToString() { return String.Format("({0}, {1}, {2})", (float)_x, (float)_y, (float)_z); }
+
+        public static implicit operator Vector3(BVec3 v) { return new Vector3(v._x, v._y, v._z); }
+        public static implicit operator BVec3(Vector3 v) { return new BVec3(v._x, v._y, v._z); }
     }
 }

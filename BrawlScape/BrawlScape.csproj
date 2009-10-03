@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Definitions\CharacterDefinition.cs" />
+    <Compile Include="Definitions\ModelDefinition.cs" />
     <Compile Include="Frames\CharacterFrame.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -72,6 +73,10 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ReferencedPictureBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="References\ModelReference.cs" />
     <Compile Include="References\NodeReference.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

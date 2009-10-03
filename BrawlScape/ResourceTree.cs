@@ -49,6 +49,6 @@ namespace BrawlScape
         }
 
         private void OnChanged(ResourceNode n) { ResourceCache.OnTreeChanged(this); }
-        private void OnChildChanged(ResourceNode n, ResourceNode c) { OnChanged(n); }
+        private void OnChildChanged(ResourceNode n, ResourceNode c) { OnChanged(n); ResourceCache.OnNodeChanged(this, c); }
     }
 }

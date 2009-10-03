@@ -170,7 +170,7 @@ namespace BrawlLib.Wii.Textures
                 case WiiPixelFormat.RGB5A3: return RGB5A3;
                 case WiiPixelFormat.CI4: return CI4;
                 case WiiPixelFormat.CI8: return CI8;
-                case WiiPixelFormat.CMP: return CMPR;
+                case WiiPixelFormat.CMPR: return CMPR;
                 case WiiPixelFormat.RGBA8: return RGBA8;
             }
             return null;

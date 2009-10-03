@@ -42,7 +42,7 @@
             this.stageList.Location = new System.Drawing.Point(0, 0);
             this.stageList.MultiSelect = false;
             this.stageList.Name = "stageList";
-            this.stageList.Size = new System.Drawing.Size(573, 97);
+            this.stageList.Size = new System.Drawing.Size(573, 110);
             this.stageList.TabIndex = 0;
             this.stageList.UseCompatibleStateImageBehavior = false;
             this.stageList.SelectedIndexChanged += new System.EventHandler(this.stageList_SelectedIndexChanged);

@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using System.Drawing;
 using BrawlLib.SSBB.ResourceNodes;
 using BrawlLib.Imaging;
+using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 
 namespace BrawlScape
 {
@@ -31,7 +33,7 @@ namespace BrawlScape
             List.Add(new CharacterDefinition("Sheik", "Sheik", 14, 6));
             List.Add(new CharacterDefinition("Ice Climbers", "Popo", 15, 6));
             List.Add(new CharacterDefinition("Marth", "Marth", 16, 6));
-            List.Add(new CharacterDefinition("Game and Watch", "GameWatch", 17, 6));
+            List.Add(new CharacterDefinition("Game & Watch", "GameWatch", 17, 6));
             List.Add(new CharacterDefinition("Falco", "Falco", 18, 6));
             List.Add(new CharacterDefinition("Ganondorf", "Ganon", 19, 6));
             List.Add(new CharacterDefinition("Meta Knight", "Metaknight", 21, 6));
@@ -68,6 +70,9 @@ namespace BrawlScape
         private int _costumeCount;
         public int CostumeCount { get { return _costumeCount; } }
 
+        private TextureReference _charNameRef;
+        public TextureReference NameReference { get { return _charNameRef; } }
+
         private CharacterDefinition(string name, string fitName, int index, int costumeCount)
             : base("system\\common5.pac", String.Format("sc_selcharacter_en/Type1[70]/Textures(NW4R)/MenSelchrChrFace.{0:000}", index + 1))
         {
@@ -75,6 +80,43 @@ namespace BrawlScape
             _fitName = fitName;
             _index = index;
             _costumeCount = costumeCount;
+            _charNameRef = NodeReference.Get<TextureReference>("system\\common5.pac", String.Format("sc_selcharacter_en/Type1[70]/Textures(NW4R)/MenSelchrChrNmS.{0:000}", index + 1));
+            _charNameRef.DataChanged += OnChanged;
+        }
+
+        protected override void OnChanged(object sender, EventArgs e)
+        {
+            if (_texture != null)
+            {
+                _texture.Dispose();
+                _texture = null;
+            }
+            base.OnChanged(sender, e);
+        }
+
+        private Bitmap _texture;
+        public override Bitmap Texture
+        {
+            get
+            {
+                if (_texture == null)
+                {
+                    Bitmap icon = base.Texture;
+                    Bitmap name = _charNameRef.Texture;
+
+                    _texture = new Bitmap(80, 56, PixelFormat.Format32bppArgb);
+                    using (Graphics g = Graphics.FromImage(_texture))
+                    {
+                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        g.SmoothingMode = SmoothingMode.AntiAlias;
+                        if (icon != null)
+                            g.DrawImageUnscaled(icon, 0, 0);
+                        if (name != null)
+                            g.DrawImage(name, 0, 0, 80, 16);
+                    }
+                }
+                return _texture;
+            }
         }
 
         CostumeDefinition[] _costumes;

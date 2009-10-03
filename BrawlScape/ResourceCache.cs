@@ -55,6 +55,7 @@ namespace BrawlScape
             else if (!dirty && listed)
                 _changedTrees.Remove(t);
         }
+        internal static void OnNodeChanged(ResourceTree t, ResourceNode n)        {        }
 
         internal static void Clear()
         {
@@ -80,6 +81,10 @@ namespace BrawlScape
                 ResourceTree t = _changedTrees[0];
                 _changedTrees.Remove(t);
 
+                string dir = Path.GetDirectoryName(t.WorkingPath);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
                 if (t == common5)
                     continue;
 
@@ -102,7 +107,7 @@ namespace BrawlScape
                 }
 
                 //string path = t.FilePath;
-                //string dir =Path.GetDirectoryName(path);
+                //string dir = Path.GetDirectoryName(path);
                 //string name = Path.GetFileNameWithoutExtension(path);
                 //string ext = Path.GetExtension(path);
                 //if (name.EndsWith("_en", StringComparison.OrdinalIgnoreCase))

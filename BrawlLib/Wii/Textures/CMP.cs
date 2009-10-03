@@ -15,7 +15,7 @@ namespace BrawlLib.Wii.Textures
         public override int BlockWidth { get { return 8; } }
         public override int BlockHeight { get { return 8; } }
         public override PixelFormat DecodedFormat { get { return PixelFormat.Format32bppArgb; } }
-        public override WiiPixelFormat RawFormat { get { return WiiPixelFormat.CMP; } }
+        public override WiiPixelFormat RawFormat { get { return WiiPixelFormat.CMPR; } }
 
         //private List<CMPBlock> _blockCache = new List<CMPBlock>();
         //private int _blockIndex;

@@ -194,11 +194,11 @@ namespace BrawlLib.Wii.Compression
                 throw new InvalidCompressionException("Compression header does not match LZ77 format.");
 
             for (byte* srcPtr = (byte*)header->Data, dstPtr = (byte*)dstAddress, ceiling = dstPtr + dstLen; dstPtr < ceiling; )
-                for (byte control = *srcPtr++, bit = 0; (bit < 8) && (dstPtr < ceiling); bit++)
-                    if ((control & (1 << (7 - bit))) == 0)
+                for (byte control = *srcPtr++, bit = 8; (bit-- != 0) && (dstPtr != ceiling); )
+                    if ((control & (1 << bit)) == 0)
                         *dstPtr++ = *srcPtr++;
                     else
-                        for (int num = (*srcPtr >> 4) + 3, offset = (((*srcPtr++ & 0xF) << 8) | *srcPtr++) + 2; (dstPtr < ceiling) && (num-- > 0); *dstPtr++ = dstPtr[-offset]) ;
+                        for (int num = (*srcPtr >> 4) + 3, offset = (((*srcPtr++ & 0xF) << 8) | *srcPtr++) + 2; (dstPtr != ceiling) && (num-- > 0); *dstPtr++ = dstPtr[-offset]) ;
         }
     }
 }

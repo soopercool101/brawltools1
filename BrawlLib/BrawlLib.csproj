@@ -51,9 +51,12 @@
     <Compile Include="Imaging\WeightedAverage.cs" />
     <Compile Include="OpenGL\Enums.cs" />
     <Compile Include="OpenGL\GLContext.cs" />
+    <Compile Include="OpenGL\GLModel.cs" />
     <Compile Include="OpenGL\GLPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="System\Vector2.cs" />
+    <Compile Include="System\Vector3.cs" />
     <Compile Include="OpenGL\wGL.cs" />
     <Compile Include="OpenGL\wGlContext.cs" />
     <Compile Include="OpenGL\wPixelFormatDescriptor.cs" />
@@ -125,9 +128,12 @@
       <DependentUpon>ProgressWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Wii\Compressor.cs" />
+    <Compile Include="Wii\Models\Enum.cs" />
+    <Compile Include="Wii\Models\ModelConverter.cs" />
     <Compile Include="Wii\Textures\CI4.cs" />
     <Compile Include="Wii\Textures\CI8.cs" />
     <Compile Include="Wii\Textures\CMP.cs" />
+    <Compile Include="Wii\Textures\Enum.cs" />
     <Compile Include="Wii\Textures\I4.cs" />
     <Compile Include="Wii\Textures\I8.cs" />
     <Compile Include="Wii\Textures\IA4.cs" />

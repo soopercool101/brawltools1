@@ -14,6 +14,7 @@ namespace BrawlScape
         public static List<NodeReference> _cache = new List<NodeReference>();
 
         public event EventHandler DataChanged;
+        public event EventHandler Disposed;
 
         protected string _relativePath, _nodePath, _name;
         //private ResourceTree _tree;
@@ -96,6 +97,8 @@ namespace BrawlScape
         protected virtual void OnDisposed(ResourceNode node)
         {
             _node = null;
+            if (Disposed != null)
+                Disposed(this, null);
         }
         protected virtual void OnChanged(ResourceNode node)
         {

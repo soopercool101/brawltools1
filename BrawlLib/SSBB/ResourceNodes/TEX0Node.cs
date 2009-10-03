@@ -32,7 +32,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Texture")]
         public bool HasPalette { get { return _hasPalette; } set { _hasPalette = value; } }
 
-        public PLT0Node GetPaletteNode() { return _parent == null ? null : _parent._parent.FindChild("Palettes(NW4R)/" + this.Name, false) as PLT0Node; }
+        public PLT0Node GetPaletteNode() { return ((_parent == null) || (!HasPalette)) ? null : _parent._parent.FindChild("Palettes(NW4R)/" + this.Name, false) as PLT0Node; }
 
         protected override bool OnInitialize()
         {

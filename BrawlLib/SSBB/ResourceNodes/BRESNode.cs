@@ -89,6 +89,11 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected internal override void OnRebuild(VoidPtr address, int size, bool force)
         {
+            DataSource src = _replSrc;
+            DataSource uncompSrc = _replUncompSrc;
+
+            _replSrc = _replUncompSrc = new DataSource(address, size);
+
             BRESHeader* header = (BRESHeader*)address;
             *header = new BRESHeader(size, _numEntries + 1);
 
@@ -116,6 +121,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             foreach (BRESGroupNode g in Children)
             {
                 //Set group entry
+                g._origSource.Address = g._uncompSource.Address = gEntry;
                 *gEntry++ = new ResourceEntry(g.EntryId, g.EntryPrev, g.EntryNext, (int)rGroup - (int)pMaster, (int)_stringTable[g.Name] - (int)pMaster);
 
                 //Initialize group and index entry
@@ -144,9 +150,8 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
             _stringTable.Clear();
 
-            _replSrc.Close();
-            _replUncompSrc.Close();
-            _replSrc = _replUncompSrc = new DataSource(address, size);
+            src.Close();
+            uncompSrc.Close();
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((BRESHeader*)address)->_tag == BRESHeader.Tag ? new BRESNode() : null; }
@@ -186,14 +191,17 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            base.OnInitialize();
+            if ((_parent != null) && (!_initialized))
+            {
+                base.OnInitialize();
+                ResourceGroup* group = Group;
+                _gPrev = group->_first._prev;
+                _gNext = group->_first._next;
+                _gId = group->_first._id;
 
-            ResourceGroup* group = Group;
-            _gPrev = group->_first._prev;
-            _gNext = group->_first._next;
-            _gId = group->_first._id;
-
-            return group->_numEntries != 0;
+                return group->_numEntries != 0;
+            }
+            return false;
         }
 
     }

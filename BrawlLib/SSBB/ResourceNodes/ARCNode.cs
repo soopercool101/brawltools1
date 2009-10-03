@@ -132,20 +132,20 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            if (!IsBranch)
+            if (!_initialized)
             {
-                if (FileHeader != null)
+                if (_parent != null)
                 {
-                    _fileType = FileHeader->FileType;
-                    _fileIndex = FileHeader->_index;
-                    _fileFlags = FileHeader->_flags;
-                    _fileId = FileHeader->_id;
+                    ARCFileHeader* header = FileHeader;
+                    _fileType = header->FileType;
+                    _fileIndex = header->_index;
+                    _fileFlags = header->_flags;
+                    _fileId = header->_id;
                     _name = String.Format("{0}[{1}]", _fileType, _fileIndex);
                 }
                 else
                     Name = Path.GetFileName(_origPath);
             }
-
             return false;
         }
     }

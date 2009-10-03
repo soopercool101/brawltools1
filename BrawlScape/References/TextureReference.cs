@@ -25,6 +25,9 @@ namespace BrawlScape
             }
         }
 
+        private List<TextureReference> _watches = new List<TextureReference>();
+        public List<TextureReference> Watches { get { return _watches; } }
+
         protected override void OnDisposed(ResourceNode node)
         {
             base.OnDisposed(node);
@@ -33,6 +36,16 @@ namespace BrawlScape
 
         protected override void OnChanged(ResourceNode node)
         {
+            TEX0Node tNode = Node as TEX0Node, trNode;
+            ResourceNode pNode = tNode.GetPaletteNode(), prNode;
+            foreach (TextureReference r in _watches)
+            {
+                trNode = r.Node as TEX0Node;
+                trNode.ReplaceRaw(tNode.WorkingRawSource.Address, tNode.WorkingRawSource.Length);
+                if ((prNode = trNode.GetPaletteNode()) != null)
+                    prNode.ReplaceRaw(pNode.WorkingRawSource.Address, pNode.WorkingRawSource.Length);
+            }
+
             if (_texture != null) { _texture.Dispose(); _texture = null; }
             base.OnChanged(node);
         }
@@ -58,15 +71,24 @@ namespace BrawlScape
 
                 case 8:
                     tNode.Replace(path); return;
+
                 default: return;
             }
 
             try
             {
-                if ((bmp.Width != tNode.Width) || (bmp.Height != tNode.Height))
-                    MessageBox.Show(String.Format("Texture size does not match original! ({0} x {1})", tNode.Width, tNode.Height));
-                else
-                    tNode.Replace(bmp);
+                //if ((bmp.Width != tNode.Width) || (bmp.Height != tNode.Height))
+                //    MessageBox.Show(String.Format("Texture size does not match original! ({0} x {1})", tNode.Width, tNode.Height));
+                //else
+                tNode.Replace(bmp);
+
+                //automatically replace multiple nodes
+                //if (_nodePath.Contains("Type1[90]/Textures(NW4R)/InfStc."))
+                //{
+                //    string id = _nodePath.Substring(_nodePath.LastIndexOf('.'));
+                //    ResourceNode node = ResourceCache.FindNode("stage\\melee\\STGRESULT.PAC", "2/Type1[120]/Textures(NW4R)/InfStc" + id);
+                //    ((TEX0Node)node).Replace(bmp);
+                //}
             }
             finally { bmp.Dispose(); }
         }

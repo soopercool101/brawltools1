@@ -24,6 +24,6 @@ namespace BrawlScape
         }
 
         //No disposing of this texture! The cache will do it.
-        public Bitmap Texture { get { return _nodeRef == null ? null : Reference.Texture; } }
+        public virtual Bitmap Texture { get { return _nodeRef == null ? null : Reference.Texture; } }
     }
 }
