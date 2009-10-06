@@ -8,13 +8,13 @@ namespace BrawlLib.OpenGL
 {
     public abstract unsafe class GLPanel : UserControl
     {
-        internal protected GLContext _gl;
+        internal protected GLContext _context;
         protected override void Dispose(bool disposing)
         {
-            if (_gl != null)
+            if (_context != null)
             {
-                _gl.Dispose();
-                _gl = null;
+                _context.Dispose();
+                _context = null;
             }
             base.Dispose(disposing);
         }
@@ -22,22 +22,22 @@ namespace BrawlLib.OpenGL
         protected override void OnLoad(EventArgs e)
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.Opaque, true);
-            _gl = GLContext.Attach(this);
+            _context = GLContext.Attach(this);
 
-            _gl.Capture();
+            _context.Capture();
             OnInit();
-            _gl.Release();
+            _context.Release();
 
             base.OnLoad(e);
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (_gl != null)
+            if (_context != null)
             {
-                _gl.Capture();
+                _context.Capture();
                 OnRender();
-                _gl.Release();
+                _context.Release();
             }
             else
                 base.OnPaint(e);
@@ -45,37 +45,42 @@ namespace BrawlLib.OpenGL
 
         protected override void OnResize(EventArgs e)
         {
-            if (_gl != null)
+            if (_context != null)
             {
-                _gl.Capture();
+                _context.Capture();
                 OnResized();
-                _gl.Release();
+                _context.Release();
             }
             else
                 base.OnResize(e);
         }
 
-        internal void OnInit()
+        internal protected virtual void OnInit()
         {
-            _gl.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-            _gl.glClearDepth(1.0f);
+            _context.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+            _context.glClearDepth(1.0f);
+            OnResized();
         }
-        internal void OnResized()
+        internal protected virtual void OnResized()
         {
-            _gl.glViewport(0, 0, Width, Height);
+            _context.glViewport(0, 0, Width, Height);
+
+            _context.glMatrixMode(GLMatrixMode.Projection);
+            _context.glLoadIdentity();
+            _context.gluPerspective(45.0f, (float)Width / (float)Height, 0.01f, 100.0f);
         }
-        internal void OnRender()
+        internal protected virtual void OnRender()
         {
-            _gl.glClear(GLClearMask.ColorBuffer | GLClearMask.DepthBuffer);
-            _gl.glLoadIdentity();
+            _context.glClear(GLClearMask.ColorBuffer | GLClearMask.DepthBuffer);
+            _context.glLoadIdentity();
 
-            _gl.glBegin(GLBeginMode.Triangles);
-            _gl.glVertex(0.0f, 1.0f, 0.0f);
-            _gl.glVertex(0.0f, 0.0f, 1.0f);
-            _gl.glVertex(1.0f, 0.0f, 0.0f);
-            _gl.glEnd();
+            _context.glBegin(GLPrimitiveType.Triangles);
+            _context.glVertex(0.0f, 1.0f, 0.0f);
+            _context.glVertex(0.0f, 0.0f, 1.0f);
+            _context.glVertex(1.0f, 0.0f, 0.0f);
+            _context.glEnd();
 
-            _gl.glFlush();
+            _context.glFlush();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Drawing;
 
 namespace System
 {
@@ -12,6 +13,10 @@ namespace System
 
         public Vector3(float x, float y, float z) { _x = x; _y = y; _z = z; }
         public Vector3(float s) { _x = s; _y = s; _z = s; }
+
+        private const float _colorFactor = 1.0f / 255.0f;
+        public static explicit operator Vector3(Color c) { return new Vector3(c.R * _colorFactor, c.G * _colorFactor, c.B * _colorFactor); }
+        public static explicit operator Color(Vector3 v) { return Color.FromArgb((int)(v._x / _colorFactor), (int)(v._y / _colorFactor), (int)(v._z / _colorFactor)); }
 
         public static Vector3 operator -(Vector3 v) { return new Vector3(-v._x, -v._y, -v._z); }
         public static Vector3 operator +(Vector3 v1, Vector3 v2) { return new Vector3(v1._x + v2._x, v1._y + v2._y, v1._z + v2._z); }

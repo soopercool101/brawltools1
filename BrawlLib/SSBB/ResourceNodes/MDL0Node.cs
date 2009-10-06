@@ -5,6 +5,8 @@ using System.Text;
 using BrawlLib.SSBBTypes;
 using System.ComponentModel;
 using BrawlLib.Imaging;
+using BrawlLib.OpenGL;
+using BrawlLib.Wii.Models;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -61,6 +63,52 @@ namespace BrawlLib.SSBB.ResourceNodes
                     new MDL0GroupNode().Initialize(this, new DataSource(gPtr, 0), i);
             }
         }
+
+        public GLModel GetModel()
+        {
+            return new GLModel(this);
+            //GLModel model = new GLModel();
+            //ResourceNode n;
+            //ResourceGroup* group;
+
+            //model._min = BoxMin;
+            //model._max = BoxMax;
+
+
+            //MDL0NodeEntry opaNode = FindChild("Definitions/DrawOpa", false) as MDL0NodeEntry; 
+
+            //if ((n = this.FindChild("Bones", false)) != null)
+            //{
+            //    foreach (MDL0BoneNode bone in n.Children)
+            //        model._bones.Add(ParseBone(bone, opaNode));
+            //}
+
+            //return model;
+        }
+
+        //private GLBone ParseBone(MDL0BoneNode node, MDL0NodeEntry opaNode)
+        //{
+        //    GLBone bone = new GLBone();
+        //    bone._translation = node.Translation;
+        //    bone._rotation = node.Rotation;
+        //    bone._scale = node.Scale;
+        //    bone._id = node.NodeId;
+        //    bone._index = node.NodeIndex;
+
+        //    //Link materials/polygons
+        //    foreach(MDL0NodeType4 o in opaNode.Items)
+        //    {
+        //        if (o.BoneIndex == bone._id)
+        //        {
+        //            bone._polygons.Add(ModelConverter.ExtractPolygon((MDL0Polygon*)Header->PolygonGroup->First[o._polygonId].DataAddress));
+        //        }
+        //    }
+
+        //    foreach (MDL0BoneNode n in node.Children)
+        //        bone._children.Add(ParseBone(n, opaNode));
+
+        //    return bone;
+        //}
 
         //public override void OnInit()
         //{
@@ -249,7 +297,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                 case 3: { t = typeof(MDL0NormalNode); break; }
                 case 4: { t = typeof(MDL0ColorNode); break; }
                 case 5: { t = typeof(MDL0UVNode); break; }
-                case 6: { t = typeof(MDL0Data7Node); break; }
+                case 6: { t = typeof(MDL0MaterialNode); break; }
                 case 7: { t = typeof(MDL0Data8Node); break; }
                 case 8: { t = typeof(MDL0PolygonNode); break; }
                 case 9: { t = typeof(MDL0Data10Node); break; }
@@ -263,13 +311,13 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
     }
 
-    unsafe class MDL0EntryNode : ResourceEntryNode
+    public unsafe class MDL0EntryNode : ResourceEntryNode
     {
         internal virtual void GetStrings(IDictionary<string, VoidPtr> strings) { strings[Name] = 0; }
     }
 
 
-    unsafe class MDL0NodeEntry : MDL0EntryNode
+    public unsafe class MDL0NodeEntry : MDL0EntryNode
     {
         private List<object> _items = new List<object>();
 
@@ -289,11 +337,11 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
     }
 
-    unsafe class MDL0BoneNode : MDL0EntryNode, IResourceGroupNode
+    public unsafe class MDL0BoneNode : MDL0EntryNode, IResourceGroupNode
     {
         private List<string> _entries = new List<string>();
 
-        internal MDL0Data2* Data { get { return (MDL0Data2*)WorkingSource.Address; } }
+        internal MDL0Bone* Data { get { return (MDL0Bone*)WorkingSource.Address; } }
         ResourceGroup* IResourceGroupNode.Group { get { return ((IResourceGroupNode)_parent).Group; } }
 
         private int _nIndex;
@@ -302,16 +350,16 @@ namespace BrawlLib.SSBB.ResourceNodes
         public string DataName { get { return Data->Name; } }
 
         [Category("Data2")]
-        public uint HeaderLen { get { return Data->_headerLen; } }
+        public int HeaderLen { get { return Data->_headerLen; } }
         [Category("Data2")]
         public int MDL0Offset { get { return Data->_mdl0Offset; } }
         [Category("Data2")]
         public int StringOffset { get { return Data->_stringOffset; } }
         [Category("Data2")]
-        public uint NodeIndex { get { return Data->_index; } }
+        public int NodeIndex { get { return Data->_index; } }
 
         [Category("Data2")]
-        public uint NodeId { get { return Data->_nodeId; } }
+        public int NodeId { get { return Data->_nodeId; } }
         [Category("Data2")]
         public uint Flags { get { return Data->_flags; } }
         [Category("Data2")]
@@ -320,15 +368,15 @@ namespace BrawlLib.SSBB.ResourceNodes
         public uint Pad2 { get { return Data->_pad2; } }
 
         [Category("Data2")]
-        public BVec3 Scale { get { return Data->_scale; } }
+        public Vector3 Scale { get { return Data->_scale; } }
         [Category("Data2")]
-        public BVec3 Rotation { get { return Data->_rotation; } }
+        public Vector3 Rotation { get { return Data->_rotation; } }
         [Category("Data2")]
-        public BVec3 Translation { get { return Data->_translation; } }
+        public Vector3 Translation { get { return Data->_translation; } }
         [Category("Data2")]
-        public BVec3 BoxMin { get { return Data->_boxMin; } }
+        public Vector3 BoxMin { get { return Data->_boxMin; } }
         [Category("Data2")]
-        public BVec3 BoxMax { get { return Data->_boxMax; } }
+        public Vector3 BoxMax { get { return Data->_boxMax; } }
 
         [Category("Data2")]
         public int ParentOffset { get { return Data->_parentOffset / 0xD0; } }
@@ -394,12 +442,17 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            ResourceEntry* entry = &((IResourceGroupNode)_parent).Group->First[_nIndex];
+            if ((_parent != null) && (!_initialized))
+            {
+                ResourceEntry* entry = &((IResourceGroupNode)_parent).Group->First[_nIndex];
 
-            Name = entry->GetName();
-            _id = entry->_id;
-            _prev = entry->_prev;
-            _next = entry->_next;
+                Name = entry->GetName();
+                _id = entry->_id;
+                _prev = entry->_prev;
+                _next = entry->_next;
+
+                //_origSource.Length = 
+            }
 
             if (Data->_part2Offset != 0)
             {
@@ -418,13 +471,13 @@ namespace BrawlLib.SSBB.ResourceNodes
     }
 
 
-    unsafe class MDL0VertexNode : MDL0EntryNode
+    public unsafe class MDL0VertexNode : MDL0EntryNode
     {
         internal MDL0VertexData* Data { get { return (MDL0VertexData*)WorkingSource.Address; } }
         private BVec3[] _vertices;
 
         [Category("Data3")]
-        public uint TotalLen { get { return Data->_dataLen; } }
+        public int TotalLen { get { return Data->_dataLen; } }
         [Category("Data3")]
         public int MDL0Offset { get { return Data->_mdl0Offset; } }
         [Category("Data3")]
@@ -458,6 +511,11 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected override bool OnInitialize()
         {
             base.OnInitialize();
+
+            if (!_initialized)
+            {
+                _origSource.Length = _uncompSource.Length = TotalLen;
+            }
 
             //_vertices = new BVec3[NumVertices];
             //for (int i = 0; i < NumVertices; i++)
@@ -499,7 +557,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     }
 
-    unsafe class MDL0NormalNode : MDL0EntryNode
+    public unsafe class MDL0NormalNode : MDL0EntryNode
     {
         internal MDL0NormalData* Data { get { return (MDL0NormalData*)WorkingSource.Address; } }
         private BVec3[] _normals;
@@ -541,7 +599,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
     }
 
-    unsafe class MDL0ColorNode : MDL0EntryNode
+    public unsafe class MDL0ColorNode : MDL0EntryNode
     {
         internal MDL0ColorData* Data { get { return (MDL0ColorData*)WorkingSource.Address; } }
         private RGBAPixel[] _colors;
@@ -557,11 +615,11 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Color Data")]
         public int ID { get { return Data->_index; } }
         [Category("Color Data")]
-        public int Unknown1 { get { return Data->_unk1; } }
+        public int IsRGBA { get { return Data->_isRGBA; } }
         [Category("Color Data")]
         public int Format { get { return Data->_format; } }
         [Category("Color Data")]
-        public byte Unknown2 { get { return Data->_unk2; } }
+        public byte EntryStride { get { return Data->_entryStride; } }
         [Category("Color Data")]
         public byte Unknown3 { get { return Data->_unk3; } }
         [Category("Color Data")]
@@ -582,7 +640,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
     }
 
-    unsafe class MDL0UVNode : MDL0EntryNode
+    public unsafe class MDL0UVNode : MDL0EntryNode
     {
         internal MDL0UVData* Data { get { return (MDL0UVData*)WorkingSource.Address; } }
         private UVPoint[] _uvPoints;
@@ -602,9 +660,9 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("UV Data")]
         public int Format { get { return Data->_format; } }
         [Category("UV Data")]
-        public byte Unknown2 { get { return Data->_unk2; } }
+        public byte Divisor { get { return Data->_divisor; } }
         [Category("UV Data")]
-        public byte Unknown3 { get { return Data->_unk3; } }
+        public byte EntryStride { get { return Data->_entryStride; } }
         [Category("UV Data")]
         public short NumEntries { get { return Data->_numEntries; } }
 
@@ -637,75 +695,94 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
     }
 
-    unsafe class MDL0Data7Node : MDL0EntryNode
+    public unsafe class MDL0MaterialNode : MDL0EntryNode
     {
-        internal MDL0Data7* Data { get { return (MDL0Data7*)WorkingSource.Address; } }
+        internal MDL0Material* Data { get { return (MDL0Material*)WorkingSource.Address; } }
+        internal List<MDL0Data7Part3> _part3Entries = new List<MDL0Data7Part3>();
         internal List<string> _part4Entries = new List<string>();
 
-        [Category("Data7")]
+        [Category("Material")]
         public int TotalLen { get { return Data->_dataLen; } }
-        [Category("Data7")]
+        [Category("Material")]
         public int MDL0Offset { get { return Data->_mdl0Offset; } }
-        [Category("Data7")]
+        [Category("Material")]
         public int StringOffset { get { return Data->_stringOffset; } }
-        [Category("Data7")]
+        [Category("Material")]
         public int ID { get { return Data->_index; } }
-        [Category("Data7")]
+        [Category("Material")]
         public int Unknown1 { get { return Data->_unk1; } }
-        [Category("Data7")]
+        [Category("Material")]
         public byte Flag1 { get { return Data->_flag1; } }
-        [Category("Data7")]
+        [Category("Material")]
         public byte Flag2 { get { return Data->_flag2; } }
-        [Category("Data7")]
+        [Category("Material")]
         public byte Flag3 { get { return Data->_flag3; } }
-        [Category("Data7")]
+        [Category("Material")]
         public byte Flag4 { get { return Data->_flag4; } }
-        [Category("Data7")]
+        [Category("Material")]
         public int Type { get { return Data->_type; } }
-        [Category("Data7")]
+        [Category("Material")]
         public byte Flag5 { get { return Data->_flag5; } }
-        [Category("Data7")]
+        [Category("Material")]
         public byte Flag6 { get { return Data->_flag6; } }
+        [Category("Material")]
+        public byte Flag7 { get { return Data->_flag7; } }
+        [Category("Material")]
+        public byte Flag8 { get { return Data->_flag8; } }
 
-        [Category("Data7")]
-        public short Unknown2 { get { return Data->_unk2; } }
-        [Category("Data7")]
+        [Category("Material")]
         public int Unknown3 { get { return Data->_unk3; } }
-        [Category("Data7")]
+        [Category("Material")]
         public int Unknown4 { get { return Data->_unk4; } }
 
-        [Category("Data7")]
-        public int Part2Offset { get { return Data->_part2Offset; } }
+        [Category("Material")]
+        public int Data8Offset { get { return Data->_data8Offset; } }
 
-        [Category("Data7")]
-        public int NumLinks { get { return Data->_numLinks; } }
-        [Category("Data7")]
+        [Category("Material")]
+        public int NumTextures { get { return Data->_numTextures; } }
+        [Category("Material")]
         public int Part3Offset { get { return Data->_part3Offset; } }
-        [Category("Data7")]
+        [Category("Material")]
         public int Part4Offset { get { return Data->_part4Offset; } }
-        [Category("Data7")]
+        [Category("Material")]
         public int Part5Offset { get { return Data->_part5Offset; } }
 
-        [Category("Data7")]
+        [Category("Material")]
         public int Unknown6 { get { return Data->_unk6; } }
 
-        [Category("Data7 Part4")]
+        [Category("Material Part3")]
+        public List<MDL0Data7Part3> Part3Entries { get { return _part3Entries; } }
+        [Category("Material Part4")]
         public List<string> Part4Entries { get { return _part4Entries; } }
 
         protected override bool OnInitialize()
         {
             base.OnInitialize();
 
-            MDL0Data7Part4* part4 = Data->Part4;
-            if (part4 != null)
+            if (!_initialized)
             {
-                ResourceGroup* group = part4->Group;
-                for (int i = 0; i < group->_numEntries; i++)
+
+                MDL0Data7Part4* part4 = Data->Part4;
+                if (part4 != null)
                 {
-                    _part4Entries.Add(group->First[i].GetName());
+                    ResourceGroup* group = part4->Group;
+                    for (int i = 0; i < group->_numEntries; i++)
+                    {
+                        _part4Entries.Add(group->First[i].GetName());
+                    }
                 }
+
+                _origSource.Length = _uncompSource.Length = TotalLen;
+                return Data->_numTextures != 0;
             }
             return false;
+        }
+
+        protected override void OnPopulate()
+        {
+            MDL0Data7Part3* part3 = Data->Part3;
+            for (int i = 0; i < Data->_numTextures; i++)
+                new MDL0MaterialReference().Initialize(this, part3++, MDL0Data7Part3.Size);
         }
 
         internal override void GetStrings(IDictionary<string, VoidPtr> strings)
@@ -716,10 +793,58 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
     }
 
+    public unsafe class MDL0MaterialReference : ResourceNode
+    {
+        internal MDL0Data7Part3* Header { get { return (MDL0Data7Part3*)_origSource.Address; } }
+
+        [Category("Texture Reference")]
+        public int Unknown1 { get { return Header->_unk1; } }
+        [Category("Texture Reference")]
+        public int Unknown2 { get { return Header->_unk2; } }
+        [Category("Texture Reference")]
+        public int Unknown3 { get { return Header->_unk3; } }
+        [Category("Texture Reference")]
+        public int Unknown4 { get { return Header->_unk4; } }
+        [Category("Texture Reference")]
+        public int Unknown5 { get { return Header->_unk5; } }
+        [Category("Texture Reference")]
+        public int Unknown6 { get { return Header->_unk6; } }
+        [Category("Texture Reference")]
+        public int Unknown7 { get { return Header->_unk7; } }
+        [Category("Texture Reference")]
+        public int Unknown8 { get { return Header->_unk8; } }
+        [Category("Texture Reference")]
+        public int Unknown9 { get { return Header->_unk9; } }
+        [Category("Texture Reference")]
+        public float Float { get { return Header->_float; } }
+        [Category("Texture Reference")]
+        public int Unknown10 { get { return Header->_unk10; } }
+        [Category("Texture Reference")]
+        public int Unknown11 { get { return Header->_unk11; } }
+
+        protected override bool OnInitialize()
+        {
+            Name = Header->TextureName;
+            return false;
+        }
+    }
+
 
     unsafe class MDL0Data8Node : MDL0EntryNode
     {
         internal MDL0Data8* Data { get { return (MDL0Data8*)WorkingSource.Address; } }
+
+        protected override bool OnInitialize()
+        {
+            base.OnInitialize();
+
+            if (!_initialized)
+            {
+                _origSource.Length = _uncompSource.Length = Data->_dataLength;
+            }
+
+            return false;
+        }
 
     }
 
@@ -782,6 +907,38 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         [Category("Polygon Data")]
         public int Part1Offset { get { return Data->_part1Offset; } }
+
+        private List<MDL0MaterialNode> _materialNodes = new List<MDL0MaterialNode>();
+        public List<MDL0MaterialNode> MaterialNodes
+        {
+            get            {                return _materialNodes;            }
+        }
+
+        protected override bool OnInitialize()
+        {
+            base.OnInitialize();
+            if (!_initialized)
+            {
+                _origSource.Length = _uncompSource.Length = Data->_totalLength;
+
+                //
+
+                MDL0Node mdl = _parent._parent as MDL0Node;
+                MDL0NodeEntry n = mdl.FindChild("Definitions/DrawOpa", false) as MDL0NodeEntry;
+                if (n != null)
+                {
+                    foreach (MDL0NodeType4 d in n.Items)
+                    {
+                        if (d._polygonId == this.ItemId)
+                        {
+                            _materialNodes.Add(mdl.FindChild("Materials1", false).Children[d._materialId] as MDL0MaterialNode);
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
 
         //[NodeAction("&View")]
         //public virtual void OnView()
@@ -865,7 +1022,7 @@ namespace BrawlLib.SSBB.ResourceNodes
     }
 
 
-    unsafe class MDL0Data10Node : MDL0EntryNode
+    public unsafe class MDL0Data10Node : MDL0EntryNode
     {
         internal MDL0Data10* Data { get { return (MDL0Data10*)WorkingSource.Address; } }
         internal MDL0Data10Entry[] _entries;

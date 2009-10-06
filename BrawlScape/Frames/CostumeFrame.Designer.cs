@@ -43,17 +43,21 @@
             this.cspImages = new System.Windows.Forms.ImageList(this.components);
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.modelPanel1 = new System.Windows.Forms.ModelPanel();
+            this.modelContext = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnuPolygons = new System.Windows.Forms.ToolStripMenuItem();
+            this.polyContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.panel3 = new System.Windows.Forms.Panel();
             this.modelList = new System.Windows.Forms.ComboBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.picGame = new ReferencedPictureBox();
-            this.picStock = new ReferencedPictureBox();
+            this.picGame = new BrawlScape.ReferencedPictureBox();
+            this.picStock = new BrawlScape.ReferencedPictureBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.costumeContext.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.modelContext.SuspendLayout();
             this.panel3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -190,11 +194,34 @@
             // 
             // modelPanel1
             // 
+            this.modelPanel1.ContextMenuStrip = this.modelContext;
             this.modelPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.modelPanel1.Location = new System.Drawing.Point(3, 46);
             this.modelPanel1.Name = "modelPanel1";
             this.modelPanel1.Size = new System.Drawing.Size(297, 361);
             this.modelPanel1.TabIndex = 0;
+            this.modelPanel1.TargetModel = null;
+            // 
+            // modelContext
+            // 
+            this.modelContext.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuPolygons});
+            this.modelContext.Name = "modelContext";
+            this.modelContext.Size = new System.Drawing.Size(153, 48);
+            this.modelContext.Opening += new System.ComponentModel.CancelEventHandler(this.modelContext_Opening);
+            // 
+            // mnuPolygons
+            // 
+            this.mnuPolygons.DropDown = this.polyContext;
+            this.mnuPolygons.Name = "mnuPolygons";
+            this.mnuPolygons.Size = new System.Drawing.Size(152, 22);
+            this.mnuPolygons.Text = "Polygons";
+            // 
+            // polyContext
+            // 
+            this.polyContext.Name = "polyContext";
+            this.polyContext.Size = new System.Drawing.Size(61, 4);
+            this.polyContext.Opening += new System.ComponentModel.CancelEventHandler(this.polyContext_Opening);
             // 
             // panel3
             // 
@@ -207,12 +234,11 @@
             // 
             // modelList
             // 
-            this.modelList.Dock = System.Windows.Forms.DockStyle.Top;
             this.modelList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.modelList.FormattingEnabled = true;
             this.modelList.Location = new System.Drawing.Point(0, 0);
             this.modelList.Name = "modelList";
-            this.modelList.Size = new System.Drawing.Size(297, 21);
+            this.modelList.Size = new System.Drawing.Size(128, 21);
             this.modelList.TabIndex = 0;
             this.modelList.SelectedIndexChanged += new System.EventHandler(this.modelList_SelectedIndexChanged);
             // 
@@ -244,6 +270,7 @@
             this.picGame.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.picGame.Location = new System.Drawing.Point(13, 5);
             this.picGame.Name = "picGame";
+            this.picGame.Reference = null;
             this.picGame.Size = new System.Drawing.Size(48, 56);
             this.picGame.TabIndex = 1;
             this.picGame.TabStop = false;
@@ -253,6 +280,7 @@
             this.picStock.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.picStock.Location = new System.Drawing.Point(70, 13);
             this.picStock.Name = "picStock";
+            this.picStock.Reference = null;
             this.picStock.Size = new System.Drawing.Size(32, 32);
             this.picStock.TabIndex = 2;
             this.picStock.TabStop = false;
@@ -281,6 +309,7 @@
             this.groupBox1.ResumeLayout(false);
             this.costumeContext.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
+            this.modelContext.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
@@ -314,5 +343,8 @@
         private System.Windows.Forms.ModelPanel modelPanel1;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.ComboBox modelList;
+        private System.Windows.Forms.ContextMenuStrip modelContext;
+        private System.Windows.Forms.ToolStripMenuItem mnuPolygons;
+        private System.Windows.Forms.ContextMenuStrip polyContext;
     }
 }

@@ -5,8 +5,11 @@ using System.Text;
 
 namespace BrawlLib.Wii.Models
 {
-    public enum WiiPrimitiveType : uint
+    public enum WiiPrimitiveType : byte
     {
+        BoneDef1 = 0x20,
+        BoneDef2 = 0x28,
+        BoneDef3 = 0x30,
         Quads= 0x80,
         Triangles = 0x90,
         TriangleStrip = 0x98,
@@ -14,6 +17,12 @@ namespace BrawlLib.Wii.Models
         Lines = 0xA8,
         LineStrip = 0xB0,
         Points = 0xB8
+    }
+
+    public enum WiiVertexElements : byte
+    {
+        XY = 0,
+        XYZ = 1
     }
 
     public enum WiiVertexComponentType : byte

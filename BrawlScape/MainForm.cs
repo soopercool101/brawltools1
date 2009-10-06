@@ -21,9 +21,7 @@ namespace BrawlScape
 
         private void textureContext_Opening(object sender, CancelEventArgs e)
         {
-            if (_currentTextureNode == null)
-                e.Cancel = true;
-            else
+            if ((_currentTextureNode != null) && (_currentTextureNode.Node != null))
             {
                 TEX0Node node = (TEX0Node)_currentTextureNode.Node;
 
@@ -38,6 +36,8 @@ namespace BrawlScape
                 else
                     mnuPalette.Text = String.Format("Palette: {0}, {1} colors", pNode.Format, pNode.Colors);
             }
+            else
+                e.Cancel = true;
         }
 
         private void mnuReplace_Click(object sender, EventArgs e) { _currentTextureNode.Replace(); }

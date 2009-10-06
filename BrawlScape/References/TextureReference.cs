@@ -96,26 +96,24 @@ namespace BrawlScape
         public void Export()
         {
             string path;
-            Bitmap bmp = null;
             switch (Program.SaveFile(Filters.TextureReplaceFilter, Name, out path))
             {
                 case 2:
-                    bmp = Texture; bmp.Save(path, ImageFormat.Png); break;
+                    Texture.Save(path, ImageFormat.Png); break;
                 case 3:
-                    bmp = Texture; bmp.SaveTGA(path); break;
+                    Texture.SaveTGA(path); break;
                 case 4:
-                    bmp = Texture; bmp.Save(path, ImageFormat.Tiff); break;
+                    Texture.Save(path, ImageFormat.Tiff); break;
                 case 5:
-                    bmp = Texture; bmp.Save(path, ImageFormat.Bmp); break;
+                    Texture.Save(path, ImageFormat.Bmp); break;
                 case 6:
-                    bmp = Texture; bmp.Save(path, ImageFormat.Jpeg); break;
+                    Texture.Save(path, ImageFormat.Jpeg); break;
                 case 7:
-                    bmp = Texture; bmp.Save(path, ImageFormat.Gif); break;
+                    Texture.Save(path, ImageFormat.Gif); break;
                 case 8:
                     ((TEX0Node)Node).Export(path); break;
                 default: return;
             }
-            bmp.Dispose();
         }
 
         public void Restore()

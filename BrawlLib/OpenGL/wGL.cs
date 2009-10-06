@@ -73,9 +73,9 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glArrayElement(int index);
         [DllImport("opengl32.dll")]
-        public static extern void glBegin(GLBeginMode mode);
+        public static extern void glBegin(GLPrimitiveType mode);
         [DllImport("opengl32.dll")]
-        public static extern void glBindTexture(uint target, uint texture);
+        public static extern void glBindTexture(GLTextureBindTarget target, uint texture);
         [DllImport("opengl32.dll")]
         public static extern void glBitmap(int width, int height, float xorig, float yorig, float xmove, float ymove, byte* bitmap);
         [DllImport("opengl32.dll")]
@@ -183,18 +183,18 @@ namespace BrawlLib.OpenGL
         #region CopyTex
 
         [DllImport("opengl32.dll")]
-        public static extern void glCopyTexImage1D(uint target, int level, uint internalFormat, int x, int y, int width, int border);
+        public static extern void glCopyTexImage1D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int border);
         [DllImport("opengl32.dll")]
-        public static extern void glCopyTexImage2D(uint target, int level, uint internalFormat, int x, int y, int width, int height, int border);
+        public static extern void glCopyTexImage2D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int height, int border);
         [DllImport("opengl32.dll")]
-        public static extern void glCopyTexSubImage1D(uint target, int level, int xOffset, int x, int y, int width);
+        public static extern void glCopyTexSubImage1D(GLTextureBindTarget target, int level, int xOffset, int x, int y, int width);
         [DllImport("opengl32.dll")]
-        public static extern void glCopyTexSubImage2D(uint target, int level, int xOffset, int yOffset, int x, int y, int width, int height);
+        public static extern void glCopyTexSubImage2D(GLTextureBindTarget target, int level, int xOffset, int yOffset, int x, int y, int width, int height);
 
         #endregion
 
         [DllImport("opengl32.dll")]
-        public static extern void glCullFace(uint mode);
+        public static extern void glCullFace(GLFace mode);
         /*
         [DllImport("opengl32.dll")]
         public static extern ?? glDebugEntry(??);
@@ -220,7 +220,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glDrawElements(uint mode, int count, uint type, void* indices);
         [DllImport("opengl32.dll")]
-        public static extern void glDrawPixels(int width, int height, uint format, uint type, void* pixels);
+        public static extern void glDrawPixels(int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
         [DllImport("opengl32.dll")]
         public static extern void glEdgeFlag(bool flag);
         [DllImport("opengl32.dll")]
@@ -228,7 +228,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glEdgeFlagv(bool* flag);
         [DllImport("opengl32.dll")]
-        public static extern void glEnable(uint cap);
+        public static extern void glEnable(GLEnableCap cap);
         [DllImport("opengl32.dll")]
         public static extern void glEnableClientState(uint cap);
         [DllImport("opengl32.dll")]
@@ -312,7 +312,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glGetClipPlane(uint plane, double* equation);
         [DllImport("opengl32.dll")]
-        public static extern uint glGetError();
+        public static extern GLErrorCode glGetError();
 
         [DllImport("opengl32.dll")]
         public static extern void glGetLightfv(uint light, uint pname, float* param);
@@ -559,7 +559,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glPointSize(float size);
         [DllImport("opengl32.dll")]
-        public static extern void glPolygonMode(uint face, uint mode);
+        public static extern void glPolygonMode(GLFace face, GLPolygonMode mode);
         [DllImport("opengl32.dll")]
         public static extern void glPolygonOffset(float factor, float units);
         [DllImport("opengl32.dll")]
@@ -805,9 +805,9 @@ namespace BrawlLib.OpenGL
         #endregion
 
         [DllImport("opengl32.dll")]
-        public static extern void glTexImage1D(uint target, int level, int components, int width, int border, uint format, uint type, void* pixels);
+        public static extern void glTexImage1D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int width, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
         [DllImport("opengl32.dll")]
-        public static extern void glTexImage2D(uint target, int level, int components, int width, int height, int border, uint format, uint type, void* pixels);
+        public static extern void glTexImage2D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int width, int height, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
 
         #region glTexParameter
 
@@ -895,5 +895,9 @@ namespace BrawlLib.OpenGL
         public static extern void glVertexPointer(int size, uint type, int stride, void* pointer);
         [DllImport("opengl32.dll")]
         public static extern void glViewport(int x, int y, int width, int height);
+
+
+        [DllImport("Glu32.dll")]
+        public static extern void gluPerspective(double fovy, double aspect, double zNear, double zFar);
     }
 }

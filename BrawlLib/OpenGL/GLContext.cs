@@ -19,6 +19,15 @@ namespace BrawlLib.OpenGL
             return null;
         }
 
+        public void CheckErrors()
+        {
+            GLErrorCode code;
+            if((code = glGetError()) == GLErrorCode.NO_ERROR)
+                return;
+
+            throw new Exception(code.ToString());
+        }
+
         public virtual void Capture() { }
         public virtual void Release() { }
 
@@ -26,8 +35,8 @@ namespace BrawlLib.OpenGL
         internal abstract void glAlphaFunc(GLAlphaFunc func, float refValue);
         internal abstract bool glAreTexturesResident(int num, uint* textures, bool* residences);
         internal abstract void glArrayElement(int index);
-        internal abstract void glBegin(GLBeginMode mode);
-        internal abstract void glBindTexture(uint target, uint texture);
+        internal abstract void glBegin(GLPrimitiveType mode);
+        internal abstract void glBindTexture(GLTextureBindTarget target, uint texture);
         internal abstract void glBitmap(int width, int height, float xorig, float yorig, float xmove, float ymove, byte* bitmap);
         internal abstract void glBlendFunc(uint sfactor, uint dfactor);
         internal abstract void glCallList(uint list);
@@ -87,14 +96,14 @@ namespace BrawlLib.OpenGL
 
         #region CopyTex
 
-        internal abstract void glCopyTexImage1D(uint target, int level, uint internalFormat, int x, int y, int width, int border);
-        internal abstract void glCopyTexImage2D(uint target, int level, uint internalFormat, int x, int y, int width, int height, int border);
-        internal abstract void glCopyTexSubImage1D(uint target, int level, int xOffset, int x, int y, int width);
-        internal abstract void glCopyTexSubImage2D(uint target, int level, int xOffset, int yOffset, int x, int y, int width, int height);
+        internal abstract void glCopyTexImage1D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int border);
+        internal abstract void glCopyTexImage2D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int height, int border);
+        internal abstract void glCopyTexSubImage1D(GLTextureBindTarget target, int level, int xOffset, int x, int y, int width);
+        internal abstract void glCopyTexSubImage2D(GLTextureBindTarget target, int level, int xOffset, int yOffset, int x, int y, int width, int height);
 
         #endregion
 
-        internal abstract void glCullFace(uint mode);
+        internal abstract void glCullFace(GLFace mode);
         /*
         [DllImport("opengl32.dll")]
         internal abstract ?? glDebugEntry(??);
@@ -109,11 +118,11 @@ namespace BrawlLib.OpenGL
         internal abstract void glDrawArrays(uint mode, int first, int count);
         internal abstract void glDrawBuffer(uint mode);
         internal abstract void glDrawElements(uint mode, int count, uint type, void* indices);
-        internal abstract void glDrawPixels(int width, int height, uint format, uint type, void* pixels);
+        internal abstract void glDrawPixels(int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
         internal abstract void glEdgeFlag(bool flag);
         internal abstract void glEdgeFlagPointer(int stride, bool* pointer);
         internal abstract void glEdgeFlagv(bool* flag);
-        internal abstract void glEnable(uint cap);
+        internal abstract void glEnable(GLEnableCap cap);
         internal abstract void glEnableClientState(uint cap);
         internal abstract void glEnd();
         internal abstract void glEndList();
@@ -165,7 +174,7 @@ namespace BrawlLib.OpenGL
         #endregion
 
         internal abstract void glGetClipPlane(uint plane, double* equation);
-        internal abstract uint glGetError();
+        internal abstract GLErrorCode glGetError();
 
         internal abstract void glGetLight(uint light, uint pname, float* param);
         internal abstract void glGetLight(uint light, uint pname, int* param);
@@ -318,7 +327,7 @@ namespace BrawlLib.OpenGL
 
         internal abstract void glPixelZoom(float xfactor, float yfactor);
         internal abstract void glPointSize(float size);
-        internal abstract void glPolygonMode(uint face, uint mode);
+        internal abstract void glPolygonMode(GLFace face, GLPolygonMode mode);
         internal abstract void glPolygonOffset(float factor, float units);
         internal abstract void glPolygonStipple(byte* mask);
 
@@ -387,11 +396,11 @@ namespace BrawlLib.OpenGL
 
         internal abstract int glRenderMode(uint mode);
 
-        internal abstract void glRotated(double angle, double x, double y, double z);
-        internal abstract void glRotatef(float angle, float x, float y, float z);
+        internal abstract void glRotate(double angle, double x, double y, double z);
+        internal abstract void glRotate(float angle, float x, float y, float z);
 
-        internal abstract void glScaled(double x, double y, double z);
-        internal abstract void glScalef(float x, float y, float z);
+        internal abstract void glScale(double x, double y, double z);
+        internal abstract void glScale(float x, float y, float z);
 
         internal abstract void glScissor(int x, int y, int width, int height);
         internal abstract void glSelectBuffer(int size, out uint* buffer);
@@ -462,8 +471,8 @@ namespace BrawlLib.OpenGL
 
         #endregion
 
-        internal abstract void glTexImage1D(uint target, int level, int components, int width, int border, uint format, uint type, void* pixels);
-        internal abstract void glTexImage2D(uint target, int level, int components, int width, int height, int border, uint format, uint type, void* pixels);
+        internal abstract void glTexImage1D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int width, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
+        internal abstract void glTexImage2D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int width, int height, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
 
         #region glTexParameter
 
@@ -516,5 +525,7 @@ namespace BrawlLib.OpenGL
 
         internal abstract void glVertexPointer(int size, uint type, int stride, void* pointer);
         internal abstract void glViewport(int x, int y, int width, int height);
+
+        internal abstract void gluPerspective(double fovy, double aspect, double zNear, double zFar);
     }
 }

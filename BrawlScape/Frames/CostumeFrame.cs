@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using BrawlLib.OpenGL;
 
 namespace BrawlScape
 {
@@ -107,6 +108,15 @@ namespace BrawlScape
 
         private void InitModel()
         {
+            if (_selectedModel != null)
+            {
+                GLModel model = _selectedModel.Model;
+                foreach (TextureDefinition def in _selectedCostume.Textures)
+                    model.AttachTexture(def.Text, def.Texture);
+                modelPanel1.TargetModel = model;
+            }
+            else
+                modelPanel1.TargetModel = null;
         }
 
 
@@ -155,5 +165,32 @@ namespace BrawlScape
         private void mnuCostumeCSP_DropDownOpening(object sender, EventArgs e) { MainForm._currentTextureNode = _selectedCostume.Reference; }
 
         private void modelList_SelectedIndexChanged(object sender, EventArgs e) { SelectedModel = modelList.SelectedItem is ModelDefinition ? modelList.SelectedItem as ModelDefinition : null; }
+
+        private void polyContext_Opening(object sender, CancelEventArgs e)
+        {
+            polyContext.Items.Clear();
+
+            GLModel model = _selectedModel.Model;
+            int index = 0;
+            //foreach (GLPolygon poly in model._polygons)
+            //{
+            //    ToolStripMenuItem item = new ToolStripMenuItem(String.Format("Polygon{0}", index++), null, PolyClick);
+            //    item.Tag = poly;
+            //    polyContext.Items.Add(item);
+            //}
+        }
+
+        private void PolyClick(object s, EventArgs e)
+        {
+            GLPolygon poly = ((ToolStripMenuItem)s).Tag as GLPolygon;
+            poly._enabled = !poly._enabled;
+            modelPanel1.Invalidate();
+        }
+
+        private void modelContext_Opening(object sender, CancelEventArgs e)
+        {
+            if (_selectedModel == null) 
+                e.Cancel = true;
+        }
     }
 }

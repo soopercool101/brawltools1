@@ -50,11 +50,17 @@
     <Compile Include="Imaging\TGAImage.cs" />
     <Compile Include="Imaging\WeightedAverage.cs" />
     <Compile Include="OpenGL\Enums.cs" />
+    <Compile Include="OpenGL\GLBone.cs" />
+    <Compile Include="OpenGL\GLBoneDef.cs" />
     <Compile Include="OpenGL\GLContext.cs" />
+    <Compile Include="OpenGL\GLMaterial.cs" />
     <Compile Include="OpenGL\GLModel.cs" />
     <Compile Include="OpenGL\GLPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="OpenGL\GLPolygon.cs" />
+    <Compile Include="OpenGL\GLPrimitive.cs" />
+    <Compile Include="System\UnsafeBuffer.cs" />
     <Compile Include="System\Vector2.cs" />
     <Compile Include="System\Vector3.cs" />
     <Compile Include="OpenGL\wGL.cs" />
@@ -128,8 +134,10 @@
       <DependentUpon>ProgressWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Wii\Compressor.cs" />
+    <Compile Include="Wii\Models\Buffers.cs" />
     <Compile Include="Wii\Models\Enum.cs" />
     <Compile Include="Wii\Models\ModelConverter.cs" />
+    <Compile Include="Wii\Models\Struct.cs" />
     <Compile Include="Wii\Textures\CI4.cs" />
     <Compile Include="Wii\Textures\CI8.cs" />
     <Compile Include="Wii\Textures\CMP.cs" />
