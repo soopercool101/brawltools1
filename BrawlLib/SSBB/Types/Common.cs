@@ -112,27 +112,30 @@ namespace BrawlLib.SSBBTypes
         public const uint Size = 0x10;
 
         public bshort _id;
-        public bshort _unk1;
-        public bshort _prev;
-        public bshort _next;
+        public bshort _pad;
+        public bshort _leftIndex;
+        public bshort _rightIndex;
         public bint _stringOffset;
         public bint _dataOffset;
+
+        public int CharIndex { get { return _id >> 3; } set { _id = (short)((value << 3) | (_id & 0x7)); } }
+        public int CharShift { get { return _id & 0x7; } set { _id = (short)((value & 0x7) | (_id & 0xFFF8)); } }
 
         public ResourceEntry(short id, short prev, short next, int dataOffset)
         {
             _id = id;
-            _unk1 = 0;
-            _prev = prev;
-            _next = next;
+            _pad = 0;
+            _leftIndex = prev;
+            _rightIndex = next;
             _stringOffset = 0;
             _dataOffset = dataOffset;
         }
         public ResourceEntry(short id, short prev, short next, int dataOffset, int stringOffset)
         {
             _id = id;
-            _unk1 = 0;
-            _prev = prev;
-            _next = next;
+            _pad = 0;
+            _leftIndex = prev;
+            _rightIndex = next;
             _stringOffset = stringOffset;
             _dataOffset = dataOffset;
         }

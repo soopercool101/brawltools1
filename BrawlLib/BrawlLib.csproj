@@ -55,11 +55,27 @@
     <Compile Include="OpenGL\GLContext.cs" />
     <Compile Include="OpenGL\GLMaterial.cs" />
     <Compile Include="OpenGL\GLModel.cs" />
+    <Compile Include="OpenGL\GLNode.cs" />
     <Compile Include="OpenGL\GLPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="OpenGL\GLPolygon.cs" />
     <Compile Include="OpenGL\GLPrimitive.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0BoneNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0ColorNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0DefNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0GroupNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0MaterialExtNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0MaterialNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0MaterialRefNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0Node.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0NormalNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0PolygonNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0TextureNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0UVNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0VertexNode.cs" />
+    <Compile Include="System\Matrix.cs" />
+    <Compile Include="System\Matrix43.cs" />
     <Compile Include="System\UnsafeBuffer.cs" />
     <Compile Include="System\Vector2.cs" />
     <Compile Include="System\Vector3.cs" />
@@ -71,7 +87,6 @@
     <Compile Include="SSBB\ResourceNodes\BRESNode.cs" />
     <Compile Include="SSBB\ResourceNodes\CHR0Node.cs" />
     <Compile Include="SSBB\ResourceNodes\CLR0Node.cs" />
-    <Compile Include="SSBB\ResourceNodes\MDL0Node.cs" />
     <Compile Include="SSBB\ResourceNodes\PAT0Node.cs" />
     <Compile Include="SSBB\ResourceNodes\PLT0Node.cs" />
     <Compile Include="SSBB\ResourceNodes\ResourceEntryNode.cs" />
@@ -136,6 +151,7 @@
     <Compile Include="Wii\Compressor.cs" />
     <Compile Include="Wii\Models\Buffers.cs" />
     <Compile Include="Wii\Models\Enum.cs" />
+    <Compile Include="Wii\Models\bMatrix43.cs" />
     <Compile Include="Wii\Models\ModelConverter.cs" />
     <Compile Include="Wii\Models\Struct.cs" />
     <Compile Include="Wii\Textures\CI4.cs" />

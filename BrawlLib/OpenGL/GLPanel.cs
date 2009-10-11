@@ -67,7 +67,7 @@ namespace BrawlLib.OpenGL
 
             _context.glMatrixMode(GLMatrixMode.Projection);
             _context.glLoadIdentity();
-            _context.gluPerspective(45.0f, (float)Width / (float)Height, 0.01f, 100.0f);
+            _context.gluPerspective(45.0f, (float)Width / (float)Height, 0.01f, 3000.0f);
         }
         internal protected virtual void OnRender()
         {

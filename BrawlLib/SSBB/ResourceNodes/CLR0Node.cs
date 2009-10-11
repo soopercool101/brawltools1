@@ -18,8 +18,8 @@ namespace BrawlLib.SSBB.ResourceNodes
             base.OnInitialize();
 
             ResourceGroup* group = Header->Group;
-            _mPrev = group->_first._prev;
-            _mNext = group->_first._next;
+            _mPrev = group->_first._leftIndex;
+            _mNext = group->_first._rightIndex;
 
             return group->_numEntries > 0;
         }

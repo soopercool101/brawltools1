@@ -68,9 +68,9 @@ namespace BrawlLib.OpenGL
         internal override bool glAreTexturesResident(int num, uint* textures, bool* residences) { return wGL.glAreTexturesResident(num, textures, residences); }
         internal override void glArrayElement(int index) { wGL.glArrayElement(index); }
         internal override void glBegin(GLPrimitiveType mode) { wGL.glBegin(mode); }
-        internal override void glBindTexture(GLTextureBindTarget target, uint texture) { wGL.glBindTexture(target, texture); }
+        internal override void glBindTexture(GLTextureTarget target, uint texture) { wGL.glBindTexture(target, texture); }
         internal override void glBitmap(int width, int height, float xorig, float yorig, float xmove, float ymove, byte* bitmap) { wGL.glBitmap(width, height, xorig, yorig, xmove, ymove, bitmap); }
-        internal override void glBlendFunc(uint sfactor, uint dfactor) { wGL.glBlendFunc(sfactor, dfactor); }
+        internal override void glBlendFunc(GLBlendFactor sfactor, GLBlendFactor dfactor) { wGL.glBlendFunc(sfactor, dfactor); }
 
         internal override void glCallList(uint list) { wGL.glCallList(list); }
         internal override void glCallLists(int n, uint type, void* lists) { wGL.glCallLists(n, type, lists); }
@@ -121,10 +121,10 @@ namespace BrawlLib.OpenGL
         internal override void glColorPointer(int size, uint type, int stride, void* pointer) { wGL.glColorPointer(size, type, stride, pointer); }
 
         internal override void glCopyPixels(int x, int y, int width, int height, uint type) { wGL.glCopyPixels(x, y, width, height, type); }
-        internal override void glCopyTexImage1D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int border) { wGL.glCopyTexImage1D(target, level, internalFormat, x, y, width, border); }
-        internal override void glCopyTexImage2D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int height, int border) { wGL.glCopyTexImage2D(target, level, internalFormat, x, y, width, height, border); }
-        internal override void glCopyTexSubImage1D(GLTextureBindTarget target, int level, int xOffset, int x, int y, int width) { wGL.glCopyTexSubImage1D(target, level, xOffset, x, y, width); }
-        internal override void glCopyTexSubImage2D(GLTextureBindTarget target, int level, int xOffset, int yOffset, int x, int y, int width, int height) { wGL.glCopyTexSubImage2D(target, level, xOffset, yOffset, x, y, width, height); }
+        internal override void glCopyTexImage1D(GLTextureTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int border) { wGL.glCopyTexImage1D(target, level, internalFormat, x, y, width, border); }
+        internal override void glCopyTexImage2D(GLTextureTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int height, int border) { wGL.glCopyTexImage2D(target, level, internalFormat, x, y, width, height, border); }
+        internal override void glCopyTexSubImage1D(GLTextureTarget target, int level, int xOffset, int x, int y, int width) { wGL.glCopyTexSubImage1D(target, level, xOffset, x, y, width); }
+        internal override void glCopyTexSubImage2D(GLTextureTarget target, int level, int xOffset, int yOffset, int x, int y, int width, int height) { wGL.glCopyTexSubImage2D(target, level, xOffset, yOffset, x, y, width, height); }
 
         internal override void glCullFace(GLFace mode) { wGL.glCullFace(mode); }
 
@@ -133,15 +133,9 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glDeleteTextures(int num, uint* textures)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glDeleteTextures(int num, uint* textures) { wGL.glDeleteTextures(num, textures); }
 
-        internal override void glDepthFunc(uint func)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glDepthFunc(GLFunction func) { wGL.glDepthFunc(func); }
 
         internal override void glDepthMask(bool flag)
         {
@@ -153,10 +147,7 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glDisable(uint cap)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glDisable(uint cap)        {            wGL.glDisable(cap);        }
 
         internal override void glDisableClientState(uint cap)
         {
@@ -315,25 +306,10 @@ namespace BrawlLib.OpenGL
 
         internal override void glGenTextures(int num, uint* textures) { wGL.glGenTextures(num, textures); }
 
-        internal override void glGetBoolean(uint pname, bool* param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glGetDouble(uint pname, double* param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glGetFloat(uint pname, float* param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glGetInteger(uint pname, int* param)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glGet(GLGetMode pname, bool* param) { wGL.glGetBooleanv(pname, param); }
+        internal override void glGet(GLGetMode pname, double* param) { wGL.glGetDoublev(pname, param); }
+        internal override void glGet(GLGetMode pname, float* param) { wGL.glGetFloatv(pname, param); }
+        internal override void glGet(GLGetMode pname, int* param) { wGL.glGetIntegerv(pname, param); }
 
         internal override void glGetClipPlane(uint plane, double* equation)
         {
@@ -457,10 +433,7 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glHint(uint target, uint mode)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glHint(GLHintTarget target, GLHintMode mode)        {            wGL.glHint(target, mode);        }
 
         internal override void glIndex(double c)
         {
@@ -978,10 +951,7 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glShadeModel(uint mode)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glShadeModel(GLShadingModel mode)        {            wGL.glShadeModel(mode);        }
 
         internal override void glStencilFunc(uint func, int refval, uint mask)
         {
@@ -1036,25 +1006,10 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glTexEnv(uint target, uint pname, float param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glTexEnv(uint target, uint pname, int param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glTexEnv(uint target, uint pname, float* param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glTexEnv(uint target, uint pname, int* param)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glTexEnv(GLTexEnvTarget target, GLTexEnvParam pname, float param) { wGL.glTexEnvf(target, pname, param); }
+        internal override void glTexEnv(GLTexEnvTarget target, GLTexEnvParam pname, int param) { wGL.glTexEnvi(target, pname, param); }
+        internal override void glTexEnv(GLTexEnvTarget target, GLTexEnvParam pname, float* param) { wGL.glTexEnvfv(target, pname, param); }
+        internal override void glTexEnv(GLTexEnvTarget target, GLTexEnvParam pname, int* param) { wGL.glTexEnviv(target, pname, param); }
 
         internal override void glTexGen(uint coord, uint pname, double param)
         {
@@ -1086,29 +1041,14 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glTexImage1D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int width, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels)        {            wGL.glTexImage1D(target, level, internalFormat, width, border, format, type, pixels);        }
+        internal override void glTexImage1D(GLTexImageTarget target, int level, GLInternalPixelFormat internalFormat, int width, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels)        {            wGL.glTexImage1D(target, level, internalFormat, width, border, format, type, pixels);        }
 
-        internal override void glTexImage2D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int width, int height, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels)        {            wGL.glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels);        }
+        internal override void glTexImage2D(GLTexImageTarget target, int level, GLInternalPixelFormat internalFormat, int width, int height, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels)        {            wGL.glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels);        }
 
-        internal override void glTexParameter(uint target, uint pname, float param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glTexParameter(uint target, uint pname, int param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glTexParameter(uint target, uint pname, float* param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glTexParameter(uint target, uint pname, int* param)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glTexParameter(GLTextureTarget target, GLTextureParameter pname, float param) { wGL.glTexParameterf(target, pname, param); }
+        internal override void glTexParameter(GLTextureTarget target, GLTextureParameter pname, int param) { wGL.glTexParameteri(target, pname, param); }
+        internal override void glTexParameter(GLTextureTarget target, GLTextureParameter pname, float* param) { wGL.glTexParameterfv(target, pname, param); }
+        internal override void glTexParameter(GLTextureTarget target, GLTextureParameter pname, int* param) { wGL.glTexParameteriv(target, pname, param); }
 
         internal override void glTexSubImage1D(uint target, int level, int xOffset, int width, uint format, uint type, void* pixels)
         {

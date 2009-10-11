@@ -9,26 +9,61 @@ namespace BrawlLib.IO
         protected VoidPtr _addr;
         protected int _length;
         protected string _path;
+        protected FileStream _baseStream;
 
         public VoidPtr Address { get { return _addr; } }
         public int Length { get { return _length; } }
         public string FilePath { get { return _path; } }
 
         ~FileMap() { Dispose(); }
-        public virtual void Dispose() { GC.SuppressFinalize(this); }
+        public virtual void Dispose() 
+        {
+            if (_baseStream != null)
+            {
+                _baseStream.Close();
+                _baseStream.Dispose();
+                _baseStream = null;
+            }
+            GC.SuppressFinalize(this); 
+        }
 
         public static FileMap FromFile(string path) { return FromFile(path, FileMapProtect.ReadWrite, 0, 0); }
         public static FileMap FromFile(string path, FileMapProtect prot) { return FromFile(path, prot, 0, 0); }
         public static FileMap FromFile(string path, FileMapProtect prot, int offset, int length)
         {
-            FileAccess access = (prot == FileMapProtect.ReadWrite) ? FileAccess.ReadWrite : FileAccess.Read;
-            using (FileStream stream = new FileStream(path, FileMode.Open, access, FileShare.Read, 8, FileOptions.RandomAccess))
-                return FromStream(stream, prot, offset, length);
+            FileStream stream = new FileStream(path, FileMode.Open, (prot == FileMapProtect.ReadWrite) ? FileAccess.ReadWrite : FileAccess.Read, FileShare.Read, 8, FileOptions.RandomAccess);
+            try { return FromStreamInternal(stream, prot, offset, length); }
+            catch (Exception x) { stream.Dispose(); throw x; }
+        }
+        public static FileMap FromTempFile(int length)
+        {
+            FileStream stream = new FileStream(Path.GetTempFileName(), FileMode.Open, FileAccess.ReadWrite, FileShare.Read, 8, FileOptions.RandomAccess | FileOptions.DeleteOnClose);
+            try { return FromStreamInternal(stream, FileMapProtect.ReadWrite, 0, length); }
+            catch (Exception x) { stream.Dispose(); throw x; }
         }
 
         public static FileMap FromStream(FileStream stream) { return FromStream(stream, FileMapProtect.ReadWrite, 0, 0); }
         public static FileMap FromStream(FileStream stream, FileMapProtect prot) { return FromStream(stream, prot, 0, 0); }
         public static FileMap FromStream(FileStream stream, FileMapProtect prot, int offset, int length)
+        {
+            //FileStream newStream = new FileStream(stream.Name, FileMode.Open, prot == FileMapProtect.Read ? FileAccess.Read : FileAccess.ReadWrite, FileShare.Read, 8, FileOptions.RandomAccess);
+            //try { return FromStreamInternal(newStream, prot, offset, length); }
+            //catch (Exception x) { newStream.Dispose(); throw x; }
+
+            if (length == 0)
+                length = (int)stream.Length;
+
+            switch (Environment.OSVersion.Platform)
+            {
+                case PlatformID.Win32NT:
+                    return new wFileMap(stream.SafeFileHandle.DangerousGetHandle(), prot, offset, (uint)length) {_path = stream.Name };
+                case PlatformID.Unix:
+                    return new lFileMap(stream.Handle, prot, (uint)offset, (uint)length) {_path = stream.Name };
+            }
+            return null;
+        }
+
+        public static FileMap FromStreamInternal(FileStream stream, FileMapProtect prot, int offset, int length)
         {
             if (length == 0)
                 length = (int)stream.Length;
@@ -36,20 +71,13 @@ namespace BrawlLib.IO
             switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:
-                    return new wFileMap(stream.SafeFileHandle.DangerousGetHandle(), prot, offset, (uint)length) { _path = stream.Name };
+                    return new wFileMap(stream.SafeFileHandle.DangerousGetHandle(), prot, offset, (uint)length) { _baseStream = stream, _path = stream.Name };
                 case PlatformID.Unix:
-                    return new lFileMap(stream.Handle, prot, (uint)offset, (uint)length) { _path = stream.Name };
+                    return new lFileMap(stream.Handle, prot, (uint)offset, (uint)length) { _baseStream = stream, _path = stream.Name };
             }
             return null;
         }
-        public static FileMap FromTempFile(int length)
-        {
-            using (FileStream stream = new FileStream(Path.GetTempFileName(), FileMode.Open, FileAccess.ReadWrite, FileShare.Read, 8, FileOptions.RandomAccess | FileOptions.DeleteOnClose))
-            {
-                stream.SetLength(length);
-                return FromStream(stream, FileMapProtect.ReadWrite, 0, length);
-            }
-        }
+
     }
 
     public enum FileMapProtect : uint
@@ -60,8 +88,6 @@ namespace BrawlLib.IO
 
     public class wFileMap : FileMap
     {
-        //Win32.SafeHandle fHandle;
-
         internal wFileMap(VoidPtr hFile, FileMapProtect protect, long offset, uint length)
         {
             long maxSize = offset + length;
@@ -79,7 +105,6 @@ namespace BrawlLib.IO
                 mAccess = Win32._FileMapAccess.Read;
             }
 
-            //fHandle = Win32.SafeHandle.Duplicate(hFile);
             using (Win32.SafeHandle h = Win32.CreateFileMapping(hFile, null, mProtect, maxHigh, maxLow, null))
             {
                 h.ErrorCheck();
@@ -91,8 +116,12 @@ namespace BrawlLib.IO
 
         public override void Dispose()
         {
-            if (_addr) { Win32.UnmapViewOfFile(_addr); _addr = null; }
-            //fHandle.Dispose();
+            if (_addr) 
+            {
+                Win32.FlushViewOfFile(_addr, 0);
+                Win32.UnmapViewOfFile(_addr);
+                _addr = null;
+            }
             base.Dispose();
         }
     }

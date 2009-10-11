@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.startupFrame1 = new BrawlScape.StartupFrame();
@@ -36,23 +35,12 @@
             this.characterFrame1 = new BrawlScape.CharacterFrame();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.itemFrame1 = new BrawlScape.ItemFrame();
-            this.textureContext = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.mnuReplace = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuExport = new System.Windows.Forms.ToolStripMenuItem();
-            this.restoreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.mnuSize = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuFormat = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuPalette = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuLOD = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuFileSize = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.stageFrame1 = new BrawlScape.StageFrame();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
-            this.textureContext.SuspendLayout();
             this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -105,7 +93,6 @@
             this.characterFrame1.Location = new System.Drawing.Point(3, 3);
             this.characterFrame1.Margin = new System.Windows.Forms.Padding(0);
             this.characterFrame1.Name = "characterFrame1";
-            this.characterFrame1.SelectedCharacter = null;
             this.characterFrame1.Size = new System.Drawing.Size(663, 480);
             this.characterFrame1.TabIndex = 0;
             // 
@@ -125,86 +112,8 @@
             this.itemFrame1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.itemFrame1.Location = new System.Drawing.Point(3, 3);
             this.itemFrame1.Name = "itemFrame1";
-            this.itemFrame1.SelectedTexture = null;
             this.itemFrame1.Size = new System.Drawing.Size(663, 480);
             this.itemFrame1.TabIndex = 0;
-            // 
-            // textureContext
-            // 
-            this.textureContext.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuReplace,
-            this.mnuExport,
-            this.restoreToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.mnuSize,
-            this.mnuFormat,
-            this.mnuPalette,
-            this.mnuLOD,
-            this.mnuFileSize});
-            this.textureContext.Name = "ctxTexture";
-            this.textureContext.Size = new System.Drawing.Size(153, 208);
-            this.textureContext.Opening += new System.ComponentModel.CancelEventHandler(this.textureContext_Opening);
-            // 
-            // mnuReplace
-            // 
-            this.mnuReplace.Name = "mnuReplace";
-            this.mnuReplace.Size = new System.Drawing.Size(152, 22);
-            this.mnuReplace.Text = "Replace...";
-            this.mnuReplace.Click += new System.EventHandler(this.mnuReplace_Click);
-            // 
-            // mnuExport
-            // 
-            this.mnuExport.Name = "mnuExport";
-            this.mnuExport.Size = new System.Drawing.Size(152, 22);
-            this.mnuExport.Text = "Export...";
-            this.mnuExport.Click += new System.EventHandler(this.mnuExport_Click);
-            // 
-            // restoreToolStripMenuItem
-            // 
-            this.restoreToolStripMenuItem.Name = "restoreToolStripMenuItem";
-            this.restoreToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.restoreToolStripMenuItem.Text = "Restore";
-            this.restoreToolStripMenuItem.Click += new System.EventHandler(this.restoreToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
-            // 
-            // mnuSize
-            // 
-            this.mnuSize.Enabled = false;
-            this.mnuSize.Name = "mnuSize";
-            this.mnuSize.Size = new System.Drawing.Size(152, 22);
-            this.mnuSize.Text = "Size:";
-            // 
-            // mnuFormat
-            // 
-            this.mnuFormat.Enabled = false;
-            this.mnuFormat.Name = "mnuFormat";
-            this.mnuFormat.Size = new System.Drawing.Size(152, 22);
-            this.mnuFormat.Text = "Format:";
-            // 
-            // mnuPalette
-            // 
-            this.mnuPalette.Enabled = false;
-            this.mnuPalette.Name = "mnuPalette";
-            this.mnuPalette.Size = new System.Drawing.Size(152, 22);
-            this.mnuPalette.Text = "Palette:";
-            // 
-            // mnuLOD
-            // 
-            this.mnuLOD.Enabled = false;
-            this.mnuLOD.Name = "mnuLOD";
-            this.mnuLOD.Size = new System.Drawing.Size(152, 22);
-            this.mnuLOD.Text = "LOD:";
-            // 
-            // mnuFileSize
-            // 
-            this.mnuFileSize.Enabled = false;
-            this.mnuFileSize.Name = "mnuFileSize";
-            this.mnuFileSize.Size = new System.Drawing.Size(152, 22);
-            this.mnuFileSize.Text = "File Size:";
             // 
             // tabPage4
             // 
@@ -222,7 +131,6 @@
             this.stageFrame1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.stageFrame1.Location = new System.Drawing.Point(3, 3);
             this.stageFrame1.Name = "stageFrame1";
-            this.stageFrame1.SelectedStage = null;
             this.stageFrame1.Size = new System.Drawing.Size(663, 480);
             this.stageFrame1.TabIndex = 0;
             // 
@@ -238,7 +146,6 @@
             this.tabPage1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
-            this.textureContext.ResumeLayout(false);
             this.tabPage4.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -253,16 +160,6 @@
         private StartupFrame startupFrame1;
         private CharacterFrame characterFrame1;
         private ItemFrame itemFrame1;
-        private System.Windows.Forms.ContextMenuStrip textureContext;
-        private System.Windows.Forms.ToolStripMenuItem mnuReplace;
-        private System.Windows.Forms.ToolStripMenuItem mnuExport;
-        private System.Windows.Forms.ToolStripMenuItem restoreToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem mnuSize;
-        private System.Windows.Forms.ToolStripMenuItem mnuFormat;
-        private System.Windows.Forms.ToolStripMenuItem mnuPalette;
-        private System.Windows.Forms.ToolStripMenuItem mnuLOD;
-        private System.Windows.Forms.ToolStripMenuItem mnuFileSize;
         private System.Windows.Forms.TabPage tabPage4;
         private StageFrame stageFrame1;
 

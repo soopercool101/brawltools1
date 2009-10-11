@@ -47,5 +47,10 @@ namespace System
                 v._x > 0.0f ? (float)Math.Floor(v._x) : (float)Math.Ceiling(v._x),
                 v._y > 0.0f ? (float)Math.Floor(v._y) : (float)Math.Ceiling(v._y));
         }
+
+        public override string ToString()
+        {
+            return String.Format("({0},{1})", _x, _y);
+        }
     }
 }

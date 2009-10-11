@@ -10,7 +10,7 @@ using BrawlLib.Wii.Compression;
 
 namespace BrawlScape
 {
-    public class CostumeDefinition : TextureDefinition
+    public class CostumeDefinition : TextureDefinition, IListSource<ModelDefinition>
     {
         private CharacterDefinition _character;
         private int _index, _portraitIndex;
@@ -23,47 +23,54 @@ namespace BrawlScape
             _index = index;
             _portraitIndex = _character.PortraitId + _index;
             _path = _character.GetCostumePath(index);
+
+            if (_nodeRef != null)
+                _nodeRef.Watches.Add(NodeReference.Get<TextureReference>(String.Format("menu\\common\\char_bust_tex\\MenSelchrFaceB{0:000}.brres", _character.CharacterIndex * 10), String.Format("Textures(NW4R)/MenSelchrFaceB.{0:000}", _character.PortraitId + _index)));
         }
 
-        private TextureDefinition[] _textures;
-        public TextureDefinition[] Textures
-        {
-            get
-            {
-                if (_textures == null)
-                {
-                    try
-                    {
-                        //Find outfit in fighter folder
-                        //string path = _character.GetCostumePath(_index);
+        //private TextureDefinition[] _textures;
+        //public TextureDefinition[] Textures
+        //{
+        //    get
+        //    {
+        //        if (_textures == null)
+        //        {
+        //            try
+        //            {
+        //                //Find outfit in fighter folder
+        //                //string path = _character.GetCostumePath(_index);
 
-                        ARCNode node = ResourceCache.FindNode(_path, null) as ARCNode;
+        //                ResourceNode[] nodes = ResourceCache.FindNodeByType(_path, null, ResourceType.TEX0);
+        //                if (nodes != null)
+        //                {
+        //                    TextureDefinition[] textures = new TextureDefinition[nodes.Length];
+        //                    for (int i = 0; i < nodes.Length; i++)
+        //                        textures[i] = new TextureDefinition(_path, nodes[i].TreePath);
 
-                        ResourceNode[] nodes = node.FindChildrenByType(null, ResourceType.TEX0);
-                        TextureDefinition[] textures = new TextureDefinition[nodes.Length];
-                        for (int i = 0; i < nodes.Length; i++)
-                            textures[i] = new TextureDefinition(_path, nodes[i].TreePath);
-
-                        _textures = textures;
-                    }
-                    catch (Exception x) { MessageBox.Show(x.Message); return new TextureDefinition[0]; }
-                }
-                return _textures;
-            }
-        }
+        //                    _textures = textures;
+        //                }
+        //            }
+        //            catch (Exception x) { MessageBox.Show(x.Message); return new TextureDefinition[0]; }
+        //        }
+        //        return _textures;
+        //    }
+        //}
 
         private ModelDefinition[] _models;
-        public ModelDefinition[] Models
+        public ModelDefinition[] ListItems
         {
             get
             {
                 if (_models == null)
                 {
                     ResourceNode[] nodes = ResourceCache.FindNodeByType(_path, null, ResourceType.MDL0);
-                    ModelDefinition[] models = new ModelDefinition[nodes.Length];
-                    for (int i = 0; i < nodes.Length; i++)
-                        models[i] = new ModelDefinition(_path, nodes[i].TreePath);
-                    _models = models;
+                    if (nodes != null)
+                    {
+                        ModelDefinition[] models = new ModelDefinition[nodes.Length];
+                        for (int i = 0; i < nodes.Length; i++)
+                            models[i] = new ModelDefinition(_path, nodes[i].TreePath);
+                        _models = models;
+                    }
                 }
                 return _models;
             }
@@ -108,12 +115,12 @@ namespace BrawlScape
 
         internal void Reset()
         {
-            if (_textures != null)
-            {
-                foreach (TextureDefinition def in _textures)
-                    def.Reset();
-                _textures = null;
-            }
+            //if (_textures != null)
+            //{
+            //    foreach (TextureDefinition def in _textures)
+            //        def.Reset();
+            //    _textures = null;
+            //}
         }
 
         private TextureReference _stockRef;

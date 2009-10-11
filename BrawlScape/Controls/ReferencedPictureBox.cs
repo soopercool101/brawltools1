@@ -6,6 +6,7 @@ namespace BrawlScape
 {
     class ReferencedPictureBox : PictureBox
     {
+        private TextureContextMenuStrip _context;
         private TextureReference _texRef;
         [Browsable(false)]
         public TextureReference Reference
@@ -28,18 +29,18 @@ namespace BrawlScape
                     _texRef.DataChanged += ResetImage;
                     Image = _texRef.Texture;
                 }
+
+                _context.TextureReference = _texRef;
             }
         }
 
-        private void ClearImage(object s, EventArgs e) { Image = null; }
-        private void ResetImage(object s, EventArgs e) { Image = _texRef == null ? null : _texRef.Texture; }
+        private void ClearImage(NodeReference r) { Image = null; }
+        private void ResetImage(NodeReference r) { Image = _texRef == null ? null : _texRef.Texture; }
 
-        protected override void OnMouseDown(MouseEventArgs e)
-        {
-            MainForm._currentTextureNode = _texRef;
-            base.OnMouseDown(e);
+        public ReferencedPictureBox()
+            : base()
+        { 
+            ContextMenuStrip = _context = new TextureContextMenuStrip();
         }
-
-        protected override void OnCreateControl() { ContextMenuStrip = MainForm._textureContext; }
     }
 }

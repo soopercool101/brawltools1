@@ -8,6 +8,8 @@ using System.Drawing;
 
 namespace BrawlScape
 {
+    public delegate void DefinitionChangeEvent<T>(ResourceDefinition<T> def) where T:NodeReference;
+
     public class ResourceDefinition<T> : ListViewItem where T:NodeReference
     {
         protected T _nodeRef;
@@ -23,7 +25,12 @@ namespace BrawlScape
             }
         }
 
-        protected virtual void OnChanged(object sender, EventArgs e)        {        }
+        public event DefinitionChangeEvent<T> Changed;
+        protected virtual void OnChanged(NodeReference reference)       
+        {
+            if (Changed != null)
+                Changed(this);
+        }
 
         public void Reset()
         {
@@ -33,36 +40,5 @@ namespace BrawlScape
                 _nodeRef = null;
             }
         }
-
-        //protected string _filePath, _nodePath;
-
-        //protected ResourceNode _node;
-        //public ResourceNode Node
-        //{
-        //    get
-        //    {
-        //        if (_node == null)
-        //        {
-        //            if ((_node = ResourceCache.FindNode(_filePath, _nodePath)) != null)
-        //            {
-        //                //_node.Dirty += OnDirty;
-        //                //_node.Clean += OnClean;
-        //                _node.Changed += OnChanged;
-        //                _node.ChildChanged += OnChildChanged;
-        //            }
-        //        }
-        //        return _node;
-        //    }
-        //}
-
-        //protected virtual void OnDirty(ResourceNode n) { }
-        //protected virtual void OnClean(ResourceNode n) { }
-        //protected virtual void OnChanged(ResourceNode n) { }
-        //protected virtual void OnChildChanged(ResourceNode n, ResourceNode child) { }
-
-        //protected virtual Image GetPreviewImage(Size size)
-        //{
-        //    return null;
-        //}
     }
 }

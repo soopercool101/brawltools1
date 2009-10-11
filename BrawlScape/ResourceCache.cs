@@ -17,6 +17,7 @@ namespace BrawlScape
         private static List<ResourceTree> _treeCache = new List<ResourceTree>();
         private static List<ResourceTree> _changedTrees = new List<ResourceTree>();
         private static List<ResourceTree> _restoredTrees = new List<ResourceTree>();
+        private static HashSet<string> _errorList = new HashSet<string>();
 
         internal static ResourceTree GetTree(string relativePath) { return GetTree(relativePath, true); }
         internal static ResourceTree GetTree(string relativePath, bool searchWorking)
@@ -25,7 +26,14 @@ namespace BrawlScape
                 if (tree.RelativePath.Equals(relativePath, StringComparison.OrdinalIgnoreCase))
                     return tree;
 
-            ResourceNode node = NodeFactory.FromFile(null, Program.GetFilePath(relativePath, searchWorking));
+            string path = Program.GetFilePath(relativePath, searchWorking);
+            if (path == null)
+            {
+                ReportError(relativePath);
+                return null;
+            }
+
+            ResourceNode node = NodeFactory.FromFile(null, path);
             ResourceTree rt = new ResourceTree(relativePath, node);
             _treeCache.Add(rt);
 
@@ -35,10 +43,22 @@ namespace BrawlScape
             return rt;
         }
 
-        internal static ResourceNode FindNode(string relativePath, string resourcePath) { return FindNode(relativePath, resourcePath, true); }
-        internal static ResourceNode FindNode(string relativePath, string resourcePath, bool searchWorking)
+        internal static void ReportError(string relativePath)
         {
-            return ResourceNode.FindNode(GetTree(relativePath, searchWorking).Node, resourcePath, true);
+            if (_errorList.Contains(relativePath))
+                return;
+
+            _errorList.Add(relativePath);
+            MessageBox.Show(String.Format("Could not find file '{0}' in your data or project directories. Please replace this file and try again.", relativePath));
+        }
+
+        internal static ResourceNode FindNode(string relativePath, string resourcePath) { return FindNode(relativePath, resourcePath, true, false); }
+        internal static ResourceNode FindNode(string relativePath, string resourcePath, bool searchWorking, bool searchChildren)
+        {
+            ResourceTree tree = GetTree(relativePath, searchWorking);
+            if (tree == null)
+                return null;
+            return ResourceNode.FindNode(tree.Node, resourcePath, searchChildren);
         }
 
         internal static void OnTreeChanged(ResourceTree t)
@@ -151,6 +171,8 @@ namespace BrawlScape
         internal static ResourceNode[] FindNodeByType(string relativePath, string nodePath, ResourceType type)
         {
             ResourceNode node = FindNode(relativePath, nodePath);
+            if (node == null)
+                return null;
             return node.FindChildrenByType(null, type);
         }
 

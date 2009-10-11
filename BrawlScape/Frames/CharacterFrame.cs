@@ -2,82 +2,72 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using BrawlLib.OpenGL;
 
 namespace BrawlScape
 {
-    public partial class CharacterFrame : UserControl
+    public partial class CharacterFrame : UserControl, IListSource<CharacterDefinition>
     {
-        public delegate void CharacterChangeEvent(CharacterDefinition def);
-        public static event CharacterChangeEvent CharacterChanged;
-
-        private CharacterDefinition _selectedCharacter;
-        public CharacterDefinition SelectedCharacter
-        {
-            get { return _selectedCharacter; }
-            set
-            {
-                _selectedCharacter = value;
-                MainForm._currentTextureNode = value == null ? null : value.Reference;
-                if (CharacterChanged != null)
-                    CharacterChanged(_selectedCharacter);
-            }
-        }
 
         public CharacterFrame() { InitializeComponent(); }
 
-        public void Initialize()
-        {
-            _charList.BeginUpdate();
-
-            _charList.Clear();
-
-            foreach (Image img in csfList.Images)
-                img.Dispose();
-            csfList.Images.Clear();
-
-            int index = 0;
-            Image im;
-            try
-            {
-
-                foreach (CharacterDefinition def in CharacterDefinition.List)
-                {
-                    if ((im = def.Texture) != null)
-                    {
-                        csfList.Images.Add(im);
-                        def.ImageIndex = index++;
-                    }
-                    else
-                        def.ImageIndex = -1;
-
-                    _charList.Items.Add(def);
-                }
-            }
-            catch (Exception x) { MessageBox.Show(x.Message); }
-
-            _charList.EndUpdate();
-        }
-
-        private void _charList_SelectedIndexChanged(object sender, EventArgs e) { SelectedCharacter = _charList.SelectedItems.Count == 0 ? null : _charList.SelectedItems[0] as CharacterDefinition; }
-
         private void CharacterFrame_Load(object sender, EventArgs e)
         {
-            if (!DesignMode)
-                Initialize();
+            if (DesignMode)
+                return;
 
-            //_charList.ContextMenuStrip = MainForm._textureContext;
-            mnuCharIcon.DropDown = MainForm._textureContext;
-            mnuNameStrip.DropDown = MainForm._textureContext;
+            charList.CurrentSource = this;
+            mnuCharIcon.DropDown = new TextureContextMenuStrip();
+            mnuNameStrip.DropDown = new TextureContextMenuStrip();
+            mnuCostumeCSP.DropDown = new TextureContextMenuStrip();
         }
 
-        private void mnuCharIcon_DropDownOpening(object sender, EventArgs e)
+        private void mnuCostumeExport_Click(object sender, EventArgs e) { costumeList.SelectedResource.ExportCostume(); }
+        private void mnuCostumeImport_Click(object sender, EventArgs e) { costumeList.SelectedResource.ImportCostume(); }
+        private void mnuCostumeRestore_Click(object sender, EventArgs e) { costumeList.SelectedResource.RestoreCostume(); }
+
+        public CharacterDefinition[] _characters;
+        public CharacterDefinition[] ListItems { get { return _characters == null ? _characters = CharacterDefinition.List.ToArray() : _characters; } }
+
+        private void charList_ResourceChanged(CharacterDefinition resource)
         {
-            MainForm._currentTextureNode = _selectedCharacter.Reference;
+            costumeList.CurrentSource = resource;
+            if (resource != null)
+            {
+                ((TextureContextMenuStrip)mnuCharIcon.DropDown).TextureReference = resource.Reference;
+                ((TextureContextMenuStrip)mnuNameStrip.DropDown).TextureReference = resource.NameReference;
+            }
+        }
+        private void costumeList_ResourceChanged(CostumeDefinition resource)
+        {
+            modelList.CurrentSource = resource;
+            if (resource != null)
+            {
+                ((TextureContextMenuStrip)mnuCostumeCSP.DropDown).TextureReference = resource.Reference;
+                gamePortrait.Reference = resource.GamePortrait;
+                stockPortrait.Reference = resource.StockPortrait;
+            }
+            else
+            {
+                stockPortrait.Reference = gamePortrait.Reference = null;
+            }
+
+            if ((modelList.SelectedResource == null) && (modelList.Items.Count != 0))
+                modelList.SelectedIndices.Add(0);
+        }
+        private void modelList_ResourceChanged(ModelDefinition resource) 
+        {
+            textureList.CurrentSource = resource;
+            if (resource != null)
+            {
+                resource.AttachTextures();
+                modelPanel.TargetModel = resource.Model;
+            }
+            else
+                modelPanel.TargetModel = null;
         }
 
-        private void mnuNameStrip_DropDownOpening(object sender, EventArgs e)
-        {
-            MainForm._currentTextureNode = _selectedCharacter.NameReference;
-        }
+        private void characterContext_Opening(object sender, CancelEventArgs e) { if (charList.SelectedResource == null) e.Cancel = true; }
+        private void costumeContext_Opening(object sender, CancelEventArgs e) { if (costumeList.SelectedResource == null) e.Cancel = true; }
     }
 }

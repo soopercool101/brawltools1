@@ -11,7 +11,7 @@ using System.Drawing.Drawing2D;
 
 namespace BrawlScape
 {
-    public class CharacterDefinition : TextureDefinition
+    public class CharacterDefinition : TextureDefinition, IListSource<CostumeDefinition>
     {
         public static List<CharacterDefinition> List = new List<CharacterDefinition>();
         static CharacterDefinition()
@@ -84,14 +84,14 @@ namespace BrawlScape
             _charNameRef.DataChanged += OnChanged;
         }
 
-        protected override void OnChanged(object sender, EventArgs e)
+        protected override void OnChanged(NodeReference r)
         {
             if (_texture != null)
             {
                 _texture.Dispose();
                 _texture = null;
             }
-            base.OnChanged(sender, e);
+            base.OnChanged(r);
         }
 
         private Bitmap _texture;
@@ -120,7 +120,7 @@ namespace BrawlScape
         }
 
         CostumeDefinition[] _costumes;
-        public CostumeDefinition[] Costumes
+        public CostumeDefinition[] ListItems
         {
             get
             {
@@ -188,5 +188,7 @@ namespace BrawlScape
         {
             return String.Format("fighter\\{0}\\Fit{1}{2:00}", _fitName.ToLower(), _fitName, _costumeIds[_index,index]);
         }
+
+
     }
 }

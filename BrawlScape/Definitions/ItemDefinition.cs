@@ -7,7 +7,7 @@ using BrawlLib.Imaging;
 
 namespace BrawlScape
 {
-    class ItemDefinition : TextureDefinition
+    public class ItemDefinition : TextureDefinition, IListSource<ModelDefinition>
     {
         public static List<ItemDefinition> List = new List<ItemDefinition>();
         static ItemDefinition()
@@ -68,7 +68,7 @@ namespace BrawlScape
             List.Add(new ItemDefinition("Coin", "Coin", -1));
             List.Add(new ItemDefinition("Dragoon Sight", "DragoonSight", -1));
             List.Add(new ItemDefinition("Figure", "Figure", -1));
-            List.Add(new ItemDefinition("Kusudama", "Kusudama", -1));
+            List.Add(new ItemDefinition("Party Ball", "Kusudama", -1));
             List.Add(new ItemDefinition("Lip Stick Flower", "RipStickFlower", -1));
             List.Add(new ItemDefinition("Seal", "Seal", -1));
             List.Add(new ItemDefinition("Seed", "Seed", -1));
@@ -80,7 +80,7 @@ namespace BrawlScape
             List.Add(new ItemDefinition("Peach's Turnips", "PeachDaikon", -1));
         }
 
-        private string _resName;
+        private string _resName, _nodePath;
         private int _iconIndex;
 
         private ItemDefinition(string name, string resourceName, int iconIndex)
@@ -89,6 +89,7 @@ namespace BrawlScape
             Text = name;
             _resName = resourceName;
             _iconIndex = iconIndex;
+            _nodePath = String.Format("ItmCommonBrres/Itm{0}Brres", _resName);
         }
 
         //public Image GetIcon()
@@ -99,19 +100,42 @@ namespace BrawlScape
         //    return null;
         //}
 
-        private TextureDefinition[] _textures;
-        public TextureDefinition[] Textures
+        //private TextureDefinition[] _textures;
+        //public TextureDefinition[] ListItems
+        //{
+        //    get
+        //    {
+        //        if (_textures == null)
+        //        {
+        //            ResourceNode[] nodes = ResourceCache.FindNodeByType("system\\common3.pac", String.Format("ItmCommonBrres/Itm{0}Brres", _resName), ResourceType.TEX0);
+        //            if (nodes != null)
+        //            {
+        //                _textures = new TextureDefinition[nodes.Length];
+        //                for (int i = 0; i < nodes.Length; i++)
+        //                    _textures[i] = new TextureDefinition("system\\common3.pac", nodes[i].TreePath);
+        //            }
+        //        }
+        //        return _textures;
+        //    }
+        //}
+
+        private ModelDefinition[] _models;
+        public ModelDefinition[] ListItems
         {
             get
             {
-                if (_textures == null)
+                if (_models == null)
                 {
-                    ResourceNode[] nodes = ResourceCache.FindNodeByType("system\\common3.pac", String.Format("ItmCommonBrres/Itm{0}Brres", _resName), ResourceType.TEX0);
-                    _textures = new TextureDefinition[nodes.Length];
-                    for (int i = 0; i < nodes.Length; i++)
-                        _textures[i] = new TextureDefinition("system\\common3.pac", nodes[i].TreePath);
+                    ResourceNode[] nodes = ResourceCache.FindNodeByType("system\\common3.pac", _nodePath, ResourceType.MDL0);
+                    if (nodes != null)
+                    {
+                        ModelDefinition[] models = new ModelDefinition[nodes.Length];
+                        for (int i = 0; i < nodes.Length; i++)
+                            models[i] = new ModelDefinition("system\\common3.pac", nodes[i].TreePath);
+                        _models = models;
+                    }
                 }
-                return _textures;
+                return _models;
             }
         }
     }

@@ -1,5 +1,5 @@
 ﻿
-BrawlScape Mod Manager - Version 0.04
+BrawlScape Mod Manager - Version 0.05
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -13,9 +13,54 @@ they be held accountable for the manner in which it is used.
 For bug reports, support, and the latest version, check out our forum post at SmashBoards.com!
 http://www.smashboards.com/showthread.php?t=250568
 
+
+ ====================================
+|************ How to Use ************|
+ ====================================
+
+1. Get a hold of the game data files. There are a few ways to do this, but the best way IMHO is to use WiiScrubber.
+	I won't show you how to do this. Use google and download the program.
+	
+2. Once you have extracted the disc files into a folder on your hard drive, create a second (empty) folder.
+	Either on your computer or an SD card.
+
+3. Open BrawlScape and enter in those two folders on the first (Project) tab.
+	The Data folder is where you extracted the game files to.
+	The project folder is where your empty folder is.
+
+4. Once you have set your data locations, continue on to the next tabs.
+
+5. Use the right mouse button to open sub-menus. These will allow you to edit resources and textures.
+
+6. When you are finished editing, go back to the Project tab and click save.
+	The program will now save any changes you've made to the project location.
+	If this is on an SD card, it may take a little longer.
+
+7. Use the new data to create an ISO or do some SD loading.
+
+
+ ====================================
+|******** Model View Controls *******|
+ ====================================
+
+Click and hold the left mouse button to rotate the model.
+Press and hold the Ctrl key while rotating to move the model around.
+Scroll the mouse wheel to zoom in/out.
+
+
  ====================================
 |************ Change Log ************|
  ====================================
+
+- v0.05 - (10/11/2009)
+	. Added support for model objects:
+		Individual models can now be selected from a list.
+		Texture list now displays textures used by selected model.
+		The model view panel properly displays textures/models.
+		Model view panel is updated as textures are changed.
+	. CSPs are now saved to "menu\common\char_bust_tex" folder for use in result screen.
+	. Added support for melee stages.
+	. Better error handling/reporting will tell you what files are missing.
 
 - v0.04 - (10/03/2009)
 	. Added support for loading sc_selcharacter from menu2 folder.
@@ -40,17 +85,6 @@ http://www.smashboards.com/showthread.php?t=250568
 - v0.01 - (09/28/2009)
 	. Original release
 
- ====================================
-|************ How to Use ************|
- ====================================
-
-1. First of all, you need to have the SSBB data files extracted to a folder on your computer. This will be your base data.
-2. Create a second folder either on your hard drive or an SD card (private\wii\app\RSBE\pf). This will be your working data.
-3. Open BrawlScape and direct the program to these two folders. Leave the program set to Project mode.
-4. Once your paths are set, continue on to the other tabs at the top of the window.
-5. Replace textures/files, using the right mouse button.
-6. When you're finished, return to the project tab and press Save. This will copy all changes to your Project folder.
-7. If using SD loader, simply remove the SD card (close the program!) and use it in SSBB.
 
  ====================================
 |*********** Requirements ***********|
@@ -59,6 +93,7 @@ http://www.smashboards.com/showthread.php?t=250568
  * Microsoft .Net Framework v3.5 SP1
 	http://www.microsoft.com/downloads/details.aspx?FamilyID=ab99342f-5d1a-413d-8319-81da479ab0d7&displaylang=en
  
+ * Video card with OpenGL 1.5 support.
 
  ====================================
 |*********** Known Issues ***********|

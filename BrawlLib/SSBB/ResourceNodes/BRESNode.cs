@@ -36,8 +36,8 @@ namespace BrawlLib.SSBB.ResourceNodes
             base.OnInitialize();
 
             ResourceGroup* group = &Header->First->_master;
-            _gPrev = group->_first._prev;
-            _gNext = group->_first._next;
+            _gPrev = group->_first._leftIndex;
+            _gNext = group->_first._rightIndex;
             _gId = group->_first._id;
 
             return group->_numEntries != 0;
@@ -122,7 +122,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             {
                 //Set group entry
                 g._origSource.Address = g._uncompSource.Address = gEntry;
-                *gEntry++ = new ResourceEntry(g.EntryId, g.EntryPrev, g.EntryNext, (int)rGroup - (int)pMaster, (int)_stringTable[g.Name] - (int)pMaster);
+                *gEntry++ = new ResourceEntry(g.EntryId, g.SortNext, g.NodeNext, (int)rGroup - (int)pMaster, (int)_stringTable[g.Name] - (int)pMaster);
 
                 //Initialize group and index entry
                 *rGroup = new ResourceGroup(g.Children.Count);
@@ -135,7 +135,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                     dataAddr = ((int)dataAddr).Align(n.DataAlign);
 
                     //Set entry data
-                    *nEntry++ = new ResourceEntry(n.EntryId, n.EntryPrev, n.EntryNext, (int)dataAddr - (int)rGroup, (int)_stringTable[n.Name] - (int)rGroup);
+                    *nEntry++ = new ResourceEntry(n.EntryId, n.SortNext, n.NodeNext, (int)dataAddr - (int)rGroup, (int)_stringTable[n.Name] - (int)rGroup);
 
                     //Rebuild entry
                     int len = n._calcSize;
@@ -195,8 +195,8 @@ namespace BrawlLib.SSBB.ResourceNodes
             {
                 base.OnInitialize();
                 ResourceGroup* group = Group;
-                _gPrev = group->_first._prev;
-                _gNext = group->_first._next;
+                _gPrev = group->_first._leftIndex;
+                _gNext = group->_first._rightIndex;
                 _gId = group->_first._id;
 
                 return group->_numEntries != 0;

@@ -42,6 +42,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\ModelContextMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ResourceList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ResourceListImps.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\TextureContextMenuStrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Definitions\CharacterDefinition.cs" />
     <Compile Include="Definitions\ModelDefinition.cs" />
     <Compile Include="Frames\CharacterFrame.cs">
@@ -52,12 +64,6 @@
     </Compile>
     <Compile Include="Config.cs" />
     <Compile Include="Definitions\CostumeDefinition.cs" />
-    <Compile Include="Frames\CostumeFrame.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Frames\CostumeFrame.Designer.cs">
-      <DependentUpon>CostumeFrame.cs</DependentUpon>
-    </Compile>
     <Compile Include="Definitions\StageDefinition.cs" />
     <Compile Include="Filters.cs" />
     <Compile Include="Definitions\ItemDefinition.cs" />
@@ -67,6 +73,7 @@
     <Compile Include="Frames\ItemFrame.Designer.cs">
       <DependentUpon>ItemFrame.cs</DependentUpon>
     </Compile>
+    <Compile Include="IListSource.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -99,9 +106,6 @@
     <Compile Include="Definitions\TextureDefinition.cs" />
     <EmbeddedResource Include="Frames\CharacterFrame.resx">
       <DependentUpon>CharacterFrame.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Frames\CostumeFrame.resx">
-      <DependentUpon>CostumeFrame.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Frames\ItemFrame.resx">
       <DependentUpon>ItemFrame.cs</DependentUpon>

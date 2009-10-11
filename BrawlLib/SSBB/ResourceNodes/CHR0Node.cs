@@ -24,8 +24,8 @@ namespace BrawlLib.SSBB.ResourceNodes
             _len2 = Header->_len2;
 
             ResourceGroup* group = Header->Group;
-            _mPrev = group->_first._prev;
-            _mNext = group->_first._next;
+            _mPrev = group->_first._leftIndex;
+            _mNext = group->_first._rightIndex;
 
             return group->_numEntries > 0;
         }

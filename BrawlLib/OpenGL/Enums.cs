@@ -5,6 +5,55 @@ using System.Text;
 
 namespace BrawlLib.OpenGL
 {
+    public enum GLBlendFactor : uint
+    {
+        ZERO = 0,
+        ONE = 1,
+        SRC_COLOR = 0x0300,
+        ONE_MINUS_SRC_COLOR = 0x0301,
+        SRC_ALPHA = 0x0302,
+        ONE_MINUS_SRC_ALPHA = 0x0303,
+        DST_ALPHA = 0x0304,
+        ONE_MINUS_DST_ALPHA = 0x0305,
+        DST_COLOR = 0x0306,
+        ONE_MINUS_DST_COLOR = 0x0307,
+        SRC_ALPHA_SATURATE = 0x0308
+    }
+
+    public enum GLShadingModel : uint
+    {
+        FLAT = 0x1D00,
+        SMOOTH = 0x1D01
+    }
+
+    public enum GLFunction : uint
+    {
+        NEVER = 0x0200,
+        LESS = 0x0201,
+        EQUAL = 0x0202,
+        LEQUAL = 0x0203,
+        GREATER = 0x0204,
+        NOTEQUAL = 0x0205,
+        GEQUAL = 0x0206,
+        ALWAYS = 0x0207
+    }
+
+    public enum GLHintTarget : int
+    {
+        PERSPECTIVE_CORRECTION_HINT = 0x0C50,
+        POINT_SMOOTH_HINT = 0x0C51,
+        LINE_SMOOTH_HINT = 0x0C52,
+        POLYGON_SMOOTH_HINT = 0x0C53,
+        FOG_HINT = 0x0C54
+    }
+
+    public enum GLHintMode : uint
+    {
+        DONT_CARE = 0x1100,
+        FASTEST = 0x1101,
+        NICEST = 0x1102
+    }
+
     public enum GLAccumOp : uint
     {
         Accum = 0x0100,
@@ -68,12 +117,49 @@ namespace BrawlLib.OpenGL
         Fill = 0x1B02
     }
 
-    public enum GLTextureBindTarget : uint
+    public enum GLTextureTarget : uint
     {
         Texture1D = 0x0DE0,
         Texture2D = 0x0DE1,
         Texture3D = 0x806F,
         TextureCubeMap = 0x8513
+    }
+
+    public enum GLTexImageTarget : uint
+    {
+        Texture1D = 0x0DE0,
+        Texture2D = 0x0DE1,
+        ProxyTexture1D = 0x8063,
+        ProxyTexture2D = 0x8064,
+
+        Texture3D = 0x806F,
+        TextureCubeMap = 0x8513
+    }
+
+    public enum GLTextureParameter : uint
+    {
+        MagFilter = 0x2800,
+        MinFilter = 0x2801,
+        WrapS = 0x2802,
+        WrapT = 0x2803,
+        MinLOD = 0x813A,
+        MaxLOD = 0x813B,
+        BaseLevel = 0x813C,
+        MaxLevel = 0x813D
+    }
+
+    public enum GLTextureWrapMode : uint
+    {
+        CLAMP = 0x2900,
+        REPEAT = 0x2901,
+        CLAMP_TO_EDGE = 0x812F,
+        CLAMP_TO_BORDER = 0x812D
+    }
+
+    public enum GLTextureFilterMode : uint
+    {
+        NEAREST						= 0x2600,
+	LINEAR						= 0x2601
     }
 
     public enum GLInternalPixelFormat : uint
@@ -168,6 +254,41 @@ namespace BrawlLib.OpenGL
         UNSIGNED_SHORT_1_5_5_5_REV = 0x8366,
         UNSIGNED_INT_8_8_8_8_REV = 0x8367,
         UNSIGNED_INT_2_10_10_10_REV = 0x8368
+    }
+
+    public enum GLTexEnvTarget : uint
+    {
+        TextureEnvironment = 0x2300,
+        FilterControl = 0x8500,
+        PointSprite = 0x8861
+    }
+
+    public enum GLTexEnvParam : uint
+    {
+        TEXTURE_ENV_MODE = 0x2200,
+        TEXTURE_ENV_COLOR = 0x2201,
+        TEXTURE_LOD_BIAS = 0x8501,
+        COMBINE_RGB = 0x8571,
+        COMBINE_ALPHA = 0x8572
+    }
+
+    public enum GLTexEnvMode : uint
+    {
+        MODULATE = 0x2100,
+        DECAL = 0x2101
+    }
+
+    public enum GLGetMode : uint
+    {
+        MATRIX_MODE = 0x0BA0,
+        NORMALIZE = 0x0BA1,
+        VIEWPORT = 0x0BA2,
+        MODELVIEW_STACK_DEPTH = 0x0BA3,
+        PROJECTION_STACK_DEPTH = 0x0BA4,
+        TEXTURE_STACK_DEPTH = 0x0BA5,
+        MODELVIEW_MATRIX = 0x0BA6,
+        PROJECTION_MATRIX = 0x0BA7,
+        TEXTURE_MATRIX = 0x0BA8
     }
 
     public enum GLEnableCap : uint

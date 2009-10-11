@@ -14,19 +14,39 @@ namespace System.Windows.Forms
 
         private int _rotX, _rotY;
         private float _rotFactor = 0.4f;
+        public float RotationScale { get { return _rotFactor; } set { _rotFactor = value; } }
 
         private int _transX, _transY;
         private float _transFactor = 0.05f;
+        public float TranslationScale { get { return _transFactor; } set { _transFactor = value; } }
 
         private int _zoom;
         private float _zoomFactor = 2.5f;
+        public float ZoomScale { get { return _zoomFactor; } set { _zoomFactor = value; } }
+
+        private int _zoomInit = -5;
+        public int InitialZoomFactor { get { return _zoomInit; } set { _zoomInit = value; } }
+
+        private int _yInit = -100;
+        public int InitialYFactor { get { return _yInit; } set { _yInit = value; } }
 
         private GLModel _model;
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public GLModel TargetModel
         {
             get { return _model; }
-            set { _model = value; InitModel(); }
+            set 
+            {
+                if (_model == value)
+                    return;
+
+                if (_model != null)
+                    _model.Unbind(_context);
+
+                _model = value;
+                InitModel();
+                Invalidate();
+            }
         }
 
         private void InitModel()
@@ -34,10 +54,9 @@ namespace System.Windows.Forms
             if (_model == null)
                 return;
 
-            _rotX = _rotY = _transX = _transY = 0;
-            _zoom = -5;
-
-            Invalidate();
+            _rotX = _rotY = _transX =  0;
+            _transY = _yInit;
+            _zoom = _zoomInit;
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)
@@ -94,13 +113,21 @@ namespace System.Windows.Forms
         protected internal override void OnInit()
         {
             //Vector3 v = (Vector3)BackColor;
-            _context.glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
+            _context.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             _context.glClearDepth(1.0f);
-            //_context.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
+            _context.glPolygonMode(GLFace.Back, GLPolygonMode.Fill);
+
             _context.glEnable(GLEnableCap.DepthTest);
-            _context.glEnable(GLEnableCap.Texture2D);
-            _context.glEnable(GLEnableCap.Blend);
+            _context.glDepthFunc(GLFunction.LEQUAL);
+            _context.glShadeModel(GLShadingModel.SMOOTH);
+            _context.glHint(GLHintTarget.PERSPECTIVE_CORRECTION_HINT, GLHintMode.NICEST);
+
+            //_context.glBlendFunc(GLBlendFactor.SRC_ALPHA, GLBlendFactor.SRC_COLOR);
+            //_context.glEnable(GLEnableCap.Blend);
+
+            _context.glTexEnv(GLTexEnvTarget.TextureEnvironment, GLTexEnvParam.TEXTURE_ENV_MODE, (int)GLTexEnvMode.DECAL);
             //_context.glEnable(GLEnableCap.Lighting);
+            _context.CheckErrors();
 
             OnResized();
         }
@@ -121,6 +148,8 @@ namespace System.Windows.Forms
                     _context.glRotate(_rotX * _rotFactor, 1.0f, 0.0f, 0.0f);
                 if (_rotY != 0)
                     _context.glRotate(_rotY * _rotFactor, 0.0f, 1.0f, 0.0f);
+
+                _context.CheckErrors();
 
 
                 _model.Render(_context);

@@ -9,12 +9,14 @@ using System.Reflection;
 
 namespace BrawlScape
 {
+    public delegate void NodeChangedEvent(NodeReference node);
+
     public class NodeReference
     {
         public static List<NodeReference> _cache = new List<NodeReference>();
 
-        public event EventHandler DataChanged;
-        public event EventHandler Disposed;
+        public event NodeChangedEvent DataChanged;
+        public event NodeChangedEvent Disposed;
 
         protected string _relativePath, _nodePath, _name;
         //private ResourceTree _tree;
@@ -28,12 +30,13 @@ namespace BrawlScape
             } 
         }
         public ResourceNode Node
-        { 
-            get 
+        {
+            get
             {
                 if (_node == null)
                 {
-                    if ((_node = ResourceNode.FindNode(Tree.Node, _nodePath, false)) != null)
+                    ResourceTree t = Tree;
+                    if ((t != null) && ((_node = ResourceNode.FindNode(Tree.Node, _nodePath, false)) != null))
                     {
                         _node.Disposed += OnDisposed;
                         _node.Changed += OnChanged;
@@ -41,7 +44,7 @@ namespace BrawlScape
                     }
                 }
                 return _node;
-            } 
+            }
         }
         public string Name { get { return _name; } }
 
@@ -54,7 +57,7 @@ namespace BrawlScape
                 //Look for file in menu2 folder
                 string name = "menu2\\" + nodePath.Substring(0, sIndex) + ".pac";
                 name = name.Replace("_en", "");
-                if ((Program.GetFilePath(name, true, false) != null) || (Program.GetFilePath("system\\common5.pac", true, false) == null))
+                if (Program.GetFilePath(name, true, false) != null)// || (Program.GetFilePath("system\\common5.pac", true, false) == null))
                 {
                     relativePath = name;
                     nodePath = nodePath.Substring(sIndex + 1);
@@ -79,7 +82,7 @@ namespace BrawlScape
             if (tree.RelativePath.Equals(_relativePath, StringComparison.OrdinalIgnoreCase))
             {
                 if((Node != null) && (DataChanged != null))
-                    DataChanged(this, null);
+                    DataChanged(this);
             }
         }
 
@@ -98,12 +101,12 @@ namespace BrawlScape
         {
             _node = null;
             if (Disposed != null)
-                Disposed(this, null);
+                Disposed(this);
         }
         protected virtual void OnChanged(ResourceNode node)
         {
             if (DataChanged != null)
-                DataChanged(this, null);
+                DataChanged(this);
         }
         private void OnChildChanged(ResourceNode node, ResourceNode child) { OnChanged(node); }
     }

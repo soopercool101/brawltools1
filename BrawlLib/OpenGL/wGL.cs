@@ -75,11 +75,11 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glBegin(GLPrimitiveType mode);
         [DllImport("opengl32.dll")]
-        public static extern void glBindTexture(GLTextureBindTarget target, uint texture);
+        public static extern void glBindTexture(GLTextureTarget target, uint texture);
         [DllImport("opengl32.dll")]
         public static extern void glBitmap(int width, int height, float xorig, float yorig, float xmove, float ymove, byte* bitmap);
         [DllImport("opengl32.dll")]
-        public static extern void glBlendFunc(uint sfactor, uint dfactor);
+        public static extern void glBlendFunc(GLBlendFactor sfactor, GLBlendFactor dfactor);
         [DllImport("opengl32.dll")]
         public static extern void glCallList(uint list);
         [DllImport("opengl32.dll")]
@@ -183,13 +183,13 @@ namespace BrawlLib.OpenGL
         #region CopyTex
 
         [DllImport("opengl32.dll")]
-        public static extern void glCopyTexImage1D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int border);
+        public static extern void glCopyTexImage1D(GLTextureTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int border);
         [DllImport("opengl32.dll")]
-        public static extern void glCopyTexImage2D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int height, int border);
+        public static extern void glCopyTexImage2D(GLTextureTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int height, int border);
         [DllImport("opengl32.dll")]
-        public static extern void glCopyTexSubImage1D(GLTextureBindTarget target, int level, int xOffset, int x, int y, int width);
+        public static extern void glCopyTexSubImage1D(GLTextureTarget target, int level, int xOffset, int x, int y, int width);
         [DllImport("opengl32.dll")]
-        public static extern void glCopyTexSubImage2D(GLTextureBindTarget target, int level, int xOffset, int yOffset, int x, int y, int width, int height);
+        public static extern void glCopyTexSubImage2D(GLTextureTarget target, int level, int xOffset, int yOffset, int x, int y, int width, int height);
 
         #endregion
 
@@ -204,7 +204,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glDeleteTextures(int num, uint* textures);
         [DllImport("opengl32.dll")]
-        public static extern void glDepthFunc(uint func);
+        public static extern void glDepthFunc(GLFunction func);
         [DllImport("opengl32.dll")]
         public static extern void glDepthMask(bool flag);
         [DllImport("opengl32.dll")]
@@ -299,13 +299,13 @@ namespace BrawlLib.OpenGL
         #region glGet
 
         [DllImport("opengl32.dll")]
-        public static extern void glGetBooleanv(uint pname, bool* param);
+        public static extern void glGetBooleanv(GLGetMode pname, bool* param);
         [DllImport("opengl32.dll")]
-        public static extern void glGetDoublev(uint pname, double* param);
+        public static extern void glGetDoublev(GLGetMode pname, double* param);
         [DllImport("opengl32.dll")]
-        public static extern void glGetFloatv(uint pname, float* param);
+        public static extern void glGetFloatv(GLGetMode pname, float* param);
         [DllImport("opengl32.dll")]
-        public static extern void glGetIntegerv(uint pname, int* param);
+        public static extern void glGetIntegerv(GLGetMode pname, int* param);
 
         #endregion
 
@@ -371,7 +371,7 @@ namespace BrawlLib.OpenGL
         public static extern void glGetTexParameteriv(uint target, uint pname, out int* param);
 
         [DllImport("opengl32.dll")]
-        public static extern void glHint(uint target, uint mode);
+        public static extern void glHint(GLHintTarget target, GLHintMode mode);
 
         #region glIndex
 
@@ -689,7 +689,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glSelectBuffer(int size, out uint* buffer);
         [DllImport("opengl32.dll")]
-        public static extern void glShadeModel(uint mode);
+        public static extern void glShadeModel(GLShadingModel mode);
         [DllImport("opengl32.dll")]
         public static extern void glStencilFunc(uint func, int refval, uint mask);
         [DllImport("opengl32.dll")]
@@ -777,14 +777,13 @@ namespace BrawlLib.OpenGL
         public static extern void glTexCoordPointer(int size, uint type, int stride, void* pointer);
 
         [DllImport("opengl32.dll")]
-        public static extern void glTexEnvf(uint target, uint pname, float param);
+        public static extern void glTexEnvf(GLTexEnvTarget target, GLTexEnvParam pname, float param);
         [DllImport("opengl32.dll")]
-        public static extern void glTexEnvi(uint target, uint pname, int param);
-
+        public static extern void glTexEnvi(GLTexEnvTarget target, GLTexEnvParam pname, int param);
         [DllImport("opengl32.dll")]
-        public static extern void glTexEnvfv(uint target, uint pname, float* param);
+        public static extern void glTexEnvfv(GLTexEnvTarget target, GLTexEnvParam pname, float* param);
         [DllImport("opengl32.dll")]
-        public static extern void glTexEnviv(uint target, uint pname, int* param);
+        public static extern void glTexEnviv(GLTexEnvTarget target, GLTexEnvParam pname, int* param);
 
         #region glTexGen
 
@@ -805,21 +804,20 @@ namespace BrawlLib.OpenGL
         #endregion
 
         [DllImport("opengl32.dll")]
-        public static extern void glTexImage1D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int width, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
+        public static extern void glTexImage1D(GLTexImageTarget target, int level, GLInternalPixelFormat internalFormat, int width, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
         [DllImport("opengl32.dll")]
-        public static extern void glTexImage2D(GLTextureBindTarget target, int level, GLInternalPixelFormat internalFormat, int width, int height, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
+        public static extern void glTexImage2D(GLTexImageTarget target, int level, GLInternalPixelFormat internalFormat, int width, int height, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
 
         #region glTexParameter
 
         [DllImport("opengl32.dll")]
-        public static extern void glTexParameterf(uint target, uint pname, float param);
+        public static extern void glTexParameterf(GLTextureTarget target, GLTextureParameter pname, float param);
         [DllImport("opengl32.dll")]
-        public static extern void glTexParameteri(uint target, uint pname, int param);
-
+        public static extern void glTexParameteri(GLTextureTarget target, GLTextureParameter pname, int param);
         [DllImport("opengl32.dll")]
-        public static extern void glTexParameterfv(uint target, uint pname, float* param);
+        public static extern void glTexParameterfv(GLTextureTarget target, GLTextureParameter pname, float* param);
         [DllImport("opengl32.dll")]
-        public static extern void glTexParameteriv(uint target, uint pname, int* param);
+        public static extern void glTexParameteriv(GLTextureTarget target, GLTextureParameter pname, int* param);
 
         #endregion
 

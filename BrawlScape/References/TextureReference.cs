@@ -18,9 +18,8 @@ namespace BrawlScape
         {
             get
             {
-                if (_texture == null)
-                    try { _texture = ((TEX0Node)Node).GetImage(0); }
-                    catch { }
+                if ((_texture == null) && (Node != null))
+                    _texture = ((TEX0Node)Node).GetImage(0);
                 return _texture;
             }
         }
@@ -40,7 +39,9 @@ namespace BrawlScape
             ResourceNode pNode = tNode.GetPaletteNode(), prNode;
             foreach (TextureReference r in _watches)
             {
-                trNode = r.Node as TEX0Node;
+                if ((trNode = r.Node as TEX0Node) == null)
+                    continue;
+
                 trNode.ReplaceRaw(tNode.WorkingRawSource.Address, tNode.WorkingRawSource.Length);
                 if ((prNode = trNode.GetPaletteNode()) != null)
                     prNode.ReplaceRaw(pNode.WorkingRawSource.Address, pNode.WorkingRawSource.Length);
@@ -120,7 +121,7 @@ namespace BrawlScape
         {
             TEX0Node tNode = Node as TEX0Node;
             PLT0Node pNode = tNode.GetPaletteNode();
-            if (tNode.IsDirty)
+            if ((tNode.IsDirty) || (tNode.IsBranch))
             {
                 if (pNode != null)
                     pNode.Restore();

@@ -12,7 +12,7 @@ namespace BrawlScape
     {
         public TextureDefinition(string treePath, string nodePath) : base(treePath, nodePath) { }
 
-        protected override void OnChanged(object sender, EventArgs e)
+        protected override void OnChanged(NodeReference r)
         {
             //Dispose();
             if (ListView != null)
@@ -21,6 +21,7 @@ namespace BrawlScape
                 list.Images[this.ImageIndex] = new Bitmap(Texture, list.ImageSize.Width, list.ImageSize.Height);
                 ListView.RedrawItems(this.Index, this.Index, false);
             }
+            base.OnChanged(r);
         }
 
         //No disposing of this texture! The cache will do it.

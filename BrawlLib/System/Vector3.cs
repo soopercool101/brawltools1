@@ -54,5 +54,10 @@ namespace System
                 v._y > 0.0f ? (float)Math.Floor(v._y) : (float)Math.Ceiling(v._z),
                 v._z > 0.0f ? (float)Math.Floor(v._z) : (float)Math.Ceiling(v._z));
         }
+
+        public override string ToString()
+        {
+            return String.Format("({0},{1},{2})", _x, _y, _z);
+        }
     }
 }
