@@ -19,8 +19,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected override void OnPopulate()
         {
             ARCFileHeader* entry = Header->First;
-            for (int i = 0 ; i < Header->_numFiles; i++, entry = entry->Next)
-                if (NodeFactory.FromAddress(this, entry->Data, entry->Length) == null)
+            for (int i = 0; i < Header->_numFiles; i++, entry = entry->Next)
+                if ((entry->_size == 0) || (NodeFactory.FromAddress(this, entry->Data, entry->Length) == null))
                     new ARCEntryNode().Initialize(this, entry->Data, entry->Length);
         }
 
@@ -39,6 +39,51 @@ namespace BrawlLib.SSBB.ResourceNodes
             base.OnInitialize();
             _name = Header->Name;
             return Header->_numFiles > 0;
+        }
+
+        public void ExtractToFolder(string outFolder)
+        {
+            if (!Directory.Exists(outFolder))
+                Directory.CreateDirectory(outFolder);
+
+            foreach (ARCEntryNode entry in Children)
+            {
+                if (entry is ARCNode)
+                    ((ARCNode)entry).ExtractToFolder(Path.Combine(outFolder, entry.Name));
+                else if (entry is BRESNode)
+                    ((BRESNode)entry).ExportToFolder(outFolder);
+            }
+        }
+
+        public void ReplaceFromFolder(string inFolder)
+        {
+            DirectoryInfo dir = new DirectoryInfo(inFolder);
+            FileInfo[] files;
+            DirectoryInfo[] dirs;
+            foreach (ARCEntryNode entry in Children)
+            {
+                if (entry is ARCNode)
+                {
+                    dirs = dir.GetDirectories(entry.Name);
+                    if (dirs.Length > 0)
+                    {
+                        ((ARCNode)entry).ReplaceFromFolder(dirs[0].FullName);
+                        continue;
+                    }
+                }
+                else if (entry is BRESNode)
+                {
+                    ((BRESNode)entry).ReplaceFromFolder(inFolder);
+                }
+
+                //Find file name for entry
+                files = dir.GetFiles(entry.Name + ".*");
+                if (files.Length > 0)
+                {
+                    entry.Replace(files[0].FullName);
+                    continue;
+                }
+            }
         }
 
         //public override void Replace(string fileName)

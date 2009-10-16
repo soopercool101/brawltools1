@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace BrawlLib.OpenGL
 {
@@ -31,13 +32,24 @@ namespace BrawlLib.OpenGL
             base.OnLoad(e);
         }
 
+        protected override void OnPaintBackground(PaintEventArgs e) { }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             if (_context != null)
             {
-                _context.Capture();
-                OnRender();
-                _context.Release();
+                if (Monitor.TryEnter(_context))
+                {
+                    try
+                    {
+                        _context.Capture();
+                        OnRender();
+                        _context.glFinish();
+                        _context.Swap();
+                        _context.Release();
+                    }
+                    finally { Monitor.Exit(_context); }
+                }
             }
             else
                 base.OnPaint(e);
@@ -67,20 +79,11 @@ namespace BrawlLib.OpenGL
 
             _context.glMatrixMode(GLMatrixMode.Projection);
             _context.glLoadIdentity();
-            _context.gluPerspective(45.0f, (float)Width / (float)Height, 0.01f, 3000.0f);
+            _context.gluPerspective(45.0f, (float)Width / (float)Height, 0.01f, 10000.0f);
         }
         internal protected virtual void OnRender()
         {
             _context.glClear(GLClearMask.ColorBuffer | GLClearMask.DepthBuffer);
-            _context.glLoadIdentity();
-
-            _context.glBegin(GLPrimitiveType.Triangles);
-            _context.glVertex(0.0f, 1.0f, 0.0f);
-            _context.glVertex(0.0f, 0.0f, 1.0f);
-            _context.glVertex(1.0f, 0.0f, 0.0f);
-            _context.glEnd();
-
-            _context.glFlush();
         }
     }
 }

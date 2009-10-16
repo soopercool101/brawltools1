@@ -6,6 +6,7 @@ using BrawlLib.Imaging;
 using System.Drawing;
 using System.Collections.Generic;
 using BrawlLib.IO;
+using System.Drawing.Imaging;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -83,6 +84,45 @@ namespace BrawlLib.SSBB.ResourceNodes
             else
                 tMap = TextureFormat.Get(Format).EncodeTexture(bmp, LevelOfDetail);
             ReplaceRaw(tMap);
+        }
+
+        public override unsafe void Replace(string fileName)
+        {
+            Bitmap bmp;
+            if (fileName.EndsWith(".tga"))
+                bmp = TGA.FromFile(fileName);
+            else if (fileName.EndsWith(".png") ||
+                fileName.EndsWith(".tiff") || fileName.EndsWith(".tif") ||
+                fileName.EndsWith(".bmp") ||
+                fileName.EndsWith(".jpg") || fileName.EndsWith(".jpeg") ||
+                fileName.EndsWith(".gif"))
+                bmp = (Bitmap)Bitmap.FromFile(fileName);
+            else
+            {
+                base.Replace(fileName);
+                return;
+            }
+
+            using (Bitmap b = bmp)
+                Replace(b);
+        }
+
+        public override void Export(string outPath)
+        {
+            if (outPath.EndsWith(".png"))
+                using (Bitmap bmp = GetImage(0)) bmp.Save(outPath, ImageFormat.Png);
+            else if (outPath.EndsWith(".tga"))
+                using (Bitmap bmp = GetImage(0)) bmp.SaveTGA(outPath);
+            else if (outPath.EndsWith(".tiff") || outPath.EndsWith(".tif"))
+                using (Bitmap bmp = GetImage(0)) bmp.Save(outPath, ImageFormat.Tiff);
+            else if (outPath.EndsWith(".bmp"))
+                using (Bitmap bmp = GetImage(0)) bmp.Save(outPath, ImageFormat.Bmp);
+            else if (outPath.EndsWith(".jpg") || outPath.EndsWith(".jpeg"))
+                using (Bitmap bmp = GetImage(0)) bmp.Save(outPath, ImageFormat.Jpeg);
+            else if (outPath.EndsWith(".gif"))
+                using (Bitmap bmp = GetImage(0)) bmp.Save(outPath, ImageFormat.Gif);
+            else
+                base.Export(outPath);
         }
     }
 }

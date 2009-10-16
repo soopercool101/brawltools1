@@ -57,33 +57,27 @@ namespace BrawlLib.OpenGL
         //        p._primitives.Add(prim);
         //}
 
+        private uint[] _textureIds = new uint[8];
         internal unsafe void Render(GLContext context)
         {
             if (!_enabled)
                 return;
 
-
-            bool ok = false;
             if (_materials.Count != 0)
             {
-                context.glEnable(GLEnableCap.Texture2D);
-                foreach (GLMaterial mat in _materials)
-                {
-                    ok = mat.Bind(context);
-                    break;
-                }
+                _materials[0].Bind(context, _textureIds);
             }
             else
             {
-                context.glDisable((uint)GLEnableCap.Texture2D);
                 return;
             }
-            if (!ok)
-                return;
 
+            context.glEnable(GLEnableCap.Texture2D);
 
             foreach (GLPrimitive prim in _primitives)
-                prim.Render(context);
+                prim.Render(context, _textureIds);
+
+            context.glDisable((uint)GLEnableCap.Texture2D);
         }
 
         internal void Rebuild()

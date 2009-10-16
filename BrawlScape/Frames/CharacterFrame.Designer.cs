@@ -33,12 +33,13 @@
             this.mnuCharIcon = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuNameStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.modelPanel = new System.Windows.Forms.ModelPanel();
+            this.modelPanel = new BrawlScape.ModelControl();
             this.panel1 = new System.Windows.Forms.Panel();
             this.stockPortrait = new BrawlScape.ReferencedPictureBox();
-            this.gamePortrait = new BrawlScape.ReferencedPictureBox();
             this.modelList = new BrawlScape.ModelList();
-            this.textureList = new BrawlScape.TextureList();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.gamePortrait = new BrawlScape.ReferencedPictureBox();
+            this.textureList = new BrawlScape.TexturePanel();
             this.costumeList = new BrawlScape.CostumeList();
             this.costumeContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuCostumeCSP = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,6 +47,8 @@
             this.mnuCostumeExport = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuCostumeImport = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuCostumeRestore = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.exportAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.charList = new BrawlScape.CharacterList();
             this.characterContext.SuspendLayout();
@@ -82,13 +85,11 @@
             // 
             this.tabPage1.Controls.Add(this.modelPanel);
             this.tabPage1.Controls.Add(this.panel1);
-            this.tabPage1.Controls.Add(this.modelList);
             this.tabPage1.Controls.Add(this.textureList);
             this.tabPage1.Controls.Add(this.costumeList);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(552, 357);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Costumes";
@@ -96,13 +97,16 @@
             // 
             // modelPanel
             // 
+            this.modelPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.modelPanel.CurrentModel = null;
             this.modelPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.modelPanel.InitialYFactor = -175;
             this.modelPanel.InitialZoomFactor = -17;
-            this.modelPanel.Location = new System.Drawing.Point(190, 47);
+            this.modelPanel.Location = new System.Drawing.Point(190, 63);
+            this.modelPanel.Margin = new System.Windows.Forms.Padding(0);
             this.modelPanel.Name = "modelPanel";
             this.modelPanel.RotationScale = 0.4F;
-            this.modelPanel.Size = new System.Drawing.Size(172, 244);
+            this.modelPanel.Size = new System.Drawing.Size(172, 294);
             this.modelPanel.TabIndex = 7;
             this.modelPanel.TranslationScale = 0.05F;
             this.modelPanel.ZoomScale = 2.5F;
@@ -110,9 +114,10 @@
             // panel1
             // 
             this.panel1.Controls.Add(this.stockPortrait);
+            this.panel1.Controls.Add(this.modelList);
             this.panel1.Controls.Add(this.gamePortrait);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(190, 291);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel1.Location = new System.Drawing.Point(190, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(0);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(172, 63);
@@ -120,12 +125,40 @@
             // 
             // stockPortrait
             // 
-            this.stockPortrait.Location = new System.Drawing.Point(57, 28);
+            this.stockPortrait.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.stockPortrait.Location = new System.Drawing.Point(53, 28);
             this.stockPortrait.Name = "stockPortrait";
             this.stockPortrait.Reference = null;
             this.stockPortrait.Size = new System.Drawing.Size(32, 32);
             this.stockPortrait.TabIndex = 1;
             this.stockPortrait.TabStop = false;
+            // 
+            // modelList
+            // 
+            this.modelList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.modelList.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.modelList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1});
+            this.modelList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            this.modelList.HideSelection = false;
+            this.modelList.ImageSize = new System.Drawing.Size(128, 128);
+            this.modelList.Location = new System.Drawing.Point(87, 0);
+            this.modelList.Margin = new System.Windows.Forms.Padding(0);
+            this.modelList.MultiSelect = false;
+            this.modelList.Name = "modelList";
+            this.modelList.ShowGroups = false;
+            this.modelList.Size = new System.Drawing.Size(85, 63);
+            this.modelList.TabIndex = 6;
+            this.modelList.UseCompatibleStateImageBehavior = false;
+            this.modelList.View = System.Windows.Forms.View.Details;
+            this.modelList.ResourceChanged += new BrawlScape.ResourceChangeEvent<BrawlScape.ModelDefinition>(this.modelList_ResourceChanged);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Models";
+            this.columnHeader1.Width = 138;
             // 
             // gamePortrait
             // 
@@ -137,34 +170,15 @@
             this.gamePortrait.TabIndex = 0;
             this.gamePortrait.TabStop = false;
             // 
-            // modelList
-            // 
-            this.modelList.Alignment = System.Windows.Forms.ListViewAlignment.Left;
-            this.modelList.Dock = System.Windows.Forms.DockStyle.Top;
-            this.modelList.HideSelection = false;
-            this.modelList.ImageSize = new System.Drawing.Size(128, 128);
-            this.modelList.Location = new System.Drawing.Point(190, 3);
-            this.modelList.MultiSelect = false;
-            this.modelList.Name = "modelList";
-            this.modelList.Size = new System.Drawing.Size(172, 44);
-            this.modelList.TabIndex = 6;
-            this.modelList.UseCompatibleStateImageBehavior = false;
-            this.modelList.View = System.Windows.Forms.View.List;
-            this.modelList.ResourceChanged += new BrawlScape.ResourceChangeEvent<BrawlScape.ModelDefinition>(this.modelList_ResourceChanged);
-            // 
             // textureList
             // 
-            this.textureList.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textureList.Dock = System.Windows.Forms.DockStyle.Right;
-            this.textureList.HideSelection = false;
             this.textureList.ImageSize = new System.Drawing.Size(128, 128);
-            this.textureList.Location = new System.Drawing.Point(362, 3);
+            this.textureList.Location = new System.Drawing.Point(362, 0);
             this.textureList.Margin = new System.Windows.Forms.Padding(0);
-            this.textureList.MultiSelect = false;
             this.textureList.Name = "textureList";
-            this.textureList.Size = new System.Drawing.Size(187, 351);
+            this.textureList.Size = new System.Drawing.Size(190, 357);
             this.textureList.TabIndex = 5;
-            this.textureList.UseCompatibleStateImageBehavior = false;
             // 
             // costumeList
             // 
@@ -173,11 +187,11 @@
             this.costumeList.Dock = System.Windows.Forms.DockStyle.Left;
             this.costumeList.HideSelection = false;
             this.costumeList.ImageSize = new System.Drawing.Size(128, 160);
-            this.costumeList.Location = new System.Drawing.Point(3, 3);
+            this.costumeList.Location = new System.Drawing.Point(0, 0);
             this.costumeList.Margin = new System.Windows.Forms.Padding(0);
             this.costumeList.MultiSelect = false;
             this.costumeList.Name = "costumeList";
-            this.costumeList.Size = new System.Drawing.Size(187, 351);
+            this.costumeList.Size = new System.Drawing.Size(190, 357);
             this.costumeList.TabIndex = 4;
             this.costumeList.UseCompatibleStateImageBehavior = false;
             this.costumeList.ResourceChanged += new BrawlScape.ResourceChangeEvent<BrawlScape.CostumeDefinition>(this.costumeList_ResourceChanged);
@@ -202,7 +216,9 @@
             this.mnuCostume.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuCostumeExport,
             this.mnuCostumeImport,
-            this.mnuCostumeRestore});
+            this.mnuCostumeRestore,
+            this.toolStripMenuItem1,
+            this.exportAllToolStripMenuItem});
             this.mnuCostume.Name = "mnuCostume";
             this.mnuCostume.Size = new System.Drawing.Size(152, 22);
             this.mnuCostume.Text = "Costume";
@@ -210,23 +226,35 @@
             // mnuCostumeExport
             // 
             this.mnuCostumeExport.Name = "mnuCostumeExport";
-            this.mnuCostumeExport.Size = new System.Drawing.Size(119, 22);
+            this.mnuCostumeExport.Size = new System.Drawing.Size(133, 22);
             this.mnuCostumeExport.Text = "Export...";
             this.mnuCostumeExport.Click += new System.EventHandler(this.mnuCostumeExport_Click);
             // 
             // mnuCostumeImport
             // 
             this.mnuCostumeImport.Name = "mnuCostumeImport";
-            this.mnuCostumeImport.Size = new System.Drawing.Size(119, 22);
+            this.mnuCostumeImport.Size = new System.Drawing.Size(133, 22);
             this.mnuCostumeImport.Text = "Import...";
             this.mnuCostumeImport.Click += new System.EventHandler(this.mnuCostumeImport_Click);
             // 
             // mnuCostumeRestore
             // 
             this.mnuCostumeRestore.Name = "mnuCostumeRestore";
-            this.mnuCostumeRestore.Size = new System.Drawing.Size(119, 22);
+            this.mnuCostumeRestore.Size = new System.Drawing.Size(133, 22);
             this.mnuCostumeRestore.Text = "Restore";
             this.mnuCostumeRestore.Click += new System.EventHandler(this.mnuCostumeRestore_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(130, 6);
+            // 
+            // exportAllToolStripMenuItem
+            // 
+            this.exportAllToolStripMenuItem.Name = "exportAllToolStripMenuItem";
+            this.exportAllToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.exportAllToolStripMenuItem.Text = "Export All...";
+            this.exportAllToolStripMenuItem.Click += new System.EventHandler(this.exportAllToolStripMenuItem_Click);
             // 
             // tabControl1
             // 
@@ -291,11 +319,14 @@
         private System.Windows.Forms.ToolStripMenuItem mnuCostumeExport;
         private System.Windows.Forms.ToolStripMenuItem mnuCostumeImport;
         private System.Windows.Forms.ToolStripMenuItem mnuCostumeRestore;
-        private BrawlScape.TextureList textureList;
-        private ModelList modelList;
-        private System.Windows.Forms.ModelPanel modelPanel;
+        private BrawlScape.TexturePanel textureList;
+        private BrawlScape.ModelList modelList;
+        private BrawlScape.ModelControl modelPanel;
         private System.Windows.Forms.Panel panel1;
-        private ReferencedPictureBox stockPortrait;
-        private ReferencedPictureBox gamePortrait;
+        private BrawlScape.ReferencedPictureBox stockPortrait;
+        private BrawlScape.ReferencedPictureBox gamePortrait;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem exportAllToolStripMenuItem;
+        private System.Windows.Forms.ColumnHeader columnHeader1;
     }
 }

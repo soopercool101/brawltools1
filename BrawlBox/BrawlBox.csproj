@@ -45,6 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NodeWrappers\ActionFactory.cs" />
+    <Compile Include="NodeWrappers\ARCWrapper.cs" />
+    <Compile Include="NodeWrappers\BRESWrapper.cs" />
     <Compile Include="NodeWrappers\GenericWrapper.cs" />
     <Compile Include="NodeWrappers\TEX0Wrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

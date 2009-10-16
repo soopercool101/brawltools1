@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.textureList = new BrawlScape.TextureList();
+            this.textureList = new BrawlScape.TexturePanel();
             this.itemList = new BrawlScape.ItemList();
             this.modelList = new BrawlScape.ModelList();
-            this.modelPanel = new System.Windows.Forms.ModelPanel();
+            this.modelPanel = new ModelControl();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -51,14 +51,11 @@
             // 
             this.textureList.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textureList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textureList.HideSelection = false;
             this.textureList.ImageSize = new System.Drawing.Size(128, 128);
             this.textureList.Location = new System.Drawing.Point(3, 16);
-            this.textureList.MultiSelect = false;
             this.textureList.Name = "textureList";
             this.textureList.Size = new System.Drawing.Size(189, 343);
             this.textureList.TabIndex = 0;
-            this.textureList.UseCompatibleStateImageBehavior = false;
             // 
             // itemList
             // 
@@ -123,8 +120,8 @@
 
         private System.Windows.Forms.GroupBox groupBox2;
         private BrawlScape.ItemList itemList;
-        private TextureList textureList;
+        private TexturePanel textureList;
         private ModelList modelList;
-        private System.Windows.Forms.ModelPanel modelPanel;
+        private ModelControl modelPanel;
     }
 }

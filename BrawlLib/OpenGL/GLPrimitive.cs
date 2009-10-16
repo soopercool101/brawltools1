@@ -26,9 +26,13 @@ namespace BrawlLib.OpenGL
         {
             if(_vertices == null)
                 _vertices = new Vector3[_elements];
+            if (_normals == null)
+                _normals = new Vector3[_elements];
 
-            Vector3 vec;
             Vector3* sPtr = (Vector3*)_parent._vertices.Address;
+            Vector3* nPtr = _parent._normals != null ? (Vector3*)_parent._normals.Address : null;
+
+            
             Matrix43 m = _parent._node != null ? _parent._node._matrix : Matrix43.Identity;
             for (int i = 0; i < _elements; i++)
             {
@@ -36,10 +40,13 @@ namespace BrawlLib.OpenGL
                     m = _parent._model._nodes[_nodeIndices[i]]._matrix;
 
                 _vertices[i] = m.Multiply(sPtr[_vertexIndices[i]]);
+
+                if (nPtr != null)
+                    _normals[i] = m.Multiply(nPtr[_normalIndices[i]]);
             }
         }
 
-        internal unsafe void Render(GLContext context)
+        internal unsafe void Render(GLContext context, uint[] texIds)
         {
             if (!_enabled)
                 return;
@@ -49,56 +56,55 @@ namespace BrawlLib.OpenGL
             if (_parent._uvData[0] == null)
                 return;
 
-            context.glBegin(_type);
 
-            Vector3* vPtr = (Vector3*)_parent._vertices.Address;
-            Vector3* nPtr = (Vector3*)_parent._normals.Address;
+            //Vector3* vPtr = (Vector3*)_parent._vertices.Address;
+            //Vector3* nPtr = _parent._normals != null ? (Vector3*)_parent._normals.Address : null;
             ARGBPixel* c1Ptr = _parent._colors1 != null ? (ARGBPixel*)_parent._colors1.Address : null;
             ARGBPixel* c2Ptr = _parent._colors2 != null ? (ARGBPixel*)_parent._colors2.Address : null;
-            Vector2* uvPtr = _parent._uvData[0] != null ? (Vector2*)_parent._uvData[0].Address : null;
-            Vector3 v = new Vector3(float.MaxValue);
-            for (int i = 0; i < _elements; i++ )
+            //Vector2* uvPtr = _parent._uvData[0] != null ? (Vector2*)_parent._uvData[0].Address : null;
+
+            int numUV = 0;
+            Vector2*[] uPtrs = new Vector2*[8];
+            while (_parent._uvData[numUV] != null)
             {
-                if(c1Ptr != null)
-                    context.glColor4((byte*)&c1Ptr[_colorIndices[0][i]]);
-                //if(c2Ptr != null)
-                //    context.glColor4((byte*)&c2Ptr[_colorIndices[1][i]]);
-
-                if (uvPtr != null)
-                    context.glTexCoord2((float*)&uvPtr[_uvIndices[0][i]]);
-
-                //context.glNormal((float*)&nPtr[_normalIndices[i]]);
-
-
-                v = _vertices[i];
-                context.glVertex3v((float*)&v);
-
-                //int index = _vertexIndices[i];
-                //Vector3 vec = vPtr[index];
-                //Vector3 vec = vPtr[_vertexIndices[i]];
-                //Vector3 v2 = vec;
-
-                //vec._x = (v2._x * m[0]) + (v2._y * m[4]) + (v2._z * m[8]) + m[12];
-                //vec._y = (v2._x * m[1]) + (v2._y * m[5]) + (v2._z * m[9]) + m[13];
-                //vec._z = (v2._x * m[2]) + (v2._y * m[6]) + (v2._z * m[10]) + m[14];
-
-                //if (_weights != null)
-                //{
-                //    vec._x /= _weights[i];
-                //    vec._y /= _weights[i];
-                //    vec._z /= _weights[i];
-                //}
-
-                //context.glVertex(vec._x, vec._y, vec._z);
-                //context.glVertex3v((float*)&vec);
-
-                //context.glVertex3v((float*)&vPtr[_vertexIndices[i]]);
-
-                //min.Min(vec);
-                //max.Max(vec);
+                uPtrs[numUV] = (Vector2*)_parent._uvData[numUV].Address;
+                numUV++;
             }
 
-            context.glEnd();
+            Vector3 v, n;
+            Vector2 u;
+            uint id;
+
+            fixed (Vector3* vPtr = _vertices)
+            fixed (Vector3* nPtr = _normals)
+            {
+
+                for (int t = 0; t < 1; t++)
+                {
+                    if ((id = texIds[t]) == 0)
+                        continue;
+
+                    context.glBindTexture(GLTextureTarget.Texture2D, id);
+                    context.glBegin(_type);
+                    for (int i = 0; i < _elements; i++)
+                    {
+                        if (c1Ptr != null)
+                            context.glColor4((byte*)&c1Ptr[_colorIndices[0][i]]);
+                        //if(c2Ptr != null)
+                        //    context.glColor4((byte*)&c2Ptr[_colorIndices[1][i]]);
+
+                        context.glNormal((float*)&nPtr[i]);
+
+                        context.glTexCoord2((float*)&uPtrs[0][_uvIndices[0][i]]);
+                        //u = uPtrs[t][_uvIndices[t][i]];
+                        //context.glTexCoord2((float*)&u);
+
+                        context.glVertex3v((float*)&vPtr[i]);
+                    }
+                    context.glEnd();
+                }
+            }
+            context.CheckErrors();
         }
     }
 }

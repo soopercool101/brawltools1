@@ -56,7 +56,7 @@ namespace BrawlScape
         public void AttachTextures()
         {
             GLModel model = Model;
-            if ((_textures != null) && (model != null))
+            if ((ListItems != null) && (model != null))
             {
                 foreach (TextureDefinition tex in _textures)
                 {

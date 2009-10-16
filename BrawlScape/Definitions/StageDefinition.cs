@@ -6,7 +6,7 @@ using BrawlLib.SSBB.ResourceNodes;
 
 namespace BrawlScape
 {
-    public class StageDefinition : TextureDefinition, IListSource<ModelDefinition>
+    public class StageDefinition : TextureDefinition, IListSource<ModelDefinition>, IListSource<TextureDefinition>
     {
         public static List<StageDefinition> List = new List<StageDefinition>();
         static StageDefinition()
@@ -15,7 +15,8 @@ namespace BrawlScape
             List.Add(new StageDefinition("Final Destination", "STGFINAL", 2));
             List.Add(new StageDefinition("Delfino Plaza", "STGDOLPIC", 3));
             List.Add(new StageDefinition("Luigi's Mansion", "STGMANSION", 4));
-            List.Add(new StageDefinition("Mushroomy Kingdom", "STGMARIOPAST_00", 5));
+            List.Add(new StageDefinition("Mushroomy Kingdom (Exterior)", "STGMARIOPAST_00", 5));
+            List.Add(new StageDefinition("Mushroomy Kingdom (Interior)", "STGMARIOPAST_01", 5));
             List.Add(new StageDefinition("Mario Circuit", "STGKART", 6));
             List.Add(new StageDefinition("75 m", "STGDONKEY", 7));
             List.Add(new StageDefinition("Rumble Falls", "STGJUNGLE", 8));
@@ -67,6 +68,21 @@ namespace BrawlScape
             List.Add(new StageDefinition("Big Blue", "STGDXBIGBLUE", 57));
             List.Add(new StageDefinition("Brinstar", "STGDXZEBES", 58));
             List.Add(new StageDefinition("Pokemon Stadium", "STGDXPSTADIUM", 59));
+
+            List.Add(new StageDefinition("Stage Edit 1", "STGEDIT_0", 102));
+            List.Add(new StageDefinition("Stage Edit 2", "STGEDIT_1", 102));
+            List.Add(new StageDefinition("Stage Edit 3", "STGEDIT_2", 102));
+            List.Add(new StageDefinition("Credits", "STGCHARAROLL", -1));
+            List.Add(new StageDefinition("Config Test", "STGCONFIGTEST", -1));
+            List.Add(new StageDefinition("All-Star Healing Room", "STGHEAL", -1));
+            List.Add(new StageDefinition("Homerun Contest", "STGHOMERUN", -1));
+            List.Add(new StageDefinition("Online Training", "STGONLINETRAINING", -1));
+            List.Add(new StageDefinition("Results", "STGRESULT", -1));
+            List.Add(new StageDefinition("Target Practice 1", "STGTARGETLV1", -1));
+            List.Add(new StageDefinition("Target Practice 2", "STGTARGETLV2", -1));
+            List.Add(new StageDefinition("Target Practice 3", "STGTARGETLV3", -1));
+            List.Add(new StageDefinition("Target Practice 4", "STGTARGETLV4", -1));
+            List.Add(new StageDefinition("Target Practice 5", "STGTARGETLV5", -1));
         }
 
         private int _index;
@@ -75,7 +91,7 @@ namespace BrawlScape
 
 
         private StageDefinition(string name, string stageName, int index)
-            : base("system\\common5.pac", String.Format("sc_selmap_en/Type1[80]/Textures(NW4R)/MenSelmapIcon.{0:00}", index))
+            : base(index == -1 ? null : "system\\common5.pac", index == -1 ? null : String.Format("sc_selmap_en/Type1[80]/Textures(NW4R)/MenSelmapIcon.{0:00}", index))
         {
             _index = index;
             _stageName = stageName;
@@ -100,6 +116,26 @@ namespace BrawlScape
                     }
                 }
                 return _models;
+            }
+        }
+
+        private TextureDefinition[] _textures;
+        TextureDefinition[] IListSource<TextureDefinition>.ListItems
+        {
+            get
+            {
+                if (_textures == null)
+                {
+                    ResourceNode[] nodes = ResourceCache.FindNodeByType(_path, null, ResourceType.TEX0);
+                    if (nodes != null)
+                    {
+                        TextureDefinition[] textures = new TextureDefinition[nodes.Length];
+                        for (int i = 0; i < nodes.Length; i++)
+                            textures[i] = new TextureDefinition(_path, nodes[i].TreePath);
+                        _textures = textures;
+                    }
+                }
+                return _textures;
             }
         }
     }

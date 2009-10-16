@@ -13,4 +13,6 @@ namespace BrawlScape
     public class TextureList : ResourceList<TextureDefinition> { }
     public class ModelList : ResourceList<ModelDefinition> { }
     public class StageList : ResourceList<StageDefinition> { }
+    public class SSEStageList : ResourceList<AdvStageDefinition> { }
+    public class SSEAreaList : ResourceList<AdvAreaDefinition> { }
 }

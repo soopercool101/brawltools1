@@ -49,6 +49,25 @@ namespace System.Windows.Forms
             }
         }
 
+        public override System.Drawing.Color BackColor
+        {
+            get { return base.BackColor; }
+            set
+            {
+                if (base.BackColor != value)
+                {
+                    base.BackColor = value;
+                    if (_context != null)
+                    {
+                        Vector3 v = (Vector3)value;
+                        _context.Capture();
+                        _context.glClearColor(v._x, v._y, v._z, 0.0f);
+                        _context.Release();
+                    }
+                }
+            }
+        }
+
         private void InitModel()
         {
             if (_model == null)
@@ -110,22 +129,49 @@ namespace System.Windows.Forms
             base.OnMouseMove(e);
         }
 
-        protected internal override void OnInit()
+        protected internal unsafe override void OnInit()
         {
-            //Vector3 v = (Vector3)BackColor;
-            _context.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            Vector3 v = (Vector3)BackColor;
+            _context.glClearColor(v._x, v._y, v._z, 0.0f);
             _context.glClearDepth(1.0f);
-            _context.glPolygonMode(GLFace.Back, GLPolygonMode.Fill);
+            _context.glFrontFace(GLFrontFaceDirection.CW);
+            _context.glCullFace(GLFace.Back);
+            //_context.glEnable(GLEnableCap.CullFace);
+            //_context.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
 
             _context.glEnable(GLEnableCap.DepthTest);
             _context.glDepthFunc(GLFunction.LEQUAL);
             _context.glShadeModel(GLShadingModel.SMOOTH);
+            //_context.glEnable(GLEnableCap.POLYGON_SMOOTH);
+            //_context.glEnable(GLEnableCap.LINE_SMOOTH);
             _context.glHint(GLHintTarget.PERSPECTIVE_CORRECTION_HINT, GLHintMode.NICEST);
 
-            //_context.glBlendFunc(GLBlendFactor.SRC_ALPHA, GLBlendFactor.SRC_COLOR);
-            //_context.glEnable(GLEnableCap.Blend);
+            _context.glBlendFunc(GLBlendFactor.SRC_ALPHA, GLBlendFactor.ONE_MINUS_SRC_ALPHA);
+            _context.glEnable(GLEnableCap.Blend);
+            _context.glAlphaFunc(GLAlphaFunc.Greater, 0.1f);
+            _context.glEnable(GLEnableCap.AlphaTest);
 
-            _context.glTexEnv(GLTexEnvTarget.TextureEnvironment, GLTexEnvParam.TEXTURE_ENV_MODE, (int)GLTexEnvMode.DECAL);
+            float* pos = stackalloc float[4];
+            pos[0] = pos[1] = pos[2] = 0.4f;
+            pos[3] = 1.0f;
+            _context.glLight(GLLightTarget.Light0, GLLightParameter.AMBIENT, pos);
+            _context.glMaterial(GLFace.FrontAndBack, GLMaterialParameter.EMISSION, pos);
+            pos[0] = 0.0f;
+            pos[1] = 3.0f;
+            pos[2] = 6.0f;
+            pos[3] = 0.0f;
+            _context.glLight(GLLightTarget.Light0, GLLightParameter.POSITION, pos);
+            pos[0] = pos[1] = pos[2] = pos[3] = 1.0f;
+            _context.glLight(GLLightTarget.Light0, GLLightParameter.DIFFUSE, pos);
+            _context.glLight(GLLightTarget.Light0, GLLightParameter.SPECULAR, pos);
+            _context.glEnable(GLEnableCap.Lighting);
+            _context.glEnable(GLEnableCap.Light0);
+
+            _context.glEnable(GLEnableCap.COLOR_MATERIAL);
+            _context.glColorMaterial(GLFace.FrontAndBack, GLMaterialParameter.AMBIENT_AND_DIFFUSE);
+            _context.glMaterial(GLFace.FrontAndBack, GLMaterialParameter.SPECULAR, pos);
+
+            _context.glTexEnv(GLTexEnvTarget.TextureEnvironment, GLTexEnvParam.TEXTURE_ENV_MODE, (int)GLTexEnvMode.MODULATE);
             //_context.glEnable(GLEnableCap.Lighting);
             _context.CheckErrors();
 
@@ -154,8 +200,6 @@ namespace System.Windows.Forms
 
                 _model.Render(_context);
             }
-
-            _context.glFlush();
         }
     }
 }

@@ -3,6 +3,8 @@ using BrawlLib.SSBBTypes;
 using System.ComponentModel;
 using System.Collections.Generic;
 using BrawlLib.Wii.Compression;
+using System.IO;
+using System.Drawing;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -41,6 +43,41 @@ namespace BrawlLib.SSBB.ResourceNodes
             _gId = group->_first._id;
 
             return group->_numEntries != 0;
+        }
+
+        public void ExportToFolder(string outFolder)
+        {
+            if (!Directory.Exists(outFolder))
+                Directory.CreateDirectory(outFolder);
+
+            foreach (BRESGroupNode group in Children)
+            {
+                foreach (BRESEntryNode entry in group.Children)
+                {
+                    if (entry is TEX0Node)
+                        entry.Export(Path.Combine(outFolder, entry.Name + ".png"));
+                    else if (entry is MDL0Node)
+                        entry.Export(Path.Combine(outFolder, entry.Name + ".mdl0"));
+                }
+            }
+        }
+        public void ReplaceFromFolder(string inFolder)
+        {
+            DirectoryInfo dir = new DirectoryInfo(inFolder);
+            FileInfo[] files;
+            foreach (BRESGroupNode group in Children)
+            {
+                foreach (BRESEntryNode entry in group.Children)
+                {
+                    //Find file name for entry
+                    files = dir.GetFiles(entry.Name + ".*");
+                    foreach (FileInfo info in files)
+                    {
+                        entry.Replace(info.FullName);
+                        break;
+                    }
+                }
+            }
         }
 
         //public ResourceNode GetResource(string group, string name)

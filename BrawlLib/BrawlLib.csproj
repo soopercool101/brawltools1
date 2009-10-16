@@ -51,7 +51,6 @@
     <Compile Include="Imaging\WeightedAverage.cs" />
     <Compile Include="OpenGL\Enums.cs" />
     <Compile Include="OpenGL\GLBone.cs" />
-    <Compile Include="OpenGL\GLBoneDef.cs" />
     <Compile Include="OpenGL\GLContext.cs" />
     <Compile Include="OpenGL\GLMaterial.cs" />
     <Compile Include="OpenGL\GLModel.cs" />

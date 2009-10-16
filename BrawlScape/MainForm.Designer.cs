@@ -37,11 +37,14 @@
             this.itemFrame1 = new BrawlScape.ItemFrame();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.stageFrame1 = new BrawlScape.StageFrame();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.sseFrame1 = new BrawlScape.Frames.AdvFrame();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            this.tabPage5.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -50,6 +53,7 @@
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage4);
+            this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -130,9 +134,30 @@
             // 
             this.stageFrame1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.stageFrame1.Location = new System.Drawing.Point(3, 3);
+            this.stageFrame1.Margin = new System.Windows.Forms.Padding(0);
             this.stageFrame1.Name = "stageFrame1";
             this.stageFrame1.Size = new System.Drawing.Size(663, 480);
             this.stageFrame1.TabIndex = 0;
+            // 
+            // tabPage5
+            // 
+            this.tabPage5.Controls.Add(this.sseFrame1);
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage5.Size = new System.Drawing.Size(669, 486);
+            this.tabPage5.TabIndex = 4;
+            this.tabPage5.Text = "Adv Stages";
+            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // sseFrame1
+            // 
+            this.sseFrame1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sseFrame1.Location = new System.Drawing.Point(3, 3);
+            this.sseFrame1.Margin = new System.Windows.Forms.Padding(0);
+            this.sseFrame1.Name = "sseFrame1";
+            this.sseFrame1.Size = new System.Drawing.Size(663, 480);
+            this.sseFrame1.TabIndex = 0;
             // 
             // MainForm
             // 
@@ -147,6 +172,7 @@
             this.tabPage2.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tabPage4.ResumeLayout(false);
+            this.tabPage5.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -162,6 +188,8 @@
         private ItemFrame itemFrame1;
         private System.Windows.Forms.TabPage tabPage4;
         private StageFrame stageFrame1;
+        private System.Windows.Forms.TabPage tabPage5;
+        private BrawlScape.Frames.AdvFrame sseFrame1;
 
     }
 }

@@ -22,13 +22,12 @@ namespace BrawlLib.OpenGL
                 _textureRefs.Add(new GLTextureRef(this, r));
         }
 
-        public bool Bind(GLContext context)
+        public void Bind(GLContext context, uint[] texIds)
         {
-            foreach (GLTextureRef r in _textureRefs)
+            for (int i = 0; i < _textureRefs.Count; i++)
             {
-                return r.Bind(context);
+                texIds[i] = _textureRefs[i].Initialize(context);
             }
-            return false;
         }
     }
 
@@ -44,12 +43,9 @@ namespace BrawlLib.OpenGL
             _name = tex.Name;
         }
 
-        public bool Bind(GLContext context)
+        public uint Initialize(GLContext context)
         {
-            if (_bmp == null)
-                return false;
-
-            if (_remake)
+            if ((_remake) && (_bmp != null))
             {
                 _remake = false;
                 uint id = 0;
@@ -61,26 +57,21 @@ namespace BrawlLib.OpenGL
 
                 context.glBindTexture(GLTextureTarget.Texture2D, id);
 
-                //context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.WrapS, (int)GLTextureWrapMode.REPEAT);
-                //context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.WrapT, (int)GLTextureWrapMode.REPEAT);
-                context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MagFilter, (int)GLTextureFilterMode.LINEAR);
-                context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MinFilter, (int)GLTextureFilterMode.LINEAR);
+                context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MagFilter, (int)GLTextureMagFilter.LINEAR);
+                context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MinFilter, (int)GLTextureMinFilter.LINEAR_MIPMAP_LINEAR);
 
                 if (_bmp != null)
                 {
                     //Lock bitmap and transfer to texture object
                     BitmapData data = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
-                    context.glTexImage2D(GLTexImageTarget.Texture2D, 0, GLInternalPixelFormat.RGBA, _bmp.Width, _bmp.Height, 0, GLPixelDataFormat.BGRA, GLPixelDataType.UNSIGNED_BYTE, (void*)data.Scan0);
+                    context.gluBuild2DMipmaps(GLTextureTarget.Texture2D, (GLInternalPixelFormat)4, _bmp.Width, _bmp.Height, GLPixelDataFormat.BGRA, GLPixelDataType.UNSIGNED_BYTE, (void*)data.Scan0);
+                    //context.glTexImage2D(GLTexImageTarget.Texture2D, 0, (GLInternalPixelFormat)4, _bmp.Width, _bmp.Height, 0, GLPixelDataFormat.BGRA, GLPixelDataType.UNSIGNED_BYTE, (void*)data.Scan0);
 
                     _bmp.UnlockBits(data);
                 }
             }
-            else
-            {
-                context.glBindTexture(GLTextureTarget.Texture2D, _texId);
-            }
-            return true;
+            return _texId;
         }
 
         public void Unbind(GLContext context)
@@ -122,11 +113,9 @@ namespace BrawlLib.OpenGL
             }
         }
 
-        public bool Bind(GLContext context)
+        public uint Initialize(GLContext context)
         {
-            if (_tex != null)
-                return _tex.Bind(context);
-            return false;
+            return _tex != null ? _tex.Initialize(context) : 0;
         }
     }
 }

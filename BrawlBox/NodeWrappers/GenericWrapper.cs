@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using BrawlLib.IO;
+using BrawlLib.SSBB.ResourceNodes;
 
 namespace BrawlBox
 {
@@ -46,7 +47,12 @@ namespace BrawlBox
             string inPath;
             int index = Program.OpenFile(ReplaceFilter, out inPath);
             if (index != 0)
+            {
                 OnReplace(inPath, index);
+                ResourceNode n = _resource;
+                this.Unlink();
+                this.Link(n);
+            }
         }
 
         public virtual void OnReplace(string inStream, int filterIndex)

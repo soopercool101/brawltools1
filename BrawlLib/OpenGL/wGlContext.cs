@@ -54,16 +54,32 @@ namespace BrawlLib.OpenGL
             if (_hglrc)
                 wGL.wglMakeCurrent(_hdc, _hglrc);
         }
-        public override void Release()
+        public override void Swap()
         {
             if (_hglrc)
-            {
                 wGL.wglSwapBuffers(_hdc);
-                wGL.wglMakeCurrent(null, null);
-            }
+        }
+        public override void Release()
+        {
+            //if (_hglrc)
+            //    wGL.wglMakeCurrent(null, null);
         }
 
         internal override void glAccum(GLAccumOp op, float value) { wGL.glAccum(op, value); }
+
+        private delegate void ActiveTextureDelegate(GLMultiTextureTarget texture);
+        private ActiveTextureDelegate _pActiveTexture;
+        internal override void glActiveTexture(GLMultiTextureTarget texture) 
+        {
+            if (_pActiveTexture == null)
+            {
+                VoidPtr ptr = wGL.wglGetProcAddress("glActiveTexture");
+                if (ptr == null)
+                    ptr = wGL.wglGetProcAddress("glActiveTextureARB");
+                _pActiveTexture = (ActiveTextureDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(ActiveTextureDelegate));
+            }
+            _pActiveTexture(texture);
+        }
         internal override void glAlphaFunc(GLAlphaFunc func, float refValue) { wGL.glAlphaFunc(func, refValue); }
         internal override bool glAreTexturesResident(int num, uint* textures, bool* residences) { return wGL.glAreTexturesResident(num, textures, residences); }
         internal override void glArrayElement(int index) { wGL.glArrayElement(index); }
@@ -117,7 +133,7 @@ namespace BrawlLib.OpenGL
         internal override void glColor4(ushort* v) { wGL.glColor4usv(v); }
 
         internal override void glColorMask(bool red, bool green, bool blue, bool alpha) { wGL.glColorMask(red, green, blue, alpha); }
-        internal override void glColorMaterial(uint face, uint mode) { wGL.glColorMaterial(face, mode); }
+        internal override void glColorMaterial(GLFace face, GLMaterialParameter mode) { wGL.glColorMaterial(face, mode); }
         internal override void glColorPointer(int size, uint type, int stride, void* pointer) { wGL.glColorPointer(size, type, stride, pointer); }
 
         internal override void glCopyPixels(int x, int y, int width, int height, uint type) { wGL.glCopyPixels(x, y, width, height, type); }
@@ -289,10 +305,7 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glFrontFace(uint mode)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glFrontFace(GLFrontFaceDirection mode)        {            wGL.glFrontFace(mode);        }
 
         internal override void glFrustum(double left, double right, double bottom, double top, double near, double far)
         {
@@ -510,25 +523,10 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override bool glLight(uint light, uint pname, float param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override bool glLight(uint light, uint pname, int param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override bool glLight(uint light, uint pname, float* param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override bool glLight(uint light, uint pname, int* param)
-        {
-            throw new NotImplementedException();
-        }
+        internal override bool glLight(GLLightTarget light, GLLightParameter pname, float param) {return wGL.glLightf(light, pname, param); }
+        internal override bool glLight(GLLightTarget light, GLLightParameter pname, int param){return wGL.glLighti(light, pname, param); }
+        internal override bool glLight(GLLightTarget light, GLLightParameter pname, float* param) { return wGL.glLightfv(light, pname, param); }
+        internal override bool glLight(GLLightTarget light, GLLightParameter pname, int* param) { return wGL.glLightiv(light, pname, param); }
 
         internal override void glLightModel(uint pname, float param)
         {
@@ -609,27 +607,61 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glMaterial(uint face, uint pname, float param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glMaterial(uint face, uint pname, int param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glMaterial(uint face, uint pname, float* param)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glMaterial(uint face, uint pname, int* param)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glMaterial(GLFace face, GLMaterialParameter pname, float param)        {            wGL.glMaterialf(face, pname, param);        }
+        internal override void glMaterial(GLFace face, GLMaterialParameter pname, int param) {            wGL.glMateriali(face, pname, param);        }
+        internal override void glMaterial(GLFace face, GLMaterialParameter pname, float* param) {            wGL.glMaterialfv(face, pname, param);        }
+        internal override void glMaterial(GLFace face, GLMaterialParameter pname, int* param) {            wGL.glMaterialiv(face, pname, param);        }
 
         internal override void glMatrixMode(GLMatrixMode mode) { wGL.glMatrixMode(mode); }
+
+        private delegate void MultiTexCoord1sDelegate(GLMultiTextureTarget target, short s);
+        private delegate void MultiTexCoord1iDelegate(GLMultiTextureTarget target, int s);
+        private delegate void MultiTexCoord2fvDelegate(GLMultiTextureTarget target, float* v);
+
+        private MultiTexCoord2fvDelegate _mtc2fv;
+
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, short s) { wGL.glMultiTexCoord1s(target, s); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, int s){ wGL.glMultiTexCoord1i(target, s); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, float s){ wGL.glMultiTexCoord1f(target, s); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, double s){ wGL.glMultiTexCoord1d(target, s); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, short s, short t) { wGL.glMultiTexCoord2s(target, s, t); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, int s, int t) { wGL.glMultiTexCoord2i(target, s, t); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, float s, float t) { wGL.glMultiTexCoord2f(target, s, t); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, double s, double t) { wGL.glMultiTexCoord2d(target, s, t); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, short s, short t, short r) { wGL.glMultiTexCoord3s(target, s, t, r); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, int s, int t, int r) { wGL.glMultiTexCoord3i(target, s, t, r); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, float s, float t, float r) { wGL.glMultiTexCoord3f(target, s, t, r); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, double s, double t, double r) { wGL.glMultiTexCoord3d(target, s, t, r); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, short s, short t, short r, short q) { wGL.glMultiTexCoord4s(target, s, t, r, q); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, int s, int t, int r, int q) { wGL.glMultiTexCoord4i(target, s, t, r, q); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, float s, float t, float r, float q) { wGL.glMultiTexCoord4f(target, s, t, r, q); }
+        //internal override void glMultiTexCoord(GLMultiTextureTarget target, double s, double t, double r, double q) { wGL.glMultiTexCoord4d(target, s, t, r, q); }
+        //internal override void glMultiTexCoord1(GLMultiTextureTarget target, short* v) { wGL.glMultiTexCoord1sv(target, v); }
+        //internal override void glMultiTexCoord1(GLMultiTextureTarget target, int* v) { wGL.glMultiTexCoord1iv(target, v); }
+        //internal override void glMultiTexCoord1(GLMultiTextureTarget target, float* v) { wGL.glMultiTexCoord1fv(target, v); }
+        //internal override void glMultiTexCoord1(GLMultiTextureTarget target, double* v) { wGL.glMultiTexCoord1dv(target, v); }
+        //internal override void glMultiTexCoord2(GLMultiTextureTarget target, short* v) { wGL.glMultiTexCoord2sv(target, v); }
+        //internal override void glMultiTexCoord2(GLMultiTextureTarget target, int* v) { wGL.glMultiTexCoord2iv(target, v); }
+        internal override void glMultiTexCoord2(GLMultiTextureTarget target, float* v) 
+        {
+            if (_mtc2fv == null)
+            {
+                VoidPtr ptr = wGL.wglGetProcAddress("glMultiTexCoord2fv");
+                if (ptr == null) 
+                    ptr = wGL.wglGetProcAddress("glMultiTexCoord2fvARB");
+                _mtc2fv = (MultiTexCoord2fvDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(MultiTexCoord2fvDelegate));
+            }
+            _mtc2fv(target, v);
+        }
+        //internal override void glMultiTexCoord2(GLMultiTextureTarget target, double* v) { wGL.glMultiTexCoord2dv(target, v); }
+        //internal override void glMultiTexCoord3(GLMultiTextureTarget target, short* v) { wGL.glMultiTexCoord3sv(target, v); }
+        //internal override void glMultiTexCoord3(GLMultiTextureTarget target, int* v) { wGL.glMultiTexCoord3iv(target, v); }
+        //internal override void glMultiTexCoord3(GLMultiTextureTarget target, float* v) { wGL.glMultiTexCoord3fv(target, v); }
+        //internal override void glMultiTexCoord3(GLMultiTextureTarget target, double* v) { wGL.glMultiTexCoord3dv(target, v); }
+        //internal override void glMultiTexCoord4(GLMultiTextureTarget target, short* v) { wGL.glMultiTexCoord4sv(target, v); }
+        //internal override void glMultiTexCoord4(GLMultiTextureTarget target, int* v) { wGL.glMultiTexCoord4iv(target, v); }
+        //internal override void glMultiTexCoord4(GLMultiTextureTarget target, float* v) { wGL.glMultiTexCoord4fv(target, v); }
+        //internal override void glMultiTexCoord4(GLMultiTextureTarget target, double* v) { wGL.glMultiTexCoord4dv(target, v); }
 
         internal override void glMultMatrix(double* m) { wGL.glMultMatrixd(m); }
 
@@ -1092,6 +1124,7 @@ namespace BrawlLib.OpenGL
 
         internal override void glViewport(int x, int y, int width, int height) { wGL.glViewport(x, y, width, height); }
 
+        internal override int gluBuild2DMipmaps(GLTextureTarget target, GLInternalPixelFormat internalFormat, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* data) { return wGL.gluBuild2DMipmaps(target, internalFormat, width, height, format, type, data); }
         internal override void gluPerspective(double fovy, double aspect, double zNear, double zFar) { wGL.gluPerspective(fovy, aspect, zNear, zFar); }
     }
 }

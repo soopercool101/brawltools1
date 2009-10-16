@@ -10,51 +10,44 @@ using BrawlLib.Wii.Compression;
 
 namespace BrawlScape
 {
-    public class CostumeDefinition : TextureDefinition, IListSource<ModelDefinition>
+    public class CostumeDefinition : TextureDefinition, IListSource<ModelDefinition>, IListSource<TextureDefinition>
     {
         private CharacterDefinition _character;
         private int _index, _portraitIndex;
         private string _path;
 
         public CostumeDefinition(CharacterDefinition character, int index) :
-            base("system\\common5.pac", String.Format("sc_selcharacter_en/char_bust_tex_lz77/Type1[{0}]/Textures(NW4R)/MenSelchrFaceB.{1:000}", character.CharacterIndex, character.PortraitId + index))
+            base(index == -1 ? null : "system\\common5.pac", index == -1 ? null : String.Format("sc_selcharacter_en/char_bust_tex_lz77/Type1[{0}]/Textures(NW4R)/MenSelchrFaceB.{1:000}", character.CharacterIndex, character.PortraitId + index))
         {
             _character = character;
             _index = index;
-            _portraitIndex = _character.PortraitId + _index;
+            _portraitIndex = index == -1 ? -1 : _character.PortraitId + _index;
             _path = _character.GetCostumePath(index);
 
             if (_nodeRef != null)
                 _nodeRef.Watches.Add(NodeReference.Get<TextureReference>(String.Format("menu\\common\\char_bust_tex\\MenSelchrFaceB{0:000}.brres", _character.CharacterIndex * 10), String.Format("Textures(NW4R)/MenSelchrFaceB.{0:000}", _character.PortraitId + _index)));
         }
 
-        //private TextureDefinition[] _textures;
-        //public TextureDefinition[] Textures
-        //{
-        //    get
-        //    {
-        //        if (_textures == null)
-        //        {
-        //            try
-        //            {
-        //                //Find outfit in fighter folder
-        //                //string path = _character.GetCostumePath(_index);
+        private TextureDefinition[] _textures;
+        TextureDefinition[] IListSource<TextureDefinition>.ListItems
+        {
+            get
+            {
+                if (_textures == null)
+                {
+                    ResourceNode[] nodes = ResourceCache.FindNodeByType(_path, null, ResourceType.TEX0);
+                    if (nodes != null)
+                    {
+                        TextureDefinition[] textures = new TextureDefinition[nodes.Length];
+                        for (int i = 0; i < nodes.Length; i++)
+                            textures[i] = new TextureDefinition(_path, nodes[i].TreePath);
 
-        //                ResourceNode[] nodes = ResourceCache.FindNodeByType(_path, null, ResourceType.TEX0);
-        //                if (nodes != null)
-        //                {
-        //                    TextureDefinition[] textures = new TextureDefinition[nodes.Length];
-        //                    for (int i = 0; i < nodes.Length; i++)
-        //                        textures[i] = new TextureDefinition(_path, nodes[i].TreePath);
-
-        //                    _textures = textures;
-        //                }
-        //            }
-        //            catch (Exception x) { MessageBox.Show(x.Message); return new TextureDefinition[0]; }
-        //        }
-        //        return _textures;
-        //    }
-        //}
+                        _textures = textures;
+                    }
+                }
+                return _textures;
+            }
+        }
 
         private ModelDefinition[] _models;
         public ModelDefinition[] ListItems
@@ -96,6 +89,16 @@ namespace BrawlScape
             }
         }
 
+        internal void ExportAllCostume()
+        {
+            ResourceTree tree = ResourceCache.GetTree(_path);
+            if (tree != null)
+            {
+                string path = Program.OpenFolder();
+                ((ARCNode)tree.Node).ExtractToFolder(path);
+            }
+        }
+
         internal bool ImportCostume()
         {
             string inFile;
@@ -128,7 +131,7 @@ namespace BrawlScape
         {
             get
             {
-                if (_stockRef == null)
+                if ((_portraitIndex != -1) && (_stockRef == null))
                 {
                     _stockRef = NodeReference.Get<TextureReference>("system\\common5.pac", String.Format("sc_selcharacter_en/Type1[90]/Textures(NW4R)/InfStc.{0:000}", _portraitIndex));
                     _stockRef.Watches.Add(NodeReference.Get<TextureReference>("system\\common5.pac", String.Format("sc_selmap_en/Type1[40]/Textures(NW4R)/InfStc.{0:000}", _portraitIndex)));
@@ -143,12 +146,13 @@ namespace BrawlScape
         {
             get
             {
-                if (_gameRef == null)
+                if ((_portraitIndex != -1) && (_gameRef == null))
                 {
                     _gameRef = NodeReference.Get<TextureReference>(String.Format("info\\portrite\\InfFace{0:000}.brres", _portraitIndex), String.Format("Textures(NW4R)/InfFace.{0:000}", _portraitIndex));
                 }
                 return _gameRef;
             }
         }
+
     }
 }

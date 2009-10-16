@@ -26,6 +26,86 @@ namespace BrawlLib.OpenGL
         SMOOTH = 0x1D01
     }
 
+    public enum GLFrontFaceDirection : uint
+    {
+        CW = 0x0900,
+        CCW = 0x0901
+    }
+
+    public enum GLLightTarget : uint
+    {
+        Light0 = 0x4000,
+        Light1 = 0x4001,
+        Light2 = 0x4002,
+        Light3 = 0x4003,
+        Light4 = 0x4004,
+        Light5 = 0x4005,
+        Light6 = 0x4006,
+        Light7 = 0x4007
+    }
+
+    public enum GLLightParameter : uint
+    {
+        AMBIENT = 0x1200,
+        DIFFUSE = 0x1201,
+        SPECULAR = 0x1202,
+        POSITION = 0x1203,
+        SPOT_DIRECTION = 0x1204,
+        SPOT_EXPONENT = 0x1205,
+        SPOT_CUTOFF = 0x1206,
+        CONSTANT_ATTENUATION = 0x1207,
+        LINEAR_ATTENUATION = 0x1208,
+        QUADRATIC_ATTENUATION = 0x1209
+    }
+
+    public enum GLMaterialParameter : uint
+    {
+        AMBIENT = 0x1200,
+        DIFFUSE = 0x1201,
+        SPECULAR = 0x1202,
+        EMISSION = 0x1600,
+        AMBIENT_AND_DIFFUSE = 0x1602
+    }
+
+    public enum GLMultiTextureTarget : uint
+    {
+        TEXTURE0 = 0x84C0,
+        TEXTURE1 = 0x84C1,
+        TEXTURE2 = 0x84C2,
+        TEXTURE3 = 0x84C3,
+        TEXTURE4 = 0x84C4,
+        TEXTURE5 = 0x84C5,
+        TEXTURE6 = 0x84C6,
+        TEXTURE7 = 0x84C7,
+        TEXTURE8 = 0x84C8,
+        TEXTURE9 = 0x84C9,
+        TEXTURE10 = 0x84CA,
+        TEXTURE11 = 0x84CB,
+        TEXTURE12 = 0x84CC,
+        TEXTURE13 = 0x84CD,
+        TEXTURE14 = 0x84CE,
+        TEXTURE15 = 0x84CF,
+        TEXTURE16 = 0x84D0,
+        TEXTURE17 = 0x84D1,
+        TEXTURE18 = 0x84D2,
+        TEXTURE19 = 0x84D3,
+        TEXTURE20 = 0x84D4,
+        TEXTURE21 = 0x84D5,
+        TEXTURE22 = 0x84D6,
+        TEXTURE23 = 0x84D7,
+        TEXTURE24 = 0x84D8,
+        TEXTURE25 = 0x84D9,
+        TEXTURE26 = 0x84DA,
+        TEXTURE27 = 0x84DB,
+        TEXTURE28 = 0x84DC,
+        TEXTURE29 = 0x84DD,
+        TEXTURE30 = 0x84DE,
+        TEXTURE31 = 0x84DF,
+        ACTIVE_TEXTURE = 0x84E0,
+        CLIENT_ACTIVE_TEXTURE = 0x84E1,
+        MAX_TEXTURE_UNITS = 0x84E2
+    }
+
     public enum GLFunction : uint
     {
         NEVER = 0x0200,
@@ -156,10 +236,20 @@ namespace BrawlLib.OpenGL
         CLAMP_TO_BORDER = 0x812D
     }
 
-    public enum GLTextureFilterMode : uint
+    public enum GLTextureMagFilter : uint
     {
-        NEAREST						= 0x2600,
-	LINEAR						= 0x2601
+        NEAREST = 0x2600,
+        LINEAR = 0x2601
+    }
+
+    public enum GLTextureMinFilter : uint
+    {
+        NEAREST = 0x2600,
+        LINEAR = 0x2601,
+        NEAREST_MIPMAP_NEAREST = 0x2700,
+        LINEAR_MIPMAP_NEAREST = 0x2701,
+        NEAREST_MIPMAP_LINEAR = 0x2702,
+        LINEAR_MIPMAP_LINEAR = 0x2703
     }
 
     public enum GLInternalPixelFormat : uint
@@ -320,12 +410,11 @@ namespace BrawlLib.OpenGL
         Light4 = 0x4004,
         Light5 = 0x4005,
         Light6 = 0x4006,
-        Light7 = 0x4007
-
-        //use GetPName TEXTURE_GEN_S
-        //use GetPName TEXTURE_GEN_T
-        //use GetPName TEXTURE_GEN_R
-        //use GetPName TEXTURE_GEN_Q
+        Light7 = 0x4007,
+        TEXTURE_GEN_S = 0x0C60,
+        TEXTURE_GEN_T = 0x0C61,
+        TEXTURE_GEN_R = 0x0C62,
+        TEXTURE_GEN_Q = 0x0C63,
         //use GetPName MAP1_VERTEX_3
         //use GetPName MAP1_VERTEX_4
         //use GetPName MAP1_COLOR_4
@@ -344,11 +433,11 @@ namespace BrawlLib.OpenGL
         //use GetPName MAP2_TEXTURE_COORD_2
         //use GetPName MAP2_TEXTURE_COORD_3
         //use GetPName MAP2_TEXTURE_COORD_4
-        //use GetPName POINT_SMOOTH
-        //use GetPName LINE_SMOOTH
-        //use GetPName POLYGON_SMOOTH
+        POINT_SMOOTH					= 0x0B10,
+        LINE_SMOOTH					= 0x0B20,
+        POLYGON_SMOOTH					= 0x0B41,
         //use GetPName SCISSOR_TEST
-        //use GetPName COLOR_MATERIAL
+        COLOR_MATERIAL = 0x0B57
         //use GetPName NORMALIZE
         //use GetPName AUTO_NORMAL
         //use GetPName POLYGON_OFFSET_POINT
@@ -360,6 +449,5 @@ namespace BrawlLib.OpenGL
         //use GetPName INDEX_ARRAY
         //use GetPName TEXTURE_COORD_ARRAY
         //use GetPName EDGE_FLAG_ARRAY
-
     }
 }

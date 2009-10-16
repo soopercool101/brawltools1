@@ -45,6 +45,9 @@
     <Compile Include="Controls\ModelContextMenu.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\ModelControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Controls\ResourceList.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -54,8 +57,13 @@
     <Compile Include="Controls\TextureContextMenuStrip.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\TexturePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Definitions\CharacterDefinition.cs" />
     <Compile Include="Definitions\ModelDefinition.cs" />
+    <Compile Include="Definitions\AdvAreaDefinition.cs" />
+    <Compile Include="Definitions\AdvStageDefinition.cs" />
     <Compile Include="Frames\CharacterFrame.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -72,6 +80,12 @@
     </Compile>
     <Compile Include="Frames\ItemFrame.Designer.cs">
       <DependentUpon>ItemFrame.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Frames\AdvFrame.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Frames\AdvFrame.Designer.cs">
+      <DependentUpon>AdvFrame.cs</DependentUpon>
     </Compile>
     <Compile Include="IListSource.cs" />
     <Compile Include="MainForm.cs">
@@ -104,11 +118,17 @@
     </Compile>
     <Compile Include="References\TextureReference.cs" />
     <Compile Include="Definitions\TextureDefinition.cs" />
+    <EmbeddedResource Include="Controls\TexturePanel.resx">
+      <DependentUpon>TexturePanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Frames\CharacterFrame.resx">
       <DependentUpon>CharacterFrame.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Frames\ItemFrame.resx">
       <DependentUpon>ItemFrame.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Frames\AdvFrame.resx">
+      <DependentUpon>AdvFrame.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

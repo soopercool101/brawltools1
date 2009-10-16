@@ -1,5 +1,5 @@
 ﻿
-BrawlScape Mod Manager - Version 0.05
+BrawlScape Mod Manager - Version 0.06
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -52,6 +52,18 @@ Scroll the mouse wheel to zoom in/out.
 |************ Change Log ************|
  ====================================
 
+- v0.06 - (10/15/2009)
+	. Changed the model viewer in a few ways:
+		Basic lighting and blending
+		Added right-click context menu
+		The background color is now changeable
+		Individual polygons can now be enabled/disabled
+	. Costume textures can now be exported all at once.
+	. The texture list can be switched between the current model textures and all textures.
+	. Added support for adventure stages/areas.
+	. Added extra characters (Alloys/GBowser/Warioman)
+	. Added extra stages
+
 - v0.05 - (10/11/2009)
 	. Added support for model objects:
 		Individual models can now be selected from a list.
@@ -93,11 +105,17 @@ Scroll the mouse wheel to zoom in/out.
  * Microsoft .Net Framework v3.5 SP1
 	http://www.microsoft.com/downloads/details.aspx?FamilyID=ab99342f-5d1a-413d-8319-81da479ab0d7&displaylang=en
  
- * Video card with OpenGL 1.5 support.
+ * Video card with OpenGL 1.3 support.
 
  ====================================
 |*********** Known Issues ***********|
  ====================================
+
+* Multi-layered textures don't display properly.
+
+* Blending is very simple and isn't drawn back-to-front.
+
+* There is a flicker to textures when zoomed out.
 
 * Startup page needs work. Make sure you set your paths before doing anything!
 

@@ -31,9 +31,10 @@
             this.stageList = new BrawlScape.StageList();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.modelPanel = new System.Windows.Forms.ModelPanel();
-            this.textureList = new BrawlScape.TextureList();
+            this.modelPanel = new BrawlScape.ModelControl();
+            this.textureList = new BrawlScape.TexturePanel();
             this.modelList = new BrawlScape.ModelList();
+            this.columnName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.SuspendLayout();
@@ -80,7 +81,9 @@
             // 
             // modelPanel
             // 
+            this.modelPanel.CurrentModel = null;
             this.modelPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.modelPanel.InitialYFactor = -100;
             this.modelPanel.InitialZoomFactor = -20;
             this.modelPanel.Location = new System.Drawing.Point(152, 0);
             this.modelPanel.Margin = new System.Windows.Forms.Padding(0);
@@ -93,23 +96,22 @@
             // 
             // textureList
             // 
-            this.textureList.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textureList.Dock = System.Windows.Forms.DockStyle.Right;
-            this.textureList.HideSelection = false;
             this.textureList.ImageSize = new System.Drawing.Size(128, 128);
             this.textureList.Location = new System.Drawing.Point(372, 0);
             this.textureList.Margin = new System.Windows.Forms.Padding(0);
-            this.textureList.MultiSelect = false;
             this.textureList.Name = "textureList";
             this.textureList.Size = new System.Drawing.Size(193, 296);
             this.textureList.TabIndex = 1;
-            this.textureList.UseCompatibleStateImageBehavior = false;
             // 
             // modelList
             // 
             this.modelList.AutoArrange = false;
             this.modelList.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.modelList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnName});
             this.modelList.Dock = System.Windows.Forms.DockStyle.Left;
+            this.modelList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
             this.modelList.HideSelection = false;
             this.modelList.ImageSize = new System.Drawing.Size(128, 128);
             this.modelList.Location = new System.Drawing.Point(0, 0);
@@ -119,8 +121,13 @@
             this.modelList.Size = new System.Drawing.Size(152, 296);
             this.modelList.TabIndex = 0;
             this.modelList.UseCompatibleStateImageBehavior = false;
-            this.modelList.View = System.Windows.Forms.View.List;
+            this.modelList.View = System.Windows.Forms.View.Details;
             this.modelList.ResourceChanged += new BrawlScape.ResourceChangeEvent<BrawlScape.ModelDefinition>(this.modelList_ResourceChanged);
+            // 
+            // columnName
+            // 
+            this.columnName.Text = "Name";
+            this.columnName.Width = 151;
             // 
             // StageFrame
             // 
@@ -143,8 +150,9 @@
         private BrawlScape.StageList stageList;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
-        private TextureList textureList;
+        private TexturePanel textureList;
         private ModelList modelList;
-        private System.Windows.Forms.ModelPanel modelPanel;
+        private ModelControl modelPanel;
+        private System.Windows.Forms.ColumnHeader columnName;
     }
 }

@@ -29,9 +29,11 @@ namespace BrawlLib.OpenGL
         }
 
         public virtual void Capture() { }
+        public virtual void Swap() { }
         public virtual void Release() { }
 
         internal abstract void glAccum(GLAccumOp op, float value);
+        internal abstract void glActiveTexture(GLMultiTextureTarget texture);
         internal abstract void glAlphaFunc(GLAlphaFunc func, float refValue);
         internal abstract bool glAreTexturesResident(int num, uint* textures, bool* residences);
         internal abstract void glArrayElement(int index);
@@ -90,7 +92,7 @@ namespace BrawlLib.OpenGL
         #endregion
 
         internal abstract void glColorMask(bool red, bool green, bool blue, bool alpha);
-        internal abstract void glColorMaterial(uint face, uint mode);
+        internal abstract void glColorMaterial(GLFace face, GLMaterialParameter mode);
         internal abstract void glColorPointer(int size, uint type, int stride, void* pointer);
         internal abstract void glCopyPixels(int x, int y, int width, int height, uint type);
 
@@ -159,7 +161,7 @@ namespace BrawlLib.OpenGL
 
         #endregion
 
-        internal abstract void glFrontFace(uint mode);
+        internal abstract void glFrontFace(GLFrontFaceDirection mode);
         internal abstract void glFrustum(double left, double right, double bottom, double top, double near, double far);
         internal abstract uint glGenLists(int range);
         internal abstract void glGenTextures(int num, uint* textures);
@@ -235,10 +237,10 @@ namespace BrawlLib.OpenGL
 
         #region glLight
 
-        internal abstract bool glLight(uint light, uint pname, float param);
-        internal abstract bool glLight(uint light, uint pname, int param);
-        internal abstract bool glLight(uint light, uint pname, float* param);
-        internal abstract bool glLight(uint light, uint pname, int* param);
+        internal abstract bool glLight(GLLightTarget light, GLLightParameter pname, float param);
+        internal abstract bool glLight(GLLightTarget light, GLLightParameter pname, int param);
+        internal abstract bool glLight(GLLightTarget light, GLLightParameter pname, float* param);
+        internal abstract bool glLight(GLLightTarget light, GLLightParameter pname, int* param);
 
         #endregion
 
@@ -280,14 +282,49 @@ namespace BrawlLib.OpenGL
 
         #region glMaterial
 
-        internal abstract void glMaterial(uint face, uint pname, float param);
-        internal abstract void glMaterial(uint face, uint pname, int param);
-        internal abstract void glMaterial(uint face, uint pname, float* param);
-        internal abstract void glMaterial(uint face, uint pname, int* param);
+        internal abstract void glMaterial(GLFace face, GLMaterialParameter pname, float param);
+        internal abstract void glMaterial(GLFace face, GLMaterialParameter pname, int param);
+        internal abstract void glMaterial(GLFace face, GLMaterialParameter pname, float* param);
+        internal abstract void glMaterial(GLFace face, GLMaterialParameter pname, int* param);
 
         #endregion
 
         internal abstract void glMatrixMode(GLMatrixMode mode);
+
+        #region glMultiTexCoord
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, short s);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, int s);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, float s);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, double s);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, short s, short t);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, int s, int t);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, float s, float t);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, double s, double t);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, short s, short t, short r);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, int s, int t, int r);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, float s, float t, float r);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, double s, double t, double r);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, short s, short t, short r, short q);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, int s, int t, int r, int q);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, float s, float t, float r, float q);
+        //internal abstract void glMultiTexCoord(GLMultiTextureTarget target, double s, double t, double r, double q);
+        //internal abstract void glMultiTexCoord1(GLMultiTextureTarget target, short* v);
+        //internal abstract void glMultiTexCoord1(GLMultiTextureTarget target, int* v);
+        //internal abstract void glMultiTexCoord1(GLMultiTextureTarget target, float* v);
+        //internal abstract void glMultiTexCoord1(GLMultiTextureTarget target, double* v);
+        //internal abstract void glMultiTexCoord2(GLMultiTextureTarget target, short* v);
+        //internal abstract void glMultiTexCoord2(GLMultiTextureTarget target, int* v);
+        internal abstract void glMultiTexCoord2(GLMultiTextureTarget target, float* v);
+        //internal abstract void glMultiTexCoord2(GLMultiTextureTarget target, double* v);
+        //internal abstract void glMultiTexCoord3(GLMultiTextureTarget target, short* v);
+        //internal abstract void glMultiTexCoord3(GLMultiTextureTarget target, int* v);
+        //internal abstract void glMultiTexCoord3(GLMultiTextureTarget target, float* v);
+        //internal abstract void glMultiTexCoord3(GLMultiTextureTarget target, double* v);
+        //internal abstract void glMultiTexCoord4(GLMultiTextureTarget target, short* v);
+        //internal abstract void glMultiTexCoord4(GLMultiTextureTarget target, int* v);
+        //internal abstract void glMultiTexCoord4(GLMultiTextureTarget target, float* v);
+        //internal abstract void glMultiTexCoord4(GLMultiTextureTarget target, double* v);
+        #endregion
 
         internal abstract void glMultMatrix(double* m);
         internal abstract void glMultMatrix(float* m);
@@ -526,6 +563,7 @@ namespace BrawlLib.OpenGL
         internal abstract void glVertexPointer(int size, uint type, int stride, void* pointer);
         internal abstract void glViewport(int x, int y, int width, int height);
 
+        internal abstract int gluBuild2DMipmaps(GLTextureTarget target, GLInternalPixelFormat internalFormat, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* data);
         internal abstract void gluPerspective(double fovy, double aspect, double zNear, double zFar);
     }
 }

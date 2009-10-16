@@ -31,7 +31,7 @@ namespace BrawlLib.OpenGL
         public static extern int wglGetLayerPaletteEntries(VoidPtr hdc, int iLayerPlane, int iStart, int cEntries, VoidPtr colorRefArray);
         [DllImport("opengl32.dll")]
         public static extern int wglGetPixelFormat(VoidPtr hdc);
-        [DllImport("opengl32.dll")]
+        [DllImport("opengl32.dll", EntryPoint="wglGetProcAddress", CharSet= CharSet.Ansi)]
         public static extern VoidPtr wglGetProcAddress(string lpszProc);
         [DllImport("opengl32.dll")]
         public static extern bool wglMakeCurrent(VoidPtr hdc, VoidPtr hglrc);
@@ -174,7 +174,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glColorMask(bool red, bool green, bool blue, bool alpha);
         [DllImport("opengl32.dll")]
-        public static extern void glColorMaterial(uint face, uint mode);
+        public static extern void glColorMaterial(GLFace face, GLMaterialParameter mode);
         [DllImport("opengl32.dll")]
         public static extern void glColorPointer(int size, uint type, int stride, void* pointer);
         [DllImport("opengl32.dll")]
@@ -288,7 +288,7 @@ namespace BrawlLib.OpenGL
         #endregion
 
         [DllImport("opengl32.dll")]
-        public static extern void glFrontFace(uint mode);
+        public static extern void glFrontFace(GLFrontFaceDirection mode);
         [DllImport("opengl32.dll")]
         public static extern void glFrustum(double left, double right, double bottom, double top, double near, double far);
         [DllImport("opengl32.dll")]
@@ -413,13 +413,13 @@ namespace BrawlLib.OpenGL
         #region glLight
 
         [DllImport("opengl32.dll")]
-        public static extern bool glLightf(uint light, uint pname, float param);
+        public static extern bool glLightf(GLLightTarget light, GLLightParameter pname, float param);
         [DllImport("opengl32.dll")]
-        public static extern bool glLighti(uint light, uint pname, int param);
+        public static extern bool glLighti(GLLightTarget light, GLLightParameter pname, int param);
         [DllImport("opengl32.dll")]
-        public static extern bool glLightfv(uint light, uint pname, float* param);
+        public static extern bool glLightfv(GLLightTarget light, GLLightParameter pname, float* param);
         [DllImport("opengl32.dll")]
-        public static extern bool glLightiv(uint light, uint pname, int* param);
+        public static extern bool glLightiv(GLLightTarget light, GLLightParameter pname, int* param);
 
         #endregion
 
@@ -482,13 +482,13 @@ namespace BrawlLib.OpenGL
         #region glMaterial
 
         [DllImport("opengl32.dll")]
-        public static extern void glMaterialf(uint face, uint pname, float param);
+        public static extern void glMaterialf(GLFace face, GLMaterialParameter pname, float param);
         [DllImport("opengl32.dll")]
-        public static extern void glMateriali(uint face, uint pname, int param);
+        public static extern void glMateriali(GLFace face, GLMaterialParameter pname, int param);
         [DllImport("opengl32.dll")]
-        public static extern void glMaterialfv(uint face, uint pname, float* param);
+        public static extern void glMaterialfv(GLFace face, GLMaterialParameter pname, float* param);
         [DllImport("opengl32.dll")]
-        public static extern void glMaterialiv(uint face, uint pname, int* param);
+        public static extern void glMaterialiv(GLFace face, GLMaterialParameter pname, int* param);
 
         #endregion
 
@@ -895,6 +895,8 @@ namespace BrawlLib.OpenGL
         public static extern void glViewport(int x, int y, int width, int height);
 
 
+        [DllImport("Glu32.dll")]
+        public static extern int gluBuild2DMipmaps(GLTextureTarget target, GLInternalPixelFormat internalFormat, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* data);
         [DllImport("Glu32.dll")]
         public static extern void gluPerspective(double fovy, double aspect, double zNear, double zFar);
     }

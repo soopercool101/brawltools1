@@ -20,6 +20,7 @@ namespace BrawlBox
         //public static OpenFileDialog OpenDialog { get { return _openDlg == null ? _openDlg = new OpenFileDialog() : _openDlg; } }
         private static SaveFileDialog _saveDlg = new SaveFileDialog();
         //public static SaveFileDialog SaveDialog { get { return _saveDlg == null ? _saveDlg = new SaveFileDialog() : _saveDlg; } }
+        private static FolderBrowserDialog _folderDlg = new FolderBrowserDialog();
 
         private static ResourceNode _rootNode;
         public static ResourceNode RootNode { get { return _rootNode; } }
@@ -110,6 +111,13 @@ namespace BrawlBox
                 catch (Exception x){ MessageBox.Show(x.Message);}
             }
             return false;
+        }
+
+        public static string ChooseFolder()
+        {
+            if (_folderDlg.ShowDialog() == DialogResult.OK)
+                return _folderDlg.SelectedPath;
+            return null;
         }
 
         public static int OpenFile(string filter, out string fileName) { return OpenFile(filter, out fileName, true); }

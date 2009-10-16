@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using BrawlLib.OpenGL;
+using BrawlLib.SSBB.ResourceNodes;
 
 namespace BrawlScape
 {
@@ -31,9 +32,17 @@ namespace BrawlScape
 
         private void charList_ResourceChanged(CharacterDefinition resource)
         {
-            costumeList.CurrentSource = resource;
-            if (resource != null)
+            if ((costumeList.CurrentSource = resource) != null)
             {
+                if (resource.CostumeCount == 1)
+                {
+                    costumeList.Visible = false;
+                    costumeList.SelectedResource = resource.ListItems[0];
+                }
+                else
+                {
+                    costumeList.Visible = true;
+                }
                 ((TextureContextMenuStrip)mnuCharIcon.DropDown).TextureReference = resource.Reference;
                 ((TextureContextMenuStrip)mnuNameStrip.DropDown).TextureReference = resource.NameReference;
             }
@@ -41,6 +50,7 @@ namespace BrawlScape
         private void costumeList_ResourceChanged(CostumeDefinition resource)
         {
             modelList.CurrentSource = resource;
+            textureList.PrimarySource = resource;
             if (resource != null)
             {
                 ((TextureContextMenuStrip)mnuCostumeCSP.DropDown).TextureReference = resource.Reference;
@@ -55,19 +65,14 @@ namespace BrawlScape
             if ((modelList.SelectedResource == null) && (modelList.Items.Count != 0))
                 modelList.SelectedIndices.Add(0);
         }
-        private void modelList_ResourceChanged(ModelDefinition resource) 
+        private void modelList_ResourceChanged(ModelDefinition resource)
         {
-            textureList.CurrentSource = resource;
-            if (resource != null)
-            {
-                resource.AttachTextures();
-                modelPanel.TargetModel = resource.Model;
-            }
-            else
-                modelPanel.TargetModel = null;
+            textureList.SecondarySource = modelPanel.CurrentModel = resource;
         }
 
         private void characterContext_Opening(object sender, CancelEventArgs e) { if (charList.SelectedResource == null) e.Cancel = true; }
         private void costumeContext_Opening(object sender, CancelEventArgs e) { if (costumeList.SelectedResource == null) e.Cancel = true; }
+
+        private void exportAllToolStripMenuItem_Click(object sender, EventArgs e) { costumeList.SelectedResource.ExportAllCostume(); }
     }
 }

@@ -71,6 +71,9 @@ namespace BrawlScape
 
         private void StartupFrame_Load(object sender, EventArgs e)
         {
+            if (DesignMode)
+                return;
+
             txtDataPath.Text = Program.DataPath;
             txtProjectPath.Text = Program.WorkingPath;
         }

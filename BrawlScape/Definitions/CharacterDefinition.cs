@@ -56,6 +56,13 @@ namespace BrawlScape
             List.Add(new CharacterDefinition("Wolf", "Wolf", 43, 6));
             List.Add(new CharacterDefinition("Snake", "Snake", 45, 6));
             List.Add(new CharacterDefinition("Sonic", "Sonic", 46, 5));
+
+            List.Add(new CharacterDefinition("Giga Bowser", "gkoopa", -1, 1));
+            List.Add(new CharacterDefinition("Wario Man", "warioman", -1, 1));
+            List.Add(new CharacterDefinition("Zako Ball", "zakoball", -1, 1));
+            List.Add(new CharacterDefinition("Zako Boy", "zakoboy", -1, 1));
+            List.Add(new CharacterDefinition("Zako Child", "zakochild", -1, 1));
+            List.Add(new CharacterDefinition("Zako Girl", "zakogirl", -1, 1));
         }
 
 
@@ -74,14 +81,17 @@ namespace BrawlScape
         public TextureReference NameReference { get { return _charNameRef; } }
 
         private CharacterDefinition(string name, string fitName, int index, int costumeCount)
-            : base("system\\common5.pac", String.Format("sc_selcharacter_en/Type1[70]/Textures(NW4R)/MenSelchrChrFace.{0:000}", index + 1))
+            : base(index == -1 ? null : "system\\common5.pac", index == -1 ? null : String.Format("sc_selcharacter_en/Type1[70]/Textures(NW4R)/MenSelchrChrFace.{0:000}", index + 1))
         {
             Text = name;
             _fitName = fitName;
             _index = index;
             _costumeCount = costumeCount;
-            _charNameRef = NodeReference.Get<TextureReference>("system\\common5.pac", String.Format("sc_selcharacter_en/Type1[70]/Textures(NW4R)/MenSelchrChrNmS.{0:000}", index + 1));
-            _charNameRef.DataChanged += OnChanged;
+            if (index != -1)
+            {
+                _charNameRef = NodeReference.Get<TextureReference>("system\\common5.pac", String.Format("sc_selcharacter_en/Type1[70]/Textures(NW4R)/MenSelchrChrNmS.{0:000}", index + 1));
+                _charNameRef.DataChanged += OnChanged;
+            }
         }
 
         protected override void OnChanged(NodeReference r)
@@ -99,7 +109,7 @@ namespace BrawlScape
         {
             get
             {
-                if (_texture == null)
+                if ((_index != -1) && (_texture == null))
                 {
                     Bitmap icon = base.Texture;
                     Bitmap name = _charNameRef.Texture;
@@ -126,6 +136,9 @@ namespace BrawlScape
             {
                 if (_costumes == null)
                 {
+                    if (_index == -1)
+                        return _costumes = new CostumeDefinition[] { new CostumeDefinition(this, -1) };
+
                     _costumes = new CostumeDefinition[_costumeCount];
                     for (int i = 0; i < _costumeCount; i++)
                         _costumes[i] = new CostumeDefinition(this, i);
@@ -186,6 +199,9 @@ namespace BrawlScape
 
         internal string GetCostumePath(int index)
         {
+            if (_index == -1)
+                return String.Format("fighter\\{0}\\Fit{1}{2:00}", _fitName.ToLower(), _fitName, 0);
+
             return String.Format("fighter\\{0}\\Fit{1}{2:00}", _fitName.ToLower(), _fitName, _costumeIds[_index,index]);
         }
 

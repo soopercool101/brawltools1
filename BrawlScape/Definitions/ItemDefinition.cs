@@ -7,7 +7,7 @@ using BrawlLib.Imaging;
 
 namespace BrawlScape
 {
-    public class ItemDefinition : TextureDefinition, IListSource<ModelDefinition>
+    public class ItemDefinition : TextureDefinition, IListSource<ModelDefinition>, IListSource<TextureDefinition>
     {
         public static List<ItemDefinition> List = new List<ItemDefinition>();
         static ItemDefinition()
@@ -100,24 +100,25 @@ namespace BrawlScape
         //    return null;
         //}
 
-        //private TextureDefinition[] _textures;
-        //public TextureDefinition[] ListItems
-        //{
-        //    get
-        //    {
-        //        if (_textures == null)
-        //        {
-        //            ResourceNode[] nodes = ResourceCache.FindNodeByType("system\\common3.pac", String.Format("ItmCommonBrres/Itm{0}Brres", _resName), ResourceType.TEX0);
-        //            if (nodes != null)
-        //            {
-        //                _textures = new TextureDefinition[nodes.Length];
-        //                for (int i = 0; i < nodes.Length; i++)
-        //                    _textures[i] = new TextureDefinition("system\\common3.pac", nodes[i].TreePath);
-        //            }
-        //        }
-        //        return _textures;
-        //    }
-        //}
+        private TextureDefinition[] _textures;
+        TextureDefinition[] IListSource<TextureDefinition>.ListItems
+        {
+            get
+            {
+                if (_textures == null)
+                {
+                    ResourceNode[] nodes = ResourceCache.FindNodeByType("system\\common3.pac", _nodePath, ResourceType.TEX0);
+                    if (nodes != null)
+                    {
+                        TextureDefinition[] textures = new TextureDefinition[nodes.Length];
+                        for (int i = 0; i < nodes.Length; i++)
+                            textures[i] = new TextureDefinition("system\\common3.pac", nodes[i].TreePath);
+                        _textures = textures;
+                    }
+                }
+                return _textures;
+            }
+        }
 
         private ModelDefinition[] _models;
         public ModelDefinition[] ListItems
