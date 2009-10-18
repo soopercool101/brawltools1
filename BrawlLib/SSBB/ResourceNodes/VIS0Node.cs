@@ -25,11 +25,11 @@ namespace BrawlLib.SSBB.ResourceNodes
                 new VIS0EntryNode().Initialize(this, new DataSource(group->First[i].DataAddress, 0));
         }
 
-        internal override void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal override void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
             foreach (VIS0EntryNode n in Children)
-                strings[n.Name] = 0;
+                table.Add(n.Name);
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((VIS0*)address)->_header._tag == VIS0.Tag ? new VIS0Node() : null; }

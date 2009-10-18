@@ -30,15 +30,17 @@ namespace BrawlBox
         public virtual void Export()
         {
             string outPath;
-            int index = Program.SaveFile(ExportFilter, Text, out outPath);
-            if (index != 0)
-                using (FileStream stream = new FileStream(outPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.RandomAccess))
-                    OnExport(stream, index);
+            int index;
+            if ((index = Program.SaveFile(ExportFilter, Text, out outPath)) > 0)
+                OnExport(outPath, index);
+            //if (index != 0)
+            //    using (FileStream stream = new FileStream(outPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.RandomAccess))
+            //        OnExport(stream, index);
         }
-        public virtual void OnExport(FileStream outStream, int filterIndex)
+        public virtual void OnExport(string outPath, int filterIndex)
         {
             ResourceNode.Rebuild();
-            ResourceNode.Export(outStream);
+            ResourceNode.Export(outPath);
         }
 
         [NodeAction("&Replace", ShortcutKeys = Keys.Control | Keys.R)]
@@ -58,6 +60,8 @@ namespace BrawlBox
         public virtual void OnReplace(string inStream, int filterIndex)
         {
             ResourceNode.Replace(inStream);
+            TreeView.SelectedNode = null;
+            TreeView.SelectedNode = this;
         }
 
         [NodeAction("&Delete")]

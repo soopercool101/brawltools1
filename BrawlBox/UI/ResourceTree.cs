@@ -40,6 +40,14 @@ namespace BrawlBox
                 ((BaseWrapper)e.Node).OnExpand();
         }
 
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+            if ((e.Button == MouseButtons.Left) && (SelectedNode is BaseWrapper))
+                ((BaseWrapper)SelectedNode).OnDoubleClick();
+            else
+                base.OnMouseDoubleClick(e);
+        }
+
         protected override void Dispose(bool disposing) { Clear(); base.Dispose(disposing); }
     }
 }

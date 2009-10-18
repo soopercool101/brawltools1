@@ -60,6 +60,8 @@
     </Compile>
     <Compile Include="OpenGL\GLPolygon.cs" />
     <Compile Include="OpenGL\GLPrimitive.cs" />
+    <Compile Include="SSBB\BinaryStringTable.cs" />
+    <Compile Include="SSBB\ExportFilters.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0BoneNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0ColorNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0DefNode.cs" />
@@ -73,6 +75,7 @@
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0TextureNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0UVNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0VertexNode.cs" />
+    <Compile Include="SSBB\StringTable.cs" />
     <Compile Include="System\Matrix.cs" />
     <Compile Include="System\Matrix43.cs" />
     <Compile Include="System\UnsafeBuffer.cs" />
@@ -99,6 +102,9 @@
     <Compile Include="System\Drawing\Imaging\ColorPaletteExtension.cs" />
     <Compile Include="System\Reflection\MemberInfoExtension.cs" />
     <Compile Include="System\Reflection\MethodInfoExtension.cs" />
+    <Compile Include="System\Windows\Forms\ModelContext.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Windows\Forms\ModelPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>

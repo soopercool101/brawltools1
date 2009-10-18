@@ -12,11 +12,11 @@ namespace BrawlLib.SSBB
         internal SHP0* Header { get { return (SHP0*)WorkingSource.Address; } }
         ResourceGroup* IResourceGroupNode.Group { get { return Header->Group; } }
 
-        internal override void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal override void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
             foreach (SHP0EntryNode n in Children)
-                strings[n.Name] = 0;
+                table.Add(n.Name);
         }
 
         protected override bool OnInitialize()

@@ -45,14 +45,15 @@ namespace BrawlLib.SSBB.ResourceNodes
                 new PAT0EntryNode().Initialize(this, new DataSource(group->First[i].DataAddress, PAT0Entry.Size));
         }
 
-        internal override void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal override void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
+
             foreach (string s in _stringList)
-                strings[s] = 0;
+                table.Add(s);
 
             foreach (PAT0EntryNode n in Children)
-                strings[n.Name] = 0;
+                table.Add(n.Name);
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((PAT0*)address)->_header._tag == PAT0.Tag ? new PAT0Node() : null; }

@@ -4,11 +4,15 @@ using System.Linq;
 using System.Text;
 using BrawlLib.OpenGL;
 using System.ComponentModel;
+using System.Drawing;
 
 namespace System.Windows.Forms
 {
     public class ModelPanel : GLPanel
     {
+        private IContainer components;
+        private ModelContext _menu;
+
         private bool _grabbing = false;
         private int _lastX, _lastY;
 
@@ -37,19 +41,12 @@ namespace System.Windows.Forms
             get { return _model; }
             set 
             {
-                if (_model == value)
-                    return;
-
-                if (_model != null)
-                    _model.Unbind(_context);
-
-                _model = value;
-                InitModel();
-                Invalidate();
+                if (_model != value) OnModelChanged(value);
+               
             }
         }
 
-        public override System.Drawing.Color BackColor
+        public override Color BackColor
         {
             get { return base.BackColor; }
             set
@@ -68,14 +65,64 @@ namespace System.Windows.Forms
             }
         }
 
-        private void InitModel()
+        private GLModel _currentModel;
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public GLModel CurrentModel
         {
-            if (_model == null)
-                return;
+            get { return _currentModel; }
+            set { if (_currentModel != value) OnModelChanged(_currentModel = value); }
+        }
 
+        public ModelPanel()
+        {
+            components = new Container();
+            ContextMenuStrip = _menu = new ModelContext(components);
+            ColorChanged += OnBackColorChanged;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        private void OnModelChanged(GLModel model)
+        {
+            if (_model != null)
+                _model.Unbind(_context);
+
+            _menu.Model = _model = model;
+
+            ResetCamera();
+        }
+        private void OnBackColorChanged(Color c) { this.BackColor = c; }
+
+        private delegate void ColorChangeEvent(Color c);
+        private static event ColorChangeEvent ColorChanged;
+
+        private static ColorDialog _colorDlg;
+        public static void ChooseColor()
+        {
+            if (_colorDlg == null)
+                _colorDlg = new ColorDialog();
+
+            if (_colorDlg.ShowDialog() == DialogResult.OK)
+            {
+                if (ColorChanged != null)
+                    ColorChanged(_colorDlg.Color);
+            }
+        }
+
+        public void ResetCamera()
+        {
             _rotX = _rotY = _transX =  0;
             _transY = _yInit;
             _zoom = _zoomInit;
+
+            Invalidate();
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)

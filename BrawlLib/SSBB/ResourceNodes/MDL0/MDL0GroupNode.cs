@@ -9,7 +9,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 {
     public unsafe class MDL0EntryNode : ResourceEntryNode
     {
-        internal virtual void GetStrings(IDictionary<string, VoidPtr> strings) { strings[Name] = 0; }
+        internal virtual void GetStrings(StringTable table) { table.Add(Name); }
     }
 
     public unsafe class MDL0GroupNode : ResourceNode, IResourceGroupNode
@@ -23,10 +23,10 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("MDL0 Group")]
         public int TopNode { get { return _topNode; } set { _topNode = value; } }
 
-        internal void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal void GetStrings(StringTable table)
         {
             foreach (MDL0EntryNode n in Children)
-                n.GetStrings(strings);
+                n.GetStrings(table);
         }
 
         internal void Initialize(ResourceNode parent, DataSource source, int index)

@@ -7,6 +7,7 @@ using BrawlLib.IO;
 using BrawlLib.SSBB.ResourceNodes;
 using System.IO;
 using System.Diagnostics;
+using BrawlLib;
 
 namespace BrawlBox
 {

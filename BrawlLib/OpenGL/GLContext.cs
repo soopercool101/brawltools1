@@ -520,8 +520,8 @@ namespace BrawlLib.OpenGL
 
         #endregion
 
-        internal abstract void glTexSubImage1D(uint target, int level, int xOffset, int width, uint format, uint type, void* pixels);
-        internal abstract void glTexSubImage2D(uint target, int level, int xOffset, int yOffset, int width, int height, uint format, uint type, void* pixels);
+        internal abstract void glTexSubImage1D(GLTexImageTarget target, int level, int xOffset, int width, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
+        internal abstract void glTexSubImage2D(GLTexImageTarget target, int level, int xOffset, int yOffset, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
 
         internal abstract void glTranslate(double x, double y, double z);
         internal abstract void glTranslate(float x, float y, float z);

@@ -21,6 +21,7 @@ namespace BrawlLib.OpenGL
 
         public Vector3 _min, _max;
         private bool _enabled = true;
+        public string _name;
 
         public GLModel(MDL0Node node)
         {
@@ -29,6 +30,7 @@ namespace BrawlLib.OpenGL
 
             _min = node.BoxMin;
             _max = node.BoxMax;
+            _name = node.Name;
 
             //Extract textures
             if ((n = node.FindChild("Textures1", false)) != null)
@@ -82,25 +84,18 @@ namespace BrawlLib.OpenGL
                     if (o is MDL0Node3Class)
                         _nodes[((MDL0Node3Class)o)._id].Link(this, o as MDL0Node3Class);
 
-            //Extract nodes
-            //_nodes = new GLNode[node.NumNodes];
-            //MDL0DefNode mixNode = node.FindChild("Definitions/NodeMix", false) as MDL0DefNode;
-            //if (mixNode != null)
-            //{
-            //    foreach (object o in mixNode.Items)
-            //    {
-            //        if (o is MDL0NodeType5)
-            //        {
-            //            MDL0NodeType5 def = (MDL0NodeType5)o;
-            //            _nodes[def._id] = new GLNode(FindBoneInternal(_bones, def._index));
-            //        }
-            //        else if (o is MDL0Node3Class)
-            //        {
-            //            MDL0Node3Class def = (MDL0Node3Class)o;
-            //            _nodes[def._id] = new GLNode(this, def);
-            //        }
-            //    }
-            //}
+
+            //Cache textures
+            foreach (TEX0Node tex in node.RootNode.FindChildrenByType(null, ResourceType.TEX0))
+            {
+                foreach (GLTexture glt in _textures)
+                {
+                    if (glt._name == tex.Name)
+                    {
+                        glt.Attach(tex);
+                    }
+                }
+            }
 
             Rebuild();
         }
@@ -151,11 +146,11 @@ namespace BrawlLib.OpenGL
             return bone;
         }
 
-        public void AttachTexture(string texName, Bitmap bmp)
-        {
-            foreach (GLTexture tex in _textures)
-                tex.Attach(bmp, texName);
-        }
+        //public void AttachTexture(string texName, Bitmap bmp)
+        //{
+        //    foreach (GLTexture tex in _textures)
+        //        tex.Attach(bmp, texName);
+        //}
 
         internal unsafe void Render(GLContext context)
         {

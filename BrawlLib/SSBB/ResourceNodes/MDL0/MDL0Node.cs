@@ -5,6 +5,8 @@ using System.Text;
 using System.ComponentModel;
 using BrawlLib.SSBBTypes;
 using BrawlLib.OpenGL;
+using System.IO;
+using BrawlLib.IO;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -69,16 +71,41 @@ namespace BrawlLib.SSBB.ResourceNodes
                     new MDL0GroupNode().Initialize(this, new DataSource(group, 0), i);
         }
 
-        internal override void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal override void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
             foreach (MDL0GroupNode n in Children)
-                n.GetStrings(strings);
+                n.GetStrings(table);
         }
 
         public GLModel GetModel()
         {
             return new GLModel(this);
+        }
+
+        public override unsafe void Export(string outPath)
+        {
+            //get total size
+            int len = WorkingRawSource.Length;
+            int stringOffset;
+
+            StringTable table = new StringTable();
+            this.GetStrings(table);
+
+            stringOffset = len = len.Align(4);
+            len += table.GetTotalSize();
+            //len.Align(0x20);
+
+            using (FileStream stream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.RandomAccess))
+            {
+                stream.SetLength(len);
+                using (FileMap map = FileMap.FromStream(stream))
+                {
+                    Memory.Move(map.Address, WorkingRawSource.Address, (uint)WorkingRawSource.Length);
+                    table.WriteTable(map.Address + stringOffset);
+                }
+            }
+            table.Clear();
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((MDL0*)address)->_entry._tag == MDL0.Tag ? new MDL0Node() : null; }

@@ -32,10 +32,10 @@ namespace BrawlLib.SSBB.ResourceNodes
             return false;
         }
 
-        protected internal override void OnAfterRebuild(IDictionary<string, VoidPtr> strings)
+        protected internal override void OnAfterRebuild(StringTable table)
         {
-            base.OnAfterRebuild(strings);
-            Header->ResourceStringAddress = strings[Name];
+            base.OnAfterRebuild(table);
+            Header->ResourceStringAddress = table[Name];
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((PLT0*)address)->_bresEntry._tag == PLT0.Tag ? new PLT0Node() : null; }

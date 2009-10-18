@@ -24,8 +24,8 @@ namespace BrawlLib.SSBB.ResourceNodes
             _len2 = Header->_len2;
 
             ResourceGroup* group = Header->Group;
-            _mPrev = group->_first._leftIndex;
-            _mNext = group->_first._rightIndex;
+            //_mPrev = group->_first._leftIndex;
+            //_mNext = group->_first._rightIndex;
 
             return group->_numEntries > 0;
         }
@@ -39,11 +39,11 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         //protected override int OnCalculateSize(bool force) { return 0x40 + (Children.Count * 0x18); }
 
-        internal override void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal override void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
             foreach (CHR0EntryNode n in Children)
-                strings[n.Name] = 0;
+                table.Add(n.Name);
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((CHR0*)address)->_header._tag == CHR0.Tag ? new CHR0Node() : null; }

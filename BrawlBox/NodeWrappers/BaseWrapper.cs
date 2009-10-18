@@ -107,6 +107,8 @@ namespace BrawlBox
                 _discovered = true;
             }
         }
+        internal protected virtual void OnDoubleClick() { }
+
         internal BaseWrapper FindResource(ResourceNode n, bool searchChildren)
         {
             BaseWrapper node;
@@ -134,5 +136,6 @@ namespace BrawlBox
             w.Link(node);
             return w;
         }
+
     }
 }

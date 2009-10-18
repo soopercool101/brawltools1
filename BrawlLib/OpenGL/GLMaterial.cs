@@ -35,8 +35,9 @@ namespace BrawlLib.OpenGL
     {
         public string _name;
         public uint _texId;
-        public Bitmap _bmp;
-        public bool _remake = true;
+
+        private bool _remake = true;
+        private Bitmap[] _textures;
 
         public unsafe GLTexture(GLModel gLModel, MDL0Data10Node tex)
         {
@@ -45,36 +46,45 @@ namespace BrawlLib.OpenGL
 
         public uint Initialize(GLContext context)
         {
-            if ((_remake) && (_bmp != null))
+            if (_remake)
             {
-                _remake = false;
-                uint id = 0;
+                ClearTexture(context);
 
-                if ((id = _texId) != 0)
-                    context.glDeleteTextures(1, &id);
+                uint id = 0;
                 context.glGenTextures(1, &id);
                 _texId = id;
 
                 context.glBindTexture(GLTextureTarget.Texture2D, id);
 
                 context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MagFilter, (int)GLTextureMagFilter.LINEAR);
-                context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MinFilter, (int)GLTextureMinFilter.LINEAR_MIPMAP_LINEAR);
+                context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MinFilter, (int)GLTextureMinFilter.NEAREST_MIPMAP_LINEAR);
+                context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.BaseLevel, 0);
+                context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MaxLevel, _textures.Length - 1);
 
-                if (_bmp != null)
+                for (int i = 0; i < _textures.Length; i++)
                 {
-                    //Lock bitmap and transfer to texture object
-                    BitmapData data = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-
-                    context.gluBuild2DMipmaps(GLTextureTarget.Texture2D, (GLInternalPixelFormat)4, _bmp.Width, _bmp.Height, GLPixelDataFormat.BGRA, GLPixelDataType.UNSIGNED_BYTE, (void*)data.Scan0);
-                    //context.glTexImage2D(GLTexImageTarget.Texture2D, 0, (GLInternalPixelFormat)4, _bmp.Width, _bmp.Height, 0, GLPixelDataFormat.BGRA, GLPixelDataType.UNSIGNED_BYTE, (void*)data.Scan0);
-
-                    _bmp.UnlockBits(data);
+                    Bitmap bmp = _textures[i];
+                    BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                    context.glTexImage2D(GLTexImageTarget.Texture2D, i, (GLInternalPixelFormat)4, data.Width, data.Height, 0, GLPixelDataFormat.BGRA, GLPixelDataType.UNSIGNED_BYTE, (void*)data.Scan0);
+                    bmp.UnlockBits(data);
                 }
+
+                _remake = false;
+                ClearImages();
             }
             return _texId;
         }
 
-        public void Unbind(GLContext context)
+        private void ClearImages()
+        {
+            if (_textures != null)
+            {
+                foreach (Bitmap bmp in _textures)
+                    bmp.Dispose();
+                _textures = null;
+            }
+        }
+        private void ClearTexture(GLContext context)
         {
             if (_texId != 0)
             {
@@ -82,16 +92,32 @@ namespace BrawlLib.OpenGL
                 context.glDeleteTextures(1, &id);
                 _texId = 0;
             }
-            _bmp = null;
         }
 
-        internal void Attach(Bitmap bmp, string name)
+        public void Unbind(GLContext context)
         {
-            if (name.Equals(_name))
-            {
-                _bmp = bmp;
-                _remake = true;
-            }
+            ClearImages();
+            ClearTexture(context);
+        }
+
+        //internal void Attach(Bitmap bmp, string name)
+        //{
+        //    if (name.Equals(_name))
+        //    {
+        //        _bmp = bmp;
+        //        _remake = true;
+        //    }
+        //}
+
+        internal unsafe void Attach(TEX0Node tex)
+        {
+            ClearImages();
+
+            _textures = new Bitmap[tex.LevelOfDetail];
+            for (int i = 0; i < tex.LevelOfDetail; i++)
+                _textures[i] = tex.GetImage(i);
+
+            _remake = true;
         }
     }
 

@@ -97,11 +97,11 @@ namespace BrawlLib.SSBB.ResourceNodes
                 new MDL0MaterialRefNode().Initialize(this, part3++, MDL0Data7Part3.Size);
         }
 
-        internal override void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal override void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
             foreach (string s in _part4Entries)
-                strings[s] = 0;
+                table.Add(s);
         }
     }
 }

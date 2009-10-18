@@ -11,14 +11,14 @@ namespace BrawlLib.SSBB.ResourceNodes
     {
         internal ResourceEntry* EntryData { get { return _parent != null ? (ResourceEntry*)(&((IResourceGroupNode)_parent).Group->First[Index]) : null; } }
 
-        protected short _prev, _next, _id;
+        protected int _left, _right, _id;
 
         [Category("Resource Entry")]
-        public short SortNext { get { return _prev; } set { _prev = value; } }
+        public int SortNext { get { return _left; } set { _left = value; } }
         [Category("Resource Entry")]
-        public short NodeNext { get { return _next; } set { _next = value; } }
+        public int NodeNext { get { return _right; } set { _right = value; } }
         [Category("Resource Entry")]
-        public short EntryId { get { return _id; } set { _id = value; } }
+        public int EntryId { get { return _id; } set { _id = value; } }
 
         protected override bool OnInitialize()
         {
@@ -27,9 +27,9 @@ namespace BrawlLib.SSBB.ResourceNodes
                 ResourceEntry* entry = EntryData;
 
                 Name = entry->GetName();
-                _prev = entry->_leftIndex;
-                _next = entry->_rightIndex;
-                _id = entry->_id;
+                //_left = entry->_leftIndex;
+                //_right = entry->_rightIndex;
+                //_id = entry->_id;
             }
             return false;
         }

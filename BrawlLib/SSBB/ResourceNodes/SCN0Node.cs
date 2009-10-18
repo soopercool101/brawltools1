@@ -26,11 +26,11 @@ namespace BrawlLib.SSBB.ResourceNodes
                 new SCN0GroupNode().Initialize(this, new DataSource(group->First[i].DataAddress, 0x10));
         }
 
-        internal override void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal override void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
             foreach (SCN0GroupNode n in Children)
-                n.GetStrings(strings);
+                n.GetStrings(table);
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((SCN0*)address)->_header._tag == SCN0.Tag ? new SCN0Node() : null; }
@@ -46,11 +46,11 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         //private int _id;
 
-        internal void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
             foreach (SCN0EntryNode n in Children)
-                n.GetStrings(strings);
+                n.GetStrings(table);
         }
 
         protected override bool OnInitialize()
@@ -80,7 +80,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     public unsafe class SCN0EntryNode : ResourceEntryNode
     {
-        internal virtual void GetStrings(IDictionary<string, VoidPtr> strings) { strings[Name] = 0; }
+        internal virtual void GetStrings(StringTable table) { table.Add(Name); }
         //internal ResourceEntry* EntryData { get { return _parent != null ? (ResourceEntry*)(&((SCN0GroupNode)_parent).Group->First[Index]) : null; } }
 
         //protected override bool OnInitialize()
@@ -116,11 +116,11 @@ namespace BrawlLib.SSBB.ResourceNodes
             return false;
         }
 
-        internal override void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal override void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
             foreach (string s in _entries)
-                strings[s] = 0;
+                table.Add(s);
         }
     }
 

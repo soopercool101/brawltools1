@@ -38,9 +38,9 @@ namespace BrawlLib.SSBB.ResourceNodes
             base.OnInitialize();
 
             ResourceGroup* group = &Header->First->_master;
-            _gPrev = group->_first._leftIndex;
-            _gNext = group->_first._rightIndex;
-            _gId = group->_first._id;
+            //_gPrev = group->_first._leftIndex;
+            //_gNext = group->_first._rightIndex;
+            //_gId = group->_first._id;
 
             return group->_numEntries != 0;
         }
@@ -91,7 +91,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         //}
 
         private int _numEntries, _strOffset, _rootSize;
-        private SortedDictionary<string, VoidPtr> _stringTable = new SortedDictionary<string, VoidPtr>(StringComparer.Ordinal);
+        //private SortedDictionary<string, VoidPtr> _stringTable = new SortedDictionary<string, VoidPtr>(StringComparer.Ordinal);
+        StringTable _stringTable = new StringTable();
         protected override int OnCalculateSize(bool force)
         {
             int size = BRESHeader.Size;
@@ -110,7 +111,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             _stringTable.Clear();
             foreach (BRESGroupNode n in Children)
             {
-                _stringTable[n.Name] = 0;
+                _stringTable.Add(n.Name);
                 foreach (BRESEntryNode c in n.Children)
                 {
                     size = size.Align(c.DataAlign) + c.CalculateSize(force);
@@ -118,8 +119,11 @@ namespace BrawlLib.SSBB.ResourceNodes
                 }
             }
             _strOffset = size = size.Align(4);
-            foreach (string s in _stringTable.Keys)
-                size += (s.Length + 5).Align(4);
+
+            size += _stringTable.GetTotalSize();
+
+            //foreach (string s in _stringTable.Keys)
+            //    size += (s.Length + 5).Align(4);
 
             return size.Align(0x80);
         }
@@ -139,16 +143,18 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             ResourceGroup* pMaster = &rootHeader->_master;
             ResourceGroup* rGroup = (ResourceGroup*)pMaster->EndAddress;
-            BRESString* pStr = (BRESString*)(address + _strOffset);
+            //BRESString* pStr = (BRESString*)(address + _strOffset);
 
-            string[] strings = new string[_stringTable.Count];
-            _stringTable.Keys.CopyTo(strings, 0);
-            foreach (string s in strings)
-            {
-                _stringTable[s] = pStr->Data;
-                pStr->Value = s;
-                pStr = pStr->Next;
-            }
+            _stringTable.WriteTable(address + _strOffset);
+
+            //string[] strings = new string[_stringTable.Count];
+            //_stringTable.Keys.CopyTo(strings, 0);
+            //foreach (string s in strings)
+            //{
+            //    _stringTable[s] = pStr->Data;
+            //    pStr->Value = s;
+            //    pStr = pStr->Next;
+            //}
 
             VoidPtr dataAddr = (VoidPtr)rootHeader + _rootSize;
 
@@ -189,6 +195,10 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             src.Close();
             uncompSrc.Close();
+        }
+
+        private void PostProcess()
+        {
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((BRESHeader*)address)->_tag == BRESHeader.Tag ? new BRESNode() : null; }
@@ -232,9 +242,9 @@ namespace BrawlLib.SSBB.ResourceNodes
             {
                 base.OnInitialize();
                 ResourceGroup* group = Group;
-                _gPrev = group->_first._leftIndex;
-                _gNext = group->_first._rightIndex;
-                _gId = group->_first._id;
+                //_gPrev = group->_first._leftIndex;
+                //_gNext = group->_first._rightIndex;
+                //_gId = group->_first._id;
 
                 return group->_numEntries != 0;
             }
@@ -278,12 +288,12 @@ namespace BrawlLib.SSBB.ResourceNodes
         //    return false;
         //}
 
-        internal virtual void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal virtual void GetStrings(StringTable strings)
         {
-            strings[Name] = 0;
+            strings.Add(Name);
         }
 
-        internal protected virtual void OnAfterRebuild(IDictionary<string, VoidPtr> strings)
+        internal protected virtual void OnAfterRebuild(StringTable strings)
         {
             CommonHeader->_size = WorkingRawSource.Length;
             CommonHeader->_bresOffset = (int)_parent._parent.WorkingRawSource.Address - (int)CommonHeader;

@@ -1082,14 +1082,14 @@ namespace BrawlLib.OpenGL
         internal override void glTexParameter(GLTextureTarget target, GLTextureParameter pname, float* param) { wGL.glTexParameterfv(target, pname, param); }
         internal override void glTexParameter(GLTextureTarget target, GLTextureParameter pname, int* param) { wGL.glTexParameteriv(target, pname, param); }
 
-        internal override void glTexSubImage1D(uint target, int level, int xOffset, int width, uint format, uint type, void* pixels)
+        internal override void glTexSubImage1D(GLTexImageTarget target, int level, int xOffset, int width, GLPixelDataFormat format, GLPixelDataType type, void* pixels)
         {
-            throw new NotImplementedException();
+            wGL.glTexSubImage1D(target, level, xOffset, width, format, type, pixels);
         }
 
-        internal override void glTexSubImage2D(uint target, int level, int xOffset, int yOffset, int width, int height, uint format, uint type, void* pixels)
+        internal override void glTexSubImage2D(GLTexImageTarget target, int level, int xOffset, int yOffset, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels)
         {
-            throw new NotImplementedException();
+            wGL.glTexSubImage2D(target, level, xOffset, yOffset, width, height, format, type, pixels);
         }
 
         internal override void glTranslate(double x, double y, double z) { wGL.glTranslated(x, y, z); }

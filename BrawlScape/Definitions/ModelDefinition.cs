@@ -63,7 +63,7 @@ namespace BrawlScape
                     if (tex.Text == "TShadow1")
                         continue;
 
-                    model.AttachTexture(tex.Text, tex.Texture);
+                    //model.AttachTexture(tex.Text, tex.Texture);
                 }
             }
         }
@@ -73,7 +73,7 @@ namespace BrawlScape
             GLModel model = Model;
             if (model != null)
             {
-                model.AttachTexture(tex.Text, (tex as TextureDefinition).Texture);
+                //model.AttachTexture(tex.Text, (tex as TextureDefinition).Texture);
                 MainForm.ActiveForm.Invalidate(true);
             }
         }

@@ -32,11 +32,11 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         //protected override int OnCalculateSize(bool force) { return CLR0.Size + (Children.Count * CLR0Entry.Size) + 0x18; }
 
-        internal override void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal override void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
             foreach (CLR0EntryNode n in Children)
-                strings[n.Name] = 0;
+                table.Add(n.Name);
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((CLR0*)address)->_header._tag == CLR0.Tag ? new CLR0Node() : null; }

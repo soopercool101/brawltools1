@@ -111,31 +111,28 @@ namespace BrawlLib.SSBBTypes
     {
         public const uint Size = 0x10;
 
-        public bshort _id;
+        public bushort _id;
         public bshort _pad;
-        public bshort _leftIndex;
-        public bshort _rightIndex;
+        public bushort _leftIndex;
+        public bushort _rightIndex;
         public bint _stringOffset;
         public bint _dataOffset;
 
-        public int CharIndex { get { return _id >> 3; } set { _id = (short)((value << 3) | (_id & 0x7)); } }
-        public int CharShift { get { return _id & 0x7; } set { _id = (short)((value & 0x7) | (_id & 0xFFF8)); } }
+        public int CharIndex { get { return _id >> 3; } set { _id = (ushort)((value << 3) | (_id & 0x7)); } }
+        public int CharShift { get { return _id & 0x7; } set { _id = (ushort)((value & 0x7) | (_id & 0xFFF8)); } }
 
-        public ResourceEntry(short id, short prev, short next, int dataOffset)
+        public ResourceEntry(int id, int left, int right)
+            : this(id, left, right, 0, 0) { }
+
+        public ResourceEntry(int id, int left, int right, int dataOffset)
+            : this(id, left, right, dataOffset, 0){ }
+
+        public ResourceEntry(int id, int left, int right, int dataOffset, int stringOffset)
         {
-            _id = id;
+            _id = (ushort)id;
             _pad = 0;
-            _leftIndex = prev;
-            _rightIndex = next;
-            _stringOffset = 0;
-            _dataOffset = dataOffset;
-        }
-        public ResourceEntry(short id, short prev, short next, int dataOffset, int stringOffset)
-        {
-            _id = id;
-            _pad = 0;
-            _leftIndex = prev;
-            _rightIndex = next;
+            _leftIndex = (ushort)left;
+            _rightIndex = (ushort)right;
             _stringOffset = stringOffset;
             _dataOffset = dataOffset;
         }
@@ -152,7 +149,7 @@ namespace BrawlLib.SSBBTypes
             get
             {
                 ResourceEntry* entry = Address;
-                while (entry->_id != -1) entry--;
+                while (entry->_id != 0xFFFF) entry--;
                 return (ResourceGroup*)((uint)entry - 8);
             }
         }

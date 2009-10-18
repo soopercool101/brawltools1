@@ -65,13 +65,15 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Data2 Part2")]
         public List<string> Entries { get { return _entries; } }
 
-        internal override void GetStrings(IDictionary<string, VoidPtr> strings)
+        internal override void GetStrings(StringTable table)
         {
-            strings[Name] = 0;
+            table.Add(Name);
+
             foreach (MDL0BoneNode n in Children)
-                n.GetStrings(strings);
+                n.GetStrings(table);
+
             foreach (string s in _entries)
-                strings[s] = 0;
+                table.Add(s);
         }
 
         protected override bool OnInitialize()
