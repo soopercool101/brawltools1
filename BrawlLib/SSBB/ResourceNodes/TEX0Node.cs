@@ -13,7 +13,7 @@ namespace BrawlLib.SSBB.ResourceNodes
     public unsafe class TEX0Node : BRESEntryNode, IImageSource
     {
         public override ResourceType ResourceType { get { return ResourceType.TEX0; } }
-        internal TEX0* Header { get { return (TEX0*)WorkingSource.Address; } }
+        internal TEX0* Header { get { return (TEX0*)WorkingUncompressed.Address; } }
 
         public override int DataAlign { get { return 0x20; } }
 
@@ -39,6 +39,9 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
+
             _width = Header->_width;
             _height = Header->_height;
             _format = Header->PixelFormat;
@@ -52,22 +55,24 @@ namespace BrawlLib.SSBB.ResourceNodes
         public int ImageCount { get { return Header->_levelOfDetail; } }
         public Bitmap GetImage(int index)
         {
-            Bitmap bmp = TextureFormat.Decode(Header, index + 1);
+            Bitmap bmp = TextureConverter.Decode(Header, index + 1);
             if (HasPalette)
             {
                 PLT0Node n = GetPaletteNode();
                 if (n != null)
-                    bmp.Palette = TextureFormat.DecodePalette(n.Header);
+                    bmp.Palette = TextureConverter.DecodePalette(n.Header);
                 else
                     bmp.GreyscalePalette();
             }
             return bmp;
         }
 
-        protected internal override void OnAfterRebuild(StringTable table)
+        protected internal override void PostProcess(VoidPtr bresAddress, VoidPtr dataAddress, int dataLength, StringTable stringTable)
         {
-            base.OnAfterRebuild(table);
-            Header->ResourceStringAddress = table[Name];
+            base.PostProcess(bresAddress, dataAddress, dataLength, stringTable);
+
+            TEX0* header = (TEX0*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((TEX0*)address)->_header._tag == TEX0.Tag ? new TEX0Node() : null; }
@@ -78,11 +83,11 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (HasPalette)
             {
                 PLT0Node pn = this.GetPaletteNode();
-                tMap = TextureFormat.Get(Format).EncodeTextureIndexed(bmp, LevelOfDetail, pn.Colors, pn.Format, out pMap);
+                tMap = TextureConverter.Get(Format).EncodeTextureIndexed(bmp, LevelOfDetail, pn.Colors, pn.Format, QuantizationAlgorithm.WeightedAverage, out pMap);
                 pn.ReplaceRaw(pMap);
             }
             else
-                tMap = TextureFormat.Get(Format).EncodeTexture(bmp, LevelOfDetail);
+                tMap = TextureConverter.Get(Format).EncodeTexture(bmp, LevelOfDetail);
             ReplaceRaw(tMap);
         }
 

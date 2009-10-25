@@ -12,8 +12,10 @@ namespace BrawlLib.SSBB.ResourceNodes
     {
         private bool _isPair;
 
-        internal ARCHeader* Header { get { return (ARCHeader*)WorkingSource.Address; } }
+        internal ARCHeader* Header { get { return (ARCHeader*)WorkingUncompressed.Address; } }
         public override ResourceType ResourceType { get { return ResourceType.ARC; } }
+
+        [Browsable(false)]
         public bool IsPair { get { return _isPair; } set { _isPair = value; } }
 
         protected override void OnPopulate()
@@ -109,7 +111,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             {
                 *entry = new ARCFileHeader(node.FileType, node.FileIndex, node._calcSize, node.FileFlags, node.FileId);
                 if (node.IsCompressed)
-                    node.WriteCompressed(entry->Data, entry->Length);
+                    node.MoveRaw(entry->Data, entry->Length);
                 else
                     node.Rebuild(entry->Data, entry->Length, force);
                 entry = entry->Next;
@@ -130,18 +132,20 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
         public void ExportPAC(string outPath)
         {
+            Rebuild();
             ExportUncompressed(outPath);
         }
         public void ExportPCS(string outPath)
         {
+            Rebuild();
             if (Compression == CompressionType.LZ77)
                 Export(outPath);
             else
             {
-                using (FileStream inStream = new FileStream(Path.GetTempFileName(), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 0x2000, FileOptions.SequentialScan | FileOptions.DeleteOnClose))
+                using (FileStream inStream = new FileStream(Path.GetTempFileName(), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 0x8, FileOptions.SequentialScan | FileOptions.DeleteOnClose))
                 using(FileStream outStream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.SequentialScan))
                 {
-                    Compressor.Compact(CompressionType.LZ77, WorkingSource.Address, WorkingSource.Length, inStream);
+                    Compressor.Compact(CompressionType.LZ77, WorkingUncompressed.Address, WorkingUncompressed.Length, inStream);
                     outStream.SetLength(inStream.Length);
                     using (FileMap map = FileMap.FromStream(inStream))
                     using(FileMap outMap = FileMap.FromStream(outStream))
@@ -156,42 +160,53 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     public unsafe class ARCEntryNode : ResourceNode
     {
-        internal ARCFileHeader* FileHeader { get { return _parent == null ? null : (ARCFileHeader*)(WorkingRawSource.Address - 0x20); } }
         public override ResourceType ResourceType { get { return ResourceType.ARCEntry; } }
+
+        [Browsable(true)]
+        public override CompressionType Compression
+        {
+            get { return base.Compression; }
+            set { base.Compression = value; }
+        }
 
         internal ARCFileType _fileType;
         [Category("ARC Entry")]
-        public ARCFileType FileType { get { return _fileType; } set { _fileType = value; } }
+        public ARCFileType FileType { get { return _fileType; } set { _fileType = value; SignalPropertyChange(); UpdateName(); } }
 
         internal short _fileIndex;
         [Category("ARC Entry")]
-        public short FileIndex { get { return _fileIndex; } set { _fileIndex = value; } }
+        public short FileIndex { get { return _fileIndex; } set { _fileIndex = value; SignalPropertyChange(); UpdateName(); } }
 
         internal short _fileFlags;
         [Category("ARC Entry")]
-        public short FileFlags { get { return _fileFlags; } set { _fileFlags = value; } }
+        public short FileFlags { get { return _fileFlags; } set { _fileFlags = value; SignalPropertyChange(); UpdateName(); } }
 
         internal short _fileId;
         [Category("ARC Entry")]
-        public short FileId { get { return _fileId; } set { _fileId = value; } }
+        public short FileId { get { return _fileId; } set { _fileId = value; SignalPropertyChange(); UpdateName(); } }
 
-        protected override bool OnInitialize()
+        protected void UpdateName()
         {
-            if (!_initialized)
+            if (!(this is ARCNode))
+                Name = String.Format("{0}[{1}]", _fileType, _fileIndex);
+        }
+
+        internal override void Initialize(ResourceNode parent, DataSource origSource, DataSource uncompSource)
+        {
+            base.Initialize(parent, origSource, uncompSource);
+
+            if (parent != null)
             {
-                if (_parent != null)
-                {
-                    ARCFileHeader* header = FileHeader;
-                    _fileType = header->FileType;
-                    _fileIndex = header->_index;
-                    _fileFlags = header->_flags;
-                    _fileId = header->_id;
+                ARCFileHeader* header = (ARCFileHeader*)(origSource.Address - 0x20);
+                _fileType = header->FileType;
+                _fileIndex = header->_index;
+                _fileFlags = header->_flags;
+                _fileId = header->_id;
+                if (_name == null)
                     _name = String.Format("{0}[{1}]", _fileType, _fileIndex);
-                }
-                else
-                    Name = Path.GetFileName(_origPath);
             }
-            return false;
+            else if (_name == null)
+                _name = Path.GetFileName(_origPath);
         }
     }
 }

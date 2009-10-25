@@ -115,6 +115,7 @@ namespace BrawlLib.Wii.Compression
             //    outStream.WriteByte(0);
             //    dstLen++;
             //}
+            outStream.Flush();
 
             if (progress != null)
                 progress.Finish();

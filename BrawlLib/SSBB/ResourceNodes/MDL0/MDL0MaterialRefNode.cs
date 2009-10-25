@@ -38,8 +38,20 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            Name = Header->TextureName;
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
             return false;
+        }
+
+        internal unsafe void GetStrings(StringTable table)
+        {
+            table.Add(Name);
+        }
+
+        protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        {
+            MDL0Data7Part3* header = (MDL0Data7Part3*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
         }
     }
 }

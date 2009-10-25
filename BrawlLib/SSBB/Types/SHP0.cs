@@ -21,6 +21,13 @@ namespace BrawlLib.SSBBTypes
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public ResourceGroup* Group { get { return (ResourceGroup*)(Address + _dataOffset); } }
+
+        public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)this.Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -41,6 +48,13 @@ namespace BrawlLib.SSBBTypes
         {
             bint* ptr = &EntryOffset[index];
             return (SHP0Part2*)((VoidPtr)ptr + *ptr);
+        }
+
+        public string ResourceString { get { return new String((sbyte*)ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
         }
     }
 

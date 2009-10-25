@@ -44,8 +44,8 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NodeWrappers\ActionFactory.cs" />
     <Compile Include="NodeWrappers\ARCWrapper.cs" />
+    <Compile Include="NodeWrappers\BRESGroupWrapper.cs" />
     <Compile Include="NodeWrappers\BRESWrapper.cs" />
     <Compile Include="NodeWrappers\GenericWrapper.cs" />
     <Compile Include="NodeWrappers\MDL0Wrapper.cs" />
@@ -86,6 +86,9 @@
       <DependentUpon>PreviewPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="UI\RenameDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="UI\ResourceTree.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -100,8 +103,14 @@
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\ModelForm.resx">
+      <DependentUpon>ModelForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\PreviewPanel.resx">
       <DependentUpon>PreviewPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\RenameDialog.resx">
+      <DependentUpon>RenameDialog.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

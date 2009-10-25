@@ -5,46 +5,61 @@ using System.Collections.Generic;
 using BrawlLib.Wii.Compression;
 using System.IO;
 using System.Drawing;
+using BrawlLib.IO;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    public unsafe class BRESNode : ARCEntryNode, IResourceGroupNode
+    public unsafe class BRESNode : ARCEntryNode
     {
-        internal BRESHeader* Header { get { return (BRESHeader*)WorkingSource.Address; } }
+        internal BRESHeader* Header { get { return (BRESHeader*)WorkingUncompressed.Address; } }
 
         internal ROOTHeader* RootHeader { get { return Header->First; } }
         internal ResourceGroup* Group { get { return &RootHeader->_master; } }
-        ResourceGroup* IResourceGroupNode.Group { get { return &RootHeader->_master; } }
 
         public override ResourceType ResourceType { get { return ResourceType.BRES; } }
-
-        private short _gPrev, _gNext, _gId = -1;
-
-        [Category("Resource Group")]
-        public short GroupId { get { return _gId; } set { _gId = value; } }
-        [Category("Resource Group")]
-        public short GroupPrev { get { return _gPrev; } set { _gPrev = value; } }
-        [Category("Resource Group")]
-        public short GroupNext { get { return _gNext; } set { _gNext = value; } }
 
         protected override void OnPopulate()
         {
             ResourceGroup* group = Group;
             for (int i = 0; i < group->_numEntries; i++)
-                new BRESGroupNode().Initialize(this, group->First[i].DataAddress, 0);
+                new BRESGroupNode(new String((sbyte*)group + group->First[i]._stringOffset)).Initialize(this, (VoidPtr)group + group->First[i]._dataOffset, 0);
         }
         protected override bool OnInitialize()
         {
             base.OnInitialize();
 
-            ResourceGroup* group = &Header->First->_master;
-            //_gPrev = group->_first._leftIndex;
-            //_gNext = group->_first._rightIndex;
-            //_gId = group->_first._id;
-
-            return group->_numEntries != 0;
+            return Group->_numEntries > 0;
         }
 
+        public T CreateResource<T>() where T : BRESEntryNode
+        {
+            string groupName;
+            if (typeof(T) == typeof(TEX0Node))
+                groupName = "Textures(NW4R)";
+            else if (typeof(T) == typeof(PLT0Node))
+                groupName = "Palettes(NW4R)";
+            else if (typeof(T) == typeof(MDL0Node))
+                groupName = "Models(NW4R)";
+            else
+                return null;
+
+            BRESGroupNode group = null;
+            foreach (BRESGroupNode node in Children)
+                if (node.Name == groupName)
+                {
+                    group = node;
+                    break;
+                }
+
+            if (group == null)
+                AddChild(group = new BRESGroupNode(groupName));
+
+            T n = Activator.CreateInstance<T>();
+            n.Name = group.FindName();
+            group.AddChild(n);
+
+            return n;
+        }
         public void ExportToFolder(string outFolder)
         {
             if (!Directory.Exists(outFolder))
@@ -80,18 +95,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
         }
 
-        //public ResourceNode GetResource(string group, string name)
-        //{
-        //    foreach (ResourceNode n in Children)
-        //        if (n.Name == group)
-        //            foreach (ResourceNode c in n.Children)
-        //                if (c.Name == name)
-        //                    return c;
-        //    return null;
-        //}
-
         private int _numEntries, _strOffset, _rootSize;
-        //private SortedDictionary<string, VoidPtr> _stringTable = new SortedDictionary<string, VoidPtr>(StringComparer.Ordinal);
         StringTable _stringTable = new StringTable();
         protected override int OnCalculateSize(bool force)
         {
@@ -100,8 +104,10 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             //Get entry count and data start
             _numEntries = 0;
+            //Children.Sort(NodeComparer.Instance);
             foreach (BRESGroupNode n in Children)
             {
+                //n.Children.Sort(NodeComparer.Instance);
                 _rootSize += (n.Children.Count * 0x10) + 0x18;
                 _numEntries += n.Children.Count;
             }
@@ -121,9 +127,6 @@ namespace BrawlLib.SSBB.ResourceNodes
             _strOffset = size = size.Align(4);
 
             size += _stringTable.GetTotalSize();
-
-            //foreach (string s in _stringTable.Keys)
-            //    size += (s.Length + 5).Align(4);
 
             return size.Align(0x80);
         }
@@ -145,48 +148,45 @@ namespace BrawlLib.SSBB.ResourceNodes
             ResourceGroup* rGroup = (ResourceGroup*)pMaster->EndAddress;
             //BRESString* pStr = (BRESString*)(address + _strOffset);
 
+            //Write string table
             _stringTable.WriteTable(address + _strOffset);
-
-            //string[] strings = new string[_stringTable.Count];
-            //_stringTable.Keys.CopyTo(strings, 0);
-            //foreach (string s in strings)
-            //{
-            //    _stringTable[s] = pStr->Data;
-            //    pStr->Value = s;
-            //    pStr = pStr->Next;
-            //}
 
             VoidPtr dataAddr = (VoidPtr)rootHeader + _rootSize;
 
-            pMaster->_first = new ResourceEntry(_gId, _gPrev, _gNext, 0);
+            //pMaster->_first = new ResourceEntry(_gId, _gPrev, _gNext, 0);
 
-            ResourceEntry* gEntry = pMaster->First;
+            int gIndex = 1;
             foreach (BRESGroupNode g in Children)
             {
                 //Set group entry
-                g._origSource.Address = g._uncompSource.Address = gEntry;
-                *gEntry++ = new ResourceEntry(g.EntryId, g.SortNext, g.NodeNext, (int)rGroup - (int)pMaster, (int)_stringTable[g.Name] - (int)pMaster);
+                //g._origSource.Address = g._uncompSource.Address = gEntry;
+                //gEntry->_dataOffset = (int)rGroup - (int)pMaster;
+                //gEntry->_stringOffset = (int)_stringTable[g.Name] - (int)pMaster;
+                //gEntry++;
 
-                //Initialize group and index entry
+                ResourceEntry.Build(pMaster, gIndex++, rGroup, (BRESString*)_stringTable[g.Name]);
+
                 *rGroup = new ResourceGroup(g.Children.Count);
-                rGroup->_first = new ResourceEntry(g.GID, g.GPrev, g.GNext, 0);
-
                 ResourceEntry* nEntry = rGroup->First;
+
+                int rIndex = 1;
                 foreach (BRESEntryNode n in g.Children)
                 {
                     //Align data
                     dataAddr = ((int)dataAddr).Align(n.DataAlign);
 
+                    ResourceEntry.Build(rGroup, rIndex++, dataAddr, (BRESString*)_stringTable[n.Name]);
+
                     //Set entry data
-                    *nEntry++ = new ResourceEntry(n.EntryId, n.SortNext, n.NodeNext, (int)dataAddr - (int)rGroup, (int)_stringTable[n.Name] - (int)rGroup);
+                    //*nEntry++ = new ResourceEntry(n.EntryId, n.SortNext, n.NodeNext, (int)dataAddr - (int)rGroup, (int)_stringTable[n.Name] - (int)rGroup);
 
                     //Rebuild entry
                     int len = n._calcSize;
                     n.Rebuild(dataAddr, len, force);
-                    n.OnAfterRebuild(_stringTable);
+                    n.PostProcess(address, dataAddr, len, _stringTable);
                     dataAddr += len;
                 }
-                g.HasChanged = false;
+                g._changed = false;
 
                 //Advance to next group
                 rGroup = (ResourceGroup*)rGroup->EndAddress;
@@ -197,18 +197,14 @@ namespace BrawlLib.SSBB.ResourceNodes
             uncompSrc.Close();
         }
 
-        private void PostProcess()
-        {
-        }
-
         internal static ResourceNode TryParse(VoidPtr address) { return ((BRESHeader*)address)->_tag == BRESHeader.Tag ? new BRESNode() : null; }
 
     }
 
-    public unsafe class BRESGroupNode : ResourceEntryNode, IResourceGroupNode
+    public unsafe class BRESGroupNode : ResourceNode
     {
-        internal ResourceGroup* Group { get { return (ResourceGroup*)WorkingSource.Address; } }
-        ResourceGroup* IResourceGroupNode.Group { get { return (ResourceGroup*)WorkingSource.Address; } }
+        internal ResourceGroup* Group { get { return (ResourceGroup*)WorkingUncompressed.Address; } }
+        public override ResourceType ResourceType { get { return ResourceType.BRESGroup; } }
 
         [Browsable(false)]
         public override BrawlLib.Wii.Compression.CompressionType Compression
@@ -217,13 +213,21 @@ namespace BrawlLib.SSBB.ResourceNodes
             set { base.Compression = value; }
         }
 
-        short _gPrev, _gNext, _gId = -1;
-        [Category("Resource Group")]
-        public short GPrev { get { return _gPrev; } set { _gPrev = value; } }
-        [Category("Resource Group")]
-        public short GNext { get { return _gNext; } set { _gNext = value; } }
-        [Category("Resource Group")]
-        public short GID { get { return _gId; } set { _gId = value; } }
+        public BRESGroupNode() : base() { }
+        public BRESGroupNode(string name) : base() { _name = name; }
+
+        public override void RemoveChild(ResourceNode child)
+        {
+            if ((Children.Count == 1) && (Children.Contains(child)))
+                Parent.RemoveChild(this);
+            else
+                base.RemoveChild(child);
+        }
+
+        protected override bool OnInitialize()
+        {
+            return Group->_numEntries > 0;
+        }
 
         protected override void OnPopulate()
         {
@@ -236,67 +240,90 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
         }
 
-        protected override bool OnInitialize()
+        public unsafe string FindName()
         {
-            if ((_parent != null) && (!_initialized))
+            int index = 0;
+            string name = "NewNode00";
+            fixed (char* cPtr = name)
             {
-                base.OnInitialize();
-                ResourceGroup* group = Group;
-                //_gPrev = group->_first._leftIndex;
-                //_gNext = group->_first._rightIndex;
-                //_gId = group->_first._id;
+            Top:
+                index++;
+                cPtr[7] = (char)((index / 10) | 0x30);
+                cPtr[8] = (char)((index % 10) | 0x30);
 
-                return group->_numEntries != 0;
+                foreach (ResourceNode node in Children)
+                {
+                    if (node.Name == name)
+                        goto Top;
+                }
+
+                return new String(cPtr);
             }
-            return false;
         }
-
     }
 
-    public unsafe class BRESEntryNode : ResourceEntryNode
+    public unsafe class BRESEntryNode : ResourceNode
     {
-        internal BRESCommonHeader* CommonHeader { get { return (BRESCommonHeader*)WorkingRawSource.Address; } }
-       // internal ResourceEntry* EntryData { get { return _parent != null ? (ResourceEntry*)(&((BRESGroupNode)_parent).GroupData->First[Index]) : null; } }
+        internal BRESCommonHeader* CommonHeader { get { return (BRESCommonHeader*)WorkingSource.Address; } }
 
         [Browsable(false)]
         public virtual int DataAlign { get { return 4; } }
 
         [Browsable(false)]
-        public override CompressionType Compression
+        public BRESNode BRESNode { get { return ((_parent != null) && (_parent._parent is BRESNode)) ? _parent._parent as BRESNode : null; } }
+
+        protected override bool OnInitialize()
         {
-            get { return base.Compression;  }
-            set { base.Compression = value;}
+            if (IsBranch)
+                if (IsCompressed)
+                    _replUncompSrc.Length = CommonHeader->_size;
+                else
+                    _replSrc.Length = _replUncompSrc.Length = CommonHeader->_size;
+            else
+                if (IsCompressed)
+                    _uncompSource.Length = CommonHeader->_size;
+                else
+                    _origSource.Length = _uncompSource.Length = CommonHeader->_size;
+
+            return false;
         }
-
-        //short _prev, _next, _id;
-        //[Category("BRES Entry")]
-        //public short Prev { get { return _prev; } set { _prev = value; } }
-        //[Category("BRES Entry")]
-        //public short Next { get { return _next; } set { _next = value; } }
-        //[Category("BRES Entry")]
-        //public short ID { get { return _id; } set { _id = value; } }
-
-        //protected override bool OnInitialize()
-        //{
-        //    if (_parent != null)
-        //    {
-        //        _name = EntryData->GetName();
-        //        _prev = EntryData->_prev;
-        //        _next = EntryData->_next;
-        //        _id = EntryData->_id;
-        //    }
-        //    return false;
-        //}
 
         internal virtual void GetStrings(StringTable strings)
         {
             strings.Add(Name);
         }
 
-        internal protected virtual void OnAfterRebuild(StringTable strings)
+        public override unsafe void Export(string outPath)
         {
-            CommonHeader->_size = WorkingRawSource.Length;
-            CommonHeader->_bresOffset = (int)_parent._parent.WorkingRawSource.Address - (int)CommonHeader;
+            Rebuild();
+
+            StringTable table = new StringTable();
+            GetStrings(table);
+
+            int dataLen = WorkingUncompressed.Length.Align(4);
+            int size = dataLen + table.GetTotalSize();
+
+            using (FileStream stream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.RandomAccess))
+            {
+                stream.SetLength(size);
+                using (FileMap map = FileMap.FromStream(stream))
+                {
+                    Memory.Move(map.Address, WorkingUncompressed.Address, (uint)WorkingUncompressed.Length);
+                    table.WriteTable(map.Address + dataLen);
+                    PostProcess(null, map.Address, WorkingUncompressed.Length, table);
+                }
+            }
+            table.Clear();
+        }
+
+        internal protected virtual void PostProcess(VoidPtr bresAddress, VoidPtr dataAddress, int dataLength, StringTable stringTable)
+        {
+            BRESCommonHeader* header = (BRESCommonHeader*)dataAddress;
+
+            if (bresAddress)
+                header->_bresOffset = (int)bresAddress - (int)header;
+
+            header->_size = dataLength;
         }
     }
 }

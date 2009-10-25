@@ -9,58 +9,60 @@ namespace BrawlLib.SSBB.ResourceNodes
 {
     public unsafe class MDL0MaterialNode : MDL0EntryNode
     {
-        internal MDL0Material* Data { get { return (MDL0Material*)WorkingSource.Address; } }
+        internal MDL0Material* Header { get { return (MDL0Material*)WorkingUncompressed.Address; } }
+        protected override int DataLength { get { return Header->_dataLen; } }
+
         //internal List<MDL0Data7Part3> _part3Entries = new List<MDL0Data7Part3>();
         internal List<string> _part4Entries = new List<string>();
 
         [Category("Material")]
-        public int TotalLen { get { return Data->_dataLen; } }
+        public int TotalLen { get { return Header->_dataLen; } }
         [Category("Material")]
-        public int MDL0Offset { get { return Data->_mdl0Offset; } }
+        public int MDL0Offset { get { return Header->_mdl0Offset; } }
         [Category("Material")]
-        public int StringOffset { get { return Data->_stringOffset; } }
+        public int StringOffset { get { return Header->_stringOffset; } }
         [Category("Material")]
-        public int ID { get { return Data->_index; } }
+        public int ID { get { return Header->_index; } }
         [Category("Material")]
-        public int Unknown1 { get { return Data->_unk1; } }
+        public int Unknown1 { get { return Header->_unk1; } }
         [Category("Material")]
-        public byte Flag1 { get { return Data->_flag1; } }
+        public byte Flag1 { get { return Header->_flag1; } }
         [Category("Material")]
-        public byte Flag2 { get { return Data->_flag2; } }
+        public byte Flag2 { get { return Header->_flag2; } }
         [Category("Material")]
-        public byte Flag3 { get { return Data->_flag3; } }
+        public byte Flag3 { get { return Header->_flag3; } }
         [Category("Material")]
-        public byte Flag4 { get { return Data->_flag4; } }
+        public byte Flag4 { get { return Header->_flag4; } }
         [Category("Material")]
-        public int Type { get { return Data->_type; } }
+        public int Type { get { return Header->_type; } }
         [Category("Material")]
-        public byte Flag5 { get { return Data->_flag5; } }
+        public byte Flag5 { get { return Header->_flag5; } }
         [Category("Material")]
-        public byte Flag6 { get { return Data->_flag6; } }
+        public byte Flag6 { get { return Header->_flag6; } }
         [Category("Material")]
-        public byte Flag7 { get { return Data->_flag7; } }
+        public byte Flag7 { get { return Header->_flag7; } }
         [Category("Material")]
-        public byte Flag8 { get { return Data->_flag8; } }
+        public byte Flag8 { get { return Header->_flag8; } }
 
         [Category("Material")]
-        public int Unknown3 { get { return Data->_unk3; } }
+        public int Unknown3 { get { return Header->_unk3; } }
         [Category("Material")]
-        public int Unknown4 { get { return Data->_unk4; } }
+        public int Unknown4 { get { return Header->_unk4; } }
 
         [Category("Material")]
-        public int Data8Offset { get { return Data->_data8Offset; } }
+        public int Data8Offset { get { return Header->_data8Offset; } }
 
         [Category("Material")]
-        public int NumTextures { get { return Data->_numTextures; } }
+        public int NumTextures { get { return Header->_numTextures; } }
         [Category("Material")]
-        public int Part3Offset { get { return Data->_part3Offset; } }
+        public int Part3Offset { get { return Header->_part3Offset; } }
         [Category("Material")]
-        public int Part4Offset { get { return Data->_part4Offset; } }
+        public int Part4Offset { get { return Header->_part4Offset; } }
         [Category("Material")]
-        public int Part5Offset { get { return Data->_part5Offset; } }
+        public int Part5Offset { get { return Header->_part5Offset; } }
 
         [Category("Material")]
-        public int Unknown6 { get { return Data->_unk6; } }
+        public int Unknown6 { get { return Header->_unk6; } }
 
         //[Category("Material Part3")]
         //public List<MDL0Data7Part3> Part3Entries { get { return _part3Entries; } }
@@ -71,37 +73,61 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            if (!_initialized)
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
+
+            MDL0Data7Part4* part4 = Header->Part4;
+            if (part4 != null)
             {
-
-                MDL0Data7Part4* part4 = Data->Part4;
-                if (part4 != null)
-                {
-                    ResourceGroup* group = part4->Group;
-                    for (int i = 0; i < group->_numEntries; i++)
-                    {
-                        _part4Entries.Add(group->First[i].GetName());
-                    }
-                }
-
-                _origSource.Length = _uncompSource.Length = TotalLen;
-                return Data->_numTextures != 0;
+                ResourceGroup* group = part4->Group;
+                for (int i = 0; i < group->_numEntries; i++)
+                    _part4Entries.Add(group->First[i].GetName());
             }
-            return false;
+
+            return Header->_numTextures != 0;
         }
 
         protected override void OnPopulate()
         {
-            MDL0Data7Part3* part3 = Data->Part3;
-            for (int i = 0; i < Data->_numTextures; i++)
+            MDL0Data7Part3* part3 = Header->Part3;
+            for (int i = 0; i < Header->_numTextures; i++)
                 new MDL0MaterialRefNode().Initialize(this, part3++, MDL0Data7Part3.Size);
         }
 
         internal override void GetStrings(StringTable table)
         {
             table.Add(Name);
+
             foreach (string s in _part4Entries)
                 table.Add(s);
+
+            foreach (MDL0MaterialRefNode n in Children)
+                n.GetStrings(table);
+        }
+
+        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        {
+            MDL0Material* header = (MDL0Material*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
+
+            MDL0Data7Part4* part4 = header->Part4;
+            if (part4 != null)
+            {
+                ResourceGroup* group = part4->Group;
+                group->_first = new ResourceEntry(0xFFFF, 0, 0, 0, 0);
+                ResourceEntry* rEntry = group->First;
+
+                for (int i = 0, x = 1; i < group->_numEntries; i++)
+                {
+                    MDL0Data7Part4Entry* entry = (MDL0Data7Part4Entry*)((int)group + (rEntry++)->_dataOffset);
+                    ResourceEntry.Build(group, x++, entry, (BRESString*)stringTable[_part4Entries[i]]);
+                    entry->ResourceStringAddress = stringTable[_part4Entries[i]] + 4;
+                }
+            }
+
+            MDL0Data7Part3* part3 = header->Part3;
+            foreach (MDL0MaterialRefNode n in Children)
+                n.PostProcess(part3++, stringTable);
         }
     }
 }

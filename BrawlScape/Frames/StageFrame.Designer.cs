@@ -1,4 +1,5 @@
-﻿namespace BrawlScape
+﻿using System.Windows.Forms;
+namespace BrawlScape
 {
     partial class StageFrame
     {
@@ -31,7 +32,7 @@
             this.stageList = new BrawlScape.StageList();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.modelPanel = new BrawlScape.ModelControl();
+            this.modelPanel = new ModelPanel();
             this.textureList = new BrawlScape.TexturePanel();
             this.modelList = new BrawlScape.ModelList();
             this.columnName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -152,7 +153,7 @@
         private System.Windows.Forms.TabPage tabPage1;
         private TexturePanel textureList;
         private ModelList modelList;
-        private ModelControl modelPanel;
+        private ModelPanel modelPanel;
         private System.Windows.Forms.ColumnHeader columnName;
     }
 }

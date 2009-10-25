@@ -6,10 +6,12 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Drawing.Imaging;
 using BrawlLib.Imaging;
+using BrawlLib.IO;
+using BrawlLib.SSBBTypes;
 
 namespace BrawlLib.Wii.Textures
 {
-    unsafe class CMP : TextureFormat
+    public unsafe class CMPR : TextureConverter
     {
         public override int BitsPerPixel { get { return 4; } }
         public override int BlockWidth { get { return 8; } }
@@ -17,12 +19,13 @@ namespace BrawlLib.Wii.Textures
         public override PixelFormat DecodedFormat { get { return PixelFormat.Format32bppArgb; } }
         public override WiiPixelFormat RawFormat { get { return WiiPixelFormat.CMPR; } }
 
+        private UnsafeBuffer _blockBuffer;
         //private List<CMPBlock> _blockCache = new List<CMPBlock>();
         //private int _blockIndex;
 
         protected override void DecodeBlock(VoidPtr blockAddr, VoidPtr destAddr, int width)
         {
-            CMPBlock* sPtr = (CMPBlock*)blockAddr;
+            CMPRBlock* sPtr = (CMPRBlock*)blockAddr;
             ARGBPixel* dPtr = (ARGBPixel*)destAddr;
 
             //int index = 0;
@@ -38,11 +41,21 @@ namespace BrawlLib.Wii.Textures
         //    return base.EncodeTexture(src, mipLevels, out paletteFile);
         //}
 
-        public override void GeneratePreview(Bitmap src, Bitmap dst)
+        public FileMap EncodeTextureCached(Bitmap src, int mipLevels, UnsafeBuffer blockBuffer)
+        {
+            _blockBuffer = blockBuffer;
+            try { return base.EncodeTexture(src, mipLevels); }
+            finally { _blockBuffer = null; }
+        }
+
+        public UnsafeBuffer GeneratePreview(Bitmap bmp)
         {
             //_blockCache.Clear();
-            int w = src.Width, h = src.Height;
+            int w = bmp.Width, h = bmp.Height;
             int aw = w.Align(BlockWidth), ah = h.Align(BlockHeight);
+
+            UnsafeBuffer buffer = new UnsafeBuffer((aw / 4) * (ah / 4) * 8);
+            CMPRBlock* bPtr = (CMPRBlock*)buffer.Address;
 
             //using (Bitmap bmp = src.Clone(new Rectangle(0, 0, aw, ah), PixelFormat.Format32bppArgb))
             //{
@@ -60,7 +73,7 @@ namespace BrawlLib.Wii.Textures
             //                }
             //}
 
-            using (DIB dib = DIB.FromBitmap(src, BlockWidth, BlockHeight, PixelFormat.Format32bppArgb))
+            using (DIB dib = DIB.FromBitmap(bmp, BlockWidth, BlockHeight, PixelFormat.Format32bppArgb))
             {
                 for (int y1 = 0; y1 < ah; y1 += 8)
                     for (int x1 = 0; x1 < aw; x1 += 8)
@@ -68,26 +81,43 @@ namespace BrawlLib.Wii.Textures
                             for (int x = 0; x < 8; x += 4)
                             {
                                 ARGBPixel* ptr = (ARGBPixel*)dib.Scan0 + (((y1 + y) * aw) + (x1 + x));
-                                CMPBlock block = CMPBlock.Encode(ptr, aw, false);
-                                //_blockCache.Add(block);
-                                block.Decode(ptr, aw);
+                                *bPtr = CMPRBlock.Encode(ptr, aw, false);
+                                bPtr->Decode(ptr, aw);
+                                bPtr++;
                             }
 
-                dib.WriteBitmap(dst, w, h);
+                dib.WriteBitmap(bmp, w, h);
             }
+
+            return buffer;
+        }
+
+        internal override void EncodeLevel(TEX0* header, DIB dib, Bitmap src, int dStep, int sStep, int level)
+        {
+            if ((level == 1) && (_blockBuffer != null))
+            {
+                CMPRBlock* sPtr = (CMPRBlock*)_blockBuffer.Address;
+                CMPRBlock* dPtr = (CMPRBlock*)header->PixelData;
+
+                int blocks = _blockBuffer.Length / 8;
+                for (int i = 0; i < blocks; i++)
+                    dPtr[i] = sPtr[i];
+            }
+            else
+                base.EncodeLevel(header, dib, src, dStep, sStep, level);
         }
 
         protected override void EncodeBlock(ARGBPixel* sPtr, VoidPtr blockAddr, int width)
         {
-            CMPBlock* dPtr = (CMPBlock*)blockAddr;
+            CMPRBlock* dPtr = (CMPRBlock*)blockAddr;
             for (int y = 0; y < 2; y++, sPtr += (width * 4))
                 for (int x = 0; x < 8; x += 4)
-                    *dPtr++ = CMPBlock.Encode(&sPtr[x], width, false);
+                    *dPtr++ = CMPRBlock.Encode(&sPtr[x], width, false);
         }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct CMPBlock
+    public unsafe struct CMPRBlock
     {
         public wRGB565Pixel _root0;
         public wRGB565Pixel _root1;
@@ -118,9 +148,9 @@ namespace BrawlLib.Wii.Textures
                     block[x++] = pixel[(lookup >> shift) & 0x03];
         }
 
-        public static CMPBlock Encode(ARGBPixel* block, int width, bool fast)
+        public static CMPRBlock Encode(ARGBPixel* block, int width, bool fast)
         {
-            CMPBlock p = new CMPBlock();
+            CMPRBlock p = new CMPRBlock();
 
             uint* pData = stackalloc uint[16];
             ARGBPixel* pColor = (ARGBPixel*)pData;

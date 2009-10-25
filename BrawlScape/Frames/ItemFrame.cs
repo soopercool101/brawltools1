@@ -26,6 +26,10 @@ namespace BrawlScape
                 modelList.SelectedIndices.Add(0);
         }
 
-        private void modelList_ResourceChanged(ModelDefinition resource) { textureList.SecondarySource = modelPanel.CurrentModel = resource; }
+        private void modelList_ResourceChanged(ModelDefinition resource) 
+        {
+            textureList.SecondarySource = resource;
+            modelPanel.CurrentModel = (resource != null) ? resource.Model : null;
+        }
     }
 }

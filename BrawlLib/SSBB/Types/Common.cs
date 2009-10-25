@@ -98,7 +98,7 @@ namespace BrawlLib.SSBBTypes
         {
             _totalSize = (numEntries * 0x10) + 0x18;
             _numEntries = numEntries;
-            _first = new ResourceEntry(-1, (short)numEntries, 0, 0);
+            _first = new ResourceEntry(0xFFFF, 0, 0, 0, 0);
         }
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
@@ -143,6 +143,67 @@ namespace BrawlLib.SSBBTypes
         public VoidPtr StringAddress { get { return (VoidPtr)Parent + _stringOffset; } set { _stringOffset = (int)value - (int)Parent; } }
 
         public string GetName() { return new String((sbyte*)StringAddress); }
+
+        public static void Build(ResourceGroup* group, int index, VoidPtr dataAddress, BRESString* pString)
+        {
+            ResourceEntry* list = &group->_first;
+            ResourceEntry* entry = &list[index];
+            ResourceEntry* prev = &list[0], current = &list[prev->_leftIndex];
+            ushort currentIndex = prev->_leftIndex;
+            bool isRight = false;
+
+            int strLen = pString->_length;
+            byte* pChar = (byte*)pString + 4, sChar;
+
+            int eIndex = strLen - 1, eBits = pChar[eIndex].CompareBits(0), val;
+            *entry = new ResourceEntry((eIndex << 3) | eBits, index, index, (int)dataAddress - (int)group, (int)pChar - (int)group);
+
+            //Continue while the previous id is greater than the current. Loop backs will stop the processing.
+            //Continue while the entry id is less than or equal the current id. Being higher than the current id means we've found a place to insert.
+            while ((entry->_id <= current->_id) && (prev->_id > current->_id))
+            {
+                if (entry->_id == current->_id)
+                {
+                    sChar = (byte*)group + current->_stringOffset;
+
+                    //Rebuild new id relative to current entry
+                    for (eIndex = strLen; (eIndex-- > 0) && (pChar[eIndex] == sChar[eIndex]); ) ;
+                    eBits = pChar[eIndex].CompareBits(sChar[eIndex]);
+
+                    entry->_id = (ushort)((eIndex << 3) | eBits);
+
+                    if (((sChar[eIndex] >> eBits) & 1) != 0)
+                    {
+                        entry->_leftIndex = (ushort)index;
+                        entry->_rightIndex = currentIndex;
+                    }
+                    else
+                    {
+                        entry->_leftIndex = currentIndex;
+                        entry->_rightIndex = (ushort)index;
+                    }
+                }
+
+                //Is entry to the right or left of current?
+                isRight = ((val = current->_id >> 3) < strLen) && (((pChar[val] >> (current->_id & 7)) & 1) != 0);
+
+                prev = current;
+                current = &list[currentIndex = (isRight) ? current->_rightIndex : current->_leftIndex];
+            }
+
+            sChar = (current->_stringOffset == 0) ? null : (byte*)group + current->_stringOffset;
+            val = sChar == null ? 0 : (int)(*(bint*)(sChar - 4));
+
+            if ((val == strLen) && (((sChar[eIndex] >> eBits) & 1) != 0))
+                entry->_rightIndex = currentIndex;
+            else
+                entry->_leftIndex = currentIndex;
+
+            if (isRight)
+                prev->_rightIndex = (ushort)index;
+            else
+                prev->_leftIndex = (ushort)index;
+        }
 
         public ResourceGroup* Parent
         {

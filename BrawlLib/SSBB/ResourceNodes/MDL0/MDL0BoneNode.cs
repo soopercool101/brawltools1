@@ -12,55 +12,53 @@ namespace BrawlLib.SSBB.ResourceNodes
     {
         private List<string> _entries = new List<string>();
 
-        internal MDL0Bone* Data { get { return (MDL0Bone*)WorkingSource.Address; } }
+        internal MDL0Bone* Header { get { return (MDL0Bone*)WorkingUncompressed.Address; } }
+        protected override int DataLength { get { return Header->_headerLen; } }
 
         [Category("Bone")]
-        public string DataName { get { return Data->Name; } }
+        public int HeaderLen { get { return Header->_headerLen; } }
+        [Category("Bone")]
+        public int MDL0Offset { get { return Header->_mdl0Offset; } }
+        [Category("Bone")]
+        public int StringOffset { get { return Header->_stringOffset; } }
+        [Category("Bone")]
+        public int BoneIndex { get { return Header->_index; } }
 
         [Category("Bone")]
-        public int HeaderLen { get { return Data->_headerLen; } }
+        public int NodeId { get { return Header->_nodeId; } }
         [Category("Bone")]
-        public int MDL0Offset { get { return Data->_mdl0Offset; } }
+        public uint Flags { get { return Header->_flags; } }
         [Category("Bone")]
-        public int StringOffset { get { return Data->_stringOffset; } }
+        public uint Pad1 { get { return Header->_pad1; } }
         [Category("Bone")]
-        public int BoneIndex { get { return Data->_index; } }
+        public uint Pad2 { get { return Header->_pad2; } }
 
         [Category("Bone")]
-        public int NodeId { get { return Data->_nodeId; } }
+        public Vector3 Scale { get { return Header->_scale; } }
         [Category("Bone")]
-        public uint Flags { get { return Data->_flags; } }
+        public Vector3 Rotation { get { return Header->_rotation; } }
         [Category("Bone")]
-        public uint Pad1 { get { return Data->_pad1; } }
+        public Vector3 Translation { get { return Header->_translation; } }
         [Category("Bone")]
-        public uint Pad2 { get { return Data->_pad2; } }
+        public Vector3 BoxMin { get { return Header->_boxMin; } }
+        [Category("Bone")]
+        public Vector3 BoxMax { get { return Header->_boxMax; } }
 
         [Category("Bone")]
-        public Vector3 Scale { get { return Data->_scale; } }
+        public int ParentOffset { get { return Header->_parentOffset / 0xD0; } }
         [Category("Bone")]
-        public Vector3 Rotation { get { return Data->_rotation; } }
+        public int FirstChildOffset { get { return Header->_unk1 / 0xD0; } }
         [Category("Bone")]
-        public Vector3 Translation { get { return Data->_translation; } }
+        public int NextOffset { get { return Header->_unk2 / 0xD0; } }
         [Category("Bone")]
-        public Vector3 BoxMin { get { return Data->_boxMin; } }
+        public int PrevOffset { get { return Header->_nextOffset / 0xD0; } }
         [Category("Bone")]
-        public Vector3 BoxMax { get { return Data->_boxMax; } }
+        public int Part2Offset { get { return Header->_part2Offset; } }
 
         [Category("Bone")]
-        public int ParentOffset { get { return Data->_parentOffset / 0xD0; } }
+        public bMatrix43 TransformMatrix { get { return Header->_transform; } }
         [Category("Bone")]
-        public int FirstChildOffset { get { return Data->_unk1 / 0xD0; } }
-        [Category("Bone")]
-        public int NextOffset { get { return Data->_unk2 / 0xD0; } }
-        [Category("Bone")]
-        public int PrevOffset { get { return Data->_nextOffset / 0xD0; } }
-        [Category("Bone")]
-        public int Part2Offset { get { return Data->_part2Offset; } }
-
-        [Category("Bone")]
-        public bMatrix43 TransformMatrix { get { return Data->_transform; } }
-        [Category("Bone")]
-        public bMatrix43 TransformInverted { get { return Data->_transformInv; } }
+        public bMatrix43 TransformInverted { get { return Header->_transformInv; } }
 
         [Category("Data2 Part2")]
         public List<string> Entries { get { return _entries; } }
@@ -80,9 +78,12 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            if (Data->_part2Offset != 0)
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
+
+            if (Header->_part2Offset != 0)
             {
-                MDL0Data7Part4* part4 = Data->Part2;
+                MDL0Data7Part4* part4 = Header->Part2;
                 if (part4 != null)
                 {
                     ResourceGroup* group = part4->Group;
@@ -93,6 +94,25 @@ namespace BrawlLib.SSBB.ResourceNodes
                 }
             }
             return false;
+        }
+
+        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        {
+            MDL0Bone* header = (MDL0Bone*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
+
+            MDL0Data7Part4* part4;
+            if ((header->_part2Offset != 0) && ((part4 = header->Part2) != null))
+            {
+                ResourceGroup* group = part4->Group;
+                group->_first = new ResourceEntry(0xFFFF, 0, 0, 0, 0);
+                ResourceEntry* rEntry = group->First;
+
+                for (int i = 0, x = 1; i < group->_numEntries; )
+                {
+                    ResourceEntry.Build(group, x++, (VoidPtr)group + (rEntry++)->_dataOffset, (BRESString*)stringTable[_entries[i++]]);
+                }
+            }
         }
     }
 }

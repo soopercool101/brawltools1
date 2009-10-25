@@ -6,31 +6,35 @@ using BrawlLib.SSBBTypes;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    public unsafe class CLR0Node : BRESEntryNode, IResourceGroupNode
+    public unsafe class CLR0Node : BRESEntryNode
     {
-        internal CLR0* Header { get { return (CLR0*)WorkingSource.Address; } }
-        ResourceGroup* IResourceGroupNode.Group { get { return Header->Group; } }
-
-        private int _mPrev, _mNext;
+        internal CLR0* Header { get { return (CLR0*)WorkingUncompressed.Address; } }
 
         protected override bool OnInitialize()
         {
             base.OnInitialize();
 
-            ResourceGroup* group = Header->Group;
-            _mPrev = group->_first._leftIndex;
-            _mNext = group->_first._rightIndex;
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
 
-            return group->_numEntries > 0;
+            return Header->Group->_numEntries > 0;
         }
+
+        //To do
+        //protected override int OnCalculateSize(bool force)
+        //{
+        //    int size = CLR0.Size + 0x18 + (Children.Count * 0x10);
+        //    foreach (CHR0EntryNode n in Children)
+        //        size += n.CalculateSize(force);
+        //    return size;
+        //}
+
         protected override void OnPopulate()
         {
             ResourceGroup* group = Header->Group;
             for (int i = 0; i < group->_numEntries; i++)
-                new CLR0EntryNode().Initialize(this, new DataSource(group->First[i].DataAddress, CLR0Entry.Size));
+                new CLR0EntryNode().Initialize(this, new DataSource(group->First[i].DataAddress, 0));
         }
-
-        //protected override int OnCalculateSize(bool force) { return CLR0.Size + (Children.Count * CLR0Entry.Size) + 0x18; }
 
         internal override void GetStrings(StringTable table)
         {
@@ -39,12 +43,52 @@ namespace BrawlLib.SSBB.ResourceNodes
                 table.Add(n.Name);
         }
 
+        protected internal override void PostProcess(VoidPtr bresAddress, VoidPtr dataAddress, int dataLength, StringTable stringTable)
+        {
+            base.PostProcess(bresAddress, dataAddress, dataLength, stringTable);
+
+            CLR0* header = (CLR0*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
+
+            ResourceGroup* group = header->Group;
+            group->_first = new ResourceEntry(0xFFFF, 0, 0, 0, 0);
+            ResourceEntry* rEntry = group->First;
+
+            int index = 1;
+            foreach (CLR0EntryNode n in Children)
+            {
+                dataAddress = (VoidPtr)group + (rEntry++)->_dataOffset;
+                ResourceEntry.Build(group, index++, dataAddress, (BRESString*)stringTable[n.Name]);
+                n.PostProcess(dataAddress, stringTable);
+            }
+        }
+
         internal static ResourceNode TryParse(VoidPtr address) { return ((CLR0*)address)->_header._tag == CLR0.Tag ? new CLR0Node() : null; }
 
     }
 
-    public unsafe class CLR0EntryNode : ResourceEntryNode
+    public unsafe class CLR0EntryNode : ResourceNode
     {
-        internal CLR0Entry* Header { get { return (CLR0Entry*)WorkingSource.Address; } }
+        internal CLR0Entry* Header { get { return (CLR0Entry*)WorkingUncompressed.Address; } }
+
+        //To do
+        //protected override int OnCalculateSize(bool force)
+        //{
+        //    return base.OnCalculateSize(force);
+        //}
+
+        protected override bool OnInitialize()
+        {
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
+            //Get size
+            return false;
+        }
+
+        protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        {
+            CLR0Entry* header = (CLR0Entry*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
+        }
     }
 }

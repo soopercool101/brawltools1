@@ -9,7 +9,7 @@ using BrawlLib.Imaging;
 
 namespace BrawlLib.Wii.Textures
 {
-    unsafe class RGB5A3 : TextureFormat
+    unsafe class RGB5A3 : TextureConverter
     {
         public override int BitsPerPixel { get { return 16; } }
         public override int BlockWidth { get { return 4; } }

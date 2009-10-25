@@ -57,6 +57,18 @@ namespace BrawlBox
                 MessageBox.Show(msg);
         }
 
+        public static bool New<T>() where T: ResourceNode
+        {
+            if (!Close())
+                return false;
+
+            _rootNode = Activator.CreateInstance<T>();
+            _rootNode.Name = "NewTree";
+            MainForm.Instance.Reset();
+
+            return true;
+        }
+
         public static bool Close() { return Close(false); }
         public static bool Close(bool force)
         {
@@ -64,7 +76,7 @@ namespace BrawlBox
             {
                 if ((_rootNode.IsDirty) && (!force))
                 {
-                    DialogResult res = MessageBox.Show("Closing", "Save changes?", MessageBoxButtons.YesNoCancel);
+                    DialogResult res = MessageBox.Show("Save changes?", "Closing", MessageBoxButtons.YesNoCancel);
                     if (((res == DialogResult.Yes) && (!Save())) || (res == DialogResult.Cancel))
                         return false;
                 }
@@ -162,6 +174,15 @@ namespace BrawlBox
                     if (s.Equals(ext, StringComparison.OrdinalIgnoreCase))
                         return (i + 1) / 2;
             return 1;
+        }
+
+        internal static void SaveAs()
+        {
+            if(MainForm.Instance.RootNode is GenericWrapper)
+            {
+                GenericWrapper w = MainForm.Instance.RootNode as GenericWrapper;
+                w.Export();
+            }
         }
     }
 }

@@ -45,7 +45,7 @@ namespace BrawlLib.SSBBTypes
         public TEX0(int width, int height, WiiPixelFormat format, int mipLevels)
         {
             _header._tag = Tag;
-            _header._size = TextureFormat.Get(format).GetMipOffset(width, height, mipLevels + 1) + Size;
+            _header._size = TextureConverter.Get(format).GetMipOffset(width, height, mipLevels + 1) + Size;
             _header._numResources = 1;
             _header._bresOffset = 0;
 

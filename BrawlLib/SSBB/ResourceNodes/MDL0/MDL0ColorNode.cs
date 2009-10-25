@@ -6,37 +6,42 @@ namespace BrawlLib.SSBB.ResourceNodes
 {
     public unsafe class MDL0ColorNode : MDL0EntryNode
     {
-        internal MDL0ColorData* Data { get { return (MDL0ColorData*)WorkingSource.Address; } }
+        internal MDL0ColorData* Header { get { return (MDL0ColorData*)WorkingUncompressed.Address; } }
+        protected override int DataLength { get { return Header->_dataLen; } }
 
         [Category("Color Data")]
-        public int TotalLen { get { return Data->_dataLen; } }
+        public int TotalLen { get { return Header->_dataLen; } }
         [Category("Color Data")]
-        public int MDL0Offset { get { return Data->_mdl0Offset; } }
+        public int MDL0Offset { get { return Header->_mdl0Offset; } }
         [Category("Color Data")]
-        public int DataOffset { get { return Data->_dataOffset; } }
+        public int DataOffset { get { return Header->_dataOffset; } }
         [Category("Color Data")]
-        public int StringOffset { get { return Data->_stringOffset; } }
+        public int StringOffset { get { return Header->_stringOffset; } }
         [Category("Color Data")]
-        public int ID { get { return Data->_index; } }
+        public int ID { get { return Header->_index; } }
         [Category("Color Data")]
-        public int IsRGBA { get { return Data->_isRGBA; } }
+        public int IsRGBA { get { return Header->_isRGBA; } }
         [Category("Color Data")]
-        public int Format { get { return Data->_format; } }
+        public int Format { get { return Header->_format; } }
         [Category("Color Data")]
-        public byte EntryStride { get { return Data->_entryStride; } }
+        public byte EntryStride { get { return Header->_entryStride; } }
         [Category("Color Data")]
-        public byte Unknown3 { get { return Data->_unk3; } }
+        public byte Unknown3 { get { return Header->_unk3; } }
         [Category("Color Data")]
-        public short NumEntries { get { return Data->_numEntries; } }
+        public short NumEntries { get { return Header->_numEntries; } }
 
         protected override bool OnInitialize()
         {
             base.OnInitialize();
-
-            if (!_initialized)
-                _origSource.Length = _uncompSource.Length = TotalLen;
-
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
             return false;
+        }
+
+        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        {
+            MDL0ColorData* header = (MDL0ColorData*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
         }
     }
 }

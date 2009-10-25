@@ -38,8 +38,10 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="System\ComponentModel\CustomPropertyDescriptor.cs" />
@@ -62,6 +64,7 @@
     <Compile Include="OpenGL\GLPrimitive.cs" />
     <Compile Include="SSBB\BinaryStringTable.cs" />
     <Compile Include="SSBB\ExportFilters.cs" />
+    <Compile Include="SSBB\NodeComparer.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0BoneNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0ColorNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0DefNode.cs" />
@@ -75,6 +78,8 @@
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0TextureNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0UVNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0VertexNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSARNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\SYMBMaskNode.cs" />
     <Compile Include="SSBB\StringTable.cs" />
     <Compile Include="System\Matrix.cs" />
     <Compile Include="System\Matrix43.cs" />
@@ -91,8 +96,6 @@
     <Compile Include="SSBB\ResourceNodes\CLR0Node.cs" />
     <Compile Include="SSBB\ResourceNodes\PAT0Node.cs" />
     <Compile Include="SSBB\ResourceNodes\PLT0Node.cs" />
-    <Compile Include="SSBB\ResourceNodes\ResourceEntryNode.cs" />
-    <Compile Include="SSBB\ResourceNodes\ResourceGroupNode.cs" />
     <Compile Include="SSBB\ResourceNodes\SCN0Node.cs" />
     <Compile Include="SSBB\ResourceNodes\SRT0Node.cs" />
     <Compile Include="SSBB\ResourceNodes\TEX0Node.cs" />
@@ -102,11 +105,18 @@
     <Compile Include="System\Drawing\Imaging\ColorPaletteExtension.cs" />
     <Compile Include="System\Reflection\MemberInfoExtension.cs" />
     <Compile Include="System\Reflection\MethodInfoExtension.cs" />
+    <Compile Include="System\ByteExtension.cs" />
+    <Compile Include="System\Windows\Forms\GoodPictureBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Windows\Forms\ModelContext.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="System\Windows\Forms\ModelPanel.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\TextureConverterDialog.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Wii\Compression\Common.cs" />
     <Compile Include="Wii\Compression\LZ77.cs" />
@@ -161,7 +171,7 @@
     <Compile Include="Wii\Models\Struct.cs" />
     <Compile Include="Wii\Textures\CI4.cs" />
     <Compile Include="Wii\Textures\CI8.cs" />
-    <Compile Include="Wii\Textures\CMP.cs" />
+    <Compile Include="Wii\Textures\CMPR.cs" />
     <Compile Include="Wii\Textures\Enum.cs" />
     <Compile Include="Wii\Textures\I4.cs" />
     <Compile Include="Wii\Textures\I8.cs" />
@@ -171,11 +181,14 @@
     <Compile Include="Wii\Textures\RGB565.cs" />
     <Compile Include="Wii\Textures\RGB5A3.cs" />
     <Compile Include="Wii\Textures\RGBA8.cs" />
-    <Compile Include="Wii\Textures\TextureFormat.cs" />
+    <Compile Include="Wii\Textures\TextureConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="System\Windows\Forms\ProgressWindow.resx">
       <DependentUpon>ProgressWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\TextureConverterDialog.resx">
+      <DependentUpon>TextureConverterDialog.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

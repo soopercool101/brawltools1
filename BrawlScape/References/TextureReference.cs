@@ -42,9 +42,9 @@ namespace BrawlScape
                 if ((trNode = r.Node as TEX0Node) == null)
                     continue;
 
-                trNode.ReplaceRaw(tNode.WorkingRawSource.Address, tNode.WorkingRawSource.Length);
+                trNode.ReplaceRaw(tNode.WorkingSource.Address, tNode.WorkingSource.Length);
                 if ((prNode = trNode.GetPaletteNode()) != null)
-                    prNode.ReplaceRaw(pNode.WorkingRawSource.Address, pNode.WorkingRawSource.Length);
+                    prNode.ReplaceRaw(pNode.WorkingSource.Address, pNode.WorkingSource.Length);
             }
 
             if (_texture != null) { _texture.Dispose(); _texture = null; }
@@ -140,9 +140,9 @@ namespace BrawlScape
                         if (pNode != null)
                         {
                             ResourceNode origp = ((TEX0Node)origNode).GetPaletteNode();
-                            pNode.ReplaceRaw(origp.WorkingSource.Address, origp.WorkingSource.Length);
+                            pNode.ReplaceRaw(origp.WorkingUncompressed.Address, origp.WorkingUncompressed.Length);
                         }
-                        tNode.ReplaceRaw(origNode.WorkingSource.Address, origNode.WorkingSource.Length);
+                        tNode.ReplaceRaw(origNode.WorkingUncompressed.Address, origNode.WorkingUncompressed.Length);
                     }
                 }
             }

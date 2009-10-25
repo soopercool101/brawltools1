@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace BrawlLib.Imaging
 {
-    class DIB: IDisposable
+    internal class DIB: IDisposable
     {
         int _width, _height, _stride;
         PixelFormat _format;

@@ -6,12 +6,57 @@ using System.Windows.Forms;
 using System.IO;
 using BrawlLib.IO;
 using BrawlLib.SSBB.ResourceNodes;
+using System.ComponentModel;
 
 namespace BrawlBox
 {
     //Contains generic members inherited by all sub-classed nodes
     class GenericWrapper : BaseWrapper
     {
+        #region Menu
+
+        private static ContextMenuStrip _menu;
+        static GenericWrapper()
+        {
+            _menu = new ContextMenuStrip();
+            _menu.Items.Add(new ToolStripMenuItem("&Export", null, ExportAction, Keys.Control | Keys.E));
+            _menu.Items.Add(new ToolStripMenuItem("&Replace", null, ReplaceAction, Keys.Control | Keys.R));
+            _menu.Items.Add(new ToolStripSeparator());
+            _menu.Items.Add(new ToolStripMenuItem("Res&tore", null, RestoreAction, Keys.Control | Keys.T));
+            _menu.Items.Add(new ToolStripMenuItem("&Delete", null, DeleteAction, Keys.Delete));
+            _menu.Items.Add(new ToolStripSeparator());
+            _menu.Items.Add(new ToolStripMenuItem("Re&name", null, RenameAction, Keys.Control | Keys.N));
+            _menu.Opening += MenuOpening;
+            _menu.Closing += MenuClosing;
+        }
+        protected static void ExportAction(object sender, EventArgs e) { GetInstance<GenericWrapper>().Export(); }
+        protected static void ReplaceAction(object sender, EventArgs e) { GetInstance<GenericWrapper>().Replace(); }
+        protected static void RestoreAction(object sender, EventArgs e) { GetInstance<GenericWrapper>().Restore(); }
+        protected static void DeleteAction(object sender, EventArgs e) { GetInstance<GenericWrapper>().Delete(); }
+        protected static void RenameAction(object sender, EventArgs e) { GetInstance<GenericWrapper>().Rename(); }
+        private static void MenuClosing(object sender, ToolStripDropDownClosingEventArgs e)
+        {
+            _menu.Items[1].Enabled = _menu.Items[3].Enabled = _menu.Items[4].Enabled = true;
+        }
+        private static void MenuOpening(object sender, CancelEventArgs e)
+        {
+            GenericWrapper w = GetInstance<GenericWrapper>();
+            if (w.Parent == null)
+                _menu.Items[1].Enabled = _menu.Items[4].Enabled = false;
+            else
+                _menu.Items[1].Enabled = _menu.Items[4].Enabled = true;
+
+            if ((w._resource.IsDirty) || (w._resource.IsBranch))
+                _menu.Items[3].Enabled = true;
+            else
+                _menu.Items[3].Enabled = false;
+        }
+
+        #endregion
+
+        public GenericWrapper() { ContextMenuStrip = _menu; }
+
+
         public virtual string ExportFilter { get { return "Raw Data File (*.*)|*.*"; } }
         public virtual string ReplaceFilter { get { return ExportFilter; } }
         public static int CategorizeFilter(string path, string filter)
@@ -26,51 +71,52 @@ namespace BrawlBox
             return 1;
         }
 
-        [NodeAction("&Export", ShortcutKeys = Keys.Control | Keys.E)]
         public virtual void Export()
         {
             string outPath;
-            int index;
-            if ((index = Program.SaveFile(ExportFilter, Text, out outPath)) > 0)
+            int index = Program.SaveFile(ExportFilter, Text, out outPath);
+            if (index != 0)
+            {
+                if (Parent == null)
+                    _resource.Merge(Control.ModifierKeys == (Keys.Control | Keys.Shift));
                 OnExport(outPath, index);
-            //if (index != 0)
-            //    using (FileStream stream = new FileStream(outPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.RandomAccess))
-            //        OnExport(stream, index);
+            }
         }
-        public virtual void OnExport(string outPath, int filterIndex)
-        {
-            ResourceNode.Rebuild();
-            ResourceNode.Export(outPath);
-        }
+        public virtual void OnExport(string outPath, int filterIndex) { _resource.Export(outPath); }
 
-        [NodeAction("&Replace", ShortcutKeys = Keys.Control | Keys.R)]
         public virtual void Replace()
         {
+            if (Parent == null)
+                return;
+
             string inPath;
             int index = Program.OpenFile(ReplaceFilter, out inPath);
             if (index != 0)
             {
                 OnReplace(inPath, index);
-                ResourceNode n = _resource;
-                this.Unlink();
-                this.Link(n);
+                this.Link(_resource);
             }
         }
 
-        public virtual void OnReplace(string inStream, int filterIndex)
-        {
-            ResourceNode.Replace(inStream);
-            TreeView.SelectedNode = null;
-            TreeView.SelectedNode = this;
-        }
+        public virtual void OnReplace(string inStream, int filterIndex) { _resource.Replace(inStream); }
 
-        [NodeAction("&Delete")]
+        public void Restore() { _resource.Restore(); }
+
         public void Delete()
         {
-            this.Remove();
-            ResourceNode.Remove();
-            ResourceNode.Dispose();
-            this.Unlink();
+            if (Parent == null)
+                return;
+
+            _resource.Dispose();
+            _resource.Remove();
+        }
+
+        public void Rename()
+        {
+            using (RenameDialog dlg = new RenameDialog())
+            {
+                dlg.ShowDialog(MainForm.Instance, _resource);
+            }
         }
     }
 }

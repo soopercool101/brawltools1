@@ -25,22 +25,27 @@ namespace BrawlBox
         public MainForm()
         {
             InitializeComponent();
-            //propertyGrid1.BrowsableAttributes = new AttributeCollection(new SSBBBrowsableAttribute());
             this.Text = Program.AssemblyTitle;
         }
 
         public void Reset()
         {
             _root = null;
+            resourceTree.SelectedNode = null;
             resourceTree.Clear();
-            propertyGrid1.SelectedObject = null;
-            previewPanel1.RenderingTarget = null;
+
+            //propertyGrid1.SelectedObject = null;
+            //if (previewPanel1.Picture != null)
+            //{
+            //    previewPanel1.Picture.Dispose();
+            //    previewPanel1.Picture = null;
+            //}
             //audioPlaybackControl1.TargetObject = null;
-            splitContainer2.Panel2Collapsed = true;
+            //splitContainer2.Panel2Collapsed = true;
 
             if (Program.RootNode != null)
             {
-                this.Text = String.Format("{0} - {1}", Program.RootPath, Program.AssemblyTitle);
+                this.Text = String.Format("{0} - {1}", Program.AssemblyTitle, Program.RootPath);
 
                 _root = BaseWrapper.Wrap(Program.RootNode);
                 resourceTree.BeginUpdate();
@@ -48,9 +53,19 @@ namespace BrawlBox
                 resourceTree.SelectedNode = _root;
                 _root.Expand();
                 resourceTree.EndUpdate();
+
+                closeToolStripMenuItem.Enabled = true;
+                saveAsToolStripMenuItem.Enabled = true;
+                saveToolStripMenuItem.Enabled = true;
             }
             else
+            {
                 this.Text = Program.AssemblyTitle;
+
+                closeToolStripMenuItem.Enabled = false;
+                saveAsToolStripMenuItem.Enabled = false;
+                saveToolStripMenuItem.Enabled = false;
+            }
         }
 
         public void TargetResource(ResourceNode n)
@@ -59,26 +74,28 @@ namespace BrawlBox
                 resourceTree.SelectedNode = _root.FindResource(n, true);
         }
 
-        private void resourceTree_AfterSelect(object sender, TreeViewEventArgs e)
+        private void resourceTree_SelectionChanged(object sender, EventArgs e)
         {
-            contextMenuStrip1.Items.Clear();
-            editToolStripMenuItem.DropDownItems.Clear();
-
-            if (e.Node is BaseWrapper)
+            if (previewPanel1.Picture != null)
             {
-                BaseWrapper w = e.Node as BaseWrapper;
-                ResourceNode node = w.ResourceNode;
+                previewPanel1.Picture.Dispose();
+                previewPanel1.Picture = null;
+            }
+
+            BaseWrapper w;
+            ResourceNode node;
+            if ((resourceTree.SelectedNode is BaseWrapper) && ((node = (w = resourceTree.SelectedNode as BaseWrapper).ResourceNode) != null))
+            {
                 propertyGrid1.SelectedObject = node;
 
                 if (node is IImageSource)
                 {
-                    previewPanel1.RenderingTarget = node;
+                    previewPanel1.Picture = ((IImageSource)node).GetImage(0);
                     previewPanel1.Visible = true;
                     splitContainer2.Panel2Collapsed = false;
                 }
                 else
                 {
-                    previewPanel1.RenderingTarget = null;
                     previewPanel1.Visible = false;
                     //if (e.Node is IAudioSource)
                     //{
@@ -93,12 +110,22 @@ namespace BrawlBox
                     splitContainer2.Panel2Collapsed = true;
                     //}
                 }
-                contextMenuStrip1.Items.AddRange(ActionFactory.Build(w));
 
-                editToolStripMenuItem.DropDownItems.AddRange(ActionFactory.Build(w));
-                editToolStripMenuItem.DropDownItems.Add(toolStripMenuItem2);
-                editToolStripMenuItem.DropDownItems.Add(settingsToolStripMenuItem);
+                if ((editToolStripMenuItem.DropDown = w.ContextMenuStrip) != null)
+                    editToolStripMenuItem.Enabled = true;
+                else
+                    editToolStripMenuItem.Enabled = false;
             }
+            else
+            {
+                propertyGrid1.SelectedObject = null;
+                previewPanel1.Visible = false;
+                splitContainer2.Panel2Collapsed = true;
+
+                editToolStripMenuItem.DropDown = null;
+                editToolStripMenuItem.Enabled = false;
+            }
+
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -107,22 +134,7 @@ namespace BrawlBox
             base.OnClosing(e);
         }
 
-        private void propertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
-        {
-            if (propertyGrid1.SelectedObject is ResourceNode)
-                ((ResourceNode)propertyGrid1.SelectedObject).HasChanged = true;
-        }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (Program.Save())
-                this.Text = this.Text.Replace("*", "");
-        }
-
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
 
         private static string _inFilter = "All Supported Formats (*.pac,*.pcs,*.brres,*.plt0,*.tex0,*.brstm,*.brsar)|*.pac;*.pcs;*.brres;*.plt0;*.tex0;*.brstm;*.brsar|" +
                     "PAC File Archive (*.pac)|*.pac|" +
@@ -136,42 +148,35 @@ namespace BrawlBox
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string inFile;
-            if(Program.OpenFile(_inFilter, out inFile) != 0)
+            if (Program.OpenFile(_inFilter, out inFile) != 0)
                 Program.Open(inFile);
         }
 
-        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.Close();
-        }
+        #region File Menu
+        private void aRCArchiveToolStripMenuItem_Click(object sender, EventArgs e) { Program.New<ARCNode>(); }
+        private void brresPackToolStripMenuItem_Click(object sender, EventArgs e) { Program.New<BRESNode>(); }
 
-        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //Program.ConfigForm.ShowDialog(this);
-        }
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e) { Program.Save(); }
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) { Program.SaveAs(); }
+        private void closeToolStripMenuItem_Click(object sender, EventArgs e) { Program.Close(); }
 
-        private void resourceTree_AfterDeselect(object sender, EventArgs e)
-        {
-            contextMenuStrip1.Items.Clear();
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e) { this.Close(); }
+        #endregion
 
-            editToolStripMenuItem.DropDownItems.Clear();
-            editToolStripMenuItem.DropDownItems.Add(settingsToolStripMenuItem);
-        }
-
-        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //Program.SaveAs();
-        }
 
         private void fileResizerToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //using (FileResizer res = new FileResizer())
             //    res.ShowDialog();
         }
-
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        private void settingsToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            AboutForm.Instance.ShowDialog(this);
+
         }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e) { AboutForm.Instance.ShowDialog(this); }
+
+
+
     }
 }

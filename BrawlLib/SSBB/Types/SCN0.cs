@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace BrawlLib.SSBBTypes
 {
-    [StructLayout(LayoutKind.Sequential, Pack=1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct SCN0
     {
         public const uint Tag = 0x304E4353;
@@ -38,26 +38,44 @@ namespace BrawlLib.SSBBTypes
         public void* Part4 { get { return (_part4Offset != 0) ? Address + _part4Offset : null; } }
         public void* Part5 { get { return (_part5Offset != 0) ? Address + _part5Offset : null; } }
         public void* Part6 { get { return (_part6Offset != 0) ? Address + _part6Offset : null; } }
+
+        public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)this.Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct SCN0CommonHeader
     {
+        public const int Size = 0x14;
+
         public bint _length;
         public bint _scn0Offset;
         public bint _stringOffset;
         public bint _nodeIndex;
         public bint _realIndex;
+
+        private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
+
+        public string ResourceString { get { return new String((sbyte*)ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct SCN0Part1
+    public unsafe struct SCN0LightSet
     {
         public SCN0CommonHeader _header;
 
         public bint _stringOffset2;
         public bshort _magic; //0xFFFF
-        public byte _numEntries;
+        public byte _numLights;
         public byte _unk1;
         public fixed int _entries[8]; //string offsets
 
@@ -66,20 +84,18 @@ namespace BrawlLib.SSBBTypes
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public bint* Offsets { get { fixed (void* ptr = _entries)return (bint*)ptr; } }
 
-        public string GetString()
+        public string AmbientString { get { return new String((sbyte*)AmbientStringAddress); } }
+        public VoidPtr AmbientStringAddress
         {
-            return new String((sbyte*)(Address + _stringOffset2));
+            get { return (VoidPtr)Address + _stringOffset2; }
+            set { _stringOffset2 = (int)value - (int)Address; }
         }
 
-        //Not working properly. Maybe they're not string offsets?
-        public string GetEntry(int index)
-        {
-            return new String((sbyte*)(Address + 28 + Offsets[index]));
-        }
+        public bint* StringOffsets { get { return (bint*)(Address + 0x1C); } }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct SCN0Part2
+    public unsafe struct SCN0AmbientLight
     {
         public SCN0CommonHeader _header;
 

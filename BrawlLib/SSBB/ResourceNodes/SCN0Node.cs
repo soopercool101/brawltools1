@@ -7,14 +7,16 @@ using System.ComponentModel;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    public unsafe class SCN0Node : BRESEntryNode, IResourceGroupNode
+    public unsafe class SCN0Node : BRESEntryNode
     {
-        internal SCN0* Header { get { return (SCN0*)WorkingSource.Address; } }
-        ResourceGroup* IResourceGroupNode.Group { get { return Header->Group; } }
+        internal SCN0* Header { get { return (SCN0*)WorkingUncompressed.Address; } }
 
         protected override bool OnInitialize()
         {
             base.OnInitialize();
+
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
 
             return Header->Group->_numEntries > 0;
         }
@@ -23,7 +25,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             ResourceGroup* group = Header->Group;
             for (int i = 0; i < group->_numEntries; i++)
-                new SCN0GroupNode().Initialize(this, new DataSource(group->First[i].DataAddress, 0x10));
+                new SCN0GroupNode(group->First[i].GetName()).Initialize(this, new DataSource(group->First[i].DataAddress, 0));
         }
 
         internal override void GetStrings(StringTable table)
@@ -33,18 +35,47 @@ namespace BrawlLib.SSBB.ResourceNodes
                 n.GetStrings(table);
         }
 
+        //To do
+        //protected override int OnCalculateSize(bool force)
+        //{
+        //    int size = SCN0.Size + 0x18 + (Children.Count * 0x10);
+        //    foreach (SCN0GroupNode n in Children)
+        //        foreach(SCN0EntryNode e in n.Children)
+        //            size += e.CalculateSize(force);
+        //    return size;
+        //}
+
+        protected internal override void PostProcess(VoidPtr bresAddress, VoidPtr dataAddress, int dataLength, StringTable stringTable)
+        {
+            base.PostProcess(bresAddress, dataAddress, dataLength, stringTable);
+
+            SCN0* header = (SCN0*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
+
+            ResourceGroup* group = header->Group;
+            group->_first = new ResourceEntry(0xFFFF, 0, 0, 0, 0);
+
+            ResourceEntry* rEntry = group->First;
+
+            int index = 1;
+            foreach (SCN0GroupNode n in Children)
+            {
+                dataAddress = (VoidPtr)group + (rEntry++)->_dataOffset;
+                ResourceEntry.Build(group, index++, dataAddress, (BRESString*)stringTable[n.Name]);
+                n.PostProcess(dataAddress, stringTable);
+            }
+        }
+
         internal static ResourceNode TryParse(VoidPtr address) { return ((SCN0*)address)->_header._tag == SCN0.Tag ? new SCN0Node() : null; }
 
     }
 
-    public unsafe class SCN0GroupNode : ResourceEntryNode, IResourceGroupNode
+    public unsafe class SCN0GroupNode : ResourceNode
     {
-        internal ResourceGroup* Group { get { return (ResourceGroup*)WorkingSource.Address; } }
-        ResourceGroup* IResourceGroupNode.Group { get { return Group; } }
+        internal ResourceGroup* Group { get { return (ResourceGroup*)WorkingUncompressed.Address; } }
 
-        //internal ResourceEntry* EntryData { get { return _parent != null ? (ResourceEntry*)(&((SCN0Node)_parent).Header->Group->First[Index]) : null; } }
-
-        //private int _id;
+        public SCN0GroupNode() : base() { }
+        public SCN0GroupNode(string name) : base() { _name = name; }
 
         internal void GetStrings(StringTable table)
         {
@@ -55,7 +86,6 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            base.OnInitialize();
             return Group->_numEntries > 0;
         }
 
@@ -64,45 +94,94 @@ namespace BrawlLib.SSBB.ResourceNodes
             ResourceGroup* group = Group;
 
             Type t = null;
-            switch (_id)
-            {
-                case 109: { t = typeof(SCN0LightSetNode); break; }
-                case 117: { t = typeof(SCN0AmbientLightNode); break; }
-                case 93: { t = typeof(SCN0LightNode); break; }
-                case 77: { t = typeof(SCN0FogNode); break; }
-                case 101: { t = typeof(SCN0CameraNode); break; }
-            }
+            if (_name == "LightSet(NW4R)")
+                t = typeof(SCN0LightSetNode);
+            else if (_name == "AmbLights(NW4R)")
+                t = typeof(SCN0AmbientLightNode);
+            else if (_name == "Lights(NW4R)")
+                t = typeof(SCN0LightNode);
+            else if (_name == "Fogs(NW4R)")
+                t = typeof(SCN0FogNode);
+            else if (_name == "Cameras(NW4R)")
+                t = typeof(SCN0CameraNode);
+            else
+                return;
 
             for (int i = 0; i < Group->_numEntries; i++)
-                ((ResourceNode)Activator.CreateInstance(t)).Initialize(this, new DataSource(Group->First[i].DataAddress, 0x10));
+                ((ResourceNode)Activator.CreateInstance(t)).Initialize(this, new DataSource(Group->First[i].DataAddress, 0));
+        }
+
+        protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        {
+            ResourceGroup* group = (ResourceGroup*)dataAddress;
+            group->_first = new ResourceEntry(0xFFFF, 0, 0, 0, 0);
+
+            ResourceEntry* rEntry = group->First;
+
+            int index = 1;
+            foreach (SCN0EntryNode n in Children)
+            {
+                dataAddress = (VoidPtr)group + (rEntry++)->_dataOffset;
+                ResourceEntry.Build(group, index++, dataAddress, (BRESString*)stringTable[n.Name]);
+                n.PostProcess(dataAddress, stringTable);
+            }
         }
     }
 
-    public unsafe class SCN0EntryNode : ResourceEntryNode
+    public unsafe class SCN0EntryNode : ResourceNode
     {
-        internal virtual void GetStrings(StringTable table) { table.Add(Name); }
-        //internal ResourceEntry* EntryData { get { return _parent != null ? (ResourceEntry*)(&((SCN0GroupNode)_parent).Group->First[Index]) : null; } }
+        internal SCN0CommonHeader* Header { get { return (SCN0CommonHeader*)WorkingUncompressed.Address; } }
 
-        //protected override bool OnInitialize()
+        internal virtual void GetStrings(StringTable table) { table.Add(Name); }
+
+        //To do
+        //protected override int OnCalculateSize(bool force)
         //{
-        //    Name = EntryData->GetName();
-        //    return false;
+        //    return base.OnCalculateSize(force);
         //}
+
+        protected override bool OnInitialize()
+        {
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
+
+            if (IsBranch)
+                if (IsCompressed)
+                    _replUncompSrc.Length = Header->_length;
+                else
+                    _replSrc.Length = _replUncompSrc.Length = Header->_length;
+            else
+                if (IsCompressed)
+                    _uncompSource.Length = Header->_length;
+                else
+                    _origSource.Length = _uncompSource.Length = Header->_length;
+
+            return false;
+        }
+
+        protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        {
+            SCN0CommonHeader* header = (SCN0CommonHeader*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
+        }
     }
 
     public unsafe class SCN0LightSetNode : SCN0EntryNode
     {
-        internal SCN0Part1* Data { get { return (SCN0Part1*)WorkingSource.Address; } }
+        internal SCN0LightSet* Data { get { return (SCN0LightSet*)WorkingUncompressed.Address; } }
+
+        private string _ambientLight;
         private List<string> _entries = new List<string>();
 
         [Category("Light Set")]
-        public string String2 { get { return Data->GetString(); } }
-        [Category("Light Set")]
         public short Magic { get { return Data->_magic; } }
         [Category("Light Set")]
-        public byte NumEntries { get { return Data->_numEntries; } }
+        public byte NumLights { get { return Data->_numLights; } }
         [Category("Light Set")]
         public byte Unknown1 { get { return Data->_unk1; } }
+
+        [Category("Light Set")]
+        public string Ambience { get { return _ambientLight; } set { _ambientLight = value; } }
         [Category("Light Set")]
         public List<string> Entries { get { return _entries; } }
 
@@ -110,8 +189,12 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            for (int i = 0; i < NumEntries; i++)
-                _entries.Add(Data->GetEntry(i));
+            if (Data->_stringOffset2 != 0)
+                _ambientLight = Data->AmbientString;
+
+            bint* strings = Data->StringOffsets;
+            for (int i = 0; i < Data->_numLights; i++)
+                _entries.Add(new String((sbyte*)strings + strings[i]));
 
             return false;
         }
@@ -119,14 +202,37 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal override void GetStrings(StringTable table)
         {
             table.Add(Name);
+
+            if (_ambientLight != null)
+                table.Add(_ambientLight);
+
             foreach (string s in _entries)
                 table.Add(s);
+        }
+
+        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        {
+            base.PostProcess(dataAddress, stringTable);
+
+            SCN0LightSet* header = (SCN0LightSet*)dataAddress;
+
+            if (_ambientLight != null)
+                header->AmbientStringAddress = stringTable[_ambientLight] + 4;
+            else
+                header->_stringOffset2 = 0;
+
+            int i;
+            bint* strings = header->StringOffsets;
+            for (i = 0; i < _entries.Count; i++)
+                strings[i] = (int)stringTable[_entries[i]] + 4 - (int)strings;
+            while (i < 8)
+                strings[i++] = 0;
         }
     }
 
     public unsafe class SCN0AmbientLightNode : SCN0EntryNode
     {
-        internal SCN0Part2* Data { get { return (SCN0Part2*)WorkingSource.Address; } }
+        internal SCN0AmbientLight* Data { get { return (SCN0AmbientLight*)WorkingUncompressed.Address; } }
 
         [Category("Ambient Light")]
         public byte Unknown1 { get { return Data->_unk1; } }
@@ -148,7 +254,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     public unsafe class SCN0LightNode : SCN0EntryNode
     {
-        internal SCN0Part3* Data { get { return (SCN0Part3*)WorkingSource.Address; } }
+        internal SCN0Part3* Data { get { return (SCN0Part3*)WorkingUncompressed.Address; } }
 
         [Category("Light")]
         public int Unknown1 { get { return Data->_unk1; } }
@@ -190,7 +296,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     public unsafe class SCN0FogNode : SCN0EntryNode
     {
-        internal SCN0Part4* Data { get { return (SCN0Part4*)WorkingSource.Address; } }
+        internal SCN0Part4* Data { get { return (SCN0Part4*)WorkingUncompressed.Address; } }
 
         [Category("Fog")]
         public int Unknown1 { get { return Data->_unk1; } }
@@ -213,7 +319,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     public unsafe class SCN0CameraNode : SCN0EntryNode
     {
-        internal SCN0Part5* Data { get { return (SCN0Part5*)WorkingSource.Address; } }
+        internal SCN0Part5* Data { get { return (SCN0Part5*)WorkingUncompressed.Address; } }
 
         [Category("Camera")]
         public int Unknown1 { get { return Data->_unk1; } }

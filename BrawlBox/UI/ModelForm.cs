@@ -9,6 +9,7 @@ namespace BrawlBox
 {
     class ModelForm : Form
     {
+        private System.ComponentModel.IContainer components;
         private ModelPanel modelPanel1;
 
         public ModelForm()
@@ -27,6 +28,7 @@ namespace BrawlBox
 
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.modelPanel1 = new System.Windows.Forms.ModelPanel();
             this.SuspendLayout();
             // 
@@ -38,7 +40,7 @@ namespace BrawlBox
             this.modelPanel1.Location = new System.Drawing.Point(0, 0);
             this.modelPanel1.Name = "modelPanel1";
             this.modelPanel1.RotationScale = 0.4F;
-            this.modelPanel1.Size = new System.Drawing.Size(284, 262);
+            this.modelPanel1.Size = new System.Drawing.Size(640, 480);
             this.modelPanel1.TabIndex = 0;
             this.modelPanel1.TranslationScale = 0.05F;
             this.modelPanel1.ZoomScale = 2.5F;

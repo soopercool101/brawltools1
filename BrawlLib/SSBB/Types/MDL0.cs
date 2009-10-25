@@ -11,10 +11,6 @@ namespace BrawlLib.SSBBTypes
     {
         public const uint Size = 16;
         public const uint Tag = 0x304C444D;
-        public const int NodeIndex = 0;
-        public const int VertexIndex = 2;
-        public const int NormalIndex = 3;
-        public const int ColorIndex = 4;
 
         public BRESCommonHeader _entry;
 
@@ -31,18 +27,27 @@ namespace BrawlLib.SSBBTypes
         public buint _data10Offset;
         public buint _data11Offset;
 
-        public buint _stringOffset;
+        public bint _stringOffset;
 
         public MDL0Part2 _modelDef;
 
-        public VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-        public string Name { get { return new String((sbyte*)Address + _stringOffset); } }
+        internal VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
+        public buint* Offsets { get { return (buint*)(Address + 0x10); } }
+
+        public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)this.Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
+
+        //public string Name { get { return new String((sbyte*)Address + _stringOffset); } }
         public ResourceGroup* GetEntry(int index) 
         {
-            bint* ptr = (bint*)(Address + 0x10);
-            if (ptr[index] == 0)
+            uint offset = Offsets[index];
+            if (offset == 0)
                 return null;
-            return (ResourceGroup*)(Address + ptr[index]); 
+            return (ResourceGroup*)(Address + offset);
         }
 
         public ResourceGroup* InfoGroup { get { return _infoOffset == 0 ? null : (ResourceGroup*)(Address + _infoOffset); } }
@@ -300,8 +305,14 @@ namespace BrawlLib.SSBBTypes
 
         public VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
 
-        public string Name { get { return new String((sbyte*)Address + _stringOffset); } }
         public MDL0Data7Part4* Part2 { get { return (MDL0Data7Part4*)(Address + _part2Offset); } }
+
+        public string ResourceString { get { return new String((sbyte*)ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -327,7 +338,12 @@ namespace BrawlLib.SSBBTypes
 
         public WiiVertexComponentType Type { get { return (WiiVertexComponentType)(int)_type; } }
 
-        //public VoidPtr GetVertex(int index) { return Data + (index * _entryStride / 8); }
+        public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)this.Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -348,6 +364,13 @@ namespace BrawlLib.SSBBTypes
         public VoidPtr Data { get { return Address + _dataOffset; } }
 
         public WiiVertexComponentType Type { get { return (WiiVertexComponentType)(int)_type; } }
+
+        public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)this.Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -368,6 +391,13 @@ namespace BrawlLib.SSBBTypes
         public VoidPtr Data { get { return Address + _dataOffset; } }
 
         public WiiColorComponentType Type { get { return (WiiColorComponentType)(int)_format; } }
+
+        public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)this.Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -394,6 +424,13 @@ namespace BrawlLib.SSBBTypes
         public BVec2* Entries { get { return (BVec2*)(Address + _dataOffset); } }
 
         public WiiVertexComponentType Type { get { return (WiiVertexComponentType)(int)_format; } }
+
+        public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)this.Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -428,6 +465,13 @@ namespace BrawlLib.SSBBTypes
         public MDL0Data7Part3* Part3 { get { return (_part3Offset != 0) ? (MDL0Data7Part3*)(Address + _part3Offset) : null; } }
         public MDL0Data7Part4* Part4 { get { return (_part4Offset != 0) ? (MDL0Data7Part4*)(Address + _part4Offset) : null; } }
         public void* Part5 { get { return (_part5Offset != 0) ? Address + _part5Offset : null; } }
+
+        public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)this.Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -450,7 +494,13 @@ namespace BrawlLib.SSBBTypes
         public bint _unk11;
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-        public string TextureName { get { return new String((sbyte*)(Address + _stringOffset)); } }
+
+        public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)this.Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -472,6 +522,15 @@ namespace BrawlLib.SSBBTypes
         public bint _stringOffset; //same as entry
         public bint _unk4; //0x00
         public bint _unk5; //0x00
+
+        private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
+
+        public string ResourceString { get { return new String((sbyte*)ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -534,6 +593,13 @@ namespace BrawlLib.SSBBTypes
         public bushort* WeightIndices { get { return (bushort*)(Address + _part1Offset); } }
 
         public VoidPtr PrimitiveData { get { return Address + 0x24 + _dataOffset; } }
+
+        public string ResourceString { get { return new String((sbyte*)ResourceStringAddress); } }
+        public VoidPtr ResourceStringAddress
+        {
+            get { return (VoidPtr)Address + _stringOffset; }
+            set { _stringOffset = (int)value - (int)Address; }
+        }
     }
 
     //public struct EntrySize
@@ -630,17 +696,17 @@ namespace BrawlLib.SSBBTypes
         }
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct UVPoint
-    {
-        public bfloat U;
-        public bfloat V;
+    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
+    //public unsafe struct UVPoint
+    //{
+    //    public bfloat U;
+    //    public bfloat V;
 
-        public override string ToString()
-        {
-            return String.Format("U:{0}, V:{1}", (float)U, (float)V);
-        }
-    }
+    //    public override string ToString()
+    //    {
+    //        return String.Format("U:{0}, V:{1}", (float)U, (float)V);
+    //    }
+    //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = 1)]
     //public unsafe struct RGBAPixel

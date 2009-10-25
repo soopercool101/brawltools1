@@ -7,61 +7,62 @@ namespace BrawlLib.SSBB.ResourceNodes
     unsafe class MDL0PolygonNode : MDL0EntryNode//, IPolygon
     {
         //private List<SSBBPrimitive> _primitives;
-        internal MDL0Polygon* Data { get { return (MDL0Polygon*)WorkingSource.Address; } }
+        internal MDL0Polygon* Header { get { return (MDL0Polygon*)WorkingUncompressed.Address; } }
+        protected override int DataLength { get { return Header->_totalLength; } }
 
         [Category("Polygon Data")]
-        public int TotalLen { get { return Data->_totalLength; } }
+        public int TotalLen { get { return Header->_totalLength; } }
         [Category("Polygon Data")]
-        public int MDL0Offset { get { return Data->_mdl0Offset; } }
+        public int MDL0Offset { get { return Header->_mdl0Offset; } }
         [Category("Polygon Data")]
-        public int NodeId { get { return Data->_nodeId; } }
+        public int NodeId { get { return Header->_nodeId; } }
 
         [Category("Polygon Data")]
-        public MDL0ElementFlags ElementFlags { get { return Data->_flags; } }
+        public MDL0ElementFlags ElementFlags { get { return Header->_flags; } }
         //[SSBBBrowsable, Category("Polygon Data"), TypeConverter(typeof(IntToHex))]
         //public int UnkFlags1 { get { return Data->_unkFlags1; } }
         [Category("Polygon Data")]
-        public int UnkFlags2 { get { return Data->_unkFlags2; } }
+        public int UnkFlags2 { get { return Header->_unkFlags2; } }
 
         [Category("Polygon Data")]
-        public int DefSize { get { return Data->_defSize; } }
+        public int DefSize { get { return Header->_defSize; } }
         [Category("Polygon Data")]
-        public int DefFlags { get { return Data->_defFlags; } }
+        public int DefFlags { get { return Header->_defFlags; } }
         [Category("Polygon Data")]
-        public int DefOffset { get { return Data->_defOffset; } }
+        public int DefOffset { get { return Header->_defOffset; } }
 
         [Category("Polygon Data")]
-        public int DataLength1 { get { return Data->_dataLen1; } }
+        public int DataLength1 { get { return Header->_dataLen1; } }
         [Category("Polygon Data")]
-        public int DataLength2 { get { return Data->_dataLen2; } }
+        public int DataLength2 { get { return Header->_dataLen2; } }
         [Category("Polygon Data")]
-        public int DataOffset { get { return Data->_dataOffset; } }
+        public int DataOffset { get { return Header->_dataOffset; } }
 
         [Category("Polygon Data")]
-        public int Unknown2 { get { return Data->_unk2; } }
+        public int Unknown2 { get { return Header->_unk2; } }
         [Category("Polygon Data")]
-        public int Unknown3 { get { return Data->_unk3; } }
+        public int Unknown3 { get { return Header->_unk3; } }
         [Category("Polygon Data")]
-        public int StringOffset { get { return Data->_stringOffset; } }
+        public int StringOffset { get { return Header->_stringOffset; } }
         [Category("Polygon Data")]
-        public int ItemId { get { return Data->_index; } }
+        public int ItemId { get { return Header->_index; } }
         [Category("Polygon Data")]
-        public int Unknown4 { get { return Data->_unk4; } }
+        public int Unknown4 { get { return Header->_unk4; } }
         [Category("Polygon Data")]
-        public int Faces { get { return Data->_numFaces; } }
+        public int Faces { get { return Header->_numFaces; } }
 
         [Category("Polygon Data")]
-        public int VertexSet { get { return Data->_vertexId; } }
+        public int VertexSet { get { return Header->_vertexId; } }
         [Category("Polygon Data")]
-        public int NormalSet { get { return Data->_normalId; } }
+        public int NormalSet { get { return Header->_normalId; } }
         [Category("Polygon Data")]
-        public int ColorSet1 { get { return Data->_colorId1; } }
+        public int ColorSet1 { get { return Header->_colorId1; } }
 
         [Category("Polygon Data")]
-        public int ColorSet2 { get { return Data->_colorId2; } }
+        public int ColorSet2 { get { return Header->_colorId2; } }
 
         [Category("Polygon Data")]
-        public int Part1Offset { get { return Data->_part1Offset; } }
+        public int Part1Offset { get { return Header->_part1Offset; } }
 
         //private List<MDL0MaterialNode> _materialNodes = new List<MDL0MaterialNode>();
         //public List<MDL0MaterialNode> MaterialNodes
@@ -72,11 +73,15 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected override bool OnInitialize()
         {
             base.OnInitialize();
-
-            if (!_initialized)
-                _origSource.Length = _uncompSource.Length = Data->_totalLength;
-
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
             return false;
+        }
+
+        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        {
+            MDL0Polygon* header = (MDL0Polygon*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
         }
 
         //public MDL0VertexNode GetVertexNode() { return VertexSet >= 0 ? _parent._parent.FindChild("Vertices", false).Children[VertexSet] as MDL0VertexNode : null; }

@@ -22,7 +22,7 @@ namespace BrawlScape
             if (rdoRawMode.Checked)
             {
                 rdoProjMode.Checked = false;
-                txtProjectPath.Text = txtDataPath.Text;
+                Program.WorkingPath = txtProjectPath.Text = txtDataPath.Text;
                 btnProjectBrowse.Enabled = false;
             }
         }

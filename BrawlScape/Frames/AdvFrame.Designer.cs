@@ -1,4 +1,5 @@
-﻿namespace BrawlScape.Frames
+﻿using System.Windows.Forms;
+namespace BrawlScape.Frames
 {
     partial class AdvFrame
     {
@@ -33,7 +34,7 @@
             this.sseStageList = new BrawlScape.SSEStageList();
             this.modelList = new BrawlScape.ModelList();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.modelControl = new BrawlScape.ModelControl();
+            this.modelControl = new ModelPanel();
             this.texturePanel = new BrawlScape.TexturePanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel1.SuspendLayout();
@@ -158,7 +159,7 @@
         private SSEStageList sseStageList;
         private System.Windows.Forms.ColumnHeader nameColumn;
         private ModelList modelList;
-        private ModelControl modelControl;
+        private ModelPanel modelControl;
         private TexturePanel texturePanel;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.Panel panel1;

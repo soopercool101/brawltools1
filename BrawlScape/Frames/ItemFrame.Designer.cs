@@ -1,4 +1,5 @@
-﻿namespace BrawlScape
+﻿using System.Windows.Forms;
+namespace BrawlScape
 {
     partial class ItemFrame
     {
@@ -32,7 +33,7 @@
             this.textureList = new BrawlScape.TexturePanel();
             this.itemList = new BrawlScape.ItemList();
             this.modelList = new BrawlScape.ModelList();
-            this.modelPanel = new ModelControl();
+            this.modelPanel = new ModelPanel();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -122,6 +123,6 @@
         private BrawlScape.ItemList itemList;
         private TexturePanel textureList;
         private ModelList modelList;
-        private ModelControl modelPanel;
+        private ModelPanel modelPanel;
     }
 }

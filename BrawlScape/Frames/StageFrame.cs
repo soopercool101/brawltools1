@@ -18,7 +18,11 @@ namespace BrawlScape
         public StageDefinition[] ListItems { get { return _stages == null ? _stages = StageDefinition.List.ToArray() : _stages; } }
 
         private void stageList_ResourceChanged(StageDefinition resource) { textureList.PrimarySource = resource; modelList.CurrentSource = resource; }
-        private void modelList_ResourceChanged(ModelDefinition resource) { textureList.SecondarySource = modelPanel.CurrentModel = resource; }
+        private void modelList_ResourceChanged(ModelDefinition resource)
+        {
+            textureList.SecondarySource = resource;
+            modelPanel.CurrentModel = (resource != null) ? resource.Model : null; 
+        }
 
         private void StageFrame_Load(object sender, EventArgs e) { if (!DesignMode) stageList.CurrentSource = this; }
     }

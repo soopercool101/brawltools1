@@ -38,9 +38,9 @@ namespace BrawlScape
                     ResourceTree t = Tree;
                     if ((t != null) && ((_node = ResourceNode.FindNode(Tree.Node, _nodePath, false)) != null))
                     {
-                        _node.Disposed += OnDisposed;
-                        _node.Changed += OnChanged;
-                        _node.ChildChanged += OnChildChanged;
+                        _node.Disposing += OnDisposed;
+                        _node.Replaced += OnChanged;
+                        _node.Restored += OnChanged;
                     }
                 }
                 return _node;

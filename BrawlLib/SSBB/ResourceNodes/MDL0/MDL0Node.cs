@@ -12,8 +12,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 {
     public unsafe class MDL0Node : BRESEntryNode
     {
-
-        internal MDL0* Header { get { return (MDL0*)WorkingSource.Address; } }
+        internal MDL0* Header { get { return (MDL0*)WorkingUncompressed.Address; } }
 
         public override ResourceType ResourceType { get { return ResourceType.MDL0; } }
 
@@ -49,6 +48,9 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
+            if (Header->_stringOffset != 0)
+                _name = Header->ResourceString;
+
             _unk1 = Header->_modelDef._unk1;
             _unk2 = Header->_modelDef._unk2;
             _numVertices = Header->_modelDef._numVertices;
@@ -83,29 +85,45 @@ namespace BrawlLib.SSBB.ResourceNodes
             return new GLModel(this);
         }
 
-        public override unsafe void Export(string outPath)
+        //public override unsafe void Export(string outPath)
+        //{
+        //    Rebuild();
+
+        //    //get total size
+        //    int len = WorkingSource.Length;
+        //    int stringOffset;
+
+        //    StringTable table = new StringTable();
+        //    this.GetStrings(table);
+
+        //    stringOffset = len = len.Align(4);
+        //    len += table.GetTotalSize();
+        //    //len.Align(0x20);
+
+        //    using (FileStream stream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.RandomAccess))
+        //    {
+        //        stream.SetLength(len);
+        //        using (FileMap map = FileMap.FromStream(stream))
+        //        {
+        //            Memory.Move(map.Address, WorkingSource.Address, (uint)WorkingSource.Length);
+        //            table.WriteTable(map.Address + stringOffset);
+        //        }
+        //    }
+        //    table.Clear();
+        //}
+
+        protected internal override void PostProcess(VoidPtr bresAddress, VoidPtr dataAddress, int dataLength, StringTable stringTable)
         {
-            //get total size
-            int len = WorkingRawSource.Length;
-            int stringOffset;
+            base.PostProcess(bresAddress, dataAddress, dataLength, stringTable);
 
-            StringTable table = new StringTable();
-            this.GetStrings(table);
+            MDL0* header = (MDL0*)dataAddress;
+            header->ResourceStringAddress = stringTable[Name] + 4;
 
-            stringOffset = len = len.Align(4);
-            len += table.GetTotalSize();
-            //len.Align(0x20);
-
-            using (FileStream stream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.RandomAccess))
+            foreach (MDL0GroupNode node in Children)
             {
-                stream.SetLength(len);
-                using (FileMap map = FileMap.FromStream(stream))
-                {
-                    Memory.Move(map.Address, WorkingRawSource.Address, (uint)WorkingRawSource.Length);
-                    table.WriteTable(map.Address + stringOffset);
-                }
+                VoidPtr addr = dataAddress + header->Offsets[node._index];
+                node.PostProcess(addr, stringTable);
             }
-            table.Clear();
         }
 
         internal static ResourceNode TryParse(VoidPtr address) { return ((MDL0*)address)->_entry._tag == MDL0.Tag ? new MDL0Node() : null; }

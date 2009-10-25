@@ -1,4 +1,5 @@
-﻿namespace BrawlScape
+﻿using System.Windows.Forms;
+namespace BrawlScape
 {
     partial class CharacterFrame
     {
@@ -33,7 +34,7 @@
             this.mnuCharIcon = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuNameStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.modelPanel = new BrawlScape.ModelControl();
+            this.modelPanel = new ModelPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.stockPortrait = new BrawlScape.ReferencedPictureBox();
             this.modelList = new BrawlScape.ModelList();
@@ -321,7 +322,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuCostumeRestore;
         private BrawlScape.TexturePanel textureList;
         private BrawlScape.ModelList modelList;
-        private BrawlScape.ModelControl modelPanel;
+        private ModelPanel modelPanel;
         private System.Windows.Forms.Panel panel1;
         private BrawlScape.ReferencedPictureBox stockPortrait;
         private BrawlScape.ReferencedPictureBox gamePortrait;

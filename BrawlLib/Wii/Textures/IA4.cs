@@ -8,7 +8,7 @@ using BrawlLib.Imaging;
 
 namespace BrawlLib.Wii.Textures
 {
-    public unsafe class IA4 : TextureFormat
+    public unsafe class IA4 : TextureConverter
     {
         public override int BitsPerPixel { get { return 8; } }
         public override int BlockWidth { get { return 8; } }

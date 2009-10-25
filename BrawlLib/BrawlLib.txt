@@ -1,5 +1,5 @@
 ﻿
-BrawlLib Resource Library - Version 0.04
+BrawlLib Resource Library - Version 0.05
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -11,6 +11,15 @@ they be held accountable for the manner in which it is used.
  ====================================
 |************ Change Log ************|
  ====================================
+
+- v0.05 - (10/24/2009)
+	. Added ModelPanel from BrawlScape.
+	. Added TextureConverterDialog.
+	. Various improvements to node stability.
+	. Certain resources now automatically convert with the Export/Replace(string) command. Mainly TEX0Node.
+	. Support for binary string trees has been added. (Use ResourceEntry.Build)
+	. More BRES entries now link to the string table. This allows other resources to change size.
+	. BRES entries now do post-processing, and link groups/nodes to the binary tree.
 
 - v0.04 - (10/11/2009)
 	. FileMaps now hold on to a FileStream object until the map is closed.

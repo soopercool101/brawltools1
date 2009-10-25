@@ -62,7 +62,7 @@ namespace BrawlScape
                     _mnuPalette.Text = String.Format("Palette: {0}, {1} colors", pNode.Format, pNode.Colors);
 
                 _mnuLOD.Text = String.Format("LOD: {0}", node.LevelOfDetail);
-                _mnuFileSize.Text = String.Format("File Size: {0}", node.WorkingSource.Length - 0x40);
+                _mnuFileSize.Text = String.Format("File Size: {0}", node.WorkingUncompressed.Length - 0x40);
             }
         }
 

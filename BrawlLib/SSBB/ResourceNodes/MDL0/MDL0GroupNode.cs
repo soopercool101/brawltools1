@@ -7,21 +7,36 @@ using System.ComponentModel;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    public unsafe class MDL0EntryNode : ResourceEntryNode
+    public unsafe abstract class MDL0EntryNode : ResourceNode
     {
         internal virtual void GetStrings(StringTable table) { table.Add(Name); }
+
+        protected abstract int DataLength { get; }
+
+        protected override bool OnInitialize()
+        {
+            if (IsBranch)
+                if (IsCompressed)
+                    _replUncompSrc.Length = DataLength;
+                else
+                    _replSrc.Length = _replUncompSrc.Length = DataLength;
+            else
+                if (IsCompressed)
+                    _uncompSource.Length = DataLength;
+                else
+                    _origSource.Length = _uncompSource.Length = DataLength;
+
+            return false;
+        }
+
+        protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable) { }
     }
 
-    public unsafe class MDL0GroupNode : ResourceNode, IResourceGroupNode
+    public unsafe class MDL0GroupNode : ResourceNode
     {
-        private int _index;
-        private int _topNode, _mRight;
+        internal int _index;
 
-        internal ResourceGroup* Header { get { return (ResourceGroup*)WorkingSource.Address; } }
-        ResourceGroup* IResourceGroupNode.Group { get { return Header; } }
-
-        [Category("MDL0 Group")]
-        public int TopNode { get { return _topNode; } set { _topNode = value; } }
+        internal ResourceGroup* Header { get { return (ResourceGroup*)WorkingUncompressed.Address; } }
 
         internal void GetStrings(StringTable table)
         {
@@ -39,19 +54,19 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             switch (_index)
             {
-                case 0: Name = "Definitions"; break;
-                case 1: Name = "Bones"; break;
-                case 2: Name = "Vertices"; break;
-                case 3: Name = "Normals"; break;
-                case 4: Name = "Colors"; break;
-                case 5: Name = "UV Points"; break;
-                case 6: Name = "Materials1"; break;
-                case 7: Name = "Materials2"; break;
-                case 8: Name = "Polygons"; break;
-                case 9: Name = "Textures1"; break;
-                case 10: Name = "Textures2"; break;
+                case 0: _name = "Definitions"; break;
+                case 1: _name = "Bones"; break;
+                case 2: _name = "Vertices"; break;
+                case 3: _name = "Normals"; break;
+                case 4: _name = "Colors"; break;
+                case 5: _name = "UV Points"; break;
+                case 6: _name = "Materials1"; break;
+                case 7: _name = "Materials2"; break;
+                case 8: _name = "Polygons"; break;
+                case 9: _name = "Textures1"; break;
+                case 10: _name = "Textures2"; break;
             }
-            _topNode = Header->_first._leftIndex;
+            //_topNode = Header->_first._leftIndex;
 
             return Header->_numEntries > 0;
         }
@@ -98,6 +113,47 @@ namespace BrawlLib.SSBB.ResourceNodes
                 _children.Clear();
                 _children = _roots;
             }
+            else if ((_index >= 9) || (_index == 0) || (_index == 7))
+            {
+                for (int i = 0; i < group->_numEntries; i++)
+                    _children[i]._name = new String((sbyte*)group + group->First[i]._stringOffset);
+            }
+        }
+
+        protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        {
+            ResourceGroup* group = (ResourceGroup*)dataAddress;
+            group->_first = new ResourceEntry(0xFFFF, 0, 0, 0, 0);
+            ResourceEntry* rEntry = group->First;
+
+            if (_index == 1)
+            {
+                //Special processing for bones
+
+                int index = 0;
+                foreach (MDL0EntryNode n in Children)
+                    PostProcessBone(n, group,ref index, stringTable);
+            }
+            else
+            {
+                int index = 1;
+                foreach (MDL0EntryNode n in Children)
+                {
+                    dataAddress = (VoidPtr)group + (rEntry++)->_dataOffset;
+                    ResourceEntry.Build(group, index++, dataAddress, (BRESString*)stringTable[n.Name]);
+                    n.PostProcess(dataAddress, stringTable);
+                }
+            }
+        }
+
+        private void PostProcessBone(MDL0EntryNode node, ResourceGroup* group, ref int index, StringTable stringTable)
+        {
+            VoidPtr dataAddress = (VoidPtr)group + group->First[index++]._dataOffset;
+            ResourceEntry.Build(group, index, dataAddress, (BRESString*)stringTable[node.Name]);
+            node.PostProcess(dataAddress, stringTable);
+
+            foreach (MDL0EntryNode n in node.Children)
+                PostProcessBone(n, group, ref index, stringTable);
         }
     }
 }

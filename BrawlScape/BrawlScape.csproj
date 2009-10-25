@@ -42,12 +42,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controls\ModelContextMenu.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\ModelControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Include="Controls\ResourceList.cs">
       <SubType>Component</SubType>
     </Compile>

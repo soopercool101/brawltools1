@@ -44,11 +44,12 @@ namespace BrawlScape
             else
                 _state = 2;
 
-            node.Changed += OnChanged;
-            node.ChildChanged += OnChildChanged;
+            //node.Replaced += OnChanged;
+            //node.Restored += OnChanged;
+            //node.ChildChanged += OnChildChanged;
         }
 
-        private void OnChanged(ResourceNode n) { ResourceCache.OnTreeChanged(this); }
-        private void OnChildChanged(ResourceNode n, ResourceNode c) { OnChanged(n); ResourceCache.OnNodeChanged(this, c); }
+        //private void OnChanged(ResourceNode n) { ResourceCache.OnTreeChanged(this); }
+        //private void OnChildChanged(ResourceNode n, ResourceNode c) { OnChanged(n); ResourceCache.OnNodeChanged(this, c); }
     }
 }
