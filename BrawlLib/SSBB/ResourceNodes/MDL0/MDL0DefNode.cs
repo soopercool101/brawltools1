@@ -15,7 +15,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected override int DataLength { get { return _len; } }
 
         [Category("MDL0 Nodes")]
-        public List<object> Items { get { return _items; } }
+        public List<object> Items { get { return _items; } set { _items = value; } }
 
         protected override bool OnInitialize()
         {

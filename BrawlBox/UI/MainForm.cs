@@ -26,6 +26,9 @@ namespace BrawlBox
         {
             InitializeComponent();
             this.Text = Program.AssemblyTitle;
+            previewPanel1.Dock = DockStyle.Fill;
+            msBinEditor1.Dock = DockStyle.Fill;
+            animEditControl.Dock = DockStyle.Fill;
         }
 
         public void Reset()
@@ -81,6 +84,8 @@ namespace BrawlBox
                 previewPanel1.Picture.Dispose();
                 previewPanel1.Picture = null;
             }
+            animEditControl.TargetSequence = null;
+            msBinEditor1.CurrentNode = null;
 
             BaseWrapper w;
             ResourceNode node;
@@ -92,23 +97,31 @@ namespace BrawlBox
                 {
                     previewPanel1.Picture = ((IImageSource)node).GetImage(0);
                     previewPanel1.Visible = true;
+                    msBinEditor1.Visible = false;
+                    animEditControl.Visible = false;
                     splitContainer2.Panel2Collapsed = false;
                 }
+                else if (node is MSBinNode)
+                {
+                    msBinEditor1.CurrentNode = node as MSBinNode;
+                    msBinEditor1.Visible = true;
+                    previewPanel1.Visible = false;
+                    animEditControl.Visible = false;
+                    splitContainer2.Panel2Collapsed = false;
+                }
+                //else if (node is CHR0EntryNode)
+                //{
+                //    animEditControl.TargetSequence = node as CHR0EntryNode;
+                //    animEditControl.Visible = true;
+                //    previewPanel1.Visible = false;
+                //    splitContainer2.Panel2Collapsed = false;
+                //}
                 else
                 {
+                    msBinEditor1.Visible = false;
+                    animEditControl.Visible = false;
                     previewPanel1.Visible = false;
-                    //if (e.Node is IAudioSource)
-                    //{
-                    //    audioPlaybackControl1.TargetObject = ((IAudioSource)e.Node).AudioStreams[0];
-                    //    audioPlaybackControl1.Visible = true;
-                    //    splitContainer2.Panel2Collapsed = false;
-                    //}
-                    //else
-                    //{
-                    //    audioPlaybackControl1.TargetObject = null;
-                    //    audioPlaybackControl1.Visible = false;
                     splitContainer2.Panel2Collapsed = true;
-                    //}
                 }
 
                 if ((editToolStripMenuItem.DropDown = w.ContextMenuStrip) != null)
@@ -120,6 +133,7 @@ namespace BrawlBox
             {
                 propertyGrid1.SelectedObject = null;
                 previewPanel1.Visible = false;
+                animEditControl.Visible = false;
                 splitContainer2.Panel2Collapsed = true;
 
                 editToolStripMenuItem.DropDown = null;
@@ -136,14 +150,16 @@ namespace BrawlBox
 
 
 
-        private static string _inFilter = "All Supported Formats (*.pac,*.pcs,*.brres,*.plt0,*.tex0,*.brstm,*.brsar)|*.pac;*.pcs;*.brres;*.plt0;*.tex0;*.brstm;*.brsar|" +
+        private static string _inFilter = "All Supported Formats (*.pac,*.pcs,*.brres,*.plt0,*.tex0,*.mdl0,*.brstm,*.brsar,*.msbin)|*.pac;*.pcs;*.brres;*.plt0;*.tex0;*.mdl0;*.brstm;*.brsar;*.msbin|" +
                     "PAC File Archive (*.pac)|*.pac|" +
                     "Compressed File Package (*.pcs)|*.pcs|" +
                     "BRRES Resource Package (*.brres)|*.brres|" +
                     "PLT0 Raw Palette (*.plt0)|*.plt0|" +
                     "TEX0 Raw Texture (*.tex0)|*.tex0|" +
+                    "MDL0 Raw Model (*.mdl0)|*.mdl0|" +
                     "BRSTM Audio Stream (*.brstm)|*.brstm|" +
-                    "BRSAR Audio Package (*.brsar)|*.brsar";
+                    "BRSAR Audio Package (*.brsar)|*.brsar|" +
+                    "MSBin Message Pack (*.msbin)|*.msbin";
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {

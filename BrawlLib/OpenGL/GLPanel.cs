@@ -23,6 +23,7 @@ namespace BrawlLib.OpenGL
         protected override void OnLoad(EventArgs e)
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.Opaque, true);
+            SetStyle(ControlStyles.ResizeRedraw, false);
             _context = GLContext.Attach(this);
 
             _context.Capture();
@@ -62,6 +63,7 @@ namespace BrawlLib.OpenGL
                 _context.Capture();
                 OnResized();
                 _context.Release();
+                Invalidate();
             }
             else
                 base.OnResize(e);

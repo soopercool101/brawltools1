@@ -34,7 +34,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            if (Header->_stringOffset != 0)
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
             bint* strings = Header->StringOffsets1;
@@ -106,7 +106,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                 strings[i] = (int)stringTable[_stringList2[i]] + 4 - (int)strings;
         }
 
-        internal static ResourceNode TryParse(VoidPtr address) { return ((PAT0*)address)->_header._tag == PAT0.Tag ? new PAT0Node() : null; }
+        internal static ResourceNode TryParse(DataSource source) { return ((PAT0*)source.Address)->_header._tag == PAT0.Tag ? new PAT0Node() : null; }
 
     }
 
@@ -122,7 +122,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            if (Header->_stringOffset != 0)
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
             //Get size
             return false;

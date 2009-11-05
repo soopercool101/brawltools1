@@ -75,14 +75,14 @@ namespace BrawlLib.Wii.Textures
 
             using (DIB dib = DIB.FromBitmap(bmp, BlockWidth, BlockHeight, PixelFormat.Format32bppArgb))
             {
+                ARGBPixel* img = (ARGBPixel*)dib.Scan0;
                 for (int y1 = 0; y1 < ah; y1 += 8)
                     for (int x1 = 0; x1 < aw; x1 += 8)
                         for (int y = 0; y < 8; y += 4)
                             for (int x = 0; x < 8; x += 4)
                             {
-                                ARGBPixel* ptr = (ARGBPixel*)dib.Scan0 + (((y1 + y) * aw) + (x1 + x));
-                                *bPtr = CMPRBlock.Encode(ptr, aw, false);
-                                bPtr->Decode(ptr, aw);
+                                *bPtr = NVDXT.compressDXT1a(img, x1 + x, y1 + y, aw, ah);
+                                bPtr->Decode(img, x1 + x, y1 + y, aw, ah);
                                 bPtr++;
                             }
 
@@ -123,6 +123,10 @@ namespace BrawlLib.Wii.Textures
         public wRGB565Pixel _root1;
         public buint _lookup;
 
+        public void Decode(ARGBPixel* image, int imgX, int imgY, int imgW, int imgH)
+        {
+            Decode(image + (imgX + (imgY * imgW)), imgW);
+        }
         public void Decode(ARGBPixel* block, int width)
         {
             uint* pixelData = stackalloc uint[4];
@@ -148,6 +152,7 @@ namespace BrawlLib.Wii.Textures
                     block[x++] = pixel[(lookup >> shift) & 0x03];
         }
 
+
         public static CMPRBlock Encode(ARGBPixel* block, int width, bool fast)
         {
             CMPRBlock p = new CMPRBlock();
@@ -166,6 +171,20 @@ namespace BrawlLib.Wii.Textures
                     else allAlpha = false;
                 }
             }
+           
+            /*
+             *  Foreach block:
+             *      copy block to buffer
+             *      mirror remaning colors?
+             *      
+             *      If block is single color:
+             *          run optiml compress?
+             *      else
+             *          Initialize color set
+             *          Compress block using color set
+             * 
+             * 
+             */
 
             //BlockDecoder decoder = new BlockDecoder(width, 4, 4, 4);
             //bool isSingle = true, hasAlpha = false, allAlpha = true;

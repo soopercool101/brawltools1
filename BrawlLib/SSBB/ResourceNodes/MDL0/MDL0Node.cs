@@ -48,7 +48,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            if (Header->_stringOffset != 0)
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
             _unk1 = Header->_modelDef._unk1;
@@ -126,6 +126,6 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
         }
 
-        internal static ResourceNode TryParse(VoidPtr address) { return ((MDL0*)address)->_entry._tag == MDL0.Tag ? new MDL0Node() : null; }
+        internal static ResourceNode TryParse(DataSource source) { return ((MDL0*)source.Address)->_entry._tag == MDL0.Tag ? new MDL0Node() : null; }
     }
 }

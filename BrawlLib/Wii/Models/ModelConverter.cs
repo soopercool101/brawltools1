@@ -17,6 +17,7 @@ namespace BrawlLib.Wii.Models
         {
             GLPolygon p = new GLPolygon();
             GLPrimitive prim;
+            p._name = polygon->ResourceString;
             p._model = model;
             p._index = polygon->_index;
             //p._nodeIndex = polygon->_nodeId;

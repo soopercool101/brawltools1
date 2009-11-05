@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace BrawlLib.Imaging
 {
-    internal class DIB: IDisposable
+    internal class DIB : IDisposable
     {
         int _width, _height, _stride;
         PixelFormat _format;
@@ -146,6 +146,18 @@ namespace BrawlLib.Imaging
             }
             dst.UnlockBits(data);
             //dst.UnlockBits(dst.LockBits(new Rectangle(x, y, width, height), ImageLockMode.UserInputBuffer | ImageLockMode.WriteOnly, _format, BitmapData));
+        }
+
+        internal void ReadRaw(VoidPtr dest, int x, int y, int width, int height)
+        {
+            int bpp = Image.GetPixelFormatSize(_format);
+            int linelen = (width * bpp) >> 3;
+
+            VoidPtr src = ((x * bpp) >> 3) + (y * _stride);
+
+
+            for (int i = 0; i < height; i++, dest += linelen, src += _stride)
+                Memory.Move(dest, src, (uint)linelen);
         }
     }
 }

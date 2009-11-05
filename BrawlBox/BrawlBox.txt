@@ -13,6 +13,7 @@ they be held accountable for the manner in which it is used.
 For bug reports, support, and the latest version, check out our forum post at SmashBoards.com!
 http://www.smashboards.com/showthread.php?t=238861
 
+
  ====================================
 |************ Change Log ************|
  ====================================
@@ -106,28 +107,26 @@ http://www.smashboards.com/showthread.php?t=238861
 - v0.50 - (06/23/2009)
 	. Original release
 
+
  ====================================
 |*********** Requirements ***********|
  ====================================
  
- * Microsoft .Net Framework v3.5 SP1
+* Microsoft .Net Framework v3.5 SP1
 	http://www.microsoft.com/downloads/details.aspx?FamilyID=ab99342f-5d1a-413d-8319-81da479ab0d7&displaylang=en
- 
+	
+* A video card that supports OpenGL 1.3 or higher.
+
 
  ====================================
 |*********** Known Issues ***********|
  ====================================
 
-* Audio playback is still a little shaky.
+* Not all nodes can be replaced properly! However, most can be extracted for hex editing.
 
-* Some things is brsar files need work:
-	a. Multi-channel audio
-	b. Small/silent audio
-	c. Sound banks
+* Audio integration is still incomplete.
 
 * Palette and CMPR algorithms are decent, but need better quality.
-
-* A lot of testing needs to be done with brres files and their compatibility with the game.
 
 * Many file formats are still unsupported.
 

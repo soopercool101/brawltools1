@@ -153,6 +153,8 @@ namespace BrawlBox
         }
         internal protected virtual void OnReplaced(ResourceNode node)
         {
+            Link(node);
+
             if ((TreeView != null) && (TreeView.SelectedNode == this))
             {
                 ((ResourceTree)TreeView).SelectedNode = null;

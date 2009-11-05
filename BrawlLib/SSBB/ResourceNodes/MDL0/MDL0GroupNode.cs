@@ -10,7 +10,6 @@ namespace BrawlLib.SSBB.ResourceNodes
     public unsafe abstract class MDL0EntryNode : ResourceNode
     {
         internal virtual void GetStrings(StringTable table) { table.Add(Name); }
-
         protected abstract int DataLength { get; }
 
         protected override bool OnInitialize()
@@ -34,9 +33,10 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     public unsafe class MDL0GroupNode : ResourceNode
     {
-        internal int _index;
-
         internal ResourceGroup* Header { get { return (ResourceGroup*)WorkingUncompressed.Address; } }
+        public override ResourceType ResourceType { get { return ResourceType.MDL0Group; } }
+
+        internal int _index;
 
         internal void GetStrings(StringTable table)
         {

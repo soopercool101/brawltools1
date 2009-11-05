@@ -40,6 +40,14 @@ namespace BrawlLib.SSBB.ResourceNodes
                 groupName = "Palettes(NW4R)";
             else if (typeof(T) == typeof(MDL0Node))
                 groupName = "Models(NW4R)";
+            else if (typeof(T) == typeof(CHR0Node))
+                groupName = "AnmChr(NW4R)";
+            else if (typeof(T) == typeof(CLR0Node))
+                groupName = "AnmClr(NW4R)";
+            else if (typeof(T) == typeof(SRT0Node))
+                groupName = "AnmTexSrt(NW4R)";
+            else if (typeof(T) == typeof(SHP0Node))
+                groupName = "AnmShp(NW4R)";
             else
                 return null;
 
@@ -133,11 +141,6 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected internal override void OnRebuild(VoidPtr address, int size, bool force)
         {
-            DataSource src = _replSrc;
-            DataSource uncompSrc = _replUncompSrc;
-
-            _replSrc = _replUncompSrc = new DataSource(address, size);
-
             BRESHeader* header = (BRESHeader*)address;
             *header = new BRESHeader(size, _numEntries + 1);
 
@@ -146,24 +149,15 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             ResourceGroup* pMaster = &rootHeader->_master;
             ResourceGroup* rGroup = (ResourceGroup*)pMaster->EndAddress;
-            //BRESString* pStr = (BRESString*)(address + _strOffset);
 
             //Write string table
             _stringTable.WriteTable(address + _strOffset);
 
             VoidPtr dataAddr = (VoidPtr)rootHeader + _rootSize;
 
-            //pMaster->_first = new ResourceEntry(_gId, _gPrev, _gNext, 0);
-
             int gIndex = 1;
             foreach (BRESGroupNode g in Children)
             {
-                //Set group entry
-                //g._origSource.Address = g._uncompSource.Address = gEntry;
-                //gEntry->_dataOffset = (int)rGroup - (int)pMaster;
-                //gEntry->_stringOffset = (int)_stringTable[g.Name] - (int)pMaster;
-                //gEntry++;
-
                 ResourceEntry.Build(pMaster, gIndex++, rGroup, (BRESString*)_stringTable[g.Name]);
 
                 *rGroup = new ResourceGroup(g.Children.Count);
@@ -176,9 +170,6 @@ namespace BrawlLib.SSBB.ResourceNodes
                     dataAddr = ((int)dataAddr).Align(n.DataAlign);
 
                     ResourceEntry.Build(rGroup, rIndex++, dataAddr, (BRESString*)_stringTable[n.Name]);
-
-                    //Set entry data
-                    //*nEntry++ = new ResourceEntry(n.EntryId, n.SortNext, n.NodeNext, (int)dataAddr - (int)rGroup, (int)_stringTable[n.Name] - (int)rGroup);
 
                     //Rebuild entry
                     int len = n._calcSize;
@@ -193,11 +184,12 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
             _stringTable.Clear();
 
-            src.Close();
-            uncompSrc.Close();
+            _replSrc.Close();
+            _replUncompSrc.Close();
+            _replSrc = _replUncompSrc = new DataSource(address, size);
         }
 
-        internal static ResourceNode TryParse(VoidPtr address) { return ((BRESHeader*)address)->_tag == BRESHeader.Tag ? new BRESNode() : null; }
+        internal static ResourceNode TryParse(DataSource source) { return ((BRESHeader*)source.Address)->_tag == BRESHeader.Tag ? new BRESNode() : null; }
 
     }
 

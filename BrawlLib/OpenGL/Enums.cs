@@ -254,6 +254,10 @@ namespace BrawlLib.OpenGL
 
     public enum GLInternalPixelFormat : uint
     {
+        _1 = 1,
+        _2 = 2,
+        _3 = 3,
+        _4 = 4,
         R3_G3_B2 = 0x2A10,
         GL_ALPHA = 0x1906,
         ALPHA4 = 0x803B,

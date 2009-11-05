@@ -47,8 +47,13 @@
     <Compile Include="NodeWrappers\ARCWrapper.cs" />
     <Compile Include="NodeWrappers\BRESGroupWrapper.cs" />
     <Compile Include="NodeWrappers\BRESWrapper.cs" />
+    <Compile Include="NodeWrappers\CHR0Wrapper.cs" />
     <Compile Include="NodeWrappers\GenericWrapper.cs" />
+    <Compile Include="NodeWrappers\MDL0GroupWrapper.cs" />
     <Compile Include="NodeWrappers\MDL0Wrapper.cs" />
+    <Compile Include="NodeWrappers\MSBinWrapper.cs" />
+    <Compile Include="NodeWrappers\PLT0Wrapper.cs" />
+    <Compile Include="NodeWrappers\RSARFolderWrapper.cs" />
     <Compile Include="NodeWrappers\TEX0Wrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\AboutForm.cs">

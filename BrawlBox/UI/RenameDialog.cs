@@ -30,49 +30,18 @@ namespace BrawlBox
             if (txtName.Text.Length == 0)
                 return;
 
-            //Doesn't really matter if it's filtered or not, right?
-            //Except in the case of MSBIN, no special characters
-            //string s = txtName.Text;
-            //for(int i = 0 ; i < s.Length ; i++)
-            //{
-            //    char c = s[i];
-            //    if((!char.IsLetterOrDigit(c)) && (c != '_') || (c > 'z'))
-            //    {
-            //        MessageBox.Show(this, "The name can only contain alphanumeric characters and underscore. (0-9), (A-Z), (a-z), ( _ )", "Invalid characters");
-            //        return;
-            //    }
-            //}
-
-            //if (_node is BRESEntryNode)
-            //{
-                if (_node.Parent != null)
+            if (_node.Parent != null)
+            {
+                //No duplicates
+                foreach (ResourceNode c in _node.Parent.Children)
                 {
-                    //No duplicates
-                    foreach (ResourceNode c in _node.Parent.Children)
+                    if ((c.Name == txtName.Text) && (c.GetType() == _node.GetType()) && (c != _node))
                     {
-                        if ((c.Name == txtName.Text) && (c != _node))
-                        {
-                            MessageBox.Show(this, "A resource with that name already exists!", "What the...");
-                            return;
-                        }
+                        MessageBox.Show(this, "A resource with that name already exists!", "What the...");
+                        return;
                     }
                 }
-            //}
-            //else if (_node is ARCNode)
-            //{
-            //    if (_node.Parent != null)
-            //    {
-            //        //No duplicates among other ARC nodes
-            //        foreach (ResourceNode c in _node.Parent.Children)
-            //        {
-            //            if ((c is ARCNode) && (c.Name == txtName.Text) && (c != _node))
-            //            {
-            //                MessageBox.Show(this, "A resource with that name already exists!", "What the...");
-            //                return;
-            //            }
-            //        }
-            //    }
-            //}
+            }
 
             //Also change palette node
             if (_node is TEX0Node)

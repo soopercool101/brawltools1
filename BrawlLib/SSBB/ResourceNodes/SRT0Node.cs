@@ -14,8 +14,10 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected override bool OnInitialize()
         {
             base.OnInitialize();
-            if (Header->_stringOffset != 0)
+
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
+
             return Header->Group->_numEntries > 0;
         }
 
@@ -53,7 +55,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
         }
 
-        internal static ResourceNode TryParse(VoidPtr address) { return ((SRT0*)address)->_header._tag == SRT0.Tag ? new SRT0Node() : null; }
+        internal static ResourceNode TryParse(DataSource source) { return ((SRT0*)source.Address)->_header._tag == SRT0.Tag ? new SRT0Node() : null; }
     }
 
     public unsafe class SRT0EntryNode : ResourceNode
@@ -69,7 +71,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            if (Header->_stringOffset != 0)
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
             return false;
         }

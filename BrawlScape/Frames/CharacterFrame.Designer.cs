@@ -34,7 +34,7 @@ namespace BrawlScape
             this.mnuCharIcon = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuNameStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.modelPanel = new ModelPanel();
+            this.modelPanel = new System.Windows.Forms.ModelPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.stockPortrait = new BrawlScape.ReferencedPictureBox();
             this.modelList = new BrawlScape.ModelList();
@@ -52,6 +52,7 @@ namespace BrawlScape
             this.exportAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.charList = new BrawlScape.CharacterList();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.characterContext.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -99,7 +100,6 @@ namespace BrawlScape
             // modelPanel
             // 
             this.modelPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.modelPanel.CurrentModel = null;
             this.modelPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.modelPanel.InitialYFactor = -175;
             this.modelPanel.InitialZoomFactor = -17;
@@ -260,6 +260,7 @@ namespace BrawlScape
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 97);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(0);
@@ -283,6 +284,16 @@ namespace BrawlScape
             this.charList.TabIndex = 3;
             this.charList.UseCompatibleStateImageBehavior = false;
             this.charList.ResourceChanged += new BrawlScape.ResourceChangeEvent<BrawlScape.CharacterDefinition>(this.charList_ResourceChanged);
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(552, 357);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // CharacterFrame
             // 
@@ -329,5 +340,6 @@ namespace BrawlScape
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem exportAllToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader columnHeader1;
+        private TabPage tabPage2;
     }
 }

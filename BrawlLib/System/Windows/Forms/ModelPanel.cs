@@ -176,6 +176,17 @@ namespace System.Windows.Forms
             base.OnMouseMove(e);
         }
 
+        private int _updateCounter = 0;
+        public void BeginUpdate()
+        {
+            _updateCounter++;
+        }
+        public void EndUpdate()
+        {
+            if ((_updateCounter = Math.Max(_updateCounter - 1, 0)) == 0)
+                Invalidate();
+        }
+
         protected internal unsafe override void OnInit()
         {
             Vector3 v = (Vector3)BackColor;
@@ -227,6 +238,9 @@ namespace System.Windows.Forms
 
         protected internal override void OnRender()
         {
+            if (_updateCounter > 0)
+                return;
+
             _context.glClear(GLClearMask.ColorBuffer | GLClearMask.DepthBuffer);
 
 

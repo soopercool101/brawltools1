@@ -13,17 +13,21 @@ namespace BrawlLib.OpenGL
         //public int _nodeIndex;
         public GLNode _node;
 
-        internal ushort[] _weights;
+        //internal ushort[] _weights;
         internal VertexBuffer _vertices;
         internal VertexBuffer _normals;
         internal ColorBuffer _colors1, _colors2;
         internal VertexBuffer[] _uvData = new VertexBuffer[8];
 
         public int _index;
-        public bool _enabled = true;
+        public bool _enabled = true, _wireframe = false;
         public GLModel _model;
 
+        public string _name;
+
         public List<GLMaterial> _materials = new List<GLMaterial>();
+
+        public override string ToString() { return _name; }
 
         //public GLPolygon(MDL0PolygonNode node)
         //{
@@ -73,6 +77,11 @@ namespace BrawlLib.OpenGL
             }
 
             context.glEnable(GLEnableCap.Texture2D);
+
+            if (_wireframe)
+                context.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
+            else
+                context.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Fill);
 
             foreach (GLPrimitive prim in _primitives)
                 prim.Render(context, _textureIds);

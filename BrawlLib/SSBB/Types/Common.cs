@@ -81,7 +81,7 @@ namespace BrawlLib.SSBBTypes
         public const uint Size = 0x08;
 
         public uint _tag;
-        public buint _length;
+        public bint _length;
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public DataBlock DataBlock { get { return new DataBlock(Address, Size); } }

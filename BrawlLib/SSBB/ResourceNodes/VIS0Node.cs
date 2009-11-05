@@ -14,8 +14,10 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected override bool OnInitialize()
         {
             base.OnInitialize();
-            if (Header->_stringOffset != 0)
+
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
+
             return Header->Group->_numEntries > 0;
         }
 
@@ -53,7 +55,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
         }
 
-        internal static ResourceNode TryParse(VoidPtr address) { return ((VIS0*)address)->_header._tag == VIS0.Tag ? new VIS0Node() : null; }
+        internal static ResourceNode TryParse(DataSource source) { return ((VIS0*)source.Address)->_header._tag == VIS0.Tag ? new VIS0Node() : null; }
     }
 
     unsafe class VIS0EntryNode : ResourceNode
@@ -65,7 +67,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            if (Header->_stringOffset != 0)
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
             return false;
         }

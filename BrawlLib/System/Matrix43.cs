@@ -212,6 +212,23 @@ namespace System
             }
         }
 
+        public static bool operator ==(Matrix43 m1, Matrix43 m2)
+        {
+            float* p1 = (float*)&m1, p2 = (float*)&m2;
+            for (int i = 0; i < 12; i++)
+                if (*p1++ != *p2++)
+                    return false;
+            return true;
+        }
+        public static bool operator !=(Matrix43 m1, Matrix43 m2) { return !(m1 == m2); }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Matrix43)
+                return (Matrix43)obj == this;
+            return base.Equals(obj);
+        }
+
         public override string ToString()
         {
             fixed (float* p = _data)

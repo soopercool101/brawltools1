@@ -96,7 +96,7 @@ namespace BrawlLib.SSBBTypes
     public enum ARCFileType : short
     {
         None = 0x0,
-        Type1 = 0x1,
+        MiscData = 0x1,
         ModelData = 0x2,
         TextureData = 0x3,
         AnimationData = 0x4,

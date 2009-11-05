@@ -39,7 +39,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            if (Header->_stringOffset != 0)
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
             _width = Header->_width;
@@ -75,7 +75,6 @@ namespace BrawlLib.SSBB.ResourceNodes
             header->ResourceStringAddress = stringTable[Name] + 4;
         }
 
-        internal static ResourceNode TryParse(VoidPtr address) { return ((TEX0*)address)->_header._tag == TEX0.Tag ? new TEX0Node() : null; }
 
         public void Replace(Bitmap bmp)
         {
@@ -129,5 +128,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             else
                 base.Export(outPath);
         }
+
+        internal static ResourceNode TryParse(DataSource source) { return ((TEX0*)source.Address)->_header._tag == TEX0.Tag ? new TEX0Node() : null; }
     }
 }

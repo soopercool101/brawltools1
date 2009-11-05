@@ -29,7 +29,7 @@ namespace BrawlLib.Wii.Models
             return String.Format("({0},{1},{2},{3})({4},{5},{6},{7})({8},{9},{10},{11})", this[0], this[1], this[2], this[3], this[4], this[5], this[6], this[7], this[8], this[9], this[10], this[11]);
         }
 
-        public static explicit operator Matrix(bMatrix43 bm)
+        public static implicit operator Matrix(bMatrix43 bm)
         {
             Matrix m = new Matrix();
             for (int x = 0, z = 0; x < 3; x++)
@@ -39,7 +39,7 @@ namespace BrawlLib.Wii.Models
             return m;
         }
 
-        public static explicit operator Matrix43(bMatrix43 bm)
+        public static implicit operator Matrix43(bMatrix43 bm)
         {
             Matrix43 m = new Matrix43();
             float* dPtr = (float*)&m;
@@ -47,6 +47,16 @@ namespace BrawlLib.Wii.Models
             for (int i = 0; i < 12; i++)
                 dPtr[i] = sPtr[i];
             return m;
+        }
+
+        public static implicit operator bMatrix43(Matrix43 m)
+        {
+            bMatrix43 bm = new bMatrix43();
+            bfloat* dPtr = (bfloat*)&bm;
+            float* sPtr = (float*)&m;
+            for (int i = 0; i < 12; i++)
+                dPtr[i] = sPtr[i];
+            return bm;
         }
     }
 }

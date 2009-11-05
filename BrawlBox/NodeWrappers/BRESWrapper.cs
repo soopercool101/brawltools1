@@ -3,6 +3,7 @@ using BrawlLib.SSBB.ResourceNodes;
 using System.IO;
 using System.Windows.Forms;
 using System.ComponentModel;
+using BrawlLib;
 
 namespace BrawlBox
 {
@@ -16,7 +17,9 @@ namespace BrawlBox
         {
             _menu = new ContextMenuStrip();
             _menu.Items.Add(new ToolStripMenuItem("Ne&w", null,
-                new ToolStripMenuItem("Texture", null, NewTextureAction)
+                new ToolStripMenuItem("Texture", null, NewTextureAction),
+                new ToolStripMenuItem("Model", null, NewModelAction),
+                new ToolStripMenuItem("Character Animation", null, NewChrAction)
                 ));
             _menu.Items.Add(new ToolStripSeparator());
             _menu.Items.Add(new ToolStripMenuItem("Export All", null, ExportAllAction));
@@ -31,6 +34,8 @@ namespace BrawlBox
             _menu.Closing += MenuClosing;
         }
         protected static void NewTextureAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().NewTexture(); }
+        protected static void NewModelAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().NewModel(); }
+        protected static void NewChrAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().NewChr(); }
         protected static void ExportAllAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().ExportAll(); }
         protected static void ReplaceAllAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().ReplaceAll(); }
         private static void MenuClosing(object sender, ToolStripDropDownClosingEventArgs e)
@@ -59,7 +64,33 @@ namespace BrawlBox
 
         public void NewTexture()
         {
-            using (TextureConverterDialog dlg = new TextureConverterDialog()) { dlg.ShowDialog(MainForm.Instance, ResourceNode as BRESNode); }
+            string path;
+            if (Program.OpenFile(ExportFilters.TEX0, out path) == 8)
+            {
+                TEX0Node node = ((BRESNode)_resource).CreateResource<TEX0Node>();
+                node.Replace(path);
+            }
+            else
+                using (TextureConverterDialog dlg = new TextureConverterDialog()) { dlg.ImageSource = path; dlg.ShowDialog(MainForm.Instance, ResourceNode as BRESNode); }
+            
+        }
+        public void NewModel()
+        {
+            string path;
+            if (Program.OpenFile(ExportFilters.MDL0, out path) > 0)
+            {
+                MDL0Node node = ((BRESNode)_resource).CreateResource<MDL0Node>();
+                node.Replace(path);
+            }
+        }
+        public void NewChr()
+        {
+            string path;
+            if (Program.OpenFile(ExportFilters.CHR0, out path) > 0)
+            {
+                CHR0Node node = ((BRESNode)_resource).CreateResource<CHR0Node>();
+                node.Replace(path);
+            }
         }
 
         public void ExportAll()

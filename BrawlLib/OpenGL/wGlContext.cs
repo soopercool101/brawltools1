@@ -41,9 +41,9 @@ namespace BrawlLib.OpenGL
             if (format == 0)
                 Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
 
-            wGL.SetPixelFormat(_hdc, format, &pfd);
-            //if (wGL.SetPixelFormat(_hdc, format, &pfd) == 0)
-            //    Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+            //wGL.SetPixelFormat(_hdc, format, &pfd);
+            if (wGL.SetPixelFormat(_hdc, format, &pfd) == 0)
+                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
 
             if (!(_hglrc = wGL.wglCreateContext(_hdc)))
                 Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());

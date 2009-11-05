@@ -20,25 +20,6 @@ namespace BrawlLib.SSBB.ResourceNodes
         public FileMap Map;
         public CompressionType Compression;
 
-        //private int _length;
-        //public int Length
-        //{
-        //    get
-        //    {
-        //        if (_length == 0x7A000)
-        //        {
-        //        }
-        //        return _length;
-        //    }
-        //    set
-        //    {
-        //        if (value == 0x7A000)
-        //        {
-        //        }
-        //        _length = value;
-        //    }
-        //}
-
         public DataSource(VoidPtr addr, int len) : this(addr, len, CompressionType.None) { }
         public DataSource(VoidPtr addr, int len, CompressionType compression)
         {
@@ -80,40 +61,53 @@ namespace BrawlLib.SSBB.ResourceNodes
     public enum ResourceType : int
     {
         Unknown = 0x0000,
+        Container = 0x0001,
 
-        ARC = 0x0101,
-        BRES = 0x0102,
-        TEX0 = 0x0203,
-        PLT0 = 0x0204,
-        MDL0 = 0x0205,
-        RSAR = 0x0006,
+        ARC = 0x0202,
+        BRES = 0x0203,
+        RSAR = 0x0007,
+        RSTM = 0x0008,
+        MSBin = 0x020D,
 
-        ARCEntry = 0x0100,
-        BRESEntry = 0x0200,
-        BRESGroup = 0x0300
+        ARCEntry = 0x0200,
+
+        BRESEntry = 0x0300,
+        BRESGroup = 0x0301,
+        TEX0 = 0x0304,
+        PLT0 = 0x0305,
+        MDL0 = 0x0306,
+        CHR0 = 0x030E,
+
+        MDL0Group = 0x0601,
+
+        RSARFolder = 0x0701,
+        RSARSound = 0x0709,
+        RSARGroup = 0x070A,
+        RSARType = 0x070B,
+        RSARBank = 0x070C
     }
 
-    public abstract class ResourceNode : IDisposable//, ICustomTypeDescriptor
+    public abstract class ResourceNode : IDisposable
     {
         //Need to modulate these sources, create a new class.
         internal protected DataSource _origSource, _uncompSource;
         internal protected DataSource _replSrc, _replUncompSrc;
 
-        internal protected bool _changed, _merged, _disposed = false;//, _initialized = true;
+        internal protected bool _changed, _merged, _disposed = false;
         internal protected CompressionType _compression;
 
         internal protected string _name, _origPath;
         internal protected ResourceNode _parent;
         internal protected List<ResourceNode> _children = new List<ResourceNode>();
+
+        //LinkedList<ResourceNode> _list = new LinkedList<ResourceNode>();
         internal int _calcSize;
 
-        //Occurs when a property or value has changed, but not when the data itself changes.
+        internal protected ResourceNode _first, _last;
+        internal protected bool _hasChildren;
+
         public event ResourceEventHandler Disposing, Renamed, PropertyChanged, Replaced, Restored;
         public event ResourceChildEventHandler ChildAdded, ChildRemoved;
-        //public event ResourceEventHandler Replaced;
-        //public event ResourceEventHandler Restored;
-
-        //public event ResourceEventHandler StateChanged;
 
         [Browsable(false)]
         public string FilePath { get { return _origPath; } }
@@ -318,6 +312,35 @@ namespace BrawlLib.SSBB.ResourceNodes
             _replSrc.Close();
 
             GC.SuppressFinalize(this);
+        }
+
+        public virtual bool MoveUp()
+        {
+            if (Parent == null)
+                return false;
+
+            int index = Index - 1;
+            if (index < 0)
+                return false;
+
+            Parent.Children.Remove(this);
+            Parent.Children.Insert(index, this);
+            Parent._changed = true;
+            return true;
+        }
+        public virtual bool MoveDown()
+        {
+            if (Parent == null)
+                return false;
+
+            int index = Index + 1;
+            if (index >= Parent.Children.Count)
+                return false;
+
+            Parent.Children.Remove(this);
+            Parent.Children.Insert(index, this);
+            Parent._changed = true;
+            return true;
         }
 
         //Called when children are first requested. Allows node to cache child nodes.

@@ -5,7 +5,7 @@ using System.Drawing;
 namespace System
 {
     [StructLayout( LayoutKind.Sequential, Pack=1)]
-    public struct Vector3
+    public unsafe struct Vector3
     {
         public float _x;
         public float _y;
@@ -28,8 +28,33 @@ namespace System
         public static Vector3 operator /(Vector3 v1, Vector3 v2) { return new Vector3(v1._x / v2._x, v1._y / v2._y, v1._z / v2._z); }
         public static Vector3 operator /(Vector3 v1, float s) { return new Vector3(v1._x / s, v1._y / s, v1._z / s); }
 
+        public static bool operator ==(Vector3 v1, Vector3 v2) { return (v1._x == v2._x) && (v1._y == v2._y) && (v1._z == v2._z); }
+        public static bool operator !=(Vector3 v1, Vector3 v2) { return (v1._x != v2._x) || (v1._y != v2._y) || (v1._z != v2._z); }
+
+        public void Add(Vector3* v) { _x += v->_x; _y += v->_y; _z += v->_z; }
+        public void Add(float v) { _x += v; _y += v; _z += v; }
+        public void Sub(Vector3* v) { _x -= v->_x; _y -= v->_y; _z -= v->_z; }
+        public void Sub(float v) { _x -= v; _y -= v; _z -= v; }
+        public void Multiply(Vector3* v) { _x *= v->_x; _y *= v->_y; _z *= v->_z; }
+        public void Multiply(float v) { _x *= v; _y *= v; _z *= v; }
+
+        public static float* Mult(float* v1, float* v2) { v1[0] = v1[0] * v2[0]; v1[1] = v1[1] * v2[1]; v1[2] = v1[2] * v2[2]; return v1; }
+        public static float* Mult(float* v1, float v2) { v1[0] = v1[0] * v2; v1[1] = v1[1] * v2; v1[2] = v1[2] * v2; return v1; }
+        public static float* Add(float* v1, float* v2) { v1[0] = v1[0] + v2[0]; v1[1] = v1[1] + v2[1]; v1[2] = v1[2] + v2[2]; return v1; }
+        public static float* Add(float* v1, float v2) { v1[0] = v1[0] + v2; v1[1] = v1[1] + v2; v1[2] = v1[2] + v2; return v1; }
+        public static float* Sub(float* v1, float* v2) { v1[0] = v1[0] - v2[0]; v1[1] = v1[1] - v2[1]; v1[2] = v1[2] - v2[2]; return v1; }
+        public static float* Sub(float* v1, float v2) { v1[0] = v1[0] - v2; v1[1] = v1[1] - v2; v1[2] = v1[2] - v2; return v1; }
+
+        //public static float* Mult(float* v1, float* v2) { v1[0] = v1[0] * v2[0]; v1[1] = v1[1] * v2[1]; v1[2] = v1[2] * v2[2]; return v1; }
+        //public static float* Mult(float* v1, float v2) { v1[0] *= v2; v1[1] *= v2; v1[2] *= v2; return v1; }
+        //public static float* Add(float* v1, float* v2) { v1[0] += v2[0]; v1[1] += v2[1]; v1[2] += v2[2]; return v1; }
+        //public static float* Add(float* v1, float v2) { v1[0] += v2; v1[1] += v2; v1[2] += v2; return v1; }
+        //public static float* Sub(float* v1, float* v2) { v1[0] -= v2[0]; v1[1] -= v2[1]; v1[2] -= v2[2]; return v1; }
+        //public static float* Sub(float* v1, float v2) { v1[0] -= v2; v1[1] -= v2; v1[2] -= v2; return v1; }
+
         public static float Dot(Vector3 v1, Vector3 v2) { return (v1._x * v2._x) + (v1._y * v2._y) + (v1._z * v2._z); }
         public float Dot(Vector3 v) { return (_x * v._x) + (_y * v._y) + (_z * v._z); }
+        public float Dot(Vector3* v) { return (_x * v->_x) + (_y * v->_y) + (_z * v->_z); }
 
         public static Vector3 Clamp(Vector3 v1, float min, float max) { v1.Clamp(min, max); return v1; }
         public void Clamp(float min, float max) { this.Max(min); this.Min(max); }
@@ -37,15 +62,19 @@ namespace System
         public static Vector3 Min(Vector3 v1, Vector3 v2) { return new Vector3(Math.Min(v1._x, v2._x), Math.Min(v1._y, v2._y), Math.Min(v1._z, v2._z)); }
         public static Vector3 Min(Vector3 v1, float f) { return new Vector3(Math.Min(v1._x, f), Math.Min(v1._y, f), Math.Min(v1._z, f)); }
         public void Min(Vector3 v) { _x = Math.Min(_x, v._x); _y = Math.Min(_y, v._y); _z = Math.Min(_z, v._z); }
+        public void Min(Vector3* v) { _x = Math.Min(_x, v->_x); _y = Math.Min(_y, v->_y); _z = Math.Min(_z, v->_z); }
         public void Min(float f) { _x = Math.Min(_x, f); _y = Math.Min(_y, f); _z = Math.Min(_z, f); }
 
         public static Vector3 Max(Vector3 v1, Vector3 v2) { return new Vector3(Math.Max(v1._x, v2._x), Math.Max(v1._y, v2._y), Math.Max(v1._z, v2._z)); }
+        public static Vector3 Max(Vector3 v1, Vector3* v2) { return new Vector3(Math.Max(v1._x, v2->_x), Math.Max(v1._y, v2->_y), Math.Max(v1._z, v2->_z)); }
         public static Vector3 Max(Vector3 v1, float f) { return new Vector3(Math.Max(v1._x, f), Math.Max(v1._y, f), Math.Max(v1._z, f)); }
         public void Max(Vector3 v) { _x = Math.Max(_x, v._x); _y = Math.Max(_y, v._y); _z = Math.Max(_z, v._z); }
+        public void Max(Vector3* v) { _x = Math.Max(_x, v->_x); _y = Math.Max(_y, v->_y); _z = Math.Max(_z, v->_z); }
         public void Max(float f) { _x = Math.Max(_x, f); _y = Math.Max(_y, f); _z = Math.Max(_z, f); }
 
         public float DistanceTo(Vector3 v) { Vector3 v1 = this - v; return Vector3.Dot(v1, v1); }
-        public static Vector3 Lerp(Vector3 v1, Vector3 v2, float median) { return (v1 * median) + (v2 * (1.0f - median)); }
+        public static Vector3 Lerp(Vector3 v1, Vector3 v2, float median) { return (v1 * (1.0f - median)) + (v2 * median); }
+        public static Vector3 Floor(Vector3 v) { return new Vector3(v._x.ToInt32(), v._y.ToInt32(), v._z.ToInt32()); }
 
         public static Vector3 Truncate(Vector3 v)
         {

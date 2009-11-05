@@ -39,5 +39,10 @@ namespace System
 
         public override int GetHashCode() { return (int)address; }
         public override bool Equals(object obj) { return base.Equals(obj); }
+
+        public static void Swap(float* p1, float* p2) { float f = *p1; *p1 = *p2; *p2 = f; }
+        public static void Swap(int* p1, int* p2) { int f = *p1; *p1 = *p2; *p2 = f; }
+        public static void Swap(short* p1, short* p2) { short f = *p1; *p1 = *p2; *p2 = f; }
+        public static void Swap(ushort* p1, ushort* p2) { ushort f = *p1; *p1 = *p2; *p2 = f; }
     }
 }

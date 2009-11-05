@@ -6,6 +6,7 @@ using BrawlLib.SSBBTypes;
 using BrawlLib.SSBB.ResourceNodes;
 using System.Drawing;
 using System.Drawing.Imaging;
+using BrawlLib.Imaging;
 
 namespace BrawlLib.OpenGL
 {
@@ -34,10 +35,11 @@ namespace BrawlLib.OpenGL
     public unsafe class GLTexture
     {
         public string _name;
-        public uint _texId;
+        public uint _texId = 0;
 
-        private bool _remake = true;
-        private Bitmap[] _textures;
+        public int _lod = 1;
+        private bool _remake = false;
+        private Bitmap _texture;
 
         public unsafe GLTexture(GLModel gLModel, MDL0Data10Node tex)
         {
@@ -48,6 +50,10 @@ namespace BrawlLib.OpenGL
         {
             if (_remake)
             {
+                _remake = false;
+                if (_texture == null)
+                    return 0;
+
                 ClearTexture(context);
 
                 uint id = 0;
@@ -59,17 +65,25 @@ namespace BrawlLib.OpenGL
                 context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MagFilter, (int)GLTextureMagFilter.LINEAR);
                 context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MinFilter, (int)GLTextureMinFilter.NEAREST_MIPMAP_LINEAR);
                 context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.BaseLevel, 0);
-                context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MaxLevel, _textures.Length - 1);
+                context.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MaxLevel, _lod - 1);
 
-                for (int i = 0; i < _textures.Length; i++)
+                int w = _texture.Width, h = _texture.Height, size = w * h;
+                BitmapData data = _texture.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                try
                 {
-                    Bitmap bmp = _textures[i];
-                    BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-                    context.glTexImage2D(GLTexImageTarget.Texture2D, i, (GLInternalPixelFormat)4, data.Width, data.Height, 0, GLPixelDataFormat.BGRA, GLPixelDataType.UNSIGNED_BYTE, (void*)data.Scan0);
-                    bmp.UnlockBits(data);
-                }
+                    using (UnsafeBuffer buffer = new UnsafeBuffer(size << 2))
+                    {
+                        ARGBPixel* sPtr = (ARGBPixel*)data.Scan0;
+                        ABGRPixel* dPtr = (ABGRPixel*)buffer.Address;
 
-                _remake = false;
+                        for (int i = 0; i < size; i++)
+                            *dPtr++ = (ABGRPixel)(*sPtr++);
+
+                        context.gluBuild2DMipmaps(GLTextureTarget.Texture2D, GLInternalPixelFormat._4, w, h, GLPixelDataFormat.RGBA, GLPixelDataType.UNSIGNED_BYTE, buffer.Address);
+                    }
+                }
+                finally { _texture.UnlockBits(data); }
+
                 ClearImages();
             }
             return _texId;
@@ -77,11 +91,10 @@ namespace BrawlLib.OpenGL
 
         private void ClearImages()
         {
-            if (_textures != null)
+            if (_texture != null)
             {
-                foreach (Bitmap bmp in _textures)
-                    bmp.Dispose();
-                _textures = null;
+                _texture.Dispose();
+                _texture = null;
             }
         }
         private void ClearTexture(GLContext context)
@@ -113,9 +126,8 @@ namespace BrawlLib.OpenGL
         {
             ClearImages();
 
-            _textures = new Bitmap[tex.LevelOfDetail];
-            for (int i = 0; i < tex.LevelOfDetail; i++)
-                _textures[i] = tex.GetImage(i);
+            _lod = tex.LevelOfDetail;
+            _texture = tex.GetImage(0);
 
             _remake = true;
         }

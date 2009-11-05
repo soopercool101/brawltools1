@@ -48,9 +48,14 @@
     <None Include="System\ComponentModel\DelegatePropertyDescriptor.cs" />
     <Compile Include="Imaging\DIB.cs" />
     <Compile Include="Imaging\IImageSource.cs" />
+    <Compile Include="Imaging\NVDXT.cs" />
     <Compile Include="Imaging\PixelTypes.cs" />
+    <None Include="Imaging\RygDxt.cs" />
+    <None Include="Imaging\Squish.cs" />
+    <Compile Include="Imaging\RygPrecomp.cs" />
     <Compile Include="Imaging\TGAImage.cs" />
     <Compile Include="Imaging\WeightedAverage.cs" />
+    <Compile Include="Maths.cs" />
     <Compile Include="OpenGL\Enums.cs" />
     <Compile Include="OpenGL\GLBone.cs" />
     <Compile Include="OpenGL\GLContext.cs" />
@@ -78,11 +83,23 @@
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0TextureNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0UVNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0VertexNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MSBinNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\FILENode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\INFONode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSARBankNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSARFolderNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSARGroupNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSARListNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\RSARNode.cs" />
-    <Compile Include="SSBB\ResourceNodes\RSAR\SYMBMaskNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSARSetNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSARSoundNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSARTypeNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RWSDNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\SYMBNode.cs" />
     <Compile Include="SSBB\StringTable.cs" />
     <Compile Include="System\Matrix.cs" />
     <Compile Include="System\Matrix43.cs" />
+    <Compile Include="System\Matrix43StringConverter.cs" />
     <Compile Include="System\UnsafeBuffer.cs" />
     <Compile Include="System\Vector2.cs" />
     <Compile Include="System\Vector3.cs" />
@@ -106,6 +123,9 @@
     <Compile Include="System\Reflection\MemberInfoExtension.cs" />
     <Compile Include="System\Reflection\MethodInfoExtension.cs" />
     <Compile Include="System\ByteExtension.cs" />
+    <Compile Include="System\Windows\Forms\AnimEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="System\Windows\Forms\GoodPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -115,9 +135,22 @@
     <Compile Include="System\Windows\Forms\ModelPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="System\Windows\Forms\MSBinEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\MSBinTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\NumericInputBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Windows\Forms\TextureConverterDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="System\Vector3StringConverter.cs" />
+    <Compile Include="Wii\Animations\AnimationCode.cs" />
+    <Compile Include="Wii\Animations\AnimationConverter.cs" />
+    <Compile Include="Wii\Animations\AnimationFrame.cs" />
     <Compile Include="Wii\Compression\Common.cs" />
     <Compile Include="Wii\Compression\LZ77.cs" />
     <Compile Include="System\IO\FileMap.cs" />
@@ -169,8 +202,10 @@
     <Compile Include="Wii\Models\bMatrix43.cs" />
     <Compile Include="Wii\Models\ModelConverter.cs" />
     <Compile Include="Wii\Models\Struct.cs" />
+    <Compile Include="Wii\MSBinDecoder.cs" />
     <Compile Include="Wii\Textures\CI4.cs" />
     <Compile Include="Wii\Textures\CI8.cs" />
+    <None Include="Imaging\ClusterFitPrecomp.cs" />
     <Compile Include="Wii\Textures\CMPR.cs" />
     <Compile Include="Wii\Textures\Enum.cs" />
     <Compile Include="Wii\Textures\I4.cs" />
@@ -184,6 +219,12 @@
     <Compile Include="Wii\Textures\TextureConverter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="System\Windows\Forms\AnimEditControl.resx">
+      <DependentUpon>AnimEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\MSBinEditor.resx">
+      <DependentUpon>MSBinEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\ProgressWindow.resx">
       <DependentUpon>ProgressWindow.cs</DependentUpon>
     </EmbeddedResource>

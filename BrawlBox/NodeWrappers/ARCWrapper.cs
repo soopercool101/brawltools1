@@ -71,7 +71,7 @@ namespace BrawlBox
 
         public ARCWrapper() { ContextMenuStrip = _menu; }
 
-        public void NewARC() { _resource.AddChild(new ARCNode() { Name = "NewARChive", FileType = ARCFileType.Type1 }); Expand(); }
+        public void NewARC() { _resource.AddChild(new ARCNode() { Name = "NewARChive", FileType = ARCFileType.MiscData }); Expand(); }
         public void NewBRES() { _resource.AddChild(new BRESNode() { FileType = ARCFileType.TextureData }); Expand(); }
 
         public override void OnExport(string outPath, int filterIndex)

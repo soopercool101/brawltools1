@@ -41,7 +41,6 @@ namespace BrawlLib.SSBBTypes
         public SYMBHeader* SYMBBlock { get { return (SYMBHeader*)_commonHeader.Entries[0].Address; } }
         public INFOHeader* INFOBlock { get { return (INFOHeader*)_commonHeader.Entries[1].Address; } }
         public FILEHeader* FILEBlock { get { return (FILEHeader*)_commonHeader.Entries[2].Address; } }
-
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -50,13 +49,13 @@ namespace BrawlLib.SSBBTypes
         public const uint Tag = 0x424D5953;
 
         public buint _tag;
-        public buint _length;
-        public buint _stringOffset;
+        public bint _length;
+        public bint _stringOffset;
 
-        public buint _maskOffset1; //For sounds
-        public buint _maskOffset2; //For types
-        public buint _maskOffset3; //For groups
-        public buint _maskOffset4; //For banks
+        public bint _maskOffset1; //For sounds
+        public bint _maskOffset2; //For types
+        public bint _maskOffset3; //For groups
+        public bint _maskOffset4; //For banks
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
 
@@ -120,24 +119,29 @@ namespace BrawlLib.SSBBTypes
         public VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public VoidPtr OffsetAddress { get { return _collection.Address; } }
 
-        //Independant sounds
+        public ruint* GroupList { get { return (ruint*)(Address + 8); } }
+
+        //Sounds
         public uint InfoCount { get { return *((buint*)_collection[0]); } }
         public ruint* InfoOffsets { get { return (ruint*)(_collection[0] + 4); } }
         public INFOData1Part1* GetInfoAddress(int index) { return (INFOData1Part1*)(_collection.Address + InfoOffsets[index]); }
 
-        //For sound banks
+        //Banks
         public uint Info2Count { get { return *((buint*)_collection[1]); } }
         public ruint* Info2Offsets { get { return (ruint*)(_collection[1] + 4); } }
         public INFOData2* GetInfo2Address(int index) { return (INFOData2*)(_collection.Address + Info2Offsets[index]); }
 
+        //Types
         public uint Info3Count { get { return *((buint*)_collection[2]); } }
         public ruint* Info3Offsets { get { return (ruint*)(_collection[2] + 4); } }
         public INFOData3* GetInfo3Address(int index) { return (INFOData3*)(_collection.Address + Info3Offsets[index]); }
 
+        //Sets
         public uint Info4Count { get { return *((buint*)_collection[3]); } }
         public ruint* Info4Offsets { get { return (ruint*)(_collection[3] + 4); } }
         public INFOData4* GetInfo4Address(int index) { return (INFOData4*)(_collection.Address + Info4Offsets[index]); }
 
+        //Groups
         public uint Info5Count { get { return *((buint*)_collection[4]); } }
         public ruint* Info5Offsets { get { return (ruint*)(_collection[4] + 4); } }
         public INFOData5* GetInfo5Address(int index) { return (INFOData5*)(_collection.Address + Info5Offsets[index]); }
@@ -146,8 +150,8 @@ namespace BrawlLib.SSBBTypes
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct INFOData1Part1
     {
-        public buint _stringId;
-        public buint _groupId;
+        public bint _stringId;
+        public bint _groupId;
         public buint _unk1;
         public ruint _offset1;
         public byte _flag1;
@@ -185,16 +189,16 @@ namespace BrawlLib.SSBBTypes
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct INFOData2
     {
-        public buint _stringId; //string id
-        public buint _collectionId;
-        public buint _padding;
+        public bint _stringId; //string id
+        public bint _collectionId;
+        public bint _padding;
     }
 
     //Type flags?
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct INFOData3
     {
-        public buint _typeId;
+        public bint _typeId;
         public uint _flags;
         public buint _unk1; //always 0
         public buint _unk2; //always 0
@@ -243,14 +247,14 @@ namespace BrawlLib.SSBBTypes
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct INFOData5
     {
-        public buint _id; //string id
-        public buint _magic; //always -1
-        public buint _unk2; //always 0
-        public buint _unk3; //always 0
-        public buint _data1Offset;
-        public buint _data1Length;
-        public buint _data2Offset;
-        public buint _data2Length;
+        public bint _id; //string id
+        public bint _magic; //always -1
+        public bint _unk1; //always 0
+        public bint _unk2; //always 0
+        public bint _data1Offset;
+        public bint _data1Length;
+        public bint _data2Offset;
+        public bint _data2Length;
         public ruint _offset;
 
         public RuintList* GetCollection(VoidPtr offset) { return (RuintList*)(offset + _offset); }
@@ -291,7 +295,7 @@ namespace BrawlLib.SSBBTypes
         public const uint Tag = 0x454C4946;
 
         public uint _tag;
-        public uint _length;
+        public bint _length;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

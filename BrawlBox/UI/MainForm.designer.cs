@@ -55,6 +55,8 @@ namespace BrawlBox
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
+            this.msBinEditor1 = new System.Windows.Forms.MSBinEditor();
+            this.animEditControl = new System.Windows.Forms.AnimEditControl();
             this.previewPanel1 = new System.Windows.Forms.GoodPictureBox();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -70,13 +72,20 @@ namespace BrawlBox
             this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
             this.imageList1.TransparentColor = System.Drawing.Color.White;
             this.imageList1.Images.SetKeyName(0, "Unknown.png");
-            this.imageList1.Images.SetKeyName(1, "ARC.png");
-            this.imageList1.Images.SetKeyName(2, "BRES.png");
-            this.imageList1.Images.SetKeyName(3, "TEX0.png");
-            this.imageList1.Images.SetKeyName(4, "PLT0.png");
-            this.imageList1.Images.SetKeyName(5, "MDL0.png");
-            this.imageList1.Images.SetKeyName(6, "RSAR.png");
-            this.imageList1.Images.SetKeyName(7, "RSTM.png");
+            this.imageList1.Images.SetKeyName(1, "Folder.png");
+            this.imageList1.Images.SetKeyName(2, "ARC.png");
+            this.imageList1.Images.SetKeyName(3, "BRES.png");
+            this.imageList1.Images.SetKeyName(4, "TEX0.png");
+            this.imageList1.Images.SetKeyName(5, "PLT0.png");
+            this.imageList1.Images.SetKeyName(6, "MDL0.png");
+            this.imageList1.Images.SetKeyName(7, "RSAR.png");
+            this.imageList1.Images.SetKeyName(8, "RSTM.png");
+            this.imageList1.Images.SetKeyName(9, "S.png");
+            this.imageList1.Images.SetKeyName(10, "G.png");
+            this.imageList1.Images.SetKeyName(11, "T.png");
+            this.imageList1.Images.SetKeyName(12, "B.png");
+            this.imageList1.Images.SetKeyName(13, "MSG.png");
+            this.imageList1.Images.SetKeyName(14, "CHR.png");
             // 
             // contextMenuStrip1
             // 
@@ -269,9 +278,11 @@ namespace BrawlBox
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.Controls.Add(this.msBinEditor1);
+            this.splitContainer2.Panel2.Controls.Add(this.animEditControl);
             this.splitContainer2.Panel2.Controls.Add(this.previewPanel1);
             this.splitContainer2.Size = new System.Drawing.Size(384, 411);
-            this.splitContainer2.SplitterDistance = 280;
+            this.splitContainer2.SplitterDistance = 238;
             this.splitContainer2.TabIndex = 3;
             // 
             // propertyGrid1
@@ -281,16 +292,31 @@ namespace BrawlBox
             this.propertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.propertyGrid1.Name = "propertyGrid1";
             this.propertyGrid1.PropertySort = System.Windows.Forms.PropertySort.Categorized;
-            this.propertyGrid1.Size = new System.Drawing.Size(384, 280);
+            this.propertyGrid1.Size = new System.Drawing.Size(384, 238);
             this.propertyGrid1.TabIndex = 2;
+            // 
+            // msBinEditor1
+            // 
+            this.msBinEditor1.Location = new System.Drawing.Point(104, 4);
+            this.msBinEditor1.Name = "msBinEditor1";
+            this.msBinEditor1.Size = new System.Drawing.Size(146, 82);
+            this.msBinEditor1.TabIndex = 2;
+            this.msBinEditor1.Visible = false;
+            // 
+            // animEditControl
+            // 
+            this.animEditControl.Location = new System.Drawing.Point(256, 0);
+            this.animEditControl.Name = "animEditControl";
+            this.animEditControl.Size = new System.Drawing.Size(128, 86);
+            this.animEditControl.TabIndex = 1;
+            this.animEditControl.Visible = false;
             // 
             // previewPanel1
             // 
-            this.previewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.previewPanel1.Location = new System.Drawing.Point(0, 0);
             this.previewPanel1.Name = "previewPanel1";
             this.previewPanel1.Picture = null;
-            this.previewPanel1.Size = new System.Drawing.Size(384, 127);
+            this.previewPanel1.Size = new System.Drawing.Size(98, 86);
             this.previewPanel1.TabIndex = 0;
             // 
             // MainForm
@@ -342,7 +368,8 @@ namespace BrawlBox
         private ToolStripMenuItem aRCArchiveToolStripMenuItem;
         private ToolStripMenuItem brresPackToolStripMenuItem;
         private ToolStripMenuItem settingsToolStripMenuItem;
-        //private AudioPlaybackControl audioPlaybackControl1;
+        private AnimEditControl animEditControl;
+        private MSBinEditor msBinEditor1;
     }
 }
 

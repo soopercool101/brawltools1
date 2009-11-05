@@ -41,8 +41,10 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected override bool OnInitialize()
         {
             base.OnInitialize();
-            if (Header->_stringOffset != 0)
+
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
+
             return false;
         }
         protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)

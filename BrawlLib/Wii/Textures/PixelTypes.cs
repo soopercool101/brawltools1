@@ -74,10 +74,15 @@ namespace BrawlLib.Wii.Textures
     {
         public bushort _data;
 
+        public wRGB565Pixel(bushort data) { _data = data; }
+
         public static bool operator >(wRGB565Pixel p1, wRGB565Pixel p2) { return (ushort)p1._data > (ushort)p2._data; }
         public static bool operator <(wRGB565Pixel p1, wRGB565Pixel p2) { return (ushort)p1._data < (ushort)p2._data; }
         public static bool operator >=(wRGB565Pixel p1, wRGB565Pixel p2) { return (ushort)p1._data >= (ushort)p2._data; }
         public static bool operator <=(wRGB565Pixel p1, wRGB565Pixel p2) { return (ushort)p1._data <= (ushort)p2._data; }
+        public static bool operator ==(wRGB565Pixel p1, wRGB565Pixel p2) { return p1._data._data == p2._data._data; }
+        public static bool operator !=(wRGB565Pixel p1, wRGB565Pixel p2) { return p1._data._data != p2._data._data; }
+
 
         public static explicit operator ARGBPixel(wRGB565Pixel p)
         {
@@ -115,6 +120,14 @@ namespace BrawlLib.Wii.Textures
             g = (val & 0x7E0); g = (g >> 3) | (g >> 9);
             b = (val & 0x1F); b = (b << 3) | (b >> 2);
             return Color.FromArgb(0xFF, r, g, b);
+        }
+
+        public static explicit operator wRGB565Pixel(Vector3 v) 
+        {
+            int r = Math.Max(Math.Min((int)(v._x * (31.0f + 0.5f)), 31), 0);
+            int g = Math.Max(Math.Min((int)(v._y * (63.0f + 0.5f)), 63), 0);
+            int b = Math.Max(Math.Min((int)(v._z * (31.0f + 0.5f)), 31), 0);
+            return new wRGB565Pixel((ushort)((r << 11) | (g << 5) | b));
         }
 
         //public uint ColorData()

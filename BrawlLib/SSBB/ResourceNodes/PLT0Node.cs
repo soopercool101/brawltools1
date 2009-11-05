@@ -26,7 +26,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            if(Header->_stringOffset != 0)
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
             _numColors = Header->_numEntries;
@@ -43,6 +43,6 @@ namespace BrawlLib.SSBB.ResourceNodes
             header->ResourceStringAddress = stringTable[Name] + 4;
         }
 
-        internal static ResourceNode TryParse(VoidPtr address) { return ((PLT0*)address)->_bresEntry._tag == PLT0.Tag ? new PLT0Node() : null; }
+        internal static ResourceNode TryParse(DataSource source) { return ((PLT0*)source.Address)->_bresEntry._tag == PLT0.Tag ? new PLT0Node() : null; }
     }
 }

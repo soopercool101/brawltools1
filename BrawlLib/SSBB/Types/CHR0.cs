@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
+using BrawlLib.Wii.Animations;
 
 namespace BrawlLib.SSBBTypes
 {
@@ -15,8 +16,8 @@ namespace BrawlLib.SSBBTypes
         public bint _dataOffset;
         public bint _stringOffset;
         public bint _unk1;
-        public bshort _len1;
-        public bshort _len2;
+        public bushort _numFrames;
+        public bushort _numEntries;
         public bint _unk2;
         public bint _unk3;
 
@@ -30,18 +31,18 @@ namespace BrawlLib.SSBBTypes
             set { _stringOffset = (int)value - (int)Address; }
         }
 
-        public CHR0(int size, int entries, int len1, int len2)
+        public CHR0(int size, int frames, int entries)
         {
             _header._tag = Tag;
             _header._size = size;
-            _header._numResources = entries;
+            _header._numResources = 4; //what is it?
             _header._bresOffset = 0;
 
             _dataOffset = Size;
             _stringOffset = 0;
             _unk1 = 0;
-            _len1 = (short)len1;
-            _len2 = (short)len2;
+            _numFrames = (ushort)frames;
+            _numEntries = (ushort)entries;
             _unk2 = 0;
             _unk3 = 0;
         }
@@ -51,21 +52,18 @@ namespace BrawlLib.SSBBTypes
     public unsafe struct CHR0Entry
     {
         public bint _stringOffset;
-        public byte _b1;
-        public byte _b2;
-        public byte _b3;
-        public byte _b4;
+        public buint _code;
 
-        public CHR0Entry(byte b1, byte b2, byte b3, byte b4)
-        {
-            _stringOffset = 0;
-            _b1 = b1;
-            _b2 = b2;
-            _b3 = b3;
-            _b4 = b4;
-        }
+        //public CHR0Entry(byte b1, byte b2, byte b3, byte b4)
+        //{
+        //    _stringOffset = 0;
+        //}
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
+
+        public AnimationCode Code { get { return new AnimationCode() { _data = _code }; } set { _code = value._data; } }
+
+        public VoidPtr Data { get { return Address + 8; } }
 
         public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
         public VoidPtr ResourceStringAddress

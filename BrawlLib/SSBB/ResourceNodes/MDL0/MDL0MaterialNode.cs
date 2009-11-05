@@ -15,6 +15,16 @@ namespace BrawlLib.SSBB.ResourceNodes
         //internal List<MDL0Data7Part3> _part3Entries = new List<MDL0Data7Part3>();
         internal List<string> _part4Entries = new List<string>();
 
+        private byte _flag1;
+        private byte _flag2;
+        private byte _flag3;
+        private byte _flag4;
+        private byte _flag5;
+        private byte _flag6;
+        private byte _flag7;
+        private byte _flag8;
+        private int _type;
+
         [Category("Material")]
         public int TotalLen { get { return Header->_dataLen; } }
         [Category("Material")]
@@ -26,23 +36,23 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Material")]
         public int Unknown1 { get { return Header->_unk1; } }
         [Category("Material")]
-        public byte Flag1 { get { return Header->_flag1; } }
+        public byte Flag1 { get { return _flag1; } set { _flag1 = value; SignalPropertyChange(); } }
         [Category("Material")]
-        public byte Flag2 { get { return Header->_flag2; } }
+        public byte Flag2 { get { return _flag2; } set { _flag2 = value; SignalPropertyChange(); } }
         [Category("Material")]
-        public byte Flag3 { get { return Header->_flag3; } }
+        public byte Flag3 { get { return _flag3; } set { _flag3 = value; SignalPropertyChange(); } }
         [Category("Material")]
-        public byte Flag4 { get { return Header->_flag4; } }
+        public byte Flag4 { get { return _flag4; } set { _flag4 = value; SignalPropertyChange(); } }
         [Category("Material")]
-        public int Type { get { return Header->_type; } }
+        public int Type { get { return _type; } set { _type = value; SignalPropertyChange(); } }
         [Category("Material")]
-        public byte Flag5 { get { return Header->_flag5; } }
+        public byte Flag5 { get { return _flag5; } set { _flag5 = value; SignalPropertyChange(); } }
         [Category("Material")]
-        public byte Flag6 { get { return Header->_flag6; } }
+        public byte Flag6 { get { return _flag6; } set { _flag6 = value; SignalPropertyChange(); } }
         [Category("Material")]
-        public byte Flag7 { get { return Header->_flag7; } }
+        public byte Flag7 { get { return _flag7; } set { _flag7 = value; SignalPropertyChange(); } }
         [Category("Material")]
-        public byte Flag8 { get { return Header->_flag8; } }
+        public byte Flag8 { get { return _flag8; } set { _flag8 = value; SignalPropertyChange(); } }
 
         [Category("Material")]
         public int Unknown3 { get { return Header->_unk3; } }
@@ -73,7 +83,17 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            if (Header->_stringOffset != 0)
+            _flag1 = Header->_flag1;
+            _flag2 = Header->_flag2;
+            _flag3 = Header->_flag3;
+            _flag4 = Header->_flag4;
+            _flag5 = Header->_flag5;
+            _flag6 = Header->_flag6;
+            _flag7 = Header->_flag7;
+            _flag8 = Header->_flag8;
+            _type = Header->_type;
+
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
             MDL0Data7Part4* part4 = Header->Part4;
@@ -105,10 +125,25 @@ namespace BrawlLib.SSBB.ResourceNodes
                 n.GetStrings(table);
         }
 
+        //protected override int OnCalculateSize(bool force)
+        //{
+
+        //}
+
         protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
         {
             MDL0Material* header = (MDL0Material*)dataAddress;
             header->ResourceStringAddress = stringTable[Name] + 4;
+
+            header->_flag1 = _flag1;
+            header->_flag2 = _flag2;
+            header->_flag3 = _flag3;
+            header->_flag4 = _flag4;
+            header->_flag5 = _flag5;
+            header->_flag6 = _flag6;
+            header->_flag7 = _flag7;
+            header->_flag8 = _flag8;
+            header->_type = _type;
 
             MDL0Data7Part4* part4 = header->Part4;
             if (part4 != null)

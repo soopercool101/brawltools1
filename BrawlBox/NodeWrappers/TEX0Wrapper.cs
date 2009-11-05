@@ -10,12 +10,16 @@ namespace BrawlBox.NodeWrappers
     {
         public override string ExportFilter { get { return ExportFilters.TEX0; } }
 
-        public override void Replace()
+        public override void OnReplace(string inStream, int filterIndex)
         {
-            using (TextureConverterDialog dlg = new TextureConverterDialog())
-            {
-                dlg.ShowDialog(MainForm.Instance, ResourceNode as TEX0Node);
-            }
+            if (filterIndex == 8)
+                base.OnReplace(inStream, filterIndex);
+            else
+                using (TextureConverterDialog dlg = new TextureConverterDialog())
+                {
+                    dlg.ImageSource = inStream;
+                    dlg.ShowDialog(MainForm.Instance, ResourceNode as TEX0Node);
+                }
         }
     }
 }

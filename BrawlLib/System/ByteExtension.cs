@@ -11,5 +11,13 @@ namespace System
                     return i;
             return 0;
         }
+        public static int CountBits(this Byte b)
+        {
+            int count = 0;
+            for (int i = 0; i < 8; i++)
+                if (((b >> i) & 1) != 0)
+                    count++;
+            return count;
+        }
     }
 }

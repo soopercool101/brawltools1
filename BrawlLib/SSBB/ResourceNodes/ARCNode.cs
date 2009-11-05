@@ -107,7 +107,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             *header = new ARCHeader((ushort)Children.Count, Name);
 
             ARCFileHeader* entry = header->First;
-            foreach(ARCEntryNode node in Children)
+            foreach (ARCEntryNode node in Children)
             {
                 *entry = new ARCFileHeader(node.FileType, node.FileIndex, node._calcSize, node.FileFlags, node.FileId);
                 if (node.IsCompressed)
@@ -143,19 +143,18 @@ namespace BrawlLib.SSBB.ResourceNodes
             else
             {
                 using (FileStream inStream = new FileStream(Path.GetTempFileName(), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 0x8, FileOptions.SequentialScan | FileOptions.DeleteOnClose))
-                using(FileStream outStream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.SequentialScan))
+                using (FileStream outStream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.SequentialScan))
                 {
                     Compressor.Compact(CompressionType.LZ77, WorkingUncompressed.Address, WorkingUncompressed.Length, inStream);
                     outStream.SetLength(inStream.Length);
                     using (FileMap map = FileMap.FromStream(inStream))
-                    using(FileMap outMap = FileMap.FromStream(outStream))
+                    using (FileMap outMap = FileMap.FromStream(outStream))
                         Memory.Move(outMap.Address, map.Address, (uint)map.Length);
                 }
             }
         }
 
-        internal static ResourceNode TryParse(VoidPtr address) 
-        { return ((ARCHeader*)address)->_tag == ARCHeader.Tag ? new ARCNode() : null; }
+        internal static ResourceNode TryParse(DataSource source) { return ((ARCHeader*)source.Address)->_tag == ARCHeader.Tag ? new ARCNode() : null; }
     }
 
     public unsafe class ARCEntryNode : ResourceNode

@@ -15,7 +15,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            if (Header->_stringOffset != 0)
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
             return Header->Group->_numEntries > 0;
@@ -66,7 +66,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
         }
 
-        internal static ResourceNode TryParse(VoidPtr address) { return ((SCN0*)address)->_header._tag == SCN0.Tag ? new SCN0Node() : null; }
+        internal static ResourceNode TryParse(DataSource source) { return ((SCN0*)source.Address)->_header._tag == SCN0.Tag ? new SCN0Node() : null; }
 
     }
 
@@ -142,7 +142,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            if (Header->_stringOffset != 0)
+            if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
             if (IsBranch)

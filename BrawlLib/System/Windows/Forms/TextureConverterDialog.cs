@@ -18,6 +18,10 @@ namespace System.Windows.Forms
         private ColorPalette _tempPalette;
         private bool _previewing = true, _updating = false;
 
+        private string _imageSource;
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string ImageSource { get { return _imageSource; } set { _imageSource = value; } }
+
         private BRESNode _parent;
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public BRESNode ParentNode { get { return _parent; } }
@@ -100,7 +104,16 @@ namespace System.Windows.Forms
         {
             base.OnShown(e);
 
-            if (!LoadImages())
+
+            if (_imageSource == null)
+            {
+                if (!LoadImages())
+                {
+                    Close();
+                    return;
+                }
+            }
+            else if (!LoadImages(_imageSource))
             {
                 Close();
                 return;
@@ -133,10 +146,12 @@ namespace System.Windows.Forms
         {
             if (openFileDialog1.ShowDialog(this) != DialogResult.OK)
                 return false;
+            return LoadImages(openFileDialog1.FileName);
+        }
 
+        private bool LoadImages(string path)
+        {
             DisposeImages();
-
-            string path = openFileDialog1.FileName;
 
             if (path.EndsWith(".tga"))
                 _source = TGA.FromFile(path);

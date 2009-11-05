@@ -295,9 +295,9 @@ namespace BrawlLib.SSBBTypes
         public BVec3 _boxMax;
 
         public bint _parentOffset;
-        public bint _unk1;
-        public bint _unk2;
+        public bint _firstChildOffset;
         public bint _nextOffset;
+        public bint _prevOffset;
         public bint _part2Offset;
 
         public bMatrix43 _transform;
@@ -436,6 +436,8 @@ namespace BrawlLib.SSBBTypes
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct MDL0Material
     {
+        public const int Size = 64;
+
         public bint _dataLen;
         public bint _mdl0Offset;
         public bint _stringOffset;

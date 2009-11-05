@@ -6,7 +6,7 @@ using BrawlLib.Wii.Compression;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    internal delegate ResourceNode ResourceParser(VoidPtr address);
+    internal delegate ResourceNode ResourceParser(DataSource source);
 
     //Factory is for initializing root node, and unknown child nodes.
     public static class NodeFactory
@@ -40,7 +40,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             ResourceNode n = null;
 
-            if ((n = GetRaw(source.Address)) != null)
+            if ((n = GetRaw(source)) != null)
                 n.Initialize(parent, source);
             else
             {
@@ -55,7 +55,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                         Compressor.Expand(cmpr, buffer, CompressBufferLen);
 
                         //Check for a match
-                        if ((n = GetRaw(buffer)) != null)
+                        if ((n = GetRaw(new DataSource(buffer, CompressBufferLen))) != null)
                         {
                             //Expand the whole resource and initialize
                             FileMap map = FileMap.FromTempFile(cmpr->ExpandedSize);
@@ -71,11 +71,11 @@ namespace BrawlLib.SSBB.ResourceNodes
             return n;
         }
 
-        public static ResourceNode GetRaw(VoidPtr address)
+        public static ResourceNode GetRaw(DataSource source)
         {
             ResourceNode n = null;
             foreach (ResourceParser d in _parsers)
-                if ((n = d(address)) != null)
+                if ((n = d(source)) != null)
                     break;
             return n;
         }
