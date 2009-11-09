@@ -22,6 +22,9 @@ namespace BrawlBox
         private BaseWrapper _root;
         public BaseWrapper RootNode { get { return _root; } }
 
+        private SettingsDialog _settings;
+        private SettingsDialog Settings { get { return _settings == null ? _settings = new SettingsDialog() : _settings; } }
+
         public MainForm()
         {
             InitializeComponent();
@@ -109,13 +112,14 @@ namespace BrawlBox
                     animEditControl.Visible = false;
                     splitContainer2.Panel2Collapsed = false;
                 }
-                //else if (node is CHR0EntryNode)
-                //{
-                //    animEditControl.TargetSequence = node as CHR0EntryNode;
-                //    animEditControl.Visible = true;
-                //    previewPanel1.Visible = false;
-                //    splitContainer2.Panel2Collapsed = false;
-                //}
+                else if (node is CHR0EntryNode)
+                {
+                    animEditControl.TargetSequence = node as CHR0EntryNode;
+                    animEditControl.Visible = true;
+                    msBinEditor1.Visible = false;
+                    previewPanel1.Visible = false;
+                    splitContainer2.Panel2Collapsed = false;
+                }
                 else
                 {
                     msBinEditor1.Visible = false;
@@ -150,13 +154,14 @@ namespace BrawlBox
 
 
 
-        private static string _inFilter = "All Supported Formats (*.pac,*.pcs,*.brres,*.plt0,*.tex0,*.mdl0,*.brstm,*.brsar,*.msbin)|*.pac;*.pcs;*.brres;*.plt0;*.tex0;*.mdl0;*.brstm;*.brsar;*.msbin|" +
+        private static string _inFilter = "All Supported Formats (*.pac,*.pcs,*.brres,*.plt0,*.tex0,*.mdl0,*.chr0,*.brstm,*.brsar,*.msbin)|*.pac;*.pcs;*.brres;*.plt0;*.tex0;*.mdl0;*.chr0;*.brstm;*.brsar;*.msbin|" +
                     "PAC File Archive (*.pac)|*.pac|" +
                     "Compressed File Package (*.pcs)|*.pcs|" +
                     "BRRES Resource Package (*.brres)|*.brres|" +
                     "PLT0 Raw Palette (*.plt0)|*.plt0|" +
                     "TEX0 Raw Texture (*.tex0)|*.tex0|" +
                     "MDL0 Raw Model (*.mdl0)|*.mdl0|" +
+                    "CHR0 Raw Animation (*.chr0)|*.chr0|" +
                     "BRSTM Audio Stream (*.brstm)|*.brstm|" +
                     "BRSAR Audio Package (*.brsar)|*.brsar|" +
                     "MSBin Message Pack (*.msbin)|*.msbin";
@@ -187,7 +192,7 @@ namespace BrawlBox
         }
         private void settingsToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-
+            Settings.ShowDialog();
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e) { AboutForm.Instance.ShowDialog(this); }

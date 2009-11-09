@@ -11,9 +11,17 @@ namespace BrawlLib.SSBB
     {
         internal SHP0* Header { get { return (SHP0*)WorkingUncompressed.Address; } }
 
+        internal List<string> _strings = new List<string>();
+
+        public List<string> StringEntries { get { return _strings; } }
+
         internal override void GetStrings(StringTable table)
         {
             table.Add(Name);
+
+            foreach (string s in _strings)
+                table.Add(s);
+
             foreach (SHP0EntryNode n in Children)
                 table.Add(n.Name);
         }
@@ -24,6 +32,10 @@ namespace BrawlLib.SSBB
 
             if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
+
+            bint* stringOffset = Header->StringEntries;
+            for (int i = 0; i < Header->_numItems; i++)
+                _strings.Add(new String((sbyte*)stringOffset + stringOffset[i]));
 
             return Header->Group->_numEntries > 0;
         }
@@ -40,6 +52,10 @@ namespace BrawlLib.SSBB
             base.PostProcess(bresAddress, dataAddress, dataLength, stringTable);
             SHP0* header = (SHP0*)dataAddress;
             header->ResourceStringAddress = stringTable[Name] + 4;
+
+            bint* stringPtr = header->StringEntries;
+            for (int i = 0; i < header->_numItems; i++)
+                stringPtr[i] = ((int)stringTable[_strings[i]] + 4) - (int)stringPtr;
 
             ResourceGroup* group = header->Group;
             group->_first = new ResourceEntry(0xFFFF, 0, 0, 0, 0);

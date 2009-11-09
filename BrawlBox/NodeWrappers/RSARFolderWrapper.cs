@@ -25,7 +25,7 @@ namespace BrawlBox.NodeWrappers
             _menu.Items.Add(new ToolStripMenuItem("Move D&own", null, MoveDownAction, Keys.Control | Keys.Down));
             _menu.Items.Add(new ToolStripMenuItem("Re&name", null, RenameAction, Keys.Control | Keys.N));
             _menu.Items.Add(new ToolStripSeparator());
-            _menu.Items.Add(new ToolStripMenuItem("&Delete", null, DeleteAction, Keys.Delete));
+            _menu.Items.Add(new ToolStripMenuItem("&Delete", null, DeleteAction, Keys.Control | Keys.Delete));
             _menu.Opening += MenuOpening;
             _menu.Closing += MenuClosing;
         }

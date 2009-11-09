@@ -1,5 +1,5 @@
 ﻿
-BrawlLib Resource Library - Version 0.05
+BrawlLib Resource Library - Version 0.06
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -11,6 +11,15 @@ they be held accountable for the manner in which it is used.
  ====================================
 |************ Change Log ************|
  ====================================
+
+- v0.06 - (11/08/2009)
+	. Added FileAssociation and FileType classes.
+	. Added CHR0 encoder/decoder, with KeyframeCollection class.
+	. Added AnimEditControl for editing keyframes in CHR0 files.
+	. Added MSBinEditor for editing MSBin messages.
+	. Re-added RSAR support with new organization. (No audio features yet)
+	. Improved CMPR algorithm using modified code from the NVidia Texture Tools.
+	. Lowered OpenGL version to 1.1, and changed the way mipmaps are generated.
 
 - v0.05 - (10/24/2009)
 	. Added ModelPanel from BrawlScape.

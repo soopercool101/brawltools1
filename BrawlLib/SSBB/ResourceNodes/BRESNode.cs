@@ -232,26 +232,6 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
         }
 
-        public unsafe string FindName()
-        {
-            int index = 0;
-            string name = "NewNode00";
-            fixed (char* cPtr = name)
-            {
-            Top:
-                index++;
-                cPtr[7] = (char)((index / 10) | 0x30);
-                cPtr[8] = (char)((index % 10) | 0x30);
-
-                foreach (ResourceNode node in Children)
-                {
-                    if (node.Name == name)
-                        goto Top;
-                }
-
-                return new String(cPtr);
-            }
-        }
     }
 
     public unsafe class BRESEntryNode : ResourceNode

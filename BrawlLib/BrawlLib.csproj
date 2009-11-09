@@ -97,9 +97,11 @@
     <Compile Include="SSBB\ResourceNodes\RSAR\RWSDNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\SYMBNode.cs" />
     <Compile Include="SSBB\StringTable.cs" />
+    <Compile Include="System\IO\FileAssociation.cs" />
     <Compile Include="System\Matrix.cs" />
     <Compile Include="System\Matrix43.cs" />
     <Compile Include="System\Matrix43StringConverter.cs" />
+    <Compile Include="System\StringExtension.cs" />
     <Compile Include="System\UnsafeBuffer.cs" />
     <Compile Include="System\Vector2.cs" />
     <Compile Include="System\Vector3.cs" />
@@ -151,6 +153,7 @@
     <Compile Include="Wii\Animations\AnimationCode.cs" />
     <Compile Include="Wii\Animations\AnimationConverter.cs" />
     <Compile Include="Wii\Animations\AnimationFrame.cs" />
+    <Compile Include="Wii\Animations\KeyframeCollection.cs" />
     <Compile Include="Wii\Compression\Common.cs" />
     <Compile Include="Wii\Compression\LZ77.cs" />
     <Compile Include="System\IO\FileMap.cs" />

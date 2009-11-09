@@ -25,5 +25,8 @@ namespace BrawlLib
 
         public static string MSBin =
             "MSBin Message List (*.msbin)|*.msbin";
+
+        public static string BRES =
+            "BRResource Pack (*.brres)|*.brres";
     }
 }

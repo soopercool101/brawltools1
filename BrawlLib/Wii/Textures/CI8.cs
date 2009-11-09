@@ -13,15 +13,24 @@ namespace BrawlLib.Wii.Textures
         public override int BitsPerPixel { get { return 8; } }
         public override int BlockWidth { get { return 8; } }
         public override int BlockHeight { get { return 4; } }
-        public override PixelFormat DecodedFormat { get { return PixelFormat.Format8bppIndexed; } }
+        //public override PixelFormat DecodedFormat { get { return PixelFormat.Format8bppIndexed; } }
         public override WiiPixelFormat RawFormat { get { return WiiPixelFormat.CI8; } }
 
-        protected override void DecodeBlock(VoidPtr blockAddr, VoidPtr destAddr, int width)
+        protected override void DecodeBlock(VoidPtr blockAddr, ARGBPixel* dPtr, int width)
         {
-            byte* sPtr = (byte*)blockAddr, dPtr = (byte*)destAddr;
-            for (int y = 0; y < BlockHeight; y++, dPtr += width)
-                for (int x = 0; x < BlockWidth;x++ )
-                    dPtr[x] = *sPtr++;
+            byte* sPtr = (byte*)blockAddr;
+            if (_workingPalette != null)
+            {
+                for (int y = 0; y < BlockHeight; y++, dPtr += width)
+                    for (int x = 0; x < BlockWidth; x++)
+                        dPtr[x] = (ARGBPixel)_workingPalette.Entries[*sPtr++];
+            }
+            else
+            {
+                for (int y = 0; y < BlockHeight; y++, dPtr += width)
+                    for (int x = 0; x < BlockWidth; x++)
+                        dPtr[x] = new ARGBPixel(*sPtr++);
+            }
         }
 
         protected override void EncodeBlock(ARGBPixel* sPtr, VoidPtr blockAddr, int width)

@@ -12,6 +12,7 @@ namespace BrawlLib.Imaging
         public byte B, G, R, A;
 
         public ARGBPixel(byte a, byte r, byte g, byte b) { A = a; R = r; G = g; B = b; }
+        public ARGBPixel(byte intensity) { A = 255; R = intensity; G = intensity; B = intensity; }
 
         public int DistanceTo(Color c)
         {

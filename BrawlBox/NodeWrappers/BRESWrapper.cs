@@ -17,9 +17,14 @@ namespace BrawlBox
         {
             _menu = new ContextMenuStrip();
             _menu.Items.Add(new ToolStripMenuItem("Ne&w", null,
-                new ToolStripMenuItem("Texture", null, NewTextureAction),
+                //new ToolStripMenuItem("Texture", null, NewTextureAction),
                 new ToolStripMenuItem("Model", null, NewModelAction),
                 new ToolStripMenuItem("Character Animation", null, NewChrAction)
+                ));
+            _menu.Items.Add(new ToolStripMenuItem("&Import", null,
+                new ToolStripMenuItem("Texture", null, ImportTextureAction),
+                new ToolStripMenuItem("Model", null, ImportModelAction),
+                new ToolStripMenuItem("Character Animation", null, ImportChrAction)
                 ));
             _menu.Items.Add(new ToolStripSeparator());
             _menu.Items.Add(new ToolStripMenuItem("Export All", null, ExportAllAction));
@@ -27,42 +32,43 @@ namespace BrawlBox
             _menu.Items.Add(new ToolStripSeparator());
             _menu.Items.Add(new ToolStripMenuItem("&Export", null, ExportAction, Keys.Control | Keys.E));
             _menu.Items.Add(new ToolStripMenuItem("&Replace", null, ReplaceAction, Keys.Control | Keys.R));
-            _menu.Items.Add(new ToolStripSeparator());
             _menu.Items.Add(new ToolStripMenuItem("Res&tore", null, RestoreAction, Keys.Control | Keys.T));
-            _menu.Items.Add(new ToolStripMenuItem("&Delete", null, DeleteAction, Keys.Delete));
+            _menu.Items.Add(new ToolStripSeparator());
+            _menu.Items.Add(new ToolStripMenuItem("Move &Up", null, MoveUpAction, Keys.Control | Keys.Up));
+            _menu.Items.Add(new ToolStripMenuItem("Move D&own", null, MoveDownAction, Keys.Control | Keys.Down));
+            _menu.Items.Add(new ToolStripSeparator());
+            _menu.Items.Add(new ToolStripMenuItem("&Delete", null, DeleteAction, Keys.Control | Keys.Delete));
             _menu.Opening += MenuOpening;
             _menu.Closing += MenuClosing;
         }
-        protected static void NewTextureAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().NewTexture(); }
+        protected static void ImportTextureAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().ImportTexture(); }
+        protected static void ImportModelAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().ImportModel(); }
+        protected static void ImportChrAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().ImportChr(); }
         protected static void NewModelAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().NewModel(); }
         protected static void NewChrAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().NewChr(); }
         protected static void ExportAllAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().ExportAll(); }
         protected static void ReplaceAllAction(object sender, EventArgs e) { GetInstance<BRESWrapper>().ReplaceAll(); }
         private static void MenuClosing(object sender, ToolStripDropDownClosingEventArgs e)
         {
-            _menu.Items[6].Enabled = _menu.Items[8].Enabled = _menu.Items[9].Enabled = true;
+            _menu.Items[7].Enabled = _menu.Items[8].Enabled = _menu.Items[10].Enabled = _menu.Items[11].Enabled = _menu.Items[13].Enabled = true;
         }
         private static void MenuOpening(object sender, CancelEventArgs e)
         {
             BRESWrapper w = GetInstance<BRESWrapper>();
-            if (w.Parent == null)
-                _menu.Items[6].Enabled = _menu.Items[9].Enabled = false;
-            else
-                _menu.Items[6].Enabled = _menu.Items[9].Enabled = true;
 
-            if ((w._resource.IsDirty) || (w._resource.IsBranch))
-                _menu.Items[8].Enabled = true;
-            else
-                _menu.Items[8].Enabled = false;
+            _menu.Items[7].Enabled = _menu.Items[13].Enabled = w.Parent != null;
+            _menu.Items[8].Enabled = ((w._resource.IsDirty) || (w._resource.IsBranch));
+            _menu.Items[10].Enabled = w.PrevNode != null;
+            _menu.Items[11].Enabled = w.NextNode != null;
         }
 
         #endregion
 
-        public override string ExportFilter { get { return "Brres Resource Pack (*.brres)|*.brres"; } }
+        public override string ExportFilter { get { return ExportFilters.BRES; } }
 
         public BRESWrapper() { ContextMenuStrip = _menu; }
 
-        public void NewTexture()
+        public void ImportTexture()
         {
             string path;
             if (Program.OpenFile(ExportFilters.TEX0, out path) == 8)
@@ -74,7 +80,7 @@ namespace BrawlBox
                 using (TextureConverterDialog dlg = new TextureConverterDialog()) { dlg.ImageSource = path; dlg.ShowDialog(MainForm.Instance, ResourceNode as BRESNode); }
             
         }
-        public void NewModel()
+        public void ImportModel()
         {
             string path;
             if (Program.OpenFile(ExportFilters.MDL0, out path) > 0)
@@ -83,7 +89,7 @@ namespace BrawlBox
                 node.Replace(path);
             }
         }
-        public void NewChr()
+        public void ImportChr()
         {
             string path;
             if (Program.OpenFile(ExportFilters.CHR0, out path) > 0)
@@ -91,6 +97,22 @@ namespace BrawlBox
                 CHR0Node node = ((BRESNode)_resource).CreateResource<CHR0Node>();
                 node.Replace(path);
             }
+        }
+        public void NewChr()
+        {
+            CHR0Node node = ((BRESNode)_resource).CreateResource<CHR0Node>();
+            BaseWrapper res = this.FindResource(node.Parent, false);
+            res = res.FindResource(node, false);
+            res.EnsureVisible();
+            res.TreeView.SelectedNode = res;
+        }
+        public void NewModel()
+        {
+            MDL0Node node = ((BRESNode)_resource).CreateResource<MDL0Node>();
+            BaseWrapper res = this.FindResource(node.Parent, false);
+            res = res.FindResource(node, false);
+            res.EnsureVisible();
+            res.TreeView.SelectedNode = res;
         }
 
         public void ExportAll()

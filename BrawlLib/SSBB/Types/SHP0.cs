@@ -12,15 +12,17 @@ namespace BrawlLib.SSBBTypes
 
         public BRESCommonHeader _header;
         public bint _dataOffset;
-        public bint _data2Offset;
+        public bint _stringListOffset; //list of strings
         public bint _stringOffset;
-        public bint _unk2;
-        public bshort _unk3;
-        public bshort _unk4; //Entries?
-        public bint _unk5; //0x01
+        public bint _unk1; //0
+        public bshort _numFrames;
+        public bshort _numItems; //Entries?
+        public bint _unk2; //0x00, 0x01
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public ResourceGroup* Group { get { return (ResourceGroup*)(Address + _dataOffset); } }
+
+        public bint* StringEntries { get { return (bint*)(Address + _stringListOffset); } }
 
         public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
         public VoidPtr ResourceStringAddress

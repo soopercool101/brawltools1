@@ -25,6 +25,7 @@ namespace System.Windows.Forms
         public MSBinEditor()
         {
             InitializeComponent();
+            txtEditor.LostFocus += txtEditor_Leave;
         }
 
         private void InitNode()
@@ -220,7 +221,6 @@ namespace System.Windows.Forms
             this.txtEditor.TabIndex = 3;
             this.txtEditor.TextChanged += new System.EventHandler(this.txtEditor_TextChanged);
             this.txtEditor.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtEditor_KeyDown);
-            this.txtEditor.Leave += new System.EventHandler(this.txtEditor_Leave);
             // 
             // splitContainer1
             // 

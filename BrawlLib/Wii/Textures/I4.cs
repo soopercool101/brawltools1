@@ -14,19 +14,19 @@ namespace BrawlLib.Wii.Textures
         public override int BitsPerPixel { get { return 4; } }
         public override int BlockWidth { get { return 8; } }
         public override int BlockHeight { get { return 8; } }
-        public override PixelFormat DecodedFormat { get { return PixelFormat.Format24bppRgb; } }
+        //public override PixelFormat DecodedFormat { get { return PixelFormat.Format24bppRgb; } }
         public override WiiPixelFormat RawFormat { get { return WiiPixelFormat.I4; } }
 
 
-        protected override void DecodeBlock(VoidPtr blockAddr, VoidPtr destAddr, int width)
+        protected override void DecodeBlock(VoidPtr blockAddr, ARGBPixel* dPtr, int width)
         {
             I4Pixel* sPtr = (I4Pixel*)blockAddr; 
-            RGBPixel* dPtr = (RGBPixel*)destAddr;
+            //RGBPixel* dPtr = (RGBPixel*)destAddr;
             for (int y = 0; y < BlockHeight; y++, dPtr += width)
                 for (int x = 0; x < BlockWidth; )
                 {
-                    dPtr[x++] = (RGBPixel)(*sPtr)[0];
-                    dPtr[x++] = (RGBPixel)(*sPtr++)[1];
+                    dPtr[x++] = (ARGBPixel)(*sPtr)[0];
+                    dPtr[x++] = (ARGBPixel)(*sPtr++)[1];
                 }
         }
 

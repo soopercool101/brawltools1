@@ -23,6 +23,13 @@ namespace BrawlLib.Wii
                         *dPtr++ = 0x0A; // \n
                         break;
 
+                    case 0x11:
+                        *dPtr++ = 0x5B; // [
+                        WriteString(ref dPtr, "border=");
+                        WriteHex(ref dPtr, ref sPtr, 4);
+                        *dPtr++ = 0x5D; // ]
+                        break;
+
                     case 0x12:
                         *dPtr++ = 0x3C; // <
                         bits = (*sPtr++).CountBits();
@@ -126,6 +133,31 @@ namespace BrawlLib.Wii
                                 *dPtr++ = 0x13;
                         }
                     }
+                    else if (c == '[')
+                    {
+                        char* last = sPtr;
+                        byte* tPtr = buffer;
+                        while ((last < ceil) && ((c = *last++) != ']'))
+                            if (c != ' ')
+                                *tPtr++ = (byte)c;
+
+                        if (c != ']')
+                            *dPtr++ = (byte)']';
+                        else
+                        {
+                            sPtr = last;
+                            bLen = (int)tPtr - (int)buffer;
+                            ToLower(buffer, bLen);
+
+                            if ((colorIndex = IndexOf(buffer, bLen, "border=")) >= 0)
+                            {
+                                tPtr = buffer + colorIndex + 5;
+
+                                *dPtr++ = 0x11;
+                                ReadHex(ref dPtr, ref tPtr, 4);
+                            }
+                        }
+                    }
                     else if (c == '\\')
                     {
                         if (sPtr < ceil)
@@ -180,6 +212,26 @@ namespace BrawlLib.Wii
                                 len += 2;
                             if (StrContains(buffer, bLen, "end"))
                                 len++;
+                        }
+                    }
+                    else if (c == '[')
+                    {
+                        char* last = sPtr;
+                        byte* tPtr = buffer;
+                        while ((last < ceil) && ((c = *last++) != ']'))
+                            if (c != ' ')
+                                *tPtr++ = (byte)c;
+
+                        if (c != ']')
+                            len++;
+                        else
+                        {
+                            sPtr = last;
+                            bLen = (int)tPtr - (int)buffer;
+                            ToLower(buffer, bLen);
+
+                            if (StrContains(buffer, bLen, "border="))
+                                len += 5;
                         }
                     }
                     else if (c == '\\')

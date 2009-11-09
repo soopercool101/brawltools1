@@ -20,7 +20,15 @@ namespace System.Windows.Forms
             }
         }
 
+        public NumericInputBox() { UpdateText(); }
+
         public event EventHandler ValueChanged;
+
+        protected override void OnLostFocus(EventArgs e)
+        {
+            Apply();
+            base.OnLostFocus(e);
+        }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
@@ -73,6 +81,14 @@ namespace System.Windows.Forms
                     e.SuppressKeyPress = true;
                     break;
 
+                case Keys.X:
+                case Keys.V:
+                case Keys.C:
+                    if (!e.Control)
+                        goto default;
+                    break;
+
+
                 default:
                     e.Handled = true;
                     e.SuppressKeyPress = true;
@@ -92,11 +108,20 @@ namespace System.Windows.Forms
 
         private void Apply()
         {
-            if (float.TryParse(Text, out _value))
+            float val = _value;
+
+            if (Text == "")
+                val = float.NaN;
+            else
+                float.TryParse(Text, out val);
+
+            if (_value != val)
             {
+                _value = val;
                 if (ValueChanged != null)
                     ValueChanged(this, null);
             }
+
             UpdateText();
         }
     }

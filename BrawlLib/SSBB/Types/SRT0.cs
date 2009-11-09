@@ -35,7 +35,7 @@ namespace BrawlLib.SSBBTypes
     unsafe struct SRT0Entry
     {
         public bint _stringOffset;
-        public bint _headerType; //0x01 or 0x03
+        public bint _headerType; //1,2,3
         public bint _unk1; //0x00
         public bint _entryOffset; //0x10 or 0x14
         public bint _unk2; //0x20, only available when type = 3
@@ -51,6 +51,15 @@ namespace BrawlLib.SSBBTypes
             set { _stringOffset = (int)value - (int)Address; }
         }
     }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    unsafe struct SRT0EntryType2
+    {
+        bint _unk1; //entry count?
+
+
+    }
+
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct SRT0Data2

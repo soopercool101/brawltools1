@@ -15,9 +15,31 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal CHR0* Header { get { return (CHR0*)WorkingUncompressed.Address; } }
         public override ResourceType ResourceType { get { return ResourceType.CHR0; } }
 
-        internal int _numFrames;
-        public int FrameCount { get { return _numFrames; } set { _numFrames = value; } }
+        internal int _numFrames = 1;
+        public int FrameCount
+        {
+            get { return _numFrames; }
+            set
+            {
+                if ((_numFrames == value) || (value < 1))
+                    return;
 
+                _numFrames = value;
+                foreach (CHR0EntryNode n in Children)
+                    n.SetSize(_numFrames);
+
+                SignalPropertyChange();
+            }
+        }
+
+        public CHR0EntryNode CreateEntry()
+        {
+            CHR0EntryNode n = new CHR0EntryNode();
+            n._numFrames = _numFrames;
+            n._name = this.FindName();
+            AddChild(n);
+            return n;
+        }
 
         protected override bool OnInitialize()
         {
@@ -45,37 +67,47 @@ namespace BrawlLib.SSBB.ResourceNodes
                 table.Add(n.Name);
         }
 
-        //protected override int OnCalculateSize(bool force)
-        //{
-        //    int size = CHR0.Size + 0x18 + (Children.Count * 0x10);
-        //    foreach (CHR0EntryNode n in Children)
-        //        size += n.CalculateSize(force);
-        //    return size;
-        //}
+        protected override int OnCalculateSize(bool force)
+        {
+            int size = CHR0.Size + 0x18 + (Children.Count * 0x10);
+            foreach (CHR0EntryNode n in Children)
+                size += n.CalculateSize(true);
+            return size;
+        }
 
-        //protected internal override void OnRebuild(VoidPtr address, int length, bool force)
-        //{
-        //    _replSrc = _replUncompSrc = new DataSource(address, length);
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
+        {
+            CHR0* header = (CHR0*)address;
+            *header = new CHR0(length, _numFrames, Children.Count);
 
-        //    CHR0* header = (CHR0*)address;
-        //    *header = new CHR0(length, Children.Count, _len1, _len2);
+            ResourceGroup* group = header->Group;
+            *group = new ResourceGroup(Children.Count);
 
-        //    ResourceGroup* group = header->Group;
-        //    *group = new ResourceGroup(Children.Count);
+            VoidPtr entryAddress = group->EndAddress;
+            VoidPtr dataAddress = entryAddress;
 
-        //    CHR0Entry* entry = (CHR0Entry*)group->EndAddress;
+            foreach (CHR0EntryNode n in Children)
+                dataAddress += n._entryLen;
 
-        //    ResourceEntry* rEntry = group->First;
-        //    foreach (CHR0EntryNode n in Children)
-        //    {
-        //        rEntry->_dataOffset = (int)entry - (int)group;
-        //        rEntry++;
+            //VoidPtr dataAddr = group->EndAddress;
+            //CHR0Entry* entry = (CHR0Entry*)group->EndAddress;
 
-        //        int size = n._calcSize;
-        //        n.Rebuild(entry, size, force);
-        //        entry += size;
-        //    }
-        //}
+            ResourceEntry* rEntry = group->First;
+            foreach (CHR0EntryNode n in Children)
+            {
+                rEntry->_dataOffset = (int)entryAddress - (int)group;
+                rEntry++;
+
+                n._dataAddr = dataAddress;
+                n.Rebuild(entryAddress, n._entryLen, true);
+                entryAddress += n._entryLen;
+                dataAddress += n._dataLen;
+            }
+
+            _replSrc.Close();
+            _replUncompSrc.Close();
+            _replSrc = _replUncompSrc = new DataSource(address, length);
+        }
 
         protected internal override void PostProcess(VoidPtr bresAddress, VoidPtr dataAddress, int dataLength, StringTable stringTable)
         {
@@ -103,131 +135,109 @@ namespace BrawlLib.SSBB.ResourceNodes
     public unsafe class CHR0EntryNode : ResourceNode
     {
         internal CHR0Entry* Header { get { return (CHR0Entry*)WorkingUncompressed.Address; } }
+        public override ResourceType ResourceType { get { return ResourceType.CHR0Entry; } }
 
-        //internal AnimationFrame[] _keyframes = new AnimationFrame[] { };
-        internal AnimationKeyframe[] _animFrames;// = new AnimationKeyframe[] { };
+        internal int _numFrames;
+        [Browsable(false)]
+        public int FrameCount { get { return _numFrames; } }
 
-        //public AnimationFrame[] Frames { get { return _animFrames; } }
-
-        public int FrameCount
-        {
-            get
+        internal KeyframeCollection _keyframes;
+        [Browsable(false)]
+        public KeyframeCollection Keyframes 
+        { 
+            get 
             {
-                return ((CHR0Node)Parent)._numFrames;
-
-                //if (_animFrames == null)
-                //    _animFrames = AnimationConverter.DecodeSequence(Header, ((CHR0Node)Parent)._numFrames);
-                //return _animFrames.Length;
-            }
-        }
-        public AnimationKeyframe this[int index]
-        {
-            get
-            {
-                if (_animFrames == null)
-                    _animFrames = AnimationConverter.DecodeSequence(Header, ((CHR0Node)Parent)._numFrames);
-                return _animFrames[index];
-            }
-            set { _animFrames[index] = value; SignalPropertyChange(); }
+                if (_keyframes == null)
+                {
+                    if (Header != null)
+                        _keyframes = AnimationConverter.DecodeKeyframes(Header, _numFrames);
+                    else
+                        _keyframes = new KeyframeCollection(_numFrames);
+                }
+                return _keyframes;
+            } 
         }
 
-        internal void SetLength(int length)
+        internal int _dataLen;
+        internal int _entryLen;
+        internal VoidPtr _dataAddr;
+        protected override int OnCalculateSize(bool force)
         {
-            int oldLen = _animFrames.Length;
-            if (oldLen == length)
-                return;
-
-            AnimationKeyframe[] newFrames = new AnimationKeyframe[length];
-
-            Array.Copy(_animFrames, newFrames, Math.Min(oldLen, length));
-            if (length > oldLen)
-            {
-                AnimationKeyframe f = (oldLen == 0) ? AnimationKeyframe.Neutral : newFrames[oldLen - 1];
-                for (int i = oldLen; i < length; )
-                    newFrames[i++] = f;
-            }
-
-            _animFrames = newFrames;
+            _dataLen = AnimationConverter.CalculateSize(Keyframes, out _entryLen);
+            return _dataLen + _entryLen;
         }
-
-
-        //AnimationCode _buildCode;
-        //protected override int OnCalculateSize(bool force)
-        //{
-        //    _buildCode = new AnimationCode();
-
-        //    //Iterate through frames, building the code
-        //    //Build data too?
-
-        //    int numFrames = _animFrames.Length;
-
-        //    float* pDiff = stackalloc float[numFrames];
-        //    ushort* pKeys = stackalloc ushort[numFrames];
-
-        //    int xKeyCount, yKeyCount, zKeyCount;
-        //    Vector3 lastValue;
-
-        //    fixed (AnimationFrame* pFrame = _animFrames)
-        //    {
-        //        bool isotropic = true;
-        //        float* pFloat = (float*)pFrame;
-        //        for (int i = 0; i < numFrames; i++, pFloat += 9)
-        //            if (pFloat[0] != pFloat[1] || pFloat[1] != pFloat[2])
-        //            {
-        //                isotropic = false;
-        //                break;
-        //            }
-
-        //        if (isotropic)
-        //        {
-        //        }
-        //        else
-        //        {
-        //        }
-        //    }
-        //}
-
-        //private int EncodeTransformation(float* list, int count, float* diff, int* keys, float defaultValue)
-        //{
-        //    int keyCount = 0;
-        //    float current, last = defaultValue;
-
-        //    for (int i = 0; i < count; i++, list += 9)
-        //    {
-        //        current = *list;
-        //        if (last != current)
-        //        {
-        //            keys[keyCount] = i;
-        //            diff[keyCount++] = current - last;
-        //            last = current;
-        //        }
-        //    }
-
-        //    return keyCount;
-        //}
-
-        //protected internal override void OnRebuild(VoidPtr address, int length, bool force)
-        //{
-        //    _replSrc = _replUncompSrc = new DataSource(address, length);
-
-        //    CHR0Entry* header = (CHR0Entry*)address;
-        //    *header = new CHR0Entry(_b1, _b2, _b3, _b4);
-        //}
 
         protected override bool OnInitialize()
         {
+            _keyframes = null;
+
+            if (_parent is CHR0Node)
+                _numFrames = ((CHR0Node)_parent)._numFrames;
+
             if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
-            //_animFrames = AnimationConverter.DecodeSequence(Header, ((CHR0Node)Parent)._numFrames);
-
             return false;
+        }
+
+        public override unsafe void Export(string outPath)
+        {
+            StringTable table = new StringTable();
+            table.Add(_name);
+
+            int dataLen = OnCalculateSize(true);
+            int totalLen = dataLen + table.GetTotalSize();
+
+            using (FileStream stream = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 8, FileOptions.RandomAccess))
+            {
+                stream.SetLength(totalLen);
+                using (FileMap map = FileMap.FromStream(stream))
+                {
+                    AnimationConverter.EncodeKeyframes(Keyframes, map.Address, map.Address + _entryLen);
+                    table.WriteTable(map.Address + dataLen);
+                    PostProcess(map.Address, table);
+                }
+            }
+        }
+
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
+        {
+            AnimationConverter.EncodeKeyframes(_keyframes, address, _dataAddr);
+
+            _replSrc.Close();
+            _replUncompSrc.Close();
+            _replSrc = _replUncompSrc = new DataSource(address, length);
         }
 
         protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)
         {
             CHR0Entry* header = (CHR0Entry*)dataAddress;
             header->ResourceStringAddress = stringTable[Name] + 4;
+        }
+
+        internal void SetSize(int count)
+        {
+            if (_keyframes != null)
+                Keyframes.SetSize(count);
+
+            _numFrames = count;
+            SignalPropertyChange();
+        }
+        public float GetKeyframe(KeyFrameMode mode, int index) { return Keyframes.GetKeyframe(mode, index); }
+        public void SetKeyframe(KeyFrameMode mode, int index, float value)
+        {
+            Keyframes.SetKeyFrame(mode, index, value);
+            SignalPropertyChange();
+        }
+        public void RemoveKeyframe(KeyFrameMode mode, int index)
+        {
+            Keyframes.RemoveKeyframe(mode, index);
+            SignalPropertyChange();
+        }
+
+        public AnimationFrame GetAnimFrame(int index)
+        {
+            return Keyframes.AnimFrames[index];
         }
     }
 }

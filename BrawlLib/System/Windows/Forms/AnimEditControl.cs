@@ -2,20 +2,18 @@
 using BrawlLib.SSBB.ResourceNodes;
 using BrawlLib.Wii.Animations;
 using System.ComponentModel;
+using System.Drawing;
 
 namespace System.Windows.Forms
 {
     public class AnimEditControl : UserControl
     {
         private int _numFrames;
-        private bool _updating = false;
 
         private int _currentPage = 1;
-        private AnimationKeyframe _currentFrame = AnimationKeyframe.Neutral;
-        private ListBox listKeyframes;
-        private Button btnAddKf;
-        private Button btnDelKf;
-        private GroupBox groupBox1;
+        private AnimationFrame _currentFrame = AnimationFrame.Neutral;
+        private NumericInputBox[] _boxes = new NumericInputBox[9];
+        private Panel panel1;
 
         private CHR0EntryNode _target;
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -27,36 +25,62 @@ namespace System.Windows.Forms
                 if (_target == value)
                     return;
 
+                _target = value;
+                UpdateTarget();
+            }
+        }
 
-                //_updating = true;
+        public AnimEditControl() 
+        { 
+            InitializeComponent();
+            _boxes[0] = numScaleX;
+            _boxes[1] = numScaleY;
+            _boxes[2] = numScaleZ;
+            _boxes[3] = numRotX;
+            _boxes[4] = numRotY;
+            _boxes[5] = numRotZ;
+            _boxes[6] = numTransX;
+            _boxes[7] = numTransY;
+            _boxes[8] = numTransZ;
 
-                if ((_target != null) && (_target.FrameCount > 0))
+            for (int i = 0; i < 9; i++)
+                _boxes[i].Tag = i;
+        }
+
+        private void UpdateTarget()
+        {
+            listKeyframes.BeginUpdate();
+            listKeyframes.Items.Clear();
+            if (_target != null)
+            {
+                if (_target.FrameCount > 0)
                 {
-                    _target = value;
+                    foreach (AnimationKeyframe f in _target.Keyframes.Keyframes)
+                        listKeyframes.Items.Add(f);
 
                     _numFrames = _target.FrameCount;
+
+                    _currentPage = 0;
                     numFrame.Value = 1;
                     numFrame.Maximum = _numFrames;
                     lblFrameCount.Text = String.Format("/ {0}", _numFrames);
                 }
                 else
-                {
-                    _target = null;
                     numFrame.Value = 1;
-                }
-
-                //_updating = false;
-
-                RefreshPage();
             }
-        }
+            listKeyframes.EndUpdate();
 
-        public AnimEditControl() { InitializeComponent(); }
+            RefreshPage();
+        }
 
         private void numFrame_ValueChanged(object sender, EventArgs e)
         {
-            if (!_updating)
+            int page = (int)numFrame.Value - 1;
+            if (_currentPage != page)
+            {
+                _currentPage = page;
                 RefreshPage();
+            }
         }
 
         private void RefreshPage()
@@ -66,11 +90,9 @@ namespace System.Windows.Forms
             }
             else
             {
-                _currentPage = (int)numFrame.Value;
+                //_currentPage = (int)numFrame.Value - 1;
 
-                _currentFrame = _target[_currentPage - 1];
-
-                _updating = true;
+                _currentFrame = _target.GetAnimFrame(_currentPage);
 
                 numScaleX.Value = _currentFrame.Scale._x;
                 numScaleY.Value = _currentFrame.Scale._y;
@@ -84,124 +106,105 @@ namespace System.Windows.Forms
                 numTransY.Value = _currentFrame.Translation._y;
                 numTransZ.Value = _currentFrame.Translation._z;
 
-                _updating = false;
+                for (int i = 0; i < 9; i++)
+                    UpdateBox(i);
 
-                btnPrev.Enabled = _currentPage > 1;
-                btnNext.Enabled = _currentPage < _numFrames;
+                btnPrev.Enabled = _currentPage > 0;
+                btnNext.Enabled = _currentPage < (_numFrames - 1);
+
+                listKeyframes.SelectedIndex = FindKeyframe(_currentPage);
             }
         }
 
-        private void numScaleX_ValueChanged(object sender, EventArgs e)
+        private int FindKeyframe(int index)
         {
-            if (_updating)
-                return;
-
-            float val = (float)numScaleX.Value;
-            if (val != _currentFrame.Scale._x)
-            {
-                _currentFrame.Scale._x = val;
-                _target[_currentPage - 1] = _currentFrame;
-            }
+            int count = listKeyframes.Items.Count;
+            for (int i = 0; i < count; i++)
+                if (((AnimationKeyframe)listKeyframes.Items[i]).Index == index)
+                    return i;
+            return -1;
         }
-        private void numScaleY_ValueChanged(object sender, EventArgs e)
+
+        private void UpdateBox(int index)
         {
-            if (_updating)
-                return;
-
-            float val = (float)numScaleY.Value;
-            if (val != _currentFrame.Scale._y)
-            {
-                _currentFrame.Scale._y = val;
-                _target[_currentPage - 1] = _currentFrame;
-            }
+            if (!float.IsNaN(_target.GetKeyframe((KeyFrameMode)index, _currentPage)))
+                _boxes[index].BackColor = Color.Yellow;
+            else
+                _boxes[index].BackColor = Color.White;
         }
-        private void numScaleZ_ValueChanged(object sender, EventArgs e)
+
+        private unsafe void BoxChanged(object sender, EventArgs e)
         {
-            if (_updating)
-                return;
+            NumericInputBox box = sender as NumericInputBox;
+            AnimationKeyframe kf;
+            float* pkf = (float*)&kf + 1;
+            float val = box.Value;
+            int index = (int)box.Tag;
+            int x;
 
-            float val = (float)numScaleZ.Value;
-            if (val != _currentFrame.Scale._z)
+            if (val != _currentFrame[index])
             {
-                _currentFrame.Scale._z = val;
-                _target[_currentPage - 1] = _currentFrame;
+                int kfIndex = FindKeyframe(_currentPage);
+
+                if (float.IsNaN(val))
+                {
+                    //Value removed find keyframe and zero it out
+                    if (kfIndex >= 0)
+                    {
+                        kf = (AnimationKeyframe)listKeyframes.Items[kfIndex];
+                        pkf[index] = val;
+                        for (x = 0; (x < 9) && float.IsNaN(pkf[x]); x++) ;
+                        if (x == 9)
+                        {
+                            listKeyframes.Items.RemoveAt(kfIndex);
+                            listKeyframes.SelectedIndex = -1;
+                        }
+                        else
+                            listKeyframes.Items[kfIndex] = kf;
+                    }
+
+                    _target.RemoveKeyframe((KeyFrameMode)index, _currentPage);
+                    val = _target.GetAnimFrame(_currentPage)[index];
+                    box.Value = val;
+                }
+                else
+                {
+                    if (kfIndex >= 0)
+                    {
+                        kf = (AnimationKeyframe)listKeyframes.Items[kfIndex];
+                        pkf[index] = val;
+                        listKeyframes.Items[kfIndex] = kf;
+                    }
+                    else
+                    {
+                        kf = AnimationKeyframe.Empty;
+                        kf.Index = _currentPage;
+                        pkf[index] = val;
+
+                        int count = listKeyframes.Items.Count;
+                        for (x = 0; (x < count) && (((AnimationKeyframe)listKeyframes.Items[x]).Index < _currentPage); x++) ;
+
+                        listKeyframes.Items.Insert(x, kf);
+                        listKeyframes.SelectedIndex = x;
+                    }
+
+                    _target.SetKeyframe((KeyFrameMode)index, _currentPage, val);
+                }
+
+                _currentFrame[index] = val;
+                UpdateBox(index);
             }
         }
 
-        private void numRotX_ValueChanged(object sender, EventArgs e)
+        private void listKeyframes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_updating)
-                return;
-
-            float val = (float)numRotX.Value;
-            if (val != _currentFrame.Rotation._x)
+            int index = listKeyframes.SelectedIndex;
+            if (index >= 0)
             {
-                _currentFrame.Rotation._x = val;
-                _target[_currentPage - 1] = _currentFrame;
+                AnimationKeyframe f = (AnimationKeyframe)listKeyframes.SelectedItem;
+                numFrame.Value = f.Index + 1;
             }
         }
-        private void numRotY_ValueChanged(object sender, EventArgs e)
-        {
-            if (_updating)
-                return;
-
-            float val = (float)numRotY.Value;
-            if (val != _currentFrame.Rotation._y)
-            {
-                _currentFrame.Rotation._y = val;
-                _target[_currentPage - 1] = _currentFrame;
-            }
-        }
-        private void numRotZ_ValueChanged(object sender, EventArgs e)
-        {
-            if (_updating)
-                return;
-
-            float val = (float)numRotZ.Value;
-            if (val != _currentFrame.Rotation._z)
-            {
-                _currentFrame.Rotation._z = val;
-                _target[_currentPage - 1] = _currentFrame;
-            }
-        }
-
-        private void numTransX_ValueChanged(object sender, EventArgs e)
-        {
-            if (_updating)
-                return;
-
-            float val = (float)numTransX.Value;
-            if (val != _currentFrame.Translation._x)
-            {
-                _currentFrame.Translation._x = val;
-                _target[_currentPage - 1] = _currentFrame;
-            }
-        }
-        private void numTransY_ValueChanged(object sender, EventArgs e)
-        {
-            if (_updating)
-                return;
-
-            float val = (float)numTransY.Value;
-            if (val != _currentFrame.Translation._y)
-            {
-                _currentFrame.Translation._y = val;
-                _target[_currentPage - 1] = _currentFrame;
-            }
-        }
-        private void numTransZ_ValueChanged(object sender, EventArgs e)
-        {
-            if (_updating)
-                return;
-
-            float val = (float)numTransZ.Value;
-            if (val != _currentFrame.Translation._z)
-            {
-                _currentFrame.Translation._z = val;
-                _target[_currentPage - 1] = _currentFrame;
-            }
-        }
-
 
         private void btnPrev_Click(object sender, EventArgs e) { numFrame.Value = numFrame.Value - 1; }
         private void btnNext_Click(object sender, EventArgs e) { numFrame.Value = numFrame.Value + 1; }
@@ -228,13 +231,15 @@ namespace System.Windows.Forms
         private Button btnPrev;
         private Button btnNext;
         private NumericInputBox numRotZ;
+        private ListBox listKeyframes;
+        private GroupBox groupBox1;
 
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.numScaleX = new NumericInputBox();
+            this.numScaleX = new System.Windows.Forms.NumericInputBox();
             this.label4 = new System.Windows.Forms.Label();
             this.numRotX = new System.Windows.Forms.NumericInputBox();
             this.numTransX = new System.Windows.Forms.NumericInputBox();
@@ -252,17 +257,17 @@ namespace System.Windows.Forms
             this.btnPrev = new System.Windows.Forms.Button();
             this.btnNext = new System.Windows.Forms.Button();
             this.listKeyframes = new System.Windows.Forms.ListBox();
-            this.btnAddKf = new System.Windows.Forms.Button();
-            this.btnDelKf = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.panel1 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.numFrame)).BeginInit();
             this.groupBox1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
             // 
             this.label1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label1.Location = new System.Drawing.Point(12, 161);
+            this.label1.Location = new System.Drawing.Point(10, 51);
             this.label1.Margin = new System.Windows.Forms.Padding(0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(70, 20);
@@ -273,7 +278,7 @@ namespace System.Windows.Forms
             // label2
             // 
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label2.Location = new System.Drawing.Point(12, 199);
+            this.label2.Location = new System.Drawing.Point(10, 89);
             this.label2.Margin = new System.Windows.Forms.Padding(0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(70, 20);
@@ -284,7 +289,7 @@ namespace System.Windows.Forms
             // label3
             // 
             this.label3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label3.Location = new System.Drawing.Point(12, 180);
+            this.label3.Location = new System.Drawing.Point(10, 70);
             this.label3.Margin = new System.Windows.Forms.Padding(0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(70, 20);
@@ -295,17 +300,18 @@ namespace System.Windows.Forms
             // numScaleX
             // 
             this.numScaleX.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numScaleX.Location = new System.Drawing.Point(81, 161);
+            this.numScaleX.Location = new System.Drawing.Point(79, 51);
             this.numScaleX.Margin = new System.Windows.Forms.Padding(0);
             this.numScaleX.Name = "numScaleX";
             this.numScaleX.Size = new System.Drawing.Size(70, 20);
             this.numScaleX.TabIndex = 3;
-            this.numScaleX.ValueChanged += new System.EventHandler(this.numScaleX_ValueChanged);
+            this.numScaleX.Text = "0";
+            this.numScaleX.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // label4
             // 
             this.label4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label4.Location = new System.Drawing.Point(81, 142);
+            this.label4.Location = new System.Drawing.Point(79, 32);
             this.label4.Margin = new System.Windows.Forms.Padding(0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(70, 20);
@@ -316,27 +322,29 @@ namespace System.Windows.Forms
             // numRotX
             // 
             this.numRotX.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numRotX.Location = new System.Drawing.Point(81, 180);
+            this.numRotX.Location = new System.Drawing.Point(79, 70);
             this.numRotX.Margin = new System.Windows.Forms.Padding(0, 10, 0, 10);
             this.numRotX.Name = "numRotX";
             this.numRotX.Size = new System.Drawing.Size(70, 20);
             this.numRotX.TabIndex = 6;
-            this.numRotX.ValueChanged += new System.EventHandler(this.numRotX_ValueChanged);
+            this.numRotX.Text = "0";
+            this.numRotX.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // numTransX
             // 
             this.numTransX.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numTransX.Location = new System.Drawing.Point(81, 199);
+            this.numTransX.Location = new System.Drawing.Point(79, 89);
             this.numTransX.Margin = new System.Windows.Forms.Padding(0, 10, 0, 10);
             this.numTransX.Name = "numTransX";
             this.numTransX.Size = new System.Drawing.Size(70, 20);
             this.numTransX.TabIndex = 9;
-            this.numTransX.ValueChanged += new System.EventHandler(this.numTransX_ValueChanged);
+            this.numTransX.Text = "0";
+            this.numTransX.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // label5
             // 
             this.label5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label5.Location = new System.Drawing.Point(150, 142);
+            this.label5.Location = new System.Drawing.Point(148, 32);
             this.label5.Margin = new System.Windows.Forms.Padding(0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(70, 20);
@@ -347,7 +355,7 @@ namespace System.Windows.Forms
             // label6
             // 
             this.label6.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label6.Location = new System.Drawing.Point(219, 142);
+            this.label6.Location = new System.Drawing.Point(217, 32);
             this.label6.Margin = new System.Windows.Forms.Padding(0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(70, 20);
@@ -358,66 +366,72 @@ namespace System.Windows.Forms
             // numScaleY
             // 
             this.numScaleY.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numScaleY.Location = new System.Drawing.Point(150, 161);
+            this.numScaleY.Location = new System.Drawing.Point(148, 51);
             this.numScaleY.Margin = new System.Windows.Forms.Padding(0);
             this.numScaleY.Name = "numScaleY";
             this.numScaleY.Size = new System.Drawing.Size(70, 20);
             this.numScaleY.TabIndex = 4;
-            this.numScaleY.ValueChanged += new System.EventHandler(this.numScaleY_ValueChanged);
+            this.numScaleY.Text = "0";
+            this.numScaleY.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // numTransY
             // 
             this.numTransY.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numTransY.Location = new System.Drawing.Point(150, 199);
+            this.numTransY.Location = new System.Drawing.Point(148, 89);
             this.numTransY.Margin = new System.Windows.Forms.Padding(0, 10, 0, 10);
             this.numTransY.Name = "numTransY";
             this.numTransY.Size = new System.Drawing.Size(70, 20);
             this.numTransY.TabIndex = 10;
-            this.numTransY.ValueChanged += new System.EventHandler(this.numTransY_ValueChanged);
+            this.numTransY.Text = "0";
+            this.numTransY.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // numRotY
             // 
             this.numRotY.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numRotY.Location = new System.Drawing.Point(150, 180);
+            this.numRotY.Location = new System.Drawing.Point(148, 70);
             this.numRotY.Margin = new System.Windows.Forms.Padding(0, 10, 0, 10);
             this.numRotY.Name = "numRotY";
             this.numRotY.Size = new System.Drawing.Size(70, 20);
             this.numRotY.TabIndex = 7;
-            this.numRotY.ValueChanged += new System.EventHandler(this.numRotY_ValueChanged);
+            this.numRotY.Text = "0";
+            this.numRotY.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // numScaleZ
             // 
             this.numScaleZ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numScaleZ.Location = new System.Drawing.Point(219, 161);
+            this.numScaleZ.Location = new System.Drawing.Point(217, 51);
             this.numScaleZ.Margin = new System.Windows.Forms.Padding(0);
             this.numScaleZ.Name = "numScaleZ";
             this.numScaleZ.Size = new System.Drawing.Size(70, 20);
             this.numScaleZ.TabIndex = 5;
-            this.numScaleZ.ValueChanged += new System.EventHandler(this.numScaleZ_ValueChanged);
+            this.numScaleZ.Text = "0";
+            this.numScaleZ.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // numTransZ
             // 
             this.numTransZ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numTransZ.Location = new System.Drawing.Point(219, 199);
+            this.numTransZ.Location = new System.Drawing.Point(217, 89);
             this.numTransZ.Margin = new System.Windows.Forms.Padding(0, 10, 0, 10);
             this.numTransZ.Name = "numTransZ";
             this.numTransZ.Size = new System.Drawing.Size(70, 20);
             this.numTransZ.TabIndex = 11;
-            this.numTransZ.ValueChanged += new System.EventHandler(this.numTransZ_ValueChanged);
+            this.numTransZ.Text = "0";
+            this.numTransZ.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // numRotZ
             // 
             this.numRotZ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numRotZ.Location = new System.Drawing.Point(219, 180);
+            this.numRotZ.Location = new System.Drawing.Point(217, 70);
             this.numRotZ.Margin = new System.Windows.Forms.Padding(0, 10, 0, 10);
             this.numRotZ.Name = "numRotZ";
             this.numRotZ.Size = new System.Drawing.Size(70, 20);
             this.numRotZ.TabIndex = 8;
-            this.numRotZ.ValueChanged += new System.EventHandler(this.numRotZ_ValueChanged);
+            this.numRotZ.Text = "0";
+            this.numRotZ.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // label7
             // 
-            this.label7.Location = new System.Drawing.Point(39, 107);
+            this.label7.Location = new System.Drawing.Point(37, 5);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(61, 20);
             this.label7.TabIndex = 15;
@@ -426,7 +440,7 @@ namespace System.Windows.Forms
             // 
             // numFrame
             // 
-            this.numFrame.Location = new System.Drawing.Point(106, 107);
+            this.numFrame.Location = new System.Drawing.Point(104, 5);
             this.numFrame.Minimum = new decimal(new int[] {
             1,
             0,
@@ -444,7 +458,7 @@ namespace System.Windows.Forms
             // 
             // lblFrameCount
             // 
-            this.lblFrameCount.Location = new System.Drawing.Point(170, 107);
+            this.lblFrameCount.Location = new System.Drawing.Point(168, 5);
             this.lblFrameCount.Name = "lblFrameCount";
             this.lblFrameCount.Size = new System.Drawing.Size(45, 20);
             this.lblFrameCount.TabIndex = 17;
@@ -454,7 +468,7 @@ namespace System.Windows.Forms
             // btnPrev
             // 
             this.btnPrev.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnPrev.Location = new System.Drawing.Point(221, 106);
+            this.btnPrev.Location = new System.Drawing.Point(219, 4);
             this.btnPrev.Name = "btnPrev";
             this.btnPrev.Size = new System.Drawing.Size(23, 23);
             this.btnPrev.TabIndex = 1;
@@ -466,7 +480,7 @@ namespace System.Windows.Forms
             // btnNext
             // 
             this.btnNext.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnNext.Location = new System.Drawing.Point(246, 106);
+            this.btnNext.Location = new System.Drawing.Point(244, 4);
             this.btnNext.Name = "btnNext";
             this.btnNext.Size = new System.Drawing.Size(23, 23);
             this.btnNext.TabIndex = 2;
@@ -477,83 +491,70 @@ namespace System.Windows.Forms
             // 
             // listKeyframes
             // 
-            this.listKeyframes.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.listKeyframes.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listKeyframes.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listKeyframes.FormattingEnabled = true;
             this.listKeyframes.IntegralHeight = false;
-            this.listKeyframes.Location = new System.Drawing.Point(6, 19);
+            this.listKeyframes.ItemHeight = 14;
+            this.listKeyframes.Location = new System.Drawing.Point(3, 16);
             this.listKeyframes.Name = "listKeyframes";
-            this.listKeyframes.Size = new System.Drawing.Size(263, 52);
+            this.listKeyframes.Size = new System.Drawing.Size(294, 76);
             this.listKeyframes.TabIndex = 18;
-            // 
-            // btnAddKf
-            // 
-            this.btnAddKf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAddKf.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAddKf.Location = new System.Drawing.Point(275, 19);
-            this.btnAddKf.Name = "btnAddKf";
-            this.btnAddKf.Size = new System.Drawing.Size(15, 23);
-            this.btnAddKf.TabIndex = 19;
-            this.btnAddKf.Text = "+";
-            this.btnAddKf.UseVisualStyleBackColor = true;
-            // 
-            // btnDelKf
-            // 
-            this.btnDelKf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDelKf.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDelKf.Location = new System.Drawing.Point(275, 48);
-            this.btnDelKf.Name = "btnDelKf";
-            this.btnDelKf.Size = new System.Drawing.Size(15, 23);
-            this.btnDelKf.TabIndex = 20;
-            this.btnDelKf.Text = "-";
-            this.btnDelKf.UseVisualStyleBackColor = true;
+            this.listKeyframes.SelectedIndexChanged += new System.EventHandler(this.listKeyframes_SelectedIndexChanged);
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.listKeyframes);
-            this.groupBox1.Controls.Add(this.btnDelKf);
-            this.groupBox1.Controls.Add(this.btnAddKf);
-            this.groupBox1.Location = new System.Drawing.Point(3, 3);
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(296, 78);
+            this.groupBox1.Size = new System.Drawing.Size(300, 95);
             this.groupBox1.TabIndex = 21;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Keyframes";
             // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.label7);
+            this.panel1.Controls.Add(this.btnNext);
+            this.panel1.Controls.Add(this.numRotY);
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.numTransY);
+            this.panel1.Controls.Add(this.btnPrev);
+            this.panel1.Controls.Add(this.numScaleX);
+            this.panel1.Controls.Add(this.label2);
+            this.panel1.Controls.Add(this.numScaleY);
+            this.panel1.Controls.Add(this.lblFrameCount);
+            this.panel1.Controls.Add(this.label6);
+            this.panel1.Controls.Add(this.label3);
+            this.panel1.Controls.Add(this.numRotZ);
+            this.panel1.Controls.Add(this.numFrame);
+            this.panel1.Controls.Add(this.label5);
+            this.panel1.Controls.Add(this.label4);
+            this.panel1.Controls.Add(this.numTransZ);
+            this.panel1.Controls.Add(this.numRotX);
+            this.panel1.Controls.Add(this.numTransX);
+            this.panel1.Controls.Add(this.numScaleZ);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(0, 95);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(300, 117);
+            this.panel1.TabIndex = 23;
+            // 
             // AnimEditControl
             // 
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.btnNext);
-            this.Controls.Add(this.btnPrev);
-            this.Controls.Add(this.lblFrameCount);
-            this.Controls.Add(this.numFrame);
-            this.Controls.Add(this.label7);
-            this.Controls.Add(this.numScaleZ);
-            this.Controls.Add(this.numTransZ);
-            this.Controls.Add(this.numRotZ);
-            this.Controls.Add(this.numScaleY);
-            this.Controls.Add(this.numTransY);
-            this.Controls.Add(this.numRotY);
-            this.Controls.Add(this.numScaleX);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.numTransX);
-            this.Controls.Add(this.numRotX);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.panel1);
             this.Name = "AnimEditControl";
-            this.Size = new System.Drawing.Size(302, 258);
+            this.Size = new System.Drawing.Size(300, 212);
             ((System.ComponentModel.ISupportInitialize)(this.numFrame)).EndInit();
             this.groupBox1.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
     }
 }

@@ -49,7 +49,6 @@ namespace BrawlBox
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.fileResizerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -230,23 +229,15 @@ namespace BrawlBox
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileResizerToolStripMenuItem,
             this.settingsToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
             // 
-            // fileResizerToolStripMenuItem
-            // 
-            this.fileResizerToolStripMenuItem.Name = "fileResizerToolStripMenuItem";
-            this.fileResizerToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
-            this.fileResizerToolStripMenuItem.Text = "File &Resizer";
-            this.fileResizerToolStripMenuItem.Click += new System.EventHandler(this.fileResizerToolStripMenuItem_Click);
-            // 
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.settingsToolStripMenuItem.Text = "&Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click_1);
             // 
@@ -307,7 +298,7 @@ namespace BrawlBox
             // 
             this.animEditControl.Location = new System.Drawing.Point(256, 0);
             this.animEditControl.Name = "animEditControl";
-            this.animEditControl.Size = new System.Drawing.Size(128, 86);
+            this.animEditControl.Size = new System.Drawing.Size(128, 100);
             this.animEditControl.TabIndex = 1;
             this.animEditControl.Visible = false;
             // 
@@ -363,7 +354,6 @@ namespace BrawlBox
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         public System.Windows.Forms.PropertyGrid propertyGrid1;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem fileResizerToolStripMenuItem;
         private ToolStripMenuItem newToolStripMenuItem;
         private ToolStripMenuItem aRCArchiveToolStripMenuItem;
         private ToolStripMenuItem brresPackToolStripMenuItem;

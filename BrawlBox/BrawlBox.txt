@@ -1,5 +1,5 @@
 
-BrawlBox Data Viewer - Version 0.58b
+BrawlBox Data Viewer - Version 0.59
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -17,6 +17,16 @@ http://www.smashboards.com/showthread.php?t=238861
  ====================================
 |************ Change Log ************|
  ====================================
+
+- v0.59 - (11/08/2009)
+	. Re-added settings dialog.
+	. Various menu improvements/features.
+	. CHR0 entries can now be manipulated.
+	. Added editor for CHR0 keyframes.
+	. Added editor for MSBin messages.
+	. Re-added RSAR support with new organization. (No audio features yet)
+	. Improved CMPR algorithm using modified code from the NVidia Texture Tools.
+	. Lowered OpenGL version to 1.1, and changed the way mipmaps are generated.
 
 - v0.58b- (10/24/2009)
 	. Re-integration with BrawlLib is nearly complete. Audio support still isn't finished.

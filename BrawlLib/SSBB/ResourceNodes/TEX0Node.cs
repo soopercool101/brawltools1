@@ -52,19 +52,14 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
 
         [Browsable(false)]
-        public int ImageCount { get { return Header->_levelOfDetail; } }
+        public int ImageCount { get { return _lod; } }
         public Bitmap GetImage(int index)
         {
-            Bitmap bmp = TextureConverter.Decode(Header, index + 1);
-            if (HasPalette)
-            {
-                PLT0Node n = GetPaletteNode();
-                if (n != null)
-                    bmp.Palette = TextureConverter.DecodePalette(n.Header);
-                else
-                    bmp.GreyscalePalette();
-            }
-            return bmp;
+            PLT0Node plt = GetPaletteNode();
+            if (plt != null)
+                return TextureConverter.DecodeIndexed(Header, plt.Header, index + 1);
+            else
+                return TextureConverter.Decode(Header, index + 1);
         }
 
         protected internal override void PostProcess(VoidPtr bresAddress, VoidPtr dataAddress, int dataLength, StringTable stringTable)

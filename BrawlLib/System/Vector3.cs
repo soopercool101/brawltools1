@@ -74,7 +74,7 @@ namespace System
 
         public float DistanceTo(Vector3 v) { Vector3 v1 = this - v; return Vector3.Dot(v1, v1); }
         public static Vector3 Lerp(Vector3 v1, Vector3 v2, float median) { return (v1 * (1.0f - median)) + (v2 * median); }
-        public static Vector3 Floor(Vector3 v) { return new Vector3(v._x.ToInt32(), v._y.ToInt32(), v._z.ToInt32()); }
+        public static Vector3 Floor(Vector3 v) { return new Vector3((int)v._x, (int)v._y, (int)v._z); }
 
         public static Vector3 Truncate(Vector3 v)
         {

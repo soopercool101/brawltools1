@@ -76,7 +76,9 @@ namespace BrawlLib.SSBB.ResourceNodes
         TEX0 = 0x0304,
         PLT0 = 0x0305,
         MDL0 = 0x0306,
+
         CHR0 = 0x030E,
+        CHR0Entry = 0x0E00,
 
         MDL0Group = 0x0601,
 
@@ -759,6 +761,32 @@ namespace BrawlLib.SSBB.ResourceNodes
                 list.Add(this);
             foreach (ResourceNode n in Children)
                 n.EnumTypeInternal(list, type);
+        }
+
+        public unsafe string FindName()
+        {
+            int index = 0;
+            string name = "NewNode00";
+            fixed (char* cPtr = name)
+            {
+            Top:
+                index++;
+                cPtr[7] = (char)((index / 10) | 0x30);
+                cPtr[8] = (char)((index % 10) | 0x30);
+
+                foreach (ResourceNode node in Children)
+                {
+                    if (node.Name == name)
+                        goto Top;
+                }
+
+                return new String(cPtr);
+            }
+        }
+
+        public override string ToString()
+        {
+            return _name;
         }
     }
 }
