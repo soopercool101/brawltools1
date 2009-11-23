@@ -85,15 +85,20 @@ namespace System.Drawing
             {
                 switch (mode)
                 {
-                    case QuantizationAlgorithm.NeuQuant:
-                        {
-                            break;
-                        }
+                    //case QuantizationAlgorithm.NeuQuant:
+                    //    {
+                    //        break;
+                    //    }
                     case QuantizationAlgorithm.WeightedAverage:
                         {
                             pal = WeightedAverage.Process(bmp, numColors);
                             break;
                         }
+                    //case QuantizationAlgorithm.GravityMap:
+                    //    {
+                    //        pal = GravityMap.Quantize(bmp, numColors);
+                    //        break;
+                    //    }
                 }
             }
             return pal;
@@ -283,7 +288,8 @@ namespace System.Drawing
     }
     public enum QuantizationAlgorithm
     {
-        NeuQuant,
+        //NeuQuant,
+        //GravityMap,
         WeightedAverage
     }
 }

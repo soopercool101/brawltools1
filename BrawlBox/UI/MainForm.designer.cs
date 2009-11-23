@@ -29,10 +29,9 @@ namespace BrawlBox
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.imageList1 = new System.Windows.Forms.ImageList();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.resourceTree = new BrawlBox.ResourceTree();
@@ -57,6 +56,7 @@ namespace BrawlBox
             this.msBinEditor1 = new System.Windows.Forms.MSBinEditor();
             this.animEditControl = new System.Windows.Forms.AnimEditControl();
             this.previewPanel1 = new System.Windows.Forms.GoodPictureBox();
+            this.bRStmAudioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -154,7 +154,8 @@ namespace BrawlBox
             // 
             this.newToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.aRCArchiveToolStripMenuItem,
-            this.brresPackToolStripMenuItem});
+            this.brresPackToolStripMenuItem,
+            this.bRStmAudioToolStripMenuItem});
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
             this.newToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.newToolStripMenuItem.Text = "&New";
@@ -162,14 +163,14 @@ namespace BrawlBox
             // aRCArchiveToolStripMenuItem
             // 
             this.aRCArchiveToolStripMenuItem.Name = "aRCArchiveToolStripMenuItem";
-            this.aRCArchiveToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.aRCArchiveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aRCArchiveToolStripMenuItem.Text = "ARC Archive";
             this.aRCArchiveToolStripMenuItem.Click += new System.EventHandler(this.aRCArchiveToolStripMenuItem_Click);
             // 
             // brresPackToolStripMenuItem
             // 
             this.brresPackToolStripMenuItem.Name = "brresPackToolStripMenuItem";
-            this.brresPackToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.brresPackToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.brresPackToolStripMenuItem.Text = "Brres Pack";
             this.brresPackToolStripMenuItem.Click += new System.EventHandler(this.brresPackToolStripMenuItem_Click);
             // 
@@ -237,7 +238,7 @@ namespace BrawlBox
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.settingsToolStripMenuItem.Text = "&Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click_1);
             // 
@@ -310,6 +311,13 @@ namespace BrawlBox
             this.previewPanel1.Size = new System.Drawing.Size(98, 86);
             this.previewPanel1.TabIndex = 0;
             // 
+            // bRStmAudioToolStripMenuItem
+            // 
+            this.bRStmAudioToolStripMenuItem.Name = "bRStmAudioToolStripMenuItem";
+            this.bRStmAudioToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.bRStmAudioToolStripMenuItem.Text = "BRStm Audio";
+            this.bRStmAudioToolStripMenuItem.Click += new System.EventHandler(this.bRStmAudioToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AllowDrop = true;
@@ -360,6 +368,7 @@ namespace BrawlBox
         private ToolStripMenuItem settingsToolStripMenuItem;
         private AnimEditControl animEditControl;
         private MSBinEditor msBinEditor1;
+        private ToolStripMenuItem bRStmAudioToolStripMenuItem;
     }
 }
 

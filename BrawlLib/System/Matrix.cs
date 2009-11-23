@@ -35,12 +35,11 @@ namespace System
         }
         public static Matrix TranslationMatrix(float x, float y, float z)
         {
-            Matrix m = new Matrix();
+            Matrix m = Identity;
             float* p = (float*)&m;
             p[12] = x;
             p[13] = y;
             p[14] = z;
-            p[0] = p[5] = p[10] = p[15] = 1.0f;
             return m;
         }
         public static Matrix RotationMatrix(float x, float y, float z)
@@ -55,29 +54,6 @@ namespace System
             Matrix m = Identity;
             float* p = (float*)&m;
 
-            //p[5] = cosx;
-            //p[6] = sinx;
-            //p[9] = -sinx;
-            //p[10] = cosx;
-
-            //Matrix m2 = Identity;
-            //float* p2 = (float*)&m2;
-            //p2[0] = cosy;
-            //p2[2] = -siny;
-            //p2[8] = siny;
-            //p2[10] = cosy;
-
-            //Matrix m3 = Identity;
-            //float* p3 = (float*)&m3;
-            //p3[0] = cosz;
-            //p3[1] = -sinz;
-            //p3[4] = sinz;
-            //p3[5] = cosz;
-
-            //m.Multiply(&m2);
-            //m.Multiply(&m3);
-
-
             m[0] = cosy * cosz;
             m[4] = cosy * sinz;
             m[8] = -siny;
@@ -89,24 +65,18 @@ namespace System
             m[10] = cosx * cosy;
             p[15] = 1.0f;
 
-            //p[0] = cosy * cosz;
-            //p[1] = (sinx * siny * cosz) - (cosx * sinz);
-            //p[2] = (cosx * siny * cosz) + (sinx * sinz);
-            //p[4] = cosy * sinz;
-            //p[5] = (sinx * siny * sinz) + (cosx * cosz);
-            //p[6] = (cosx * siny * sinz) - (sinx * cosz);
-            //p[8] = -siny;
-            //p[9] = sinx * cosy;
-            //p[10] = cosx * cosy;
-            //p[15] = 1.0f;
-
             return m;
         }
 
         public void Translate(float x, float y, float z)
         {
-            Matrix m = TranslationMatrix(x, y, z);
-            Multiply(&m);
+            fixed (float* p = _values)
+            {
+                p[12] += (p[0] * x) + (p[4] * y) + (p[8] * z);
+                p[13] += (p[1] * x) + (p[5] * y) + (p[9] * z);
+                p[14] += (p[2] * x) + (p[6] * y) + (p[10] * z);
+                p[15] += (p[3] * x) + (p[7] * y) + (p[11] * z);
+            }
         }
 
         public void Multiply(Matrix* m)
@@ -153,8 +123,8 @@ namespace System
 
         public static Matrix operator *(Matrix m1, Matrix m2)
         {
-            Matrix dm = new Matrix();
-            float* s1 = (float*)&m1, s2 = (float*)&m2, d = (float*)&dm;
+            Matrix dm;
+            float* s1 = (float*)&m2, s2 = (float*)&m1, d = (float*)&dm;
 
             int index = 0;
             float val;
@@ -170,22 +140,218 @@ namespace System
             return dm;
         }
 
+        public static Matrix operator +(Matrix m1, Matrix m2)
+        {
+            float* dPtr = (float*)&m1;
+            float* sPtr = (float*)&m2;
+            for (int i = 0; i < 16; i++)
+                *dPtr++ += *sPtr++;
+            return m1;
+        }
+        public static Matrix operator *(Matrix m, float f)
+        {
+            float* p = (float*)&m;
+            for (int i = 0; i < 16; i++)
+                *p++ *= f;
+            return m;
+        }
+
         public override string ToString()
         {
             return String.Format("({0},{1},{2},{3})({4},{5},{6},{7})({8},{9},{10},{11})({12},{13},{14},{15})", this[0], this[1], this[2], this[3], this[4], this[5], this[6], this[7], this[8], this[9], this[10], this[11], this[12], this[13], this[14], this[15]);
         }
 
 
-        internal void Rotate(float x, float y, float z)
+        public void RotateX(float x)
         {
-            Matrix m = RotationMatrix(x, y, z);
-            this.Multiply(&m);
+            float var1, var2;
+            float cosx = (float)Math.Cos(x / 180.0f * Math.PI);
+            float sinx = (float)Math.Sin(x / 180.0f * Math.PI);
+
+            fixed (float* p = _values)
+            {
+                var1 = p[4]; var2 = p[8];
+                p[4] = (var1 * cosx) + (var2 * sinx);
+                p[8] = (var1 * -sinx) + (var2 * cosx);
+
+                var1 = p[5]; var2 = p[9];
+                p[5] = (var1 * cosx) + (var2 * sinx);
+                p[9] = (var1 * -sinx) + (var2 * cosx);
+
+                var1 = p[6]; var2 = p[10];
+                p[6] = (var1 * cosx) + (var2 * sinx);
+                p[10] = (var1 * -sinx) + (var2 * cosx);
+            }
+        }
+        public void RotateY(float y)
+        {
+            float var1, var2;
+            float cosy = (float)Math.Cos(y / 180.0f * Math.PI);
+            float siny = (float)Math.Sin(y / 180.0f * Math.PI);
+
+            fixed (float* p = _values)
+            {
+                var1 = p[0]; var2 = p[8];
+                p[0] = (var1 * cosy) + (var2 * -siny);
+                p[8] = (var1 * siny) + (var2 * cosy);
+
+                var1 = p[1]; var2 = p[9];
+                p[1] = (var1 * cosy) + (var2 * -siny);
+                p[9] = (var1 * siny) + (var2 * cosy);
+
+                var1 = p[2]; var2 = p[10];
+                p[2] = (var1 * cosy) + (var2 * -siny);
+                p[10] = (var1 * siny) + (var2 * cosy);
+            }
+        }
+        public void RotateZ(float z)
+        {
+            float var1, var2;
+            float cosz = (float)Math.Cos(z / 180.0f * Math.PI);
+            float sinz = (float)Math.Sin(z / 180.0f * Math.PI);
+
+            fixed (float* p = _values)
+            {
+                var1 = p[0]; var2 = p[4];
+                p[0] = (var1 * cosz) + (var2 * sinz);
+                p[4] = (var1 * -sinz) + (var2 * cosz);
+
+                var1 = p[1]; var2 = p[5];
+                p[1] = (var1 * cosz) + (var2 * sinz);
+                p[5] = (var1 * -sinz) + (var2 * cosz);
+
+                var1 = p[2]; var2 = p[6];
+                p[2] = (var1 * cosz) + (var2 * sinz);
+                p[6] = (var1 * -sinz) + (var2 * cosz);
+            }
         }
 
         internal void Scale(float x, float y, float z)
         {
             Matrix m = ScaleMatrix(x, y, z);
             this.Multiply(&m);
+        }
+
+        public static explicit operator Matrix(Matrix43 m)
+        {
+            Matrix m1;
+            float* sPtr = (float*)&m;
+            float* dPtr = (float*)&m1;
+
+            dPtr[0] = sPtr[0];
+            dPtr[1] = sPtr[4];
+            dPtr[2] = sPtr[8];
+            dPtr[3] = 0.0f;
+            dPtr[4] = sPtr[1];
+            dPtr[5] = sPtr[5];
+            dPtr[6] = sPtr[9];
+            dPtr[7] = 0.0f;
+            dPtr[8] = sPtr[2];
+            dPtr[9] = sPtr[6];
+            dPtr[10] = sPtr[10];
+            dPtr[11] = 0.0f;
+            dPtr[12] = sPtr[3];
+            dPtr[13] = sPtr[7];
+            dPtr[14] = sPtr[11];
+            dPtr[15] = 1.0f;
+
+            return m1;
+        }
+        public static explicit operator Matrix43(Matrix m)
+        {
+            Matrix43 m1;
+            float* sPtr = (float*)&m;
+            float* dPtr = (float*)&m1;
+
+            dPtr[0] = sPtr[0];
+            dPtr[1] = sPtr[4];
+            dPtr[2] = sPtr[8];
+            dPtr[3] = sPtr[12];
+            dPtr[4] = sPtr[1];
+            dPtr[5] = sPtr[5];
+            dPtr[6] = sPtr[9];
+            dPtr[7] = sPtr[13];
+            dPtr[8] = sPtr[2];
+            dPtr[9] = sPtr[6];
+            dPtr[10] = sPtr[10];
+            dPtr[11] = sPtr[14];
+
+            return m1;
+        }
+
+        public static Matrix TransformMatrix(Vector3 scale, Vector3 rotate, Vector3 translate)
+        {
+            Matrix m;
+            float* d = (float*)&m;
+
+            float cosx = (float)Math.Cos(rotate._x / 180.0f * Math.PI);
+            float sinx = (float)Math.Sin(rotate._x / 180.0f * Math.PI);
+            float cosy = (float)Math.Cos(rotate._y / 180.0f * Math.PI);
+            float siny = (float)Math.Sin(rotate._y / 180.0f * Math.PI);
+            float cosz = (float)Math.Cos(rotate._z / 180.0f * Math.PI);
+            float sinz = (float)Math.Sin(rotate._z / 180.0f * Math.PI);
+
+            d[0] = scale._x * cosy * cosz;
+            d[1] = scale._x * sinz * cosy;
+            d[2] = -scale._x * siny;
+            d[3] = 0.0f;
+            d[4] = scale._y * (sinx * cosz * siny - cosx * sinz);
+            d[5] = scale._y * (sinx * sinz * siny + cosz * cosx);
+            d[6] = scale._y * sinx * cosy;
+            d[7] = 0.0f;
+            d[8] = scale._z * (sinx * sinz + cosx * cosz * siny);
+            d[9] = scale._z * (cosx * sinz * siny - sinx * cosz);
+            d[10] = scale._z * cosx * cosy;
+            d[11] = 0.0f;
+            d[12] = translate._x;
+            d[13] = translate._y;
+            d[14] = translate._z;
+            d[15] = 1.0f;
+
+            return m;
+        }
+
+        public static Matrix ReverseTransformMatrix(Vector3 scale, Vector3 rotation, Vector3 translation)
+        {
+            float cosx = (float)Math.Cos(rotation._x / 180.0 * Math.PI);
+            float sinx = (float)Math.Sin(rotation._x / 180.0 * Math.PI);
+            float cosy = (float)Math.Cos(rotation._y / 180.0 * Math.PI);
+            float siny = (float)Math.Sin(rotation._y / 180.0 * Math.PI);
+            float cosz = (float)Math.Cos(rotation._z / 180.0 * Math.PI);
+            float sinz = (float)Math.Sin(rotation._z / 180.0 * Math.PI);
+
+            scale._x = 1 / scale._x;
+            scale._y = 1 / scale._y;
+            scale._z = 1 / scale._z;
+            translation._x = -translation._x;
+            translation._y = -translation._y;
+            translation._z = -translation._z;
+
+            Matrix m;
+            float* p = (float*)&m;
+
+            p[0] = scale._x * cosy * cosz;
+            p[1] = scale._y * (sinx * siny * cosz - cosx * sinz);
+            p[2] = scale._z * (cosx * siny * cosz + sinx * sinz);
+            p[3] = 0.0f;
+
+
+            p[4] = scale._x * cosy * sinz;
+            p[5] = scale._y * (sinx * siny * sinz + cosx * cosz);
+            p[6] = scale._z * (cosx * siny * sinz - sinx * cosz);
+            p[7] = 0.0f;
+
+            p[8] = -scale._x * siny;
+            p[9] = scale._y * sinx * cosy;
+            p[10] = scale._z * cosx * cosy;
+            p[11] = 0.0f;
+
+            p[12] = (translation._x * p[0]) + (translation._y * p[4]) + (translation._z * p[8]);
+            p[13] = (translation._x * p[1]) + (translation._y * p[5]) + (translation._z * p[9]);
+            p[14] = (translation._x * p[2]) + (translation._y * p[6]) + (translation._z * p[10]);
+            p[15] = 1.0f;
+
+            return m;
         }
     }
 }

@@ -8,6 +8,22 @@ namespace BrawlLib.OpenGL
 {
     public unsafe abstract class GLContext : IDisposable
     {
+        internal Dictionary<string, object> _states = new Dictionary<string, object>();
+
+        public void Unbind()
+        {
+            Capture();
+            foreach (object o in _states.Values)
+            {
+                if (o is GLDisplayList)
+                    glDeleteList(o as GLDisplayList);
+                else if (o is GLTexture)
+                    glDeleteTexture(o as GLTexture);
+            }
+            _states.Clear();
+            Release();
+        }
+
         public virtual void Dispose() { }
 
         public static GLContext Attach(Control target)
@@ -22,7 +38,7 @@ namespace BrawlLib.OpenGL
         public void CheckErrors()
         {
             GLErrorCode code;
-            if((code = glGetError()) == GLErrorCode.NO_ERROR)
+            if ((code = glGetError()) == GLErrorCode.NO_ERROR)
                 return;
 
             throw new Exception(code.ToString());
@@ -41,6 +57,7 @@ namespace BrawlLib.OpenGL
         internal abstract void glBindTexture(GLTextureTarget target, uint texture);
         internal abstract void glBitmap(int width, int height, float xorig, float yorig, float xmove, float ymove, byte* bitmap);
         internal abstract void glBlendFunc(GLBlendFactor sfactor, GLBlendFactor dfactor);
+        internal void glCallList(GLDisplayList list) { glCallList(list._id); }
         internal abstract void glCallList(uint list);
         internal abstract void glCallLists(int n, uint type, void* lists);
         internal abstract void glClear(GLClearMask mask);
@@ -93,7 +110,7 @@ namespace BrawlLib.OpenGL
 
         internal abstract void glColorMask(bool red, bool green, bool blue, bool alpha);
         internal abstract void glColorMaterial(GLFace face, GLMaterialParameter mode);
-        internal abstract void glColorPointer(int size, uint type, int stride, void* pointer);
+        internal abstract void glColorPointer(int size, GLDataType type, int stride, void* pointer);
         internal abstract void glCopyPixels(int x, int y, int width, int height, uint type);
 
         #region CopyTex
@@ -110,22 +127,24 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         internal abstract ?? glDebugEntry(??);
          * */
+        public void glDeleteList(GLDisplayList list) { glDeleteLists(list._id, 1); list._id = 0; }
         internal abstract void glDeleteLists(uint list, int range);
+        internal void glDeleteTexture(GLTexture texture) { uint id = texture._id; glDeleteTextures(1, &id); texture._id = 0; }
         internal abstract void glDeleteTextures(int num, uint* textures);
         internal abstract void glDepthFunc(GLFunction func);
         internal abstract void glDepthMask(bool flag);
         internal abstract void glDepthRange(double near, double far);
         internal abstract void glDisable(uint cap);
-        internal abstract void glDisableClientState(uint cap);
-        internal abstract void glDrawArrays(uint mode, int first, int count);
+        internal abstract void glDisableClientState(GLArrayType cap);
+        internal abstract void glDrawArrays(GLPrimitiveType mode, int first, int count);
         internal abstract void glDrawBuffer(uint mode);
-        internal abstract void glDrawElements(uint mode, int count, uint type, void* indices);
+        internal abstract void glDrawElements(GLPrimitiveType mode, int count, GLElementType type, void* indices);
         internal abstract void glDrawPixels(int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
         internal abstract void glEdgeFlag(bool flag);
         internal abstract void glEdgeFlagPointer(int stride, bool* pointer);
         internal abstract void glEdgeFlagv(bool* flag);
         internal abstract void glEnable(GLEnableCap cap);
-        internal abstract void glEnableClientState(uint cap);
+        internal abstract void glEnableClientState(GLArrayType cap);
         internal abstract void glEnd();
         internal abstract void glEndList();
 
@@ -329,7 +348,7 @@ namespace BrawlLib.OpenGL
         internal abstract void glMultMatrix(double* m);
         internal abstract void glMultMatrix(float* m);
 
-        internal abstract void glNewList(uint list, uint mode);
+        internal abstract void glNewList(uint list, GLListMode mode);
 
         #region glNormal
 
@@ -347,7 +366,7 @@ namespace BrawlLib.OpenGL
 
         #endregion
 
-        internal abstract void glNormalPointer(uint type, int stride, void* pointer);
+        internal abstract void glNormalPointer(GLDataType type, int stride, void* pointer);
 
         internal abstract void glOrtho(double left, double right, double bottom, double top, double near, double far);
         internal abstract void glPassThrough(float token);
@@ -490,7 +509,7 @@ namespace BrawlLib.OpenGL
 
         #endregion
 
-        internal abstract void glTexCoordPointer(int size, uint type, int stride, void* pointer);
+        internal abstract void glTexCoordPointer(int size, GLDataType type, int stride, void* pointer);
 
         internal abstract void glTexEnv(GLTexEnvTarget target, GLTexEnvParam pname, float param);
         internal abstract void glTexEnv(GLTexEnvTarget target, GLTexEnvParam pname, int param);
@@ -560,10 +579,18 @@ namespace BrawlLib.OpenGL
 
         #endregion
 
-        internal abstract void glVertexPointer(int size, uint type, int stride, void* pointer);
+        internal abstract void glVertexPointer(int size, GLDataType type, int stride, void* pointer);
         internal abstract void glViewport(int x, int y, int width, int height);
 
         internal abstract int gluBuild2DMipmaps(GLTextureTarget target, GLInternalPixelFormat internalFormat, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* data);
+        internal abstract void gluDeleteQuadric(int quad);
+        internal abstract int gluNewQuadric();
+
         internal abstract void gluPerspective(double fovy, double aspect, double zNear, double zFar);
+
+        internal abstract void gluSphere(int quad, double radius, int slices, int stacks);
+
+        internal abstract void gluQuadricDrawStyle(int quad, GLUQuadricDrawStyle draw);
+        internal abstract void gluLookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ);
     }
 }

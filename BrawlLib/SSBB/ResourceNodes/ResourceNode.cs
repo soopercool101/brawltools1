@@ -784,6 +784,23 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
         }
 
+        public ResourceNode FindEmbeddedIndex(int index)
+        {
+            int count = -1;
+            return FindEmbeddedInternal(this, index, ref count);
+        }
+        private static ResourceNode FindEmbeddedInternal(ResourceNode node, int index, ref int count)
+        {
+            if (count++ >= index)
+                return node;
+
+            foreach (ResourceNode n in node.Children)
+                if ((node = FindEmbeddedInternal(n, index, ref count)) != null)
+                    return node;
+
+            return null;
+        }
+
         public override string ToString()
         {
             return _name;

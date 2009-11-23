@@ -12,18 +12,28 @@ namespace BrawlLib.OpenGL
         internal protected GLContext _context;
         protected override void Dispose(bool disposing)
         {
+            DisposeContext();
+            base.Dispose(disposing);
+        }
+
+        private void DisposeContext()
+        {
             if (_context != null)
             {
+                _context.Unbind();
                 _context.Dispose();
                 _context = null;
             }
-            base.Dispose(disposing);
+        }
+
+        public GLPanel()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.Opaque, true);
+            SetStyle(ControlStyles.ResizeRedraw, false);
         }
 
         protected override void OnLoad(EventArgs e)
         {
-            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.Opaque, true);
-            SetStyle(ControlStyles.ResizeRedraw, false);
             _context = GLContext.Attach(this);
 
             _context.Capture();
@@ -67,6 +77,12 @@ namespace BrawlLib.OpenGL
             }
             else
                 base.OnResize(e);
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            DisposeContext();
+            base.OnHandleDestroyed(e);
         }
 
         internal protected virtual void OnInit()

@@ -1,6 +1,8 @@
 ﻿using System;
 using BrawlLib.SSBBTypes;
 using System.ComponentModel;
+using BrawlLib.Modeling;
+using BrawlLib.Wii.Models;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -38,6 +40,13 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Vertex Data")]
         public int Pad2 { get { return Header->_pad2; } }
 
+        private Vector3[] _vertices;
+        public Vector3[] Vertices
+        {
+            get { return _vertices == null ? _vertices = ModelConverter.ExtractVertices(Header) : _vertices; }
+            set { _vertices = value; SignalPropertyChange(); }
+        }
+
         protected override bool OnInitialize()
         {
             base.OnInitialize();
@@ -52,5 +61,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             MDL0UVData* header = (MDL0UVData*)dataAddress;
             header->ResourceStringAddress = stringTable[Name] + 4;
         }
+
+        //public VertexList GetVertices() { return new VertexList() { _name = Name, _vertices = ModelConverter.ExtractVertices(Header) }; }
     }
 }

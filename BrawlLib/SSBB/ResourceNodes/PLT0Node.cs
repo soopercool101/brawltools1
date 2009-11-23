@@ -11,7 +11,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         public override ResourceType ResourceType { get { return ResourceType.PLT0; } }
         internal PLT0* Header { get { return (PLT0*)WorkingUncompressed.Address; } }
 
-        public override int DataAlign { get { return 0x10; } }
+        public override int DataAlign { get { return 0x20; } }
 
         private int _numColors;
         private WiiPaletteFormat _format;

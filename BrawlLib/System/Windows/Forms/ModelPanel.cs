@@ -5,26 +5,25 @@ using System.Text;
 using BrawlLib.OpenGL;
 using System.ComponentModel;
 using System.Drawing;
+using BrawlLib.Modeling;
+using BrawlLib.SSBB.ResourceNodes;
 
 namespace System.Windows.Forms
 {
-    public class ModelPanel : GLPanel
+    public unsafe class ModelPanel : GLPanel
     {
-        private IContainer components;
-        private ModelContext _menu;
-
         private bool _grabbing = false;
         private int _lastX, _lastY;
 
-        private int _rotX, _rotY;
-        private float _rotFactor = 0.4f;
+        //private int _rotX, _rotY;
+        private float _rotFactor = 0.1f;
         public float RotationScale { get { return _rotFactor; } set { _rotFactor = value; } }
 
-        private int _transX, _transY;
+        //private int _transX, _transY;
         private float _transFactor = 0.05f;
         public float TranslationScale { get { return _transFactor; } set { _transFactor = value; } }
 
-        private int _zoom;
+        //private int _zoom;
         private float _zoomFactor = 2.5f;
         public float ZoomScale { get { return _zoomFactor; } set { _zoomFactor = value; } }
 
@@ -34,15 +33,29 @@ namespace System.Windows.Forms
         private int _yInit = -100;
         public int InitialYFactor { get { return _yInit; } set { _yInit = value; } }
 
-        private GLModel _model;
+        private Vector3 _eyePoint;
+        private Vector3 _viewPoint, _viewRot;
+        private float _viewDistance = 5.0f;
+        private Matrix43 _viewMatrix = Matrix43.Identity;
+        //private Matrix _vMatrix = Matrix.Identity;
+
+        private Matrix43 _transform = Matrix43.Identity, _inverseTransform;
+
+        private MDL0Node _model;
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public GLModel TargetModel
+        public MDL0Node TargetModel
         {
             get { return _model; }
-            set 
+            set
             {
-                if (_model != value) OnModelChanged(value);
-               
+                if (_model == value)
+                    return;
+
+                if (_context != null)
+                    _context.Unbind();
+
+                _model = value;
+                ResetCamera();
             }
         }
 
@@ -65,39 +78,19 @@ namespace System.Windows.Forms
             }
         }
 
-        private GLModel _currentModel;
-        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public GLModel CurrentModel
-        {
-            get { return _currentModel; }
-            set { if (_currentModel != value) OnModelChanged(_currentModel = value); }
-        }
+        //private Model _currentModel;
+        //[Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        //public Model CurrentModel
+        //{
+        //    get { return _currentModel; }
+        //    set { if (_currentModel != value) OnModelChanged(_currentModel = value); }
+        //}
 
         public ModelPanel()
         {
-            components = new Container();
-            ContextMenuStrip = _menu = new ModelContext(components);
             ColorChanged += OnBackColorChanged;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        private void OnModelChanged(GLModel model)
-        {
-            if (_model != null)
-                _model.Unbind(_context);
-
-            _menu.Model = _model = model;
-
-            ResetCamera();
-        }
         private void OnBackColorChanged(Color c) { this.BackColor = c; }
 
         private delegate void ColorChangeEvent(Color c);
@@ -118,35 +111,33 @@ namespace System.Windows.Forms
 
         public void ResetCamera()
         {
-            _rotX = _rotY = _transX =  0;
-            _transY = _yInit;
-            _zoom = _zoomInit;
+            _viewPoint = new Vector3();
+            _viewRot = new Vector3();
+
+            CalcMatrices();
 
             Invalidate();
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)
         {
-            int z = Math.Min(-1, _zoom + (e.Delta / 120));
-            if (z != _zoom)
-            {
-                _zoom = z;
-                this.Invalidate();
-            }
+            int z = e.Delta / 120;
+
+            Translate(0.0f, 0.0f, -z * _zoomFactor);
 
             base.OnMouseWheel(e);
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Right)
                 _grabbing = true;
 
             base.OnMouseDown(e);
         }
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Right)
                 _grabbing = false;
 
             base.OnMouseUp(e);
@@ -158,22 +149,99 @@ namespace System.Windows.Forms
             _lastX = e.X;
             _lastY = e.Y;
 
-            if (_grabbing)
+            lock(_context)
             {
-                if (ModifierKeys == Keys.Control)
+
+                if (_grabbing)
                 {
-                    _transX += xDiff;
-                    _transY += yDiff;
+                    if (ModifierKeys == Keys.Control)
+                        Rotate(yDiff * _rotFactor, -xDiff * _rotFactor);
+                    else
+                        Translate(-xDiff * _transFactor, -yDiff * _transFactor, 0.0f);
                 }
-                else
-                {
-                    _rotX -= yDiff;
-                    _rotY += xDiff;
-                }
-                this.Invalidate();
             }
 
             base.OnMouseMove(e);
+        }
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.NumPad8:
+                case Keys.Up:
+                    {
+                        if (e.Control)
+                            Rotate(-_rotFactor * 4, 0.0f);
+                        else
+                            Translate(0.0f, -_transFactor * 4, 0.0f);
+                        break;
+                    }
+                case Keys.NumPad2:
+                case Keys.Down:
+                    {
+                        if (e.Control)
+                            Rotate(_rotFactor * 4, 0.0f);
+                        else
+                            Translate(0.0f, _transFactor * 4, 0.0f);
+                        break;
+                    }
+                case Keys.NumPad6:
+                case Keys.Right:
+                    {
+                        if (e.Control)
+                            Rotate(0.0f, -_rotFactor * 4);
+                        else
+                            Translate(-_transFactor * 4, 0.0f, 0.0f);
+                        break;
+                    }
+                case Keys.NumPad4:
+                case Keys.Left:
+                    {
+                        if (e.Control)
+                            Rotate(0.0f, _rotFactor * 4);
+                        else
+                            Translate(_transFactor * 4, 0.0f, 0.0f);
+                        break;
+                    }
+                case Keys.Add:
+                case Keys.Oemplus:
+                    {
+                        Translate(0.0f, 0.0f, -_zoomFactor * 2);
+                        break;
+                    }
+                case Keys.Subtract:
+                case Keys.OemMinus:
+                    {
+                        Translate(0.0f, 0.0f, _zoomFactor * 2);
+                        break;
+                    }
+            }
+            base.OnKeyDown(e);
+        }
+
+        private void Translate(float x, float y, float z)
+        {
+            _viewPoint = _transform.Multiply(new Vector3(x, y, z));
+
+            CalcMatrices();
+            this.Invalidate();
+        }
+        private void Rotate(float x, float y)
+        {
+            _viewRot._x = Math.Max(Math.Min(89.0f, _viewRot._x + x), -89.0f);
+            _viewRot._y += y;
+
+            CalcMatrices();
+            this.Invalidate();
+        }
+
+        private void CalcMatrices()
+        {
+            _transform = Matrix43.TranslationMatrix(_viewPoint._x, _viewPoint._y, _viewPoint._z);
+            _transform.RotateY(_viewRot._y);
+            _transform.RotateX(_viewRot._x);
+
+            _eyePoint = _transform.Multiply(new Vector3(0.0f, 0.0f, _viewDistance));
         }
 
         private int _updateCounter = 0;
@@ -230,7 +298,6 @@ namespace System.Windows.Forms
             _context.glMaterial(GLFace.FrontAndBack, GLMaterialParameter.SPECULAR, pos);
 
             _context.glTexEnv(GLTexEnvTarget.TextureEnvironment, GLTexEnvParam.TEXTURE_ENV_MODE, (int)GLTexEnvMode.MODULATE);
-            //_context.glEnable(GLEnableCap.Lighting);
             _context.CheckErrors();
 
             OnResized();
@@ -249,15 +316,34 @@ namespace System.Windows.Forms
                 _context.glMatrixMode(GLMatrixMode.ModelView);
                 _context.glLoadIdentity();
 
-                _context.glTranslate(_transX * _transFactor, _transY * _transFactor, _zoom * _zoomFactor);
+                //_context.glBegin(GLPrimitiveType.Lines);
 
-                if (_rotX != 0)
-                    _context.glRotate(_rotX * _rotFactor, 1.0f, 0.0f, 0.0f);
-                if (_rotY != 0)
-                    _context.glRotate(_rotY * _rotFactor, 0.0f, 1.0f, 0.0f);
+                //_context.glColor(1.0f, 0.0f, 0.0f);
+                //_context.glVertex(_viewPoint._x - 1.0, _viewPoint._y, _viewPoint._z);
+                //_context.glVertex(_viewPoint._x + 1.0, _viewPoint._y, _viewPoint._z);
+                //_context.glVertex(_viewPoint._x, _viewPoint._y - 1.0, _viewPoint._z);
+                //_context.glVertex(_viewPoint._x, _viewPoint._y + 1.0, _viewPoint._z);
 
-                _context.CheckErrors();
+                //_context.glColor(0.0f, 1.0f, 0.0f);
+                //_context.glVertex(_eyePoint._x - 1.0, _eyePoint._y, _eyePoint._z);
+                //_context.glVertex(_eyePoint._x + 1.0, _eyePoint._y, _eyePoint._z);
+                //_context.glVertex(_eyePoint._x, _eyePoint._y - 1.0, _eyePoint._z);
+                //_context.glVertex(_eyePoint._x, _eyePoint._y + 1.0, _eyePoint._z);
 
+                //_context.glEnd();
+
+                //Matrix m = (Matrix)_transform;
+                //_context.glLoadMatrix((float*)&m);
+                //_context.glTranslate(0.0f, 0.0f, -50.0f);
+
+                //_context.glTranslate(_viewPoint._x, _viewPoint._y, _viewPoint._z);
+                //_context.glRotate(_viewRot._x, 1.0f, 0.0f, 0.0f);
+                //_context.glRotate(_viewRot._y, 0.0f, 1.0f, 0.0f);
+
+                //Matrix m2;
+                //_context.glGet(GLGetMode.MODELVIEW_MATRIX, (float*)&m2);
+
+                _context.gluLookAt(_eyePoint._x, _eyePoint._y, _eyePoint._z, _viewPoint._x, _viewPoint._y, _viewPoint._z, 0.0, 1.0, 0.0);
 
                 _model.Render(_context);
             }

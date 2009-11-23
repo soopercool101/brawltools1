@@ -10,7 +10,7 @@ namespace BrawlLib.OpenGL
         internal Matrix43 _matrix;
         //public int _index;
 
-        //internal GLModel _model;
+        internal GLModel _model;
         internal GLBone _bone;
         internal Dictionary<GLBone, float> _nodeLinks = new Dictionary<GLBone, float>();
 
@@ -52,8 +52,28 @@ namespace BrawlLib.OpenGL
 
         internal unsafe void Link(GLModel model, MDL0Node3Class def)
         {
+            //_model = model;
             foreach (MDL0NodeType3Entry e in def._entries)
                 _nodeLinks[model._nodes[e._id]._bone] = e._value;
+        }
+
+        internal unsafe void Render(GLContext ctx)
+        {
+            if ((_model == null) || (_model._nodeDL == 0))
+                return;
+
+            Matrix m = (Matrix)_matrix;
+
+            ctx.glPushMatrix();
+            ctx.glMultMatrix((float*)&m);
+
+            if (_bone != null)
+            {
+                ctx.glCallList((uint)_model._nodeDL);
+                _bone.Render(ctx);
+            }
+
+            ctx.glPopMatrix();
         }
     }
 }

@@ -10,6 +10,11 @@ namespace System
 
         internal fixed float _data[12];
 
+        public float this[int index]
+        {
+            get { fixed (float* p = _data) return p[index]; }
+            set { fixed (float* p = _data) *p = value; }
+        }
 
         public void Translate(float x, float y, float z)
         {
@@ -26,6 +31,19 @@ namespace System
         {
             Matrix43 m = ScaleMatrix(x, y, z);
             this.Multiply(&m);
+        }
+
+        public Matrix43 GetTranslation()
+        {
+            Matrix43 m = Identity;
+            float* p = (float*)&m;
+            fixed(float* s = _data)
+            {
+                p[3] = s[3];
+                p[7] = s[7];
+                p[11] = s[11];
+            }
+            return m;
         }
 
         public static Matrix43 ScaleMatrix(float x, float y, float z)
@@ -46,6 +64,141 @@ namespace System
             p[11] = z;
             p[0] = p[5] = p[10] = 1.0f;
             return m;
+        }
+
+        public static Matrix43 RotationMatrixX(float x)
+        {
+            Matrix43 m = new Matrix43();
+            float* p = (float*)&m;
+
+            float cosx = (float)Math.Cos(x / 180.0f * Math.PI);
+            float sinx = (float)Math.Sin(x / 180.0f * Math.PI);
+
+            p[0] = 1.0f;
+            p[5] = cosx;
+            p[6] = -sinx;
+            p[9] = sinx;
+            p[10] = cosx;
+
+            return m;
+        }
+        public static Matrix43 RotationMatrixRX(float x)
+        {
+            Matrix43 m = new Matrix43();
+            float* p = (float*)&m;
+
+            float cosx = (float)Math.Cos(x / 180.0f * Math.PI);
+            float sinx = (float)Math.Sin(x / 180.0f * Math.PI);
+
+            p[0] = 1.0f;
+            p[5] = cosx;
+            p[6] = sinx;
+            p[9] = -sinx;
+            p[10] = cosx;
+
+            return m;
+        }
+
+        public static Matrix43 RotationMatrixY(float y)
+        {
+            Matrix43 m = new Matrix43();
+            float* p = (float*)&m;
+
+            float cosy = (float)Math.Cos(y / 180.0f * Math.PI);
+            float siny = (float)Math.Sin(y / 180.0f * Math.PI);
+
+            p[5] = 1.0f;
+
+            p[0] = cosy;
+            p[2] = siny;
+            p[8] = -siny;
+            p[10] = cosy;
+
+            return m;
+        }
+
+        public static Matrix43 RotationMatrixRY(float y)
+        {
+            Matrix43 m = new Matrix43();
+            float* p = (float*)&m;
+
+            float cosy = (float)Math.Cos(y / 180.0f * Math.PI);
+            float siny = (float)Math.Sin(y / 180.0f * Math.PI);
+
+            p[5] = 1.0f;
+
+            p[0] = cosy;
+            p[2] = -siny;
+            p[8] = siny;
+            p[10] = cosy;
+
+            return m;
+        }
+
+        public void RotateX(float x)
+        {
+            float var1, var2;
+            float cosx = (float)Math.Cos(x / 180.0f * Math.PI);
+            float sinx = (float)Math.Sin(x / 180.0f * Math.PI);
+
+            fixed (float* p = _data)
+            {
+                var1 = p[1]; var2 = p[2];
+                p[1] = (var1 * cosx) + (var2 * sinx);
+                p[2] = (var1 * -sinx) + (var2 * cosx);
+
+                var1 = p[5]; var2 = p[6];
+                p[5] = (var1 * cosx) + (var2 * sinx);
+                p[6] = (var1 * -sinx) + (var2 * cosx);
+
+                var1 = p[9]; var2 = p[10];
+                p[9] = (var1 * cosx) + (var2 * sinx);
+                p[10] = (var1 * -sinx) + (var2 * cosx);
+            }
+        }
+
+        public void RotateY(float y)
+        {
+            float var1, var2;
+            float cosy = (float)Math.Cos(y / 180.0f * Math.PI);
+            float siny = (float)Math.Sin(y / 180.0f * Math.PI);
+
+            fixed (float* p = _data)
+            {
+                var1 = p[0]; var2 = p[2];
+                p[0] = (var1 * cosy) + (var2 * -siny);
+                p[2] = (var1 * siny) + (var2 * cosy);
+
+                var1 = p[4]; var2 = p[6];
+                p[4] = (var1 * cosy) + (var2 * -siny);
+                p[6] = (var1 * siny) + (var2 * cosy);
+
+                var1 = p[8]; var2 = p[10];
+                p[8] = (var1 * cosy) + (var2 * -siny);
+                p[10] = (var1 * siny) + (var2 * cosy);
+            }
+        }
+
+        public void RotateZ(float z)
+        {
+            float var1, var2;
+            float cosz = (float)Math.Cos(z / 180.0f * Math.PI);
+            float sinz = (float)Math.Sin(z / 180.0f * Math.PI);
+
+            fixed (float* p = _data)
+            {
+                var1 = p[0]; var2 = p[1];
+                p[0] = (var1 * cosz) + (var2 * sinz);
+                p[1] = (var1 * -sinz) + (var2 * cosz);
+
+                var1 = p[4]; var2 = p[5];
+                p[4] = (var1 * cosz) + (var2 * sinz);
+                p[5] = (var1 * -sinz) + (var2 * cosz);
+
+                var1 = p[8]; var2 = p[9];
+                p[8] = (var1 * cosz) + (var2 * sinz);
+                p[9] = (var1 * -sinz) + (var2 * cosz);
+            }
         }
 
         public static Matrix43 RotationMatrix(float x, float y, float z)
@@ -75,8 +228,8 @@ namespace System
             Matrix43 m3 = Identity;
             float* p3 = (float*)&m3;
             p3[0] = cosz;
-            p3[1] = sinz;
-            p3[4] = -sinz;
+            p3[1] = -sinz;
+            p3[4] = sinz;
             p3[5] = cosz;
 
             m.Multiply(&m2);
@@ -163,7 +316,7 @@ namespace System
         {
             Matrix43 m2 = this;
 
-            float* s1 = (float*)m, s2 = (float*)&m2;
+            float* s1 = (float*)&m2, s2 = (float*)m;
 
             fixed (float* p = _data)
             {
@@ -202,6 +355,13 @@ namespace System
                 for (int i = 0; i < 12; i++)
                     d[i] += s[i];
         }
+        public void Subtract(Matrix43* m)
+        {
+            float* s = (float*)m;
+            fixed (float* d = _data)
+                for (int i = 0; i < 12; i++)
+                    d[i] -= s[i];
+        }
 
         internal void Multiply(float v)
         {
@@ -210,6 +370,30 @@ namespace System
                 for (int i = 0; i < 12; i++)
                     p[i] *= v;
             }
+        }
+
+        public static Matrix43 operator *(Matrix43 m1, Matrix43 m2)
+        {
+            Matrix43 m;
+
+            float* s1 = (float*)&m1, s2 = (float*)&m2, p = (float*)&m;
+
+            int index = 0;
+            float val;
+            for (int b = 0; b < 12; b += 4)
+                for (int a = 0; a < 4; a++)
+                {
+                    val = 0.0f;
+                    for (int x = b, y = a; y < 12; y += 4)
+                        val += s1[x++] * s2[y];
+                    p[index++] = val;
+                }
+
+            p[3] += s1[3];
+            p[7] += s1[7];
+            p[11] += s1[11];
+
+            return m;
         }
 
         public static bool operator ==(Matrix43 m1, Matrix43 m2)

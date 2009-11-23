@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using BrawlLib.SSBBTypes;
+using BrawlLib.Wii.Models;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -43,6 +44,13 @@ namespace BrawlLib.SSBB.ResourceNodes
         public int Pad3 { get { return Header->_pad3; } }
         [Category("UV Data")]
         public int Pad4 { get { return Header->_pad4; } }
+
+        private Vector2[] _points;
+        public Vector2[] Points
+        {
+            get { return _points == null ? _points = ModelConverter.ExtractUVs(Header) : _points; }
+            set { _points = value; SignalPropertyChange(); }
+        }
 
         protected override bool OnInitialize()
         {

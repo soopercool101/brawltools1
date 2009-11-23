@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using BrawlLib.SSBBTypes;
+using BrawlLib.Wii.Models;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -29,6 +30,13 @@ namespace BrawlLib.SSBB.ResourceNodes
         public int EntryStride { get { return Header->_entryStride; } }
         [Category("Normal Data")]
         public short NumEntries { get { return Header->_numVertices; } }
+
+        private Vector3[] _normals;
+        public Vector3[] Normals
+        {
+            get { return _normals == null ? _normals = ModelConverter.ExtractNormals(Header) : _normals; }
+            set { _normals = value; SignalPropertyChange(); }
+        }
 
         protected override bool OnInitialize()
         {

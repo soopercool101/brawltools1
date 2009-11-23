@@ -7,74 +7,166 @@ using BrawlLib.SSBBTypes;
 using BrawlLib.Wii.Textures;
 using BrawlLib.Imaging;
 using System.Runtime.InteropServices;
+using BrawlLib.Modeling;
+using BrawlLib.SSBB.ResourceNodes;
 
 namespace BrawlLib.Wii.Models
 {
     public static unsafe class ModelConverter
     {
+        //public static Model Extract(MDL0Node node)
+        //{
+        //    ResourceNode n;
+        //    Model m = new Model();
 
-        public static GLPolygon ExtractPolygon(GLModel model, MDL0Polygon* polygon)
+        //    //Cache nodes
+        //    object[] nodeCache = new object[node.NumNodes];
+
+        //    //Extract bones
+        //    if ((n = node.FindChild("Bones", false)) != null)
+        //        foreach (MDL0BoneNode bone in n.Children)
+        //            m._bones.Add(ParseBone(bone, nodeCache));
+
+        //    //Extract polygons
+        //    //if ((n = node.FindChild("Polygons", false)) != null)
+        //    //    foreach (MDL0PolygonNode poly in n.Children)
+        //    //        m._polygons.Add(ParsePolygon(poly));
+
+
+
+        //    return m;
+        //}
+        //private static BoneNode ParseBone(MDL0BoneNode node, object[] cache)
+        //{
+        //    BoneNode bone = new BoneNode();
+        //    bone._name = node._name;
+        //    bone.BaseTransform = new FrameState(node.Scale, node.Rotation, node.Translation);
+
+        //    cache[node.NodeId] = bone;
+
+        //    foreach (MDL0BoneNode n in node.Children)
+        //        bone._children.Add(ParseBone(n, cache));
+
+        //    return bone;
+        //}
+        //private static Polygon ParsePolygon(MDL0PolygonNode poly)
+        //{
+        //    Polygon p = new Polygon();
+        //    p._name = poly.Name;
+
+        //    //Extract raw data
+        //    MDL0VertexNode vNode = poly.GetVertexNode();
+        //    if(vNode != null)
+        //        p._vertices = vNode.GetVertices();
+
+        //    MDL0Polygon* polygon = poly.Header;
+        //    VoidPtr address = polygon->PrimitiveData;
+        //    ModelEntrySize e = new ModelEntrySize(polygon->_flags);
+
+        //    p._vertices = ExtractVertices(polygon->VertexData);
+        //    if (polygon->_normalId != -1)
+        //        p._normals = ExtractNormals(polygon->NormalData);
+        //    if (polygon->_colorId1 != -1)
+        //        p._colors1 = ExtractColors(polygon->ColorData1);
+        //    if (polygon->_colorId2 != -1)
+        //        p._colors2 = ExtractColors(polygon->ColorData2);
+
+        //    MDL0UVData* uvPtr;
+        //    for (int i = 0; (i < 8) && ((uvPtr = polygon->GetUVData(i)) != null); i++)
+        //        p._uvData[i] = ExtractUVs(uvPtr);
+
+        //    int nodeIndex = 0;
+        //    ushort[] nodeBuffer = new ushort[16];
+        //    while ((prim = ExtractPrimitive(ref address, e, p, nodeBuffer, ref nodeIndex)) != null)
+        //        p._primitives.Add(prim);
+
+        //    return p;
+        //}
+
+        //public static GLPolygon ExtractPolygon(GLModel model, MDL0Polygon* polygon)
+        //{
+        //    GLPolygon p = new GLPolygon();
+        //    GLPrimitive prim;
+        //    p._name = polygon->ResourceString;
+        //    p._model = model;
+        //    p._index = polygon->_index;
+        //    //p._nodeIndex = polygon->_nodeId;
+        //    if (polygon->_nodeId != -1)
+        //        p._node = model._nodes[polygon->_nodeId];
+
+        //    VoidPtr address = polygon->PrimitiveData;
+        //    ModelEntrySize e = new ModelEntrySize(polygon->_flags);
+
+        //    p._vertices = ExtractVertices(polygon->VertexData);
+        //    if(polygon->_normalId != -1)
+        //        p._normals = ExtractNormals(polygon->NormalData);
+        //    if (polygon->_colorId1 != -1)
+        //        p._colors1 = ExtractColors(polygon->ColorData1);
+        //    if (polygon->_colorId2 != -1)
+        //        p._colors2 = ExtractColors(polygon->ColorData2);
+
+        //    MDL0UVData* uvPtr;
+        //    for(int i = 0 ; (i < 8) && ((uvPtr = polygon->GetUVData(i)) != null) ; i++)
+        //        p._uvData[i] = ExtractUVs(uvPtr);
+
+        //    int nodeIndex = 0;
+        //    ushort[] nodeBuffer = new ushort[16];
+        //    while((prim = ExtractPrimitive(ref address, e, p, nodeBuffer,ref nodeIndex)) != null)
+        //        p._primitives.Add(prim);
+
+        //    return p;
+        //}
+
+        public static List<Primitive> ExtractPrimitives(MDL0Polygon* polygon)
         {
-            GLPolygon p = new GLPolygon();
-            GLPrimitive prim;
-            p._name = polygon->ResourceString;
-            p._model = model;
-            p._index = polygon->_index;
-            //p._nodeIndex = polygon->_nodeId;
-            if (polygon->_nodeId != -1)
-                p._node = model._nodes[polygon->_nodeId];
+            List<Primitive> list = new List<Primitive>();
 
-            VoidPtr address = polygon->PrimitiveData;
+            VoidPtr dataAddr = polygon->PrimitiveData;
             ModelEntrySize e = new ModelEntrySize(polygon->_flags);
-
-            p._vertices = ExtractVertices(polygon->VertexData);
-            if(polygon->_normalId != -1)
-                p._normals = ExtractNormals(polygon->NormalData);
-            if (polygon->_colorId1 != -1)
-                p._colors1 = ExtractColors(polygon->ColorData1);
-            if (polygon->_colorId2 != -1)
-                p._colors2 = ExtractColors(polygon->ColorData2);
-
-            MDL0UVData* uvPtr;
-            for(int i = 0 ; (i < 8) && ((uvPtr = polygon->GetUVData(i)) != null) ; i++)
-                p._uvData[i] = ExtractUVs(uvPtr);
 
             int nodeIndex = 0;
             ushort[] nodeBuffer = new ushort[16];
-            while((prim = ExtractPrimitive(ref address, e, p, nodeBuffer,ref nodeIndex)) != null)
-                p._primitives.Add(prim);
+            Primitive p;
 
-            return p;
+            while ((p = ExtractPrimitive(ref dataAddr, e, nodeBuffer, ref nodeIndex)) != null)
+                list.Add(p);
+
+            return list;
         }
 
-
-        private static VertexBuffer ExtractPoints(VoidPtr address, int count, WiiVertexComponentType type, float divisor)
+        private static Vector2[] ExtractPoints(VoidPtr address, int count, WiiVertexComponentType type, float divisor)
         {
-            VertexBuffer buffer = new VertexBuffer(count, false);
-            float* dPtr = (float*)buffer.Address;
+            Vector2[] points = new Vector2[count];
 
-            for (int i = 0; i < count; i++)
+            fixed (Vector2* p = points)
             {
-                *dPtr++ = ReadValue(ref address, type, divisor);
-                *dPtr++ = ReadValue(ref address, type, divisor);
-            }
-            return buffer;
-        }
-        private static VertexBuffer ExtractVertices(VoidPtr address, int count, bool isXYZ, WiiVertexComponentType type, float divisor)
-        {
-            VertexBuffer buffer = new VertexBuffer(count, true);
-            float* dPtr = (float*)buffer.Address;
-
-            for (int i = 0; i < count; i++)
-            {
-                *dPtr++ = ReadValue(ref address, type, divisor);
-                *dPtr++ = ReadValue(ref address, type, divisor);
-                if (isXYZ)
+                float* dPtr = (float*)p;
+                for (int i = 0; i < count; i++)
+                {
                     *dPtr++ = ReadValue(ref address, type, divisor);
-                else
-                    *dPtr++ = 0.0f;
+                    *dPtr++ = ReadValue(ref address, type, divisor);
+                }
             }
-            return buffer;
+            return points;
+        }
+        private static Vector3[] ExtractVertices(VoidPtr address, int count, bool isXYZ, WiiVertexComponentType type, float divisor)
+        {
+            Vector3[] verts = new Vector3[count];
+            fixed (Vector3* p = verts)
+            {
+                float* dPtr = (float*)p;
+                for (int i = 0; i < count; i++)
+                {
+                    *dPtr++ = ReadValue(ref address, type, divisor);
+                    *dPtr++ = ReadValue(ref address, type, divisor);
+                    if (isXYZ)
+                        *dPtr++ = ReadValue(ref address, type, divisor);
+                    else
+                        *dPtr++ = 0.0f;
+                }
+            }
+
+            return verts;
         }
         private static float ReadValue(ref VoidPtr addr, WiiVertexComponentType type, float divisor)
         {
@@ -89,70 +181,73 @@ namespace BrawlLib.Wii.Models
             return 0.0f;
         }
 
-        public static ColorBuffer ExtractColors(MDL0ColorData* colors)
+        public static ARGBPixel[] ExtractColors(MDL0ColorData* colors)
         {
             int count = colors->_numEntries;
+            ARGBPixel[] c = new ARGBPixel[count];
 
-            ColorBuffer buffer = new ColorBuffer(count);
-            ARGBPixel* dPtr = (ARGBPixel*)buffer.Address;
-
-            switch (colors->Type)
+            fixed (ARGBPixel* p = c)
             {
-                case WiiColorComponentType.RGB565:
-                    {
-                        wRGB565Pixel* sPtr = (wRGB565Pixel*)colors->Data;
-                        for (int i = 0; i < count; i++)
-                            *dPtr++ = (ARGBPixel)(*sPtr++);
-                        break;
-                    }
-                case WiiColorComponentType.RGB8:
-                    {
-                        wRGBPixel* sPtr = (wRGBPixel*)colors->Data;
-                        for (int i = 0; i < count; i++)
-                            *dPtr++ = (ARGBPixel)(*sPtr++);
-                        break;
-                    }
-                case WiiColorComponentType.RGBX8:
-                    {
-                        wRGBXPixel* sPtr = (wRGBXPixel*)colors->Data;
-                        for (int i = 0; i < count; i++)
-                            *dPtr++ = (ARGBPixel)(*sPtr++);
-                        break;
-                    }
-                case WiiColorComponentType.RGBA4:
-                    {
-                        wRGBA4Pixel* sPtr = (wRGBA4Pixel*)colors->Data;
-                        for (int i = 0; i < count; i++)
-                            *dPtr++ = (ARGBPixel)(*sPtr++);
-                        break;
-                    }
-                case WiiColorComponentType.RGBA6:
-                    {
-                        wRGBA6Pixel* sPtr = (wRGBA6Pixel*)colors->Data;
-                        for (int i = 0; i < count; i++)
-                            *dPtr++ = (ARGBPixel)(*sPtr++);
-                        break;
-                    }
-                case WiiColorComponentType.RGBA8:
-                    {
-                        wRGBAPixel* sPtr = (wRGBAPixel*)colors->Data;
-                        for (int i = 0; i < count; i++)
-                            *dPtr++ = (ARGBPixel)(*sPtr++);
-                        break;
-                    }
+                ARGBPixel* dPtr = p;
+
+                switch (colors->Type)
+                {
+                    case WiiColorComponentType.RGB565:
+                        {
+                            wRGB565Pixel* sPtr = (wRGB565Pixel*)colors->Data;
+                            for (int i = 0; i < count; i++)
+                                *dPtr++ = (ARGBPixel)(*sPtr++);
+                            break;
+                        }
+                    case WiiColorComponentType.RGB8:
+                        {
+                            wRGBPixel* sPtr = (wRGBPixel*)colors->Data;
+                            for (int i = 0; i < count; i++)
+                                *dPtr++ = (ARGBPixel)(*sPtr++);
+                            break;
+                        }
+                    case WiiColorComponentType.RGBX8:
+                        {
+                            wRGBXPixel* sPtr = (wRGBXPixel*)colors->Data;
+                            for (int i = 0; i < count; i++)
+                                *dPtr++ = (ARGBPixel)(*sPtr++);
+                            break;
+                        }
+                    case WiiColorComponentType.RGBA4:
+                        {
+                            wRGBA4Pixel* sPtr = (wRGBA4Pixel*)colors->Data;
+                            for (int i = 0; i < count; i++)
+                                *dPtr++ = (ARGBPixel)(*sPtr++);
+                            break;
+                        }
+                    case WiiColorComponentType.RGBA6:
+                        {
+                            wRGBA6Pixel* sPtr = (wRGBA6Pixel*)colors->Data;
+                            for (int i = 0; i < count; i++)
+                                *dPtr++ = (ARGBPixel)(*sPtr++);
+                            break;
+                        }
+                    case WiiColorComponentType.RGBA8:
+                        {
+                            wRGBAPixel* sPtr = (wRGBAPixel*)colors->Data;
+                            for (int i = 0; i < count; i++)
+                                *dPtr++ = (ARGBPixel)(*sPtr++);
+                            break;
+                        }
+                }
             }
-            return buffer;
+            return c;
         }
 
-        public static VertexBuffer ExtractVertices(MDL0VertexData* vertices)
+        public static Vector3[] ExtractVertices(MDL0VertexData* vertices)
         {
             return ExtractVertices(vertices->Data, vertices->_numVertices, vertices->_isXYZ != 0, vertices->Type, (float)(1 << vertices->_divisor));
         }
-        public static VertexBuffer ExtractNormals(MDL0NormalData* normals)
+        public static Vector3[] ExtractNormals(MDL0NormalData* normals)
         {
             return ExtractVertices(normals->Data, normals->_numVertices, true, normals->Type, (float)(1 << normals->_divisor));
         }
-        public static VertexBuffer ExtractUVs(MDL0UVData* uvs)
+        public static Vector2[] ExtractUVs(MDL0UVData* uvs)
         {
             return ExtractPoints(uvs->Entries, uvs->_numEntries, uvs->Type, (float)(1 << uvs->_divisor));
         }
@@ -160,7 +255,7 @@ namespace BrawlLib.Wii.Models
         private delegate ushort IndexParser(VoidPtr addr);
         private static IndexParser ByteParser = x => *(byte*)x;
         private static IndexParser UShortParser = x => *(bushort*)x;
-        public static GLPrimitive ExtractPrimitive(ref VoidPtr address, ModelEntrySize entryInfo, GLPolygon parent, ushort[] nodeBuffer,ref int nodeIndex)
+        private static Primitive ExtractPrimitive(ref VoidPtr address, ModelEntrySize entryInfo, ushort[] nodeBuffer,ref int nodeIndex)
         {
             Top:
             PrimitiveHeader* header = (PrimitiveHeader*)address;
@@ -190,17 +285,16 @@ namespace BrawlLib.Wii.Models
                 default: return null;
             }
 
-            GLPrimitive primitive = new GLPrimitive();
+            Primitive primitive = new Primitive();
             primitive._type = type;
-            primitive._elements = header->Entries;
-            primitive._parent = parent;
+            ;
 
-            int entries = primitive._elements;
+            int entries = primitive._elementCount = header->Entries;
             int stride = entryInfo._totalLen;
             VoidPtr data = header->Data;
 
             //Weight indices
-            primitive._nodeIndices = ParseWeights(data, entries, entryInfo._extraLen, stride, nodeBuffer);
+            primitive._weightIndices = ParseWeights(data, entries, entryInfo._extraLen, stride, nodeBuffer);
             data += entryInfo._extraLen;
 
             //Vertex Data

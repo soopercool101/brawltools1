@@ -31,12 +31,52 @@ namespace BrawlLib.Wii.Models
 
         public static implicit operator Matrix(bMatrix43 bm)
         {
-            Matrix m = new Matrix();
-            for (int x = 0, z = 0; x < 3; x++)
-                for (int y = 0; y < 4; )
-                    m[x, y++] = bm[z++];
-            m[15] = 1.0f;
+            Matrix m;
+
+            bfloat* sPtr = (bfloat*)&bm;
+            float* dPtr = (float*)&m;
+
+            dPtr[0] = sPtr[0];
+            dPtr[1] = sPtr[4];
+            dPtr[2] = sPtr[8];
+            dPtr[3] = 0.0f;
+            dPtr[4] = sPtr[1];
+            dPtr[5] = sPtr[5];
+            dPtr[6] = sPtr[9];
+            dPtr[7] = 0.0f;
+            dPtr[8] = sPtr[2];
+            dPtr[9] = sPtr[6];
+            dPtr[10] = sPtr[10];
+            dPtr[11] = 0.0f;
+            dPtr[12] = sPtr[3];
+            dPtr[13] = sPtr[7];
+            dPtr[14] = sPtr[11];
+            dPtr[15] = 1.0f;
+
             return m;
+        }
+
+        public static implicit operator bMatrix43(Matrix m)
+        {
+            bMatrix43 bm;
+
+            bfloat* dPtr = (bfloat*)&bm;
+            float* sPtr = (float*)&m;
+
+            dPtr[0] = sPtr[0];
+            dPtr[1] = sPtr[4];
+            dPtr[2] = sPtr[8];
+            dPtr[3] = sPtr[12];
+            dPtr[4] = sPtr[1];
+            dPtr[5] = sPtr[5];
+            dPtr[6] = sPtr[9];
+            dPtr[7] = sPtr[13];
+            dPtr[8] = sPtr[2];
+            dPtr[9] = sPtr[6];
+            dPtr[10] = sPtr[10];
+            dPtr[11] = sPtr[14];
+
+            return bm;
         }
 
         public static implicit operator Matrix43(bMatrix43 bm)

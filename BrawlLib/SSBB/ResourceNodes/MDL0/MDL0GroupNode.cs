@@ -37,6 +37,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         public override ResourceType ResourceType { get { return ResourceType.MDL0Group; } }
 
         internal int _index;
+        internal List<ResourceNode> _nodeCache;
 
         internal void GetStrings(StringTable table)
         {
@@ -110,7 +111,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                         bone._parent.Children.Add(bone);
                     }
                 }
-                _children.Clear();
+                _nodeCache = _children;
                 _children = _roots;
             }
             else if ((_index >= 9) || (_index == 0) || (_index == 7))

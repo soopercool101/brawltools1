@@ -163,7 +163,7 @@ namespace BrawlLib.Wii.Animations
                     }
                 case AnimDataFormat.F1F:
                     {
-                        float* sPtr = (float*)dataAddr;
+                        bfloat* sPtr = (bfloat*)dataAddr;
 
                         for (int i = 0; i < kf.Count; i++)
                             kf.SetKeyFrame(mode, i, *sPtr++);

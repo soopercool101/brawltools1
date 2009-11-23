@@ -11,11 +11,11 @@ namespace BrawlLib.OpenGL
         //Platform  
         [DllImport("opengl32.dll")]
         public static extern bool wglCopyContext(VoidPtr hglrcSrc, VoidPtr hglrcDst, uint mask);
-        [DllImport("opengl32.dll")]
+        [DllImport("opengl32.dll", SetLastError=true)]
         public static extern VoidPtr wglCreateContext(VoidPtr hdc);
         [DllImport("opengl32.dll")]
         public static extern VoidPtr wglCreateLayerContext(VoidPtr hdc, int layerPlane);
-        [DllImport("opengl32.dll")]
+        [DllImport("opengl32.dll", SetLastError=true)]
         public static extern bool wglDeleteContext(VoidPtr hglrc);
         [DllImport("opengl32.dll")]
         public static extern bool wglDescribeLayerPlane(VoidPtr hdc, int iPixelFormat, int iLayerPlane, uint nBytes, VoidPtr layerPlaneDescriptor);
@@ -33,7 +33,7 @@ namespace BrawlLib.OpenGL
         public static extern int wglGetPixelFormat(VoidPtr hdc);
         [DllImport("opengl32.dll", EntryPoint="wglGetProcAddress", CharSet= CharSet.Ansi)]
         public static extern VoidPtr wglGetProcAddress(string lpszProc);
-        [DllImport("opengl32.dll")]
+        [DllImport("opengl32.dll", SetLastError = true)]
         public static extern bool wglMakeCurrent(VoidPtr hdc, VoidPtr hglrc);
         [DllImport("opengl32.dll")]
         public static extern bool wglRealizeLayerPalette(VoidPtr hdc, int iLayerPlane, bool bRealize);
@@ -41,7 +41,7 @@ namespace BrawlLib.OpenGL
         public static extern int wglSetLayerPaletteEntries(VoidPtr hdc, int iLayerPlane, int iStart, int cEntries, VoidPtr colorRefArray);
         [DllImport("opengl32.dll")]
         public static extern bool wglShareLists(VoidPtr hglrc1, VoidPtr hglrc2);
-        [DllImport("opengl32.dll")]
+        [DllImport("opengl32.dll", SetLastError = true)]
         public static extern bool wglSwapBuffers(VoidPtr hdc);
         [DllImport("opengl32.dll")]
         public static extern bool wglSwapLayerBuffers(VoidPtr hdc, uint fuPlanes);
@@ -61,7 +61,7 @@ namespace BrawlLib.OpenGL
         [DllImport("gdi32.dll", SetLastError = true)]
         public static extern int DescribePixelFormat(VoidPtr hdc, int iPixelFormat, ushort nBytes, PixelFormatDescriptor* pfd);
         [DllImport("gdi32.dll", SetLastError = true)]
-        public static extern int SetPixelFormat(VoidPtr hdc, int iPixelFormat, PixelFormatDescriptor* pfd);
+        public static extern bool SetPixelFormat(VoidPtr hdc, int iPixelFormat, PixelFormatDescriptor* pfd);
 
         //OpenGL
         [DllImport("opengl32.dll")]
@@ -176,7 +176,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glColorMaterial(GLFace face, GLMaterialParameter mode);
         [DllImport("opengl32.dll")]
-        public static extern void glColorPointer(int size, uint type, int stride, void* pointer);
+        public static extern void glColorPointer(int size, GLDataType type, int stride, void* pointer);
         [DllImport("opengl32.dll")]
         public static extern void glCopyPixels(int x, int y, int width, int height, uint type);
 
@@ -212,13 +212,13 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glDisable(uint cap);
         [DllImport("opengl32.dll")]
-        public static extern void glDisableClientState(uint cap);
+        public static extern void glDisableClientState(GLArrayType cap);
         [DllImport("opengl32.dll")]
-        public static extern void glDrawArrays(uint mode, int first, int count);
+        public static extern void glDrawArrays(GLPrimitiveType mode, int first, int count);
         [DllImport("opengl32.dll")]
         public static extern void glDrawBuffer(uint mode);
         [DllImport("opengl32.dll")]
-        public static extern void glDrawElements(uint mode, int count, uint type, void* indices);
+        public static extern void glDrawElements(GLPrimitiveType mode, int count, GLElementType type, void* indices);
         [DllImport("opengl32.dll")]
         public static extern void glDrawPixels(int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
         [DllImport("opengl32.dll")]
@@ -230,7 +230,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glEnable(GLEnableCap cap);
         [DllImport("opengl32.dll")]
-        public static extern void glEnableClientState(uint cap);
+        public static extern void glEnableClientState(GLArrayType cap);
         [DllImport("opengl32.dll")]
         public static extern void glEnd();
         [DllImport("opengl32.dll")]
@@ -501,7 +501,7 @@ namespace BrawlLib.OpenGL
         public static extern void glMultMatrixf(float* m);
 
         [DllImport("opengl32.dll")]
-        public static extern void glNewList(uint list, uint mode);
+        public static extern void glNewList(uint list, GLListMode mode);
 
         #region glNormal
 
@@ -530,7 +530,7 @@ namespace BrawlLib.OpenGL
         #endregion
 
         [DllImport("opengl32.dll")]
-        public static extern void glNormalPointer(uint type, int stride, void* pointer);
+        public static extern void glNormalPointer(GLDataType type, int stride, void* pointer);
 
         [DllImport("opengl32.dll")]
         public static extern void glOrtho(double left, double right, double bottom, double top, double near, double far);
@@ -774,7 +774,7 @@ namespace BrawlLib.OpenGL
         #endregion
 
         [DllImport("opengl32.dll")]
-        public static extern void glTexCoordPointer(int size, uint type, int stride, void* pointer);
+        public static extern void glTexCoordPointer(int size, GLDataType type, int stride, void* pointer);
 
         [DllImport("opengl32.dll")]
         public static extern void glTexEnvf(GLTexEnvTarget target, GLTexEnvParam pname, float param);
@@ -890,14 +890,30 @@ namespace BrawlLib.OpenGL
         #endregion
 
         [DllImport("opengl32.dll")]
-        public static extern void glVertexPointer(int size, uint type, int stride, void* pointer);
+        public static extern void glVertexPointer(int size, GLDataType type, int stride, void* pointer);
         [DllImport("opengl32.dll")]
         public static extern void glViewport(int x, int y, int width, int height);
 
 
         [DllImport("Glu32.dll")]
         public static extern int gluBuild2DMipmaps(GLTextureTarget target, GLInternalPixelFormat internalFormat, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* data);
+
+        [DllImport("Glu32.dll")]
+        public static extern void gluDeleteQuadric(int quad);
+
+        [DllImport("Glu32.dll")]
+        public static extern int gluNewQuadric();
+
         [DllImport("Glu32.dll")]
         public static extern void gluPerspective(double fovy, double aspect, double zNear, double zFar);
+
+        [DllImport("Glu32.dll")]
+        public static extern void gluSphere(int quad, double radius, int slices, int stacks);
+
+        [DllImport("Glu32.dll")]
+        public static extern void gluQuadricDrawStyle(int quad, GLUQuadricDrawStyle draw);
+
+        [DllImport("Glu32.dll")]
+        public static extern void gluLookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ);
     }
 }

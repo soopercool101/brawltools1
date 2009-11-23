@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.ComponentModel;
 
 namespace BrawlLib.OpenGL
 {
@@ -16,7 +17,8 @@ namespace BrawlLib.OpenGL
             if (_hglrc)
             {
                 wGL.wglMakeCurrent(null, null);
-                wGL.wglDeleteContext(_hglrc);
+                if (!wGL.wglDeleteContext(_hglrc))
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
                 _hglrc = null;
             }
             if (_hdc)
@@ -33,26 +35,31 @@ namespace BrawlLib.OpenGL
 
             _hwnd = target.Handle;
             if (!(_hdc = Win32.GetDC(_hwnd)))
-                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                throw new Win32Exception(Marshal.GetLastWin32Error());
 
-            PixelFormatDescriptor pfd = new PixelFormatDescriptor(24, 16);
+            PixelFormatDescriptor pfd = new PixelFormatDescriptor(32, 32);
 
             int format = wGL.ChoosePixelFormat(_hdc, &pfd);
             if (format == 0)
-                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                throw new Win32Exception(Marshal.GetLastWin32Error());
 
-            //wGL.SetPixelFormat(_hdc, format, &pfd);
-            if (wGL.SetPixelFormat(_hdc, format, &pfd) == 0)
-                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+            if (wGL.DescribePixelFormat(_hdc, format, pfd.nSize, &pfd) == 0)
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+
+            if (!wGL.SetPixelFormat(_hdc, format, &pfd))
+                throw new Win32Exception(Marshal.GetLastWin32Error());
 
             if (!(_hglrc = wGL.wglCreateContext(_hdc)))
-                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                throw new Win32Exception(Marshal.GetLastWin32Error());
         }
 
         public override void Capture()
         {
             if (_hglrc)
-                wGL.wglMakeCurrent(_hdc, _hglrc);
+            {
+                if (!wGL.wglMakeCurrent(_hdc, _hglrc))
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
+            }
         }
         public override void Swap()
         {
@@ -61,15 +68,15 @@ namespace BrawlLib.OpenGL
         }
         public override void Release()
         {
-            //if (_hglrc)
-            //    wGL.wglMakeCurrent(null, null);
+            if (_hglrc)
+                wGL.wglMakeCurrent(null, null);
         }
 
         internal override void glAccum(GLAccumOp op, float value) { wGL.glAccum(op, value); }
 
         private delegate void ActiveTextureDelegate(GLMultiTextureTarget texture);
         private ActiveTextureDelegate _pActiveTexture;
-        internal override void glActiveTexture(GLMultiTextureTarget texture) 
+        internal override void glActiveTexture(GLMultiTextureTarget texture)
         {
             if (_pActiveTexture == null)
             {
@@ -134,7 +141,7 @@ namespace BrawlLib.OpenGL
 
         internal override void glColorMask(bool red, bool green, bool blue, bool alpha) { wGL.glColorMask(red, green, blue, alpha); }
         internal override void glColorMaterial(GLFace face, GLMaterialParameter mode) { wGL.glColorMaterial(face, mode); }
-        internal override void glColorPointer(int size, uint type, int stride, void* pointer) { wGL.glColorPointer(size, type, stride, pointer); }
+        internal override void glColorPointer(int size, GLDataType type, int stride, void* pointer) { wGL.glColorPointer(size, type, stride, pointer); }
 
         internal override void glCopyPixels(int x, int y, int width, int height, uint type) { wGL.glCopyPixels(x, y, width, height, type); }
         internal override void glCopyTexImage1D(GLTextureTarget target, int level, GLInternalPixelFormat internalFormat, int x, int y, int width, int border) { wGL.glCopyTexImage1D(target, level, internalFormat, x, y, width, border); }
@@ -144,10 +151,7 @@ namespace BrawlLib.OpenGL
 
         internal override void glCullFace(GLFace mode) { wGL.glCullFace(mode); }
 
-        internal override void glDeleteLists(uint list, int range)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glDeleteLists(uint list, int range) { wGL.glDeleteLists(list, range); }
 
         internal override void glDeleteTextures(int num, uint* textures) { wGL.glDeleteTextures(num, textures); }
 
@@ -163,29 +167,19 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glDisable(uint cap)        {            wGL.glDisable(cap);        }
+        internal override void glDisable(uint cap) { wGL.glDisable(cap); }
+        internal override void glDisableClientState(GLArrayType cap) { wGL.glDisableClientState(cap); }
 
-        internal override void glDisableClientState(uint cap)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void glDrawArrays(uint mode, int first, int count)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glDrawArrays(GLPrimitiveType mode, int first, int count) { wGL.glDrawArrays(mode, first, count); }
 
         internal override void glDrawBuffer(uint mode)
         {
             throw new NotImplementedException();
         }
 
-        internal override void glDrawElements(uint mode, int count, uint type, void* indices)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glDrawElements(GLPrimitiveType mode, int count, GLElementType type, void* indices) { wGL.glDrawElements(mode, count, type, indices); }
 
-        internal override void glDrawPixels(int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels)        {            wGL.glDrawPixels(width, height, format, type, pixels);        }
+        internal override void glDrawPixels(int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels) { wGL.glDrawPixels(width, height, format, type, pixels); }
 
         internal override void glEdgeFlag(bool flag)
         {
@@ -203,18 +197,11 @@ namespace BrawlLib.OpenGL
         }
 
         internal override void glEnable(GLEnableCap cap) { wGL.glEnable(cap); }
-
-        internal override void glEnableClientState(uint cap)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glEnableClientState(GLArrayType cap) { wGL.glEnableClientState(cap); }
 
         internal override void glEnd() { wGL.glEnd(); }
 
-        internal override void glEndList()
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glEndList() { wGL.glEndList(); }
 
         internal override void glEvalCoord(double u)
         {
@@ -305,17 +292,14 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glFrontFace(GLFrontFaceDirection mode)        {            wGL.glFrontFace(mode);        }
+        internal override void glFrontFace(GLFrontFaceDirection mode) { wGL.glFrontFace(mode); }
 
         internal override void glFrustum(double left, double right, double bottom, double top, double near, double far)
         {
             throw new NotImplementedException();
         }
 
-        internal override uint glGenLists(int range)
-        {
-            throw new NotImplementedException();
-        }
+        internal override uint glGenLists(int range) { return wGL.glGenLists(range); }
 
         internal override void glGenTextures(int num, uint* textures) { wGL.glGenTextures(num, textures); }
 
@@ -329,7 +313,7 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override GLErrorCode glGetError()        {            return wGL.glGetError();        }
+        internal override GLErrorCode glGetError() { return wGL.glGetError(); }
 
         internal override void glGetLight(uint light, uint pname, float* param)
         {
@@ -446,7 +430,7 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glHint(GLHintTarget target, GLHintMode mode)        {            wGL.glHint(target, mode);        }
+        internal override void glHint(GLHintTarget target, GLHintMode mode) { wGL.glHint(target, mode); }
 
         internal override void glIndex(double c)
         {
@@ -523,8 +507,8 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override bool glLight(GLLightTarget light, GLLightParameter pname, float param) {return wGL.glLightf(light, pname, param); }
-        internal override bool glLight(GLLightTarget light, GLLightParameter pname, int param){return wGL.glLighti(light, pname, param); }
+        internal override bool glLight(GLLightTarget light, GLLightParameter pname, float param) { return wGL.glLightf(light, pname, param); }
+        internal override bool glLight(GLLightTarget light, GLLightParameter pname, int param) { return wGL.glLighti(light, pname, param); }
         internal override bool glLight(GLLightTarget light, GLLightParameter pname, float* param) { return wGL.glLightfv(light, pname, param); }
         internal override bool glLight(GLLightTarget light, GLLightParameter pname, int* param) { return wGL.glLightiv(light, pname, param); }
 
@@ -607,10 +591,10 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glMaterial(GLFace face, GLMaterialParameter pname, float param)        {            wGL.glMaterialf(face, pname, param);        }
-        internal override void glMaterial(GLFace face, GLMaterialParameter pname, int param) {            wGL.glMateriali(face, pname, param);        }
-        internal override void glMaterial(GLFace face, GLMaterialParameter pname, float* param) {            wGL.glMaterialfv(face, pname, param);        }
-        internal override void glMaterial(GLFace face, GLMaterialParameter pname, int* param) {            wGL.glMaterialiv(face, pname, param);        }
+        internal override void glMaterial(GLFace face, GLMaterialParameter pname, float param) { wGL.glMaterialf(face, pname, param); }
+        internal override void glMaterial(GLFace face, GLMaterialParameter pname, int param) { wGL.glMateriali(face, pname, param); }
+        internal override void glMaterial(GLFace face, GLMaterialParameter pname, float* param) { wGL.glMaterialfv(face, pname, param); }
+        internal override void glMaterial(GLFace face, GLMaterialParameter pname, int* param) { wGL.glMaterialiv(face, pname, param); }
 
         internal override void glMatrixMode(GLMatrixMode mode) { wGL.glMatrixMode(mode); }
 
@@ -642,12 +626,12 @@ namespace BrawlLib.OpenGL
         //internal override void glMultiTexCoord1(GLMultiTextureTarget target, double* v) { wGL.glMultiTexCoord1dv(target, v); }
         //internal override void glMultiTexCoord2(GLMultiTextureTarget target, short* v) { wGL.glMultiTexCoord2sv(target, v); }
         //internal override void glMultiTexCoord2(GLMultiTextureTarget target, int* v) { wGL.glMultiTexCoord2iv(target, v); }
-        internal override void glMultiTexCoord2(GLMultiTextureTarget target, float* v) 
+        internal override void glMultiTexCoord2(GLMultiTextureTarget target, float* v)
         {
             if (_mtc2fv == null)
             {
                 VoidPtr ptr = wGL.wglGetProcAddress("glMultiTexCoord2fv");
-                if (ptr == null) 
+                if (ptr == null)
                     ptr = wGL.wglGetProcAddress("glMultiTexCoord2fvARB");
                 _mtc2fv = (MultiTexCoord2fvDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(MultiTexCoord2fvDelegate));
             }
@@ -667,10 +651,7 @@ namespace BrawlLib.OpenGL
 
         internal override void glMultMatrix(float* m) { wGL.glMultMatrixf(m); }
 
-        internal override void glNewList(uint list, uint mode)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glNewList(uint list, GLListMode mode) { wGL.glNewList(list, mode); }
 
         internal override void glNormal(sbyte nx, sbyte ny, sbyte nz) { wGL.glNormal3b(nx, ny, nz); }
         internal override void glNormal(double nx, double ny, double nz) { wGL.glNormal3d(nx, ny, nz); }
@@ -683,10 +664,7 @@ namespace BrawlLib.OpenGL
         internal override void glNormal(int* v) { wGL.glNormal3iv(v); }
         internal override void glNormal(short* v) { wGL.glNormal3sv(v); }
 
-        internal override void glNormalPointer(uint type, int stride, void* pointer)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glNormalPointer(GLDataType type, int stride, void* pointer) { wGL.glNormalPointer(type, stride, pointer); }
 
         internal override void glOrtho(double left, double right, double bottom, double top, double near, double far) { wGL.glOrtho(left, right, bottom, top, near, far); }
 
@@ -762,7 +740,7 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glPopMatrix()        {            wGL.glPopMatrix();        }
+        internal override void glPopMatrix() { wGL.glPopMatrix(); }
 
         internal override void glPopName()
         {
@@ -784,7 +762,7 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glPushMatrix()        {            wGL.glPushMatrix();        }
+        internal override void glPushMatrix() { wGL.glPushMatrix(); }
 
         internal override void glPushName(uint name)
         {
@@ -970,8 +948,8 @@ namespace BrawlLib.OpenGL
 
         internal override void glRotate(float angle, float x, float y, float z) { wGL.glRotatef(angle, x, y, z); }
 
-        internal override void glScale(double x, double y, double z)        {            wGL.glScaled(x, y, z);        }
-        internal override void glScale(float x, float y, float z)        {            wGL.glScalef(x, y, z);        }
+        internal override void glScale(double x, double y, double z) { wGL.glScaled(x, y, z); }
+        internal override void glScale(float x, float y, float z) { wGL.glScalef(x, y, z); }
 
         internal override void glScissor(int x, int y, int width, int height)
         {
@@ -983,7 +961,7 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glShadeModel(GLShadingModel mode)        {            wGL.glShadeModel(mode);        }
+        internal override void glShadeModel(GLShadingModel mode) { wGL.glShadeModel(mode); }
 
         internal override void glStencilFunc(uint func, int refval, uint mask)
         {
@@ -1033,10 +1011,7 @@ namespace BrawlLib.OpenGL
         internal override void glTexCoord4(int* v) { wGL.glTexCoord4iv(v); }
         internal override void glTexCoord4(short* v) { wGL.glTexCoord4sv(v); }
 
-        internal override void glTexCoordPointer(int size, uint type, int stride, void* pointer)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glTexCoordPointer(int size, GLDataType type, int stride, void* pointer) { wGL.glTexCoordPointer(size, type, stride, pointer); }
 
         internal override void glTexEnv(GLTexEnvTarget target, GLTexEnvParam pname, float param) { wGL.glTexEnvf(target, pname, param); }
         internal override void glTexEnv(GLTexEnvTarget target, GLTexEnvParam pname, int param) { wGL.glTexEnvi(target, pname, param); }
@@ -1073,9 +1048,9 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glTexImage1D(GLTexImageTarget target, int level, GLInternalPixelFormat internalFormat, int width, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels)        {            wGL.glTexImage1D(target, level, internalFormat, width, border, format, type, pixels);        }
+        internal override void glTexImage1D(GLTexImageTarget target, int level, GLInternalPixelFormat internalFormat, int width, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels) { wGL.glTexImage1D(target, level, internalFormat, width, border, format, type, pixels); }
 
-        internal override void glTexImage2D(GLTexImageTarget target, int level, GLInternalPixelFormat internalFormat, int width, int height, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels)        {            wGL.glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels);        }
+        internal override void glTexImage2D(GLTexImageTarget target, int level, GLInternalPixelFormat internalFormat, int width, int height, int border, GLPixelDataFormat format, GLPixelDataType type, void* pixels) { wGL.glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels); }
 
         internal override void glTexParameter(GLTextureTarget target, GLTextureParameter pname, float param) { wGL.glTexParameterf(target, pname, param); }
         internal override void glTexParameter(GLTextureTarget target, GLTextureParameter pname, int param) { wGL.glTexParameteri(target, pname, param); }
@@ -1120,11 +1095,21 @@ namespace BrawlLib.OpenGL
         internal override void glVertex4v(int* v) { wGL.glVertex4iv(v); }
         internal override void glVertex4v(short* v) { wGL.glVertex4sv(v); }
 
-        internal override void glVertexPointer(int size, uint type, int stride, void* pointer) { wGL.glVertexPointer(size, type, stride, pointer); }
+        internal override void glVertexPointer(int size, GLDataType type, int stride, void* pointer) { wGL.glVertexPointer(size, type, stride, pointer); }
 
         internal override void glViewport(int x, int y, int width, int height) { wGL.glViewport(x, y, width, height); }
 
         internal override int gluBuild2DMipmaps(GLTextureTarget target, GLInternalPixelFormat internalFormat, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* data) { return wGL.gluBuild2DMipmaps(target, internalFormat, width, height, format, type, data); }
+        internal override void gluDeleteQuadric(int quad) { wGL.gluDeleteQuadric(quad); }
+        internal override int gluNewQuadric() { return wGL.gluNewQuadric(); }
+
         internal override void gluPerspective(double fovy, double aspect, double zNear, double zFar) { wGL.gluPerspective(fovy, aspect, zNear, zFar); }
+
+        internal override void gluSphere(int quad, double radius, int slices, int stacks) { wGL.gluSphere(quad, radius, slices, stacks); }
+
+        internal override void gluQuadricDrawStyle(int quad, GLUQuadricDrawStyle draw) { wGL.gluQuadricDrawStyle(quad, draw); }
+
+        internal override void gluLookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ) { wGL.gluLookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ); }
+
     }
 }

@@ -7,13 +7,13 @@ using System.Drawing.Imaging;
 
 namespace BrawlLib.OpenGL
 {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     internal struct PixelFormatDescriptor
     {
         public ushort nSize;
         public ushort nVersion;
         public PixelFlags dwFlags;
-        public PixelType iPixelType;
+        public byte iPixelType;
         public byte cColorBits;
         public byte cRedBits;
         public byte cRedShift;
@@ -42,7 +42,7 @@ namespace BrawlLib.OpenGL
             nSize = 40;
             nVersion = 1;
             dwFlags = PixelFlags.DoubleBuffer | PixelFlags.DrawToWindow | PixelFlags.SupportOpenGL;
-            iPixelType = PixelType.RGBA;
+            iPixelType = 0;
             cColorBits = colorBits;
             cRedBits = 0;
             cRedShift = 0;
@@ -68,11 +68,11 @@ namespace BrawlLib.OpenGL
         }
     }
 
-    public enum PixelType : byte
-    {
-        RGBA = 0x00,
-        ColorIndex = 0x01
-    }
+    //public enum PixelType : byte
+    //{
+    //    RGBA = 0x00,
+    //    ColorIndex = 0x01
+    //}
     public enum PixelFlags : uint
     {
         DoubleBuffer = 0x00000001,

@@ -5,27 +5,32 @@ using System.Runtime.InteropServices;
 
 namespace BrawlLib.SSBBTypes
 {
-    //File contains anmation data?
-    //Filled with float values separated by uint values.
-    //End of file contains incrementing uint values, frame counters?
-
     [StructLayout( LayoutKind.Sequential, Pack=1)]
-    unsafe struct FighterDefinitionHeader
+    unsafe struct FDefHeader
     {
-        buint _unk; //0x10000 ?
-        buint _dataLength; //file size minus header
-        buint spacer; //0x0000FFFF
-        fixed byte _padding[20];
+        bint _fileSize; 
+        bint _lookupOffset;
+        bint _numLookupEntries;
+        bint _numEntries1; //Has string entry
+        bint _numEntries2; //Has string entry
+
+        private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
+        public FDefLookupHeader* LookupHeader { get { return (FDefLookupHeader*)(Address + _lookupOffset); } }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct DefHeader1
+    unsafe struct FDefLookupHeader
     {
-        buint _dataLength;
-        buint _unkLength;
-        buint _unkLength2;
-        buint _unkLength3; //when added together, these two numbers equal the number of string entries at the end of the file
-        buint _unkLength4; //they may denote numbers of data entries
-        fixed byte _padding[12];
+        bint _offset1;
+        bint _offset2;
+        bint _offset3;
+        bint _offset4;
+        bint _offset5;
+        bint _offset6;
+        bint _offset7;
+        bint _offset8;
+
+        private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
+        public bint* Data { get { return (bint*)(Address + 0x20); } }
     }
 }

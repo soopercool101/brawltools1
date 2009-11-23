@@ -104,7 +104,6 @@ namespace BrawlScape.Frames
             // 
             // modelControl
             // 
-            this.modelControl.CurrentModel = null;
             this.modelControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.modelControl.InitialYFactor = -160;
             this.modelControl.InitialZoomFactor = -20;

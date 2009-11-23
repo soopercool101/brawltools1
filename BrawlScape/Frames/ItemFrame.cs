@@ -29,7 +29,7 @@ namespace BrawlScape
         private void modelList_ResourceChanged(ModelDefinition resource) 
         {
             textureList.SecondarySource = resource;
-            modelPanel.CurrentModel = (resource != null) ? resource.Model : null;
+            modelPanel.TargetModel = (resource != null) ? resource.Model : null;
         }
     }
 }

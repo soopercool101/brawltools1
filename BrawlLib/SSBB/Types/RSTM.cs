@@ -12,20 +12,6 @@ namespace BrawlLib.SSBBTypes
 
         public SSBBCommonHeader _header;
 
-        //public uint _tag;
-        //public ushort _magic;
-        //public ushort _version;
-        //public buint _fileSize;
-        //public bushort _firstOffset; //always 0x40
-        //public bushort _numEntries; //always 0x02
-
-        //public buint _headOffset;
-        //public buint _headLength;
-        //public buint _adpcOffset;
-        //public buint _adpcLength;
-        //public buint _dataOffset;
-        //public buint _dataLength;
-        //fixed uint _padding[6];
 
         //private VoidPtr Address{get{fixed(void* ptr = &this)return ptr;}}
 
@@ -43,29 +29,14 @@ namespace BrawlLib.SSBBTypes
         public buint _size;
         public RuintCollection _entries;
 
-        //public ruint _offset1;
-        //public ruint _offset2;
-        //public ruint _offset3;
-
-        //public uint _unk1; //0x01
-        //public buint _unk2; //0x18
-        //public uint _unk3; //0x01
-        //public buint _unk4; //0x4C
-        //public uint _unk5; //0x01
-        //public buint _unk6; //0x5C
-
-        //public byte _encoding;
-        //public byte _loop;
-        //public byte _channels;
-        //public byte _unk7; //0x00
-        //public bushort _sampleRate; //0x7D00
-        //public ushort _unk8;
-        //public buint _loopStartSample;
-        //public buint _numSamples;
-
         public HEADPart1* Part1 { get { return (HEADPart1*)_entries[0]; } } //Audio info
         public RuintList* Part2 { get { return (RuintList*)_entries[1]; } } //ADPC block flags?
         public RuintList* Part3 { get { return (RuintList*)_entries[2]; } } //ADPCMInfo array, one for each channel?
+
+        public ADPCMInfo* GetChannelInfo(int index)
+        {
+            return (ADPCMInfo*)((ruint*)Part3->GetEntry(_entries.Address, index))->Offset(_entries.Address);
+        }
 
         public ADPCMInfo[] ChannelInfo
         {
@@ -84,23 +55,19 @@ namespace BrawlLib.SSBBTypes
     unsafe struct HEADPart1
     {
         public AudioFormatInfo _format;
-        //public byte _encoding;
-        //public byte _loop;
-        //public byte _channels;
-        //public byte _unk1; //0x00
         public bushort _sampleRate; //0x7D00
         public ushort _unk1;
         public bint _loopStartSample;
         public bint _numSamples;
         public bint _dataOffset;
-        public buint _numBlocks;
-        public buint _blockSize;
-        public buint _samplesPerBlock; //0x3800
-        public buint _lastBlockSize; //Without padding
-        public buint _lastBlockSamples;
-        public buint _lastBlockTotal; //Includes padding
-        public buint _unk8; //0x3800
-        public buint _bitsPerSample;
+        public bint _numBlocks;
+        public bint _blockSize;
+        public bint _samplesPerBlock; //0x3800
+        public bint _lastBlockSize; //Without padding
+        public bint _lastBlockSamples;
+        public bint _lastBlockTotal; //Includes padding
+        public bint _unk8; //0x3800
+        public bint _bitsPerSample;
     }
 
 

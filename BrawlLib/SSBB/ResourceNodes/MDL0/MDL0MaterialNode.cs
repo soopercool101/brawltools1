@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using BrawlLib.SSBBTypes;
 using System.ComponentModel;
+using BrawlLib.OpenGL;
+using System.Drawing;
+using System.IO;
+using BrawlLib.Imaging;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -15,8 +19,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         //internal List<MDL0Data7Part3> _part3Entries = new List<MDL0Data7Part3>();
         internal List<string> _part4Entries = new List<string>();
 
-        private byte _flag1;
-        private byte _flag2;
+        private byte _numTextures;
+        private byte _numLayers;
         private byte _flag3;
         private byte _flag4;
         private byte _flag5;
@@ -36,9 +40,9 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Material")]
         public int Unknown1 { get { return Header->_unk1; } }
         [Category("Material")]
-        public byte Flag1 { get { return _flag1; } set { _flag1 = value; SignalPropertyChange(); } }
+        public byte Textures { get { return _numTextures; } set { _numTextures = value; SignalPropertyChange(); } }
         [Category("Material")]
-        public byte Flag2 { get { return _flag2; } set { _flag2 = value; SignalPropertyChange(); } }
+        public byte Layers { get { return _numLayers; } set { _numLayers = value; SignalPropertyChange(); } }
         [Category("Material")]
         public byte Flag3 { get { return _flag3; } set { _flag3 = value; SignalPropertyChange(); } }
         [Category("Material")]
@@ -83,8 +87,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            _flag1 = Header->_flag1;
-            _flag2 = Header->_flag2;
+            _numTextures = Header->_flag1;
+            _numLayers = Header->_numLayers;
             _flag3 = Header->_flag3;
             _flag4 = Header->_flag4;
             _flag5 = Header->_flag5;
@@ -135,8 +139,8 @@ namespace BrawlLib.SSBB.ResourceNodes
             MDL0Material* header = (MDL0Material*)dataAddress;
             header->ResourceStringAddress = stringTable[Name] + 4;
 
-            header->_flag1 = _flag1;
-            header->_flag2 = _flag2;
+            header->_flag1 = _numTextures;
+            header->_numLayers = _numLayers;
             header->_flag3 = _flag3;
             header->_flag4 = _flag4;
             header->_flag5 = _flag5;

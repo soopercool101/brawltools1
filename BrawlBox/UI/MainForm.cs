@@ -11,6 +11,8 @@ using System.Threading;
 using BrawlLib.SSBB.ResourceNodes;
 using BrawlLib.Imaging;
 using System.Reflection;
+using BrawlLib.IO;
+using System.Audio;
 
 namespace BrawlBox
 {
@@ -196,6 +198,18 @@ namespace BrawlBox
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e) { AboutForm.Instance.ShowDialog(this); }
+
+        private void bRStmAudioToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string path;
+            if (Program.OpenFile("PCM Audio (*.wav)|*.wav", out path) > 0)
+            {
+                using (IAudioStream stream = WAV.FromFile(path))
+                {
+                    ADPCM.Encode(stream, null);
+                }
+            }
+        }
 
 
 

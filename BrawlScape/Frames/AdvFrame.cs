@@ -38,7 +38,7 @@ namespace BrawlScape.Frames
         private void modelList_ResourceChanged(ModelDefinition resource)
         {
             texturePanel.SecondarySource = resource;
-            modelControl.CurrentModel = (resource != null) ? resource.Model : null;
+            modelControl.TargetModel = (resource != null) ? resource.Model : null;
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using BrawlLib.SSBBTypes;
 using System.ComponentModel;
+using BrawlLib.Imaging;
+using BrawlLib.Wii.Models;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -29,6 +31,13 @@ namespace BrawlLib.SSBB.ResourceNodes
         public byte Unknown3 { get { return Header->_unk3; } }
         [Category("Color Data")]
         public short NumEntries { get { return Header->_numEntries; } }
+
+        private ARGBPixel[] _colors;
+        public ARGBPixel[] Colors
+        {
+            get { return _colors == null ? _colors = ModelConverter.ExtractColors(Header) : _colors; }
+            set { _colors = value; SignalPropertyChange(); }
+        }
 
         protected override bool OnInitialize()
         {

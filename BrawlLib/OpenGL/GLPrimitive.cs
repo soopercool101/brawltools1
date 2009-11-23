@@ -40,9 +40,12 @@ namespace BrawlLib.OpenGL
                     m = _parent._model._nodes[_nodeIndices[i]]._matrix;
 
                 _vertices[i] = m.Multiply(sPtr[_vertexIndices[i]]);
+                //_vertices[i] = sPtr[_vertexIndices[i]];
 
                 if (nPtr != null)
                     _normals[i] = m.Multiply(nPtr[_normalIndices[i]]);
+                //if (nPtr != null)
+                //    _normals[i] = nPtr[_normalIndices[i]];
             }
         }
 

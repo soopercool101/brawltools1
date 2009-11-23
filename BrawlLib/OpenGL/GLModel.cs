@@ -23,6 +23,9 @@ namespace BrawlLib.OpenGL
         private bool _enabled = true;
         public string _name;
 
+        public int _nodeQuad;
+        public int _nodeDL;
+
         public GLModel(MDL0Node node)
         {
             ResourceNode n;
@@ -46,7 +49,7 @@ namespace BrawlLib.OpenGL
             int nodeCount = node.NumNodes;
             _nodes = new GLNode[nodeCount];
             for (int i = 0; i < nodeCount; )
-                _nodes[i++] = new GLNode();
+                _nodes[i++] = new GLNode() { _model = this };
 
 
 
@@ -55,9 +58,9 @@ namespace BrawlLib.OpenGL
             //    foreach (MDL0PolygonNode poly in n.Children)
             //        _polygons.Add(ModelConverter.ExtractPolygon(this,  new GLPolygon(this, poly));
 
-            if ((group = node.Header->PolygonGroup) != null)
-                for (int i = 0; i < group->_numEntries; i++)
-                    _polygons.Add(ModelConverter.ExtractPolygon(this, (MDL0Polygon*)group->First[i].DataAddress));
+            //if ((group = node.Header->PolygonGroup) != null)
+            //    for (int i = 0; i < group->_numEntries; i++)
+            //        _polygons.Add(ModelConverter.ExtractPolygon(this, (MDL0Polygon*)group->First[i].DataAddress));
 
             //Link Opa
             MDL0DefNode opaNode = node.FindChild("Definitions/DrawOpa", false) as MDL0DefNode;
@@ -121,20 +124,21 @@ namespace BrawlLib.OpenGL
         private GLBone ParseBone(MDL0BoneNode node, MDL0DefNode opaNode)
         {
             GLBone bone = new GLBone(node);
+            bone._model = this;
             int nid = bone._nodeId;
             //if (_nodes[nid] == null)
             //    _nodes[nid] = new GLNode(this);
             _nodes[nid]._bone = bone;
 
             //Link materials/polygons
-            //if(opaNode != null)
-            //    foreach (MDL0NodeType4 o in opaNode.Items)
-            //    {
-            //        if (o.BoneIndex == bone._index)
-            //        {
-            //            bone._polygons.Add(_polygons[o.PolygonId]);
-            //        }
-            //    }
+            if(opaNode != null)
+                foreach (MDL0NodeType4 o in opaNode.Items)
+                {
+                    if (o.BoneIndex == bone._index)
+                    {
+                        bone._polygons.Add(_polygons[o.PolygonId]);
+                    }
+                }
 
             foreach (MDL0BoneNode n in node.Children)
             {
@@ -157,13 +161,58 @@ namespace BrawlLib.OpenGL
             if (!_enabled)
                 return;
 
+            if (_nodeDL == 0)
+            {
+                //Create display list for node orb
+                _nodeDL = (int)context.glGenLists(1);
+
+                context.glPushMatrix();
+                context.glLoadIdentity();
+
+                int quad = context.gluNewQuadric();
+                context.gluQuadricDrawStyle(quad, GLUQuadricDrawStyle.GLU_LINE);
+
+                context.glNewList((uint)_nodeDL, GLListMode.COMPILE);
+
+                context.gluSphere(quad, 0.1, 4, 2);
+
+                context.glEndList();
+
+                context.gluDeleteQuadric(quad);
+
+                context.glPopMatrix();
+            }
+
+            //Should render nodes instead?
+            //foreach (GLNode node in _nodes)
+            //    node.Render(context);
+            foreach (GLBone bone in _bones)
+                bone.Render(context);
+
             //Render polygons
-            foreach (GLPolygon poly in _polygons)
-                poly.Render(context);
+            //foreach (GLPolygon poly in _polygons)
+            //    poly.Render(context);
+        }
+
+        public void ResetTransforms()
+        {
+            foreach (GLBone bone in _bones)
+                bone.ResetTransform();
         }
 
         internal unsafe void Unbind(GLContext context)
         {
+            if (_nodeDL != 0)
+            {
+                context.glDeleteLists((uint)_nodeDL, 1);
+                _nodeDL = 0;
+            }
+            //if (_nodeQuad != 0)
+            //{
+            //    context.gluDeleteQuadric(_nodeQuad);
+            //    _nodeQuad = 0;
+            //}
+
             foreach (GLTexture tex in _textures)
                 tex.Unbind(context);
         }

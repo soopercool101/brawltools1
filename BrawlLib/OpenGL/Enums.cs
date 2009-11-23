@@ -20,6 +20,20 @@ namespace BrawlLib.OpenGL
         SRC_ALPHA_SATURATE = 0x0308
     }
 
+    public enum GLUQuadricDrawStyle : uint
+    {
+        GLU_POINT = 100010,
+        GLU_LINE = 100011,
+        GLU_FILL = 100012,
+        GLU_SILHOUETTE = 100013
+    }
+
+    public enum GLListMode : uint
+    {
+        COMPILE = 0x1300,
+        COMPILE_AND_EXECUTE = 0x1301
+    }
+
     public enum GLShadingModel : uint
     {
         FLAT = 0x1D00,
@@ -348,6 +362,35 @@ namespace BrawlLib.OpenGL
         UNSIGNED_SHORT_1_5_5_5_REV = 0x8366,
         UNSIGNED_INT_8_8_8_8_REV = 0x8367,
         UNSIGNED_INT_2_10_10_10_REV = 0x8368
+    }
+
+    public enum GLElementType : uint
+    {
+        UNSIGNED_BYTE = 0x1401,
+        UNSIGNED_SHORT = 0x1403,
+        UNSIGNED_INT = 0x1405
+    }
+
+    public enum GLDataType : uint
+    {
+        SByte = 0x1400,
+        Byte = 0x1401,
+        Short = 0x1402,
+        UShort = 0x1403,
+        Int = 0x1404,
+        UInt = 0x1405,
+        Float = 0x1406,
+        Double = 0x140A,
+    }
+
+    public enum GLArrayType : uint
+    {
+        VERTEX_ARRAY = 0x8074,
+        NORMAL_ARRAY = 0x8075,
+        COLOR_ARRAY = 0x8076,
+        INDEX_ARRAY = 0x8077,
+        TEXTURE_COORD_ARRAY = 0x8078,
+        EDGE_FLAG_ARRAY = 0x8079
     }
 
     public enum GLTexEnvTarget : uint

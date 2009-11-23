@@ -23,7 +23,7 @@ namespace BrawlLib.SSBBTypes
         public buint _uvDataOffset;
         public buint _data7Offset;
         public buint _data8Offset;
-        public buint _data9Offset;
+        public buint _polygonOffset;
         public buint _data10Offset;
         public buint _data11Offset;
 
@@ -58,7 +58,7 @@ namespace BrawlLib.SSBBTypes
         public ResourceGroup* UVGroup { get { return _uvDataOffset == 0 ? null :  (ResourceGroup*)(Address + _uvDataOffset); } }
         public ResourceGroup* Material1Group { get { return _data7Offset == 0 ? null : (ResourceGroup*)(Address + _data7Offset); } }
         public ResourceGroup* Material2Group { get { return _data8Offset == 0 ? null : (ResourceGroup*)(Address + _data8Offset); } }
-        public ResourceGroup* PolygonGroup { get { return _data9Offset == 0 ? null : (ResourceGroup*)(Address + _data9Offset); } }
+        public ResourceGroup* PolygonGroup { get { return _polygonOffset == 0 ? null : (ResourceGroup*)(Address + _polygonOffset); } }
         public ResourceGroup* Data10Group { get { return _data10Offset == 0 ? null : (ResourceGroup*)(Address + _data10Offset); } }
         public ResourceGroup* Data11Group { get { return _data11Offset == 0 ? null : (ResourceGroup*)(Address + _data11Offset); } }
 
@@ -444,7 +444,7 @@ namespace BrawlLib.SSBBTypes
         public bint _index;
         public bint _unk1; //0x00
         public byte _flag1;
-        public byte _flag2;
+        public byte _numLayers;
         public byte _flag3;
         public byte _flag4;
         public bint _type; //0x02
@@ -487,8 +487,8 @@ namespace BrawlLib.SSBBTypes
         public bint _unk3;
         public bint _unk4;
         public bint _unk5;
-        public bint _unk6;
-        public bint _unk7;
+        public bint _layerId1;
+        public bint _layerId2;
         public bint _unk8;
         public bint _unk9;
         public bfloat _float;
@@ -571,8 +571,9 @@ namespace BrawlLib.SSBBTypes
         public bint _numFaces;
         public bshort _vertexId;
         public bshort _normalId;
-        public bshort _colorId1;
-        public bshort _colorId2;
+        fixed short _colorIds[2];
+        //public bshort _colorId1;
+        //public bshort _colorId2;
         fixed short _uids[8];
         public bint _part1Offset;
 
@@ -581,8 +582,8 @@ namespace BrawlLib.SSBBTypes
 
         public MDL0VertexData* VertexData { get { return (MDL0VertexData*)Parent->VertexGroup->First[_vertexId].DataAddress; } }
         public MDL0NormalData* NormalData { get { return (MDL0NormalData*)Parent->NormalGroup->First[_normalId].DataAddress; } }
-        public MDL0ColorData* ColorData1 { get { return (MDL0ColorData*)Parent->ColorGroup->First[_colorId1].DataAddress; } }
-        public MDL0ColorData* ColorData2 { get { return (MDL0ColorData*)Parent->ColorGroup->First[_colorId2].DataAddress; } }
+        //public MDL0ColorData* ColorData1 { get { return (MDL0ColorData*)Parent->ColorGroup->First[_colorId1].DataAddress; } }
+        //public MDL0ColorData* ColorData2 { get { return (MDL0ColorData*)Parent->ColorGroup->First[_colorId2].DataAddress; } }
         public MDL0UVData* GetUVData(int index)
         {
             fixed (short* p = _uids)
@@ -591,6 +592,9 @@ namespace BrawlLib.SSBBTypes
                 return ptr[index] == -1 ? null : (MDL0UVData*)Parent->UVGroup->First[ptr[index]].DataAddress;
             }
         }
+
+        public bshort* ColorIds { get { return (bshort*)(Address + 0x4C); } }
+        public bshort* UVIds { get { return (bshort*)(Address + 0x50); } }
 
         public bushort* WeightIndices { get { return (bushort*)(Address + _part1Offset); } }
 

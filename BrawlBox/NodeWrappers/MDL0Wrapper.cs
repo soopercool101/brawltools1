@@ -46,7 +46,8 @@ namespace BrawlBox.NodeWrappers
         }
         #endregion
 
-        public override string ExportFilter { get { return "Raw Model File (*.mdl0)|*.mdl0"; } }
+        public override string ExportFilter { get { return "Collada Test (*.dae)|*.dae|Raw Model File (*.mdl0)|*.mdl0"; } }
+        //public override string ExportFilter { get { return "Raw Model File (*.mdl0)|*.mdl0"; } }
 
         public MDL0Wrapper() { ContextMenuStrip = _menu; }
 
@@ -54,7 +55,7 @@ namespace BrawlBox.NodeWrappers
         {
             using (ModelForm form = new ModelForm())
             {
-                form.ShowDialog(((MDL0Node)_resource).GetModel());
+                form.ShowDialog((MDL0Node)_resource);
             }
         }
 

@@ -1,6 +1,10 @@
 ﻿using System;
 using BrawlLib.SSBBTypes;
 using System.ComponentModel;
+using BrawlLib.OpenGL;
+using System.Collections.Generic;
+using BrawlLib.Modeling;
+using BrawlLib.Wii.Models;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -55,11 +59,11 @@ namespace BrawlLib.SSBB.ResourceNodes
         public int VertexSet { get { return Header->_vertexId; } }
         [Category("Polygon Data")]
         public int NormalSet { get { return Header->_normalId; } }
-        [Category("Polygon Data")]
-        public int ColorSet1 { get { return Header->_colorId1; } }
+        //[Category("Polygon Data")]
+        //public int ColorSet1 { get { return Header->_colorId1; } }
 
-        [Category("Polygon Data")]
-        public int ColorSet2 { get { return Header->_colorId2; } }
+        //[Category("Polygon Data")]
+        //public int ColorSet2 { get { return Header->_colorId2; } }
 
         [Category("Polygon Data")]
         public int Part1Offset { get { return Header->_part1Offset; } }
@@ -70,12 +74,57 @@ namespace BrawlLib.SSBB.ResourceNodes
         //    get { return _materialNodes; }
         //}
 
+        internal IMatrixProvider _singleBind;
+
+        internal MDL0MaterialNode _material;
+
+        internal MDL0VertexNode _vertexNode;
+        internal MDL0NormalNode _normalNode;
+        internal MDL0ColorNode[] _colorSet = new MDL0ColorNode[2];
+        internal MDL0UVNode[] _uvSet = new MDL0UVNode[8];
+
+        //public MDL0VertexNode VertexNode { get { return _vertexNode; } }
+
+        internal bool _render = true;
+        internal bool _wireframe = false;
+
+        private List<Primitive> _primitives;
+        public List<Primitive> Primitives
+        {
+            get { return _primitives == null ? _primitives = ModelConverter.ExtractPrimitives(Header) : _primitives; }
+            set { _primitives = value; SignalPropertyChange(); }
+        }
+
+        public override void Dispose()
+        {
+            if (_primitives != null)
+                foreach (Primitive prim in _primitives)
+                    prim.Dispose();
+            base.Dispose();
+        }
+
         protected override bool OnInitialize()
         {
             base.OnInitialize();
 
             if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
+
+            //Link nodes
+            if (Header->_vertexId >= 0)
+                _vertexNode = ((MDL0Node)_parent._parent).FindResource<MDL0VertexNode>(Header->_vertexId);
+            if (Header->_normalId >= 0)
+                _normalNode = ((MDL0Node)_parent._parent).FindResource<MDL0NormalNode>(Header->_normalId);
+
+            int id;
+            for (int i = 0; i < 2; i++)
+                if ((id = Header->ColorIds[i]) >= 0)
+                    _colorSet[i] = ((MDL0Node)_parent._parent).FindResource<MDL0ColorNode>(id);
+
+            for (int i = 0; i < 8; i++)
+                if ((id = Header->UVIds[i]) >= 0)
+                    _uvSet[i] = ((MDL0Node)_parent._parent).FindResource<MDL0UVNode>(id);
+
 
             return false;
         }
@@ -86,9 +135,87 @@ namespace BrawlLib.SSBB.ResourceNodes
             header->ResourceStringAddress = stringTable[Name] + 4;
         }
 
-        //public MDL0VertexNode GetVertexNode() { return VertexSet >= 0 ? _parent._parent.FindChild("Vertices", false).Children[VertexSet] as MDL0VertexNode : null; }
-        //public MDL0NormalNode GetNormalNode() { return NormalSet >= 0 ? _parent._parent.FindChild("Normals", false).Children[NormalSet] as MDL0NormalNode : null; }
-        //public MDL0ColorNode GetColorNode(int index) { return Data->_colorId1 >= 0 ? _parent._parent.FindChild("Colors", false).Children[Data->_colorId1] as MDL0ColorNode : null; }
-        //public MDL0UVNode GetUVNode(int index) { return Data->_ >= 0 ? _parent._parent.FindChild("Colors", false).Children[Data->_colorId1] as MDL0ColorNode : null; }
+        #region Rendering
+        internal void Render(GLContext ctx)
+        {
+            if (!_render)
+                return;
+
+            if (_wireframe)
+                ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
+            else
+                ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Fill);
+
+            ctx.glPushMatrix();
+
+            //Enable arrays
+            ctx.glEnableClientState(GLArrayType.VERTEX_ARRAY);
+
+            if (_normalNode != null)
+                ctx.glEnableClientState(GLArrayType.NORMAL_ARRAY);
+
+            if (_colorSet[0] != null)
+                ctx.glEnableClientState(GLArrayType.COLOR_ARRAY);
+
+            if (_singleBind != null)
+            {
+                Matrix m = _singleBind.FrameMatrix;
+                ctx.glMultMatrix((float*)&m);
+            }
+
+            if (_material != null)
+            {
+                ctx.glEnable(GLEnableCap.Texture2D);
+                ctx.glEnableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
+                foreach (MDL0MaterialRefNode mr in _material.Children)
+                {
+                    if (mr._layerId1 == 0)
+                        continue;
+
+                    mr.Prepare(ctx);
+                    foreach (Primitive prim in Primitives)
+                    {
+                        prim.PreparePointers(ctx);
+                        prim.Render(ctx, mr._layerId1);
+                    }
+                }
+                ctx.glDisableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
+                ctx.glDisable((uint)GLEnableCap.Texture2D);
+            }
+            else
+            {
+                foreach (Primitive prim in Primitives)
+                {
+                    prim.PreparePointers(ctx);
+                    prim.Render(ctx, 0);
+                }
+            }
+
+
+            if (_normalNode != null)
+                ctx.glDisableClientState(GLArrayType.NORMAL_ARRAY);
+
+            if (_colorSet[0] != null)
+                ctx.glDisableClientState(GLArrayType.COLOR_ARRAY);
+
+            ctx.glDisableClientState(GLArrayType.VERTEX_ARRAY);
+
+            ctx.glPopMatrix();
+        }
+
+        internal void SetFrame(CHR0EntryNode n, int index)
+        {
+        }
+
+        internal void WeightVertices(List<IMatrixProvider> nodes)
+        {
+            //if (_singleBind != null)
+            //    return;
+
+            foreach (Primitive prim in Primitives)
+                prim.Precalc(this, nodes);
+        }
+
+        #endregion
     }
 }

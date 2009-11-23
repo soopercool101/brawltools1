@@ -135,7 +135,7 @@ namespace BrawlBox
         {
             switch (filterIndex)
             {
-                case 1: ((ARCNode)_resource).ExportPAC(outPath); break;
+                case 1: ((ARCNode)_resource).Export(outPath); break;
                 case 2: ((ARCNode)_resource).ExportPCS(outPath); break;
                 case 3: ((ARCNode)_resource).ExportPair(outPath); break;
             }

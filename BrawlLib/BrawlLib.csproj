@@ -46,27 +46,44 @@
   <ItemGroup>
     <None Include="System\ComponentModel\CustomPropertyDescriptor.cs" />
     <None Include="System\ComponentModel\DelegatePropertyDescriptor.cs" />
+    <None Include="Imaging\Collada.cs" />
     <Compile Include="Imaging\DIB.cs" />
     <Compile Include="Imaging\IImageSource.cs" />
     <Compile Include="Imaging\NVDXT.cs" />
     <Compile Include="Imaging\PixelTypes.cs" />
-    <None Include="Imaging\RygDxt.cs" />
     <None Include="Imaging\Squish.cs" />
-    <Compile Include="Imaging\RygPrecomp.cs" />
     <Compile Include="Imaging\TGAImage.cs" />
     <Compile Include="Imaging\WeightedAverage.cs" />
     <Compile Include="Maths.cs" />
+    <Compile Include="Modeling\Animation.cs" />
+    <Compile Include="Modeling\AnimBone.cs" />
+    <Compile Include="Modeling\AnimFrame.cs" />
+    <Compile Include="Modeling\BoneNode.cs" />
+    <Compile Include="Modeling\FrameState.cs" />
+    <Compile Include="Modeling\IMatrixProvider.cs" />
+    <Compile Include="Modeling\Material.cs" />
+    <Compile Include="Modeling\Model.cs" />
+    <Compile Include="Modeling\NodeRef.cs" />
+    <Compile Include="Modeling\Polygon.cs" />
+    <Compile Include="Modeling\PolygonRef.cs" />
+    <Compile Include="Modeling\Primitive.cs" />
+    <Compile Include="Modeling\RenderedObject.cs" />
+    <Compile Include="Modeling\Skin.cs" />
+    <Compile Include="Modeling\Vertex.cs" />
+    <Compile Include="Modeling\VertexList.cs" />
     <Compile Include="OpenGL\Enums.cs" />
-    <Compile Include="OpenGL\GLBone.cs" />
+    <None Include="OpenGL\GLBone.cs" />
     <Compile Include="OpenGL\GLContext.cs" />
-    <Compile Include="OpenGL\GLMaterial.cs" />
-    <Compile Include="OpenGL\GLModel.cs" />
-    <Compile Include="OpenGL\GLNode.cs" />
+    <Compile Include="OpenGL\GLDisplayList.cs" />
+    <None Include="OpenGL\GLMaterial.cs" />
+    <None Include="OpenGL\GLModel.cs" />
+    <None Include="OpenGL\GLNode.cs" />
     <Compile Include="OpenGL\GLPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="OpenGL\GLPolygon.cs" />
-    <Compile Include="OpenGL\GLPrimitive.cs" />
+    <None Include="OpenGL\GLPolygon.cs" />
+    <None Include="OpenGL\GLPrimitive.cs" />
+    <Compile Include="OpenGL\GLTexture.cs" />
     <Compile Include="SSBB\BinaryStringTable.cs" />
     <Compile Include="SSBB\ExportFilters.cs" />
     <Compile Include="SSBB\NodeComparer.cs" />
@@ -96,7 +113,14 @@
     <Compile Include="SSBB\ResourceNodes\RSAR\RSARTypeNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\RWSDNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\SYMBNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSTMNode.cs" />
     <Compile Include="SSBB\StringTable.cs" />
+    <Compile Include="System\Audio\ADPCM.cs" />
+    <Compile Include="System\Audio\AudioProvider.cs" />
+    <Compile Include="System\Audio\G726.cs" />
+    <Compile Include="System\Audio\IAudioStream.cs" />
+    <Compile Include="System\Audio\PCMStream.cs" />
+    <Compile Include="System\Audio\WAV.cs" />
     <Compile Include="System\IO\FileAssociation.cs" />
     <Compile Include="System\Matrix.cs" />
     <Compile Include="System\Matrix43.cs" />
@@ -131,8 +155,8 @@
     <Compile Include="System\Windows\Forms\GoodPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="System\Windows\Forms\ModelContext.cs">
-      <SubType>Component</SubType>
+    <Compile Include="System\Windows\Forms\ModelEditControl.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="System\Windows\Forms\ModelPanel.cs">
       <SubType>UserControl</SubType>
@@ -150,10 +174,15 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="System\Vector3StringConverter.cs" />
+    <Compile Include="System\Windows\Forms\TransformEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Wii\Animations\AnimationCode.cs" />
     <Compile Include="Wii\Animations\AnimationConverter.cs" />
     <Compile Include="Wii\Animations\AnimationFrame.cs" />
     <Compile Include="Wii\Animations\KeyframeCollection.cs" />
+    <Compile Include="Wii\Audio\ADPCMStream.cs" />
+    <Compile Include="Wii\Audio\AudioConverter.cs" />
     <Compile Include="Wii\Compression\Common.cs" />
     <Compile Include="Wii\Compression\LZ77.cs" />
     <Compile Include="System\IO\FileMap.cs" />
@@ -225,6 +254,9 @@
     <EmbeddedResource Include="System\Windows\Forms\AnimEditControl.resx">
       <DependentUpon>AnimEditControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\ModelEditControl.resx">
+      <DependentUpon>ModelEditControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\MSBinEditor.resx">
       <DependentUpon>MSBinEditor.cs</DependentUpon>
     </EmbeddedResource>
@@ -233,6 +265,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\TextureConverterDialog.resx">
       <DependentUpon>TextureConverterDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\TransformEditControl.resx">
+      <DependentUpon>TransformEditControl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using BrawlLib.OpenGL;
 using BrawlLib.SSBB.ResourceNodes;
+using BrawlLib.Modeling;
 
 namespace BrawlScape
 {
@@ -13,7 +14,7 @@ namespace BrawlScape
 
         public override string ToString() { return Text; }
 
-        public GLModel Model { get { return _nodeRef == null ? null : _nodeRef.Model; } }
+        public MDL0Node Model { get { return _nodeRef == null ? null : _nodeRef.Model; } }
 
         private TextureDefinition[] _textures;
         public TextureDefinition[] ListItems
@@ -25,7 +26,7 @@ namespace BrawlScape
                     ResourceNode node = _nodeRef.Node;
                     ResourceNode root = node.RootNode;
                     ResourceTree tree = _nodeRef.Tree;
-                    GLModel model = Model;
+                    MDL0Node model = Model;
 
                     List<TextureDefinition> list = new List<TextureDefinition>();
 
@@ -55,7 +56,7 @@ namespace BrawlScape
 
         public void AttachTextures()
         {
-            GLModel model = Model;
+            MDL0Node model = Model;
             if ((ListItems != null) && (model != null))
             {
                 foreach (TextureDefinition tex in _textures)
@@ -70,7 +71,7 @@ namespace BrawlScape
 
         private void TextureChanged(ResourceDefinition<TextureReference> tex)
         {
-            GLModel model = Model;
+            MDL0Node model = Model;
             if (model != null)
             {
                 //model.AttachTexture(tex.Text, (tex as TextureDefinition).Texture);

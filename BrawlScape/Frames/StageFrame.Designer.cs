@@ -82,7 +82,6 @@ namespace BrawlScape
             // 
             // modelPanel
             // 
-            this.modelPanel.CurrentModel = null;
             this.modelPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.modelPanel.InitialYFactor = -100;
             this.modelPanel.InitialZoomFactor = -20;

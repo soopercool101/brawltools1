@@ -10,6 +10,9 @@ namespace BrawlLib.Wii.Models
         private int _numVertices;
         public int Vertices { get { return _numVertices; } }
 
+        private string _name;
+        public string Name { get { return _name; } }
+
         private bool _isXYZ;
         public bool IsXYZ { get { return _isXYZ; } }
 
@@ -19,6 +22,7 @@ namespace BrawlLib.Wii.Models
             _numVertices = numVertices;
             _isXYZ = isXYZ;
         }
+        public VertexBuffer(int numVertices, bool isXYZ, string name) : this(numVertices, isXYZ) { _name = name; }
     }
     public class ColorBuffer : UnsafeBuffer
     {
