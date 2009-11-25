@@ -83,6 +83,8 @@ namespace BrawlLib.Imaging
     {
         public byte R, G, B, A;
 
+        public ABGRPixel(byte a, byte b, byte g, byte r) { A = a; B = b; G = g; R = r; }
+
         public static explicit operator ABGRPixel(ARGBPixel p) { return new ABGRPixel() { A = p.A, B = p.B, G = p.G, R = p.R }; }
         public static explicit operator ARGBPixel(ABGRPixel p) { return new ARGBPixel() { A = p.A, B = p.B, G = p.G, R = p.R }; }
     }

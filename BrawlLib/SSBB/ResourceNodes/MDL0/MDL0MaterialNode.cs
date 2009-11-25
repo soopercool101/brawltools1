@@ -168,5 +168,8 @@ namespace BrawlLib.SSBB.ResourceNodes
             foreach (MDL0MaterialRefNode n in Children)
                 n.PostProcess(part3++, stringTable);
         }
+
+        internal override void Bind(GLContext ctx) { foreach (MDL0MaterialRefNode m in Children) m.Bind(ctx); }
+        internal override void Unbind(GLContext ctx) { foreach (MDL0MaterialRefNode m in Children) m.Unbind(ctx); }
     }
 }

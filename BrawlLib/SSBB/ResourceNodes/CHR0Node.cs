@@ -15,7 +15,16 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal CHR0* Header { get { return (CHR0*)WorkingUncompressed.Address; } }
         public override ResourceType ResourceType { get { return ResourceType.CHR0; } }
 
+        internal int _layer = 0;
+        [Category("Character Animation")]
+        public int Layer
+        {
+            get { return _layer; }
+            set { _layer = value; SignalPropertyChange(); }
+        }
+
         internal int _numFrames = 1;
+        [Category("Character Animation")]
         public int FrameCount
         {
             get { return _numFrames; }
@@ -48,6 +57,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
+            _layer = Header->_layer;
             _numFrames = Header->_numFrames;
 
             return Header->Group->_numEntries > 0;
@@ -78,7 +88,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected internal override void OnRebuild(VoidPtr address, int length, bool force)
         {
             CHR0* header = (CHR0*)address;
-            *header = new CHR0(length, _numFrames, Children.Count);
+            *header = new CHR0(length, _numFrames, Children.Count, _layer);
 
             ResourceGroup* group = header->Group;
             *group = new ResourceGroup(Children.Count);

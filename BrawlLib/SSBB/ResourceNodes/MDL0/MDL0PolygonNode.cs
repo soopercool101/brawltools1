@@ -8,7 +8,7 @@ using BrawlLib.Wii.Models;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    unsafe class MDL0PolygonNode : MDL0EntryNode//, IPolygon
+    public unsafe class MDL0PolygonNode : MDL0EntryNode//, IPolygon
     {
         //private List<SSBBPrimitive> _primitives;
         internal MDL0Polygon* Header { get { return (MDL0Polygon*)WorkingUncompressed.Address; } }
@@ -169,10 +169,10 @@ namespace BrawlLib.SSBB.ResourceNodes
                 ctx.glEnableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
                 foreach (MDL0MaterialRefNode mr in _material.Children)
                 {
-                    if (mr._layerId1 == 0)
+                    if ((mr._layerId1 == 0) || (!mr._textureReference.Enabled))
                         continue;
 
-                    mr.Prepare(ctx);
+                    mr.Bind(ctx);
                     foreach (Primitive prim in Primitives)
                     {
                         prim.PreparePointers(ctx);
@@ -203,17 +203,24 @@ namespace BrawlLib.SSBB.ResourceNodes
             ctx.glPopMatrix();
         }
 
-        internal void SetFrame(CHR0EntryNode n, int index)
-        {
-        }
+        //internal void SetFrame(CHR0EntryNode n, int index)
+        //{
+        //}
 
         internal void WeightVertices(List<IMatrixProvider> nodes)
         {
-            //if (_singleBind != null)
-            //    return;
-
             foreach (Primitive prim in Primitives)
                 prim.Precalc(this, nodes);
+        }
+
+        internal override void Bind(GLContext ctx)
+        {
+            _render = true;
+        }
+        internal override void Unbind(GLContext ctx)
+        {
+            foreach (Primitive prim in _primitives)
+                prim.Dispose();
         }
 
         #endregion

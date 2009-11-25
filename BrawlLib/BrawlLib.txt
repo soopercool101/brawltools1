@@ -1,5 +1,5 @@
 ﻿
-BrawlLib Resource Library - Version 0.06
+BrawlLib Resource Library - Version 0.07
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -11,6 +11,25 @@ they be held accountable for the manner in which it is used.
  ====================================
 |************ Change Log ************|
  ====================================
+
+- v0.07 - (11/24/2009)
+	. Fixed various issues with OpenGL initialization.
+	. Removed many GL classes in favor of using the MDL0 classes directly.
+	. The MDL0 nodes now wrap OpenGL rendering and resources.
+	. Added support for multiple texture layers and uv points.
+	. Added the following features to MDL0 nodes:
+		Bone rendering and animation.
+		Model skinning.
+		Automatic texture loading.
+	. Added the following features to ModelEditControl:
+		Animation/bone editor.
+		Animation playback controls.
+		Bone/texture lists.
+		Built-in texture support for preview/replace/export.
+		External file loader.
+		Improved mouse/keyboard controls.
+	. Fixed a bug that was causing PAC files to export uncompressed regardless of setting.
+	. Fixed a bug in the CHR0 decoder.
 
 - v0.06 - (11/08/2009)
 	. Added FileAssociation and FileType classes.

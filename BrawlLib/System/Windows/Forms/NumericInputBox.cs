@@ -32,6 +32,7 @@ namespace System.Windows.Forms
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
+            float val;
             switch (e.KeyCode)
             {
                 case Keys.D0:
@@ -59,6 +60,20 @@ namespace System.Windows.Forms
                 case Keys.Back:
                     break;
 
+                case Keys.Up:
+                    if (float.TryParse(Text, out val))
+                        Text = (val + 0.1f).ToString();
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                    break;
+
+                case Keys.Down:
+                    if (float.TryParse(Text, out val))
+                        Text = (val - 0.1f).ToString();
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                    break;
+
                 case Keys.Subtract:
                 case Keys.OemMinus:
                     if ((this.SelectionStart != 0) || (Text.IndexOf('-') != -1))
@@ -78,6 +93,7 @@ namespace System.Windows.Forms
 
                 case Keys.Enter:
                     Apply();
+                    e.Handled = true;
                     e.SuppressKeyPress = true;
                     break;
 
@@ -109,6 +125,9 @@ namespace System.Windows.Forms
         private void Apply()
         {
             float val = _value;
+
+            if (val.ToString() == Text)
+                return;
 
             if (Text == "")
                 val = float.NaN;

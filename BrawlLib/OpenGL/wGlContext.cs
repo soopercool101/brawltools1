@@ -12,6 +12,12 @@ namespace BrawlLib.OpenGL
     {
         VoidPtr _hwnd, _hdc, _hglrc;
 
+        public override void Share(GLContext ctx)
+        {
+            if (!wGL.wglShareLists(_hglrc, ((wGlContext)ctx)._hglrc))
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
+
         public override void Dispose()
         {
             if (_hglrc)

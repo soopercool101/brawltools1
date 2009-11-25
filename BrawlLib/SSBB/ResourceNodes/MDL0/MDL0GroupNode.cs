@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using BrawlLib.SSBBTypes;
 using System.ComponentModel;
+using BrawlLib.OpenGL;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -27,6 +28,9 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             return false;
         }
+
+        internal virtual void Bind(GLContext ctx) { }
+        internal virtual void Unbind(GLContext ctx) { }
 
         protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable) { }
     }
@@ -86,8 +90,8 @@ namespace BrawlLib.SSBB.ResourceNodes
                 case 6: { t = typeof(MDL0MaterialNode); break; }
                 case 7: { t = typeof(MDL0MaterialExtNode); break; }
                 case 8: { t = typeof(MDL0PolygonNode); break; }
-                case 9: { t = typeof(MDL0Data10Node); break; }
-                case 10: { t = typeof(MDL0Data10Node); break; }
+                case 9: { t = typeof(MDL0TextureNode); break; }
+                case 10: { t = typeof(MDL0TextureNode); break; }
                 default: return;
             }
 
@@ -155,6 +159,17 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             foreach (MDL0EntryNode n in node.Children)
                 PostProcessBone(n, group, ref index, stringTable);
+        }
+
+        internal void Bind(GLContext ctx)
+        {
+            foreach (MDL0EntryNode e in Children)
+                e.Bind(ctx);
+        }
+        internal void Unbind(GLContext ctx)
+        {
+            foreach (MDL0EntryNode e in Children)
+                e.Unbind(ctx);
         }
     }
 }

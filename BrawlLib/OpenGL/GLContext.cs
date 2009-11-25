@@ -6,9 +6,19 @@ using System.Windows.Forms;
 
 namespace BrawlLib.OpenGL
 {
+    public delegate T GLCreateHandler<T>(GLContext ctx);
+
     public unsafe abstract class GLContext : IDisposable
     {
         internal Dictionary<string, object> _states = new Dictionary<string, object>();
+        public T FindOrCreate<T>(string name, GLCreateHandler<T> handler)
+        {
+            if (_states.ContainsKey(name))
+                return (T)_states[name];
+            T obj = handler(this);
+            _states[name] = obj;
+            return obj;
+        }
 
         public void Unbind()
         {
@@ -16,13 +26,15 @@ namespace BrawlLib.OpenGL
             foreach (object o in _states.Values)
             {
                 if (o is GLDisplayList)
-                    glDeleteList(o as GLDisplayList);
+                    (o as GLDisplayList).Delete();
                 else if (o is GLTexture)
-                    glDeleteTexture(o as GLTexture);
+                    (o as GLTexture).Delete();
             }
             _states.Clear();
             Release();
         }
+
+        public virtual void Share(GLContext ctx) { }
 
         public virtual void Dispose() { }
 
@@ -129,7 +141,12 @@ namespace BrawlLib.OpenGL
          * */
         public void glDeleteList(GLDisplayList list) { glDeleteLists(list._id, 1); list._id = 0; }
         internal abstract void glDeleteLists(uint list, int range);
-        internal void glDeleteTexture(GLTexture texture) { uint id = texture._id; glDeleteTextures(1, &id); texture._id = 0; }
+        //internal void glDeleteTexture(GLTexture texture) 
+        //{ 
+        //    uint id = texture._id; 
+        //    glDeleteTextures(1, &id); 
+        //    texture._id = 0;
+        //}
         internal abstract void glDeleteTextures(int num, uint* textures);
         internal abstract void glDepthFunc(GLFunction func);
         internal abstract void glDepthMask(bool flag);

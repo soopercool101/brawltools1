@@ -39,7 +39,9 @@ namespace System.Windows.Forms
         private Matrix43 _viewMatrix = Matrix43.Identity;
         //private Matrix _vMatrix = Matrix.Identity;
 
-        private Matrix43 _transform = Matrix43.Identity, _inverseTransform;
+        private List<ResourceNode> _resourceList = new List<ResourceNode>();
+
+        private Matrix43 _transform = Matrix43.Identity;
 
         private MDL0Node _model;
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -51,10 +53,20 @@ namespace System.Windows.Forms
                 if (_model == value)
                     return;
 
+                if (_model != null)
+                    _model.Unbind(_context);
+
                 if (_context != null)
                     _context.Unbind();
 
-                _model = value;
+                _resourceList.Clear();
+                if ((_model = value) != null)
+                {
+                    _resourceList.Add(_model);
+                    if (_context != null)
+                        _context._states["_Node_Refs"] = _resourceList;
+                }
+
                 ResetCamera();
             }
         }
@@ -77,14 +89,6 @@ namespace System.Windows.Forms
                 }
             }
         }
-
-        //private Model _currentModel;
-        //[Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        //public Model CurrentModel
-        //{
-        //    get { return _currentModel; }
-        //    set { if (_currentModel != value) OnModelChanged(_currentModel = value); }
-        //}
 
         public ModelPanel()
         {
@@ -116,6 +120,23 @@ namespace System.Windows.Forms
 
             CalcMatrices();
 
+            Invalidate();
+        }
+
+        public void AddReference(ResourceNode node)
+        {
+            if (!_resourceList.Contains(node))
+                _resourceList.Add(node);
+            if (_model != null)
+                _model.ResetTextures();
+            Invalidate();
+        }
+        public void RemoveReference(ResourceNode node)
+        {
+            if (_resourceList.Contains(node))
+                _resourceList.Remove(node);
+            if (_model != null)
+                _model.ResetTextures();
             Invalidate();
         }
 
@@ -163,6 +184,23 @@ namespace System.Windows.Forms
 
             base.OnMouseMove(e);
         }
+
+        protected override bool IsInputKey(Keys keyData)
+        {
+            keyData &= (Keys)0xFFFF;
+            switch (keyData)
+            {
+                case Keys.Up:
+                case Keys.Down:
+                case Keys.Left:
+                case Keys.Right:
+                    return true;
+
+                default:
+                    return base.IsInputKey(keyData);
+            }
+        }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {
             switch (e.KeyCode)
@@ -173,7 +211,7 @@ namespace System.Windows.Forms
                         if (e.Control)
                             Rotate(-_rotFactor * 4, 0.0f);
                         else
-                            Translate(0.0f, -_transFactor * 4, 0.0f);
+                            Translate(0.0f, _transFactor * 8, 0.0f);
                         break;
                     }
                 case Keys.NumPad2:
@@ -182,37 +220,37 @@ namespace System.Windows.Forms
                         if (e.Control)
                             Rotate(_rotFactor * 4, 0.0f);
                         else
-                            Translate(0.0f, _transFactor * 4, 0.0f);
+                            Translate(0.0f, -_transFactor * 8, 0.0f);
                         break;
                     }
                 case Keys.NumPad6:
                 case Keys.Right:
                     {
                         if (e.Control)
-                            Rotate(0.0f, -_rotFactor * 4);
+                            Rotate(0.0f, _rotFactor * 4);
                         else
-                            Translate(-_transFactor * 4, 0.0f, 0.0f);
+                            Translate(_transFactor * 8, 0.0f, 0.0f);
                         break;
                     }
                 case Keys.NumPad4:
                 case Keys.Left:
                     {
                         if (e.Control)
-                            Rotate(0.0f, _rotFactor * 4);
+                            Rotate(0.0f, -_rotFactor * 4);
                         else
-                            Translate(_transFactor * 4, 0.0f, 0.0f);
+                            Translate(-_transFactor * 8, 0.0f, 0.0f);
                         break;
                     }
                 case Keys.Add:
                 case Keys.Oemplus:
                     {
-                        Translate(0.0f, 0.0f, -_zoomFactor * 2);
+                        Translate(0.0f, 0.0f, -_zoomFactor);
                         break;
                     }
                 case Keys.Subtract:
                 case Keys.OemMinus:
                     {
-                        Translate(0.0f, 0.0f, _zoomFactor * 2);
+                        Translate(0.0f, 0.0f, _zoomFactor);
                         break;
                     }
             }
@@ -237,9 +275,7 @@ namespace System.Windows.Forms
 
         private void CalcMatrices()
         {
-            _transform = Matrix43.TranslationMatrix(_viewPoint._x, _viewPoint._y, _viewPoint._z);
-            _transform.RotateY(_viewRot._y);
-            _transform.RotateX(_viewRot._x);
+            _transform = Matrix43.TransformationMatrix(new Vector3(1.0f), _viewRot, _viewPoint);
 
             _eyePoint = _transform.Multiply(new Vector3(0.0f, 0.0f, _viewDistance));
         }
@@ -300,6 +336,9 @@ namespace System.Windows.Forms
             _context.glTexEnv(GLTexEnvTarget.TextureEnvironment, GLTexEnvParam.TEXTURE_ENV_MODE, (int)GLTexEnvMode.MODULATE);
             _context.CheckErrors();
 
+            //Set client states
+            _context._states["_Node_Refs"] = _resourceList;
+
             OnResized();
         }
 
@@ -315,33 +354,6 @@ namespace System.Windows.Forms
             {
                 _context.glMatrixMode(GLMatrixMode.ModelView);
                 _context.glLoadIdentity();
-
-                //_context.glBegin(GLPrimitiveType.Lines);
-
-                //_context.glColor(1.0f, 0.0f, 0.0f);
-                //_context.glVertex(_viewPoint._x - 1.0, _viewPoint._y, _viewPoint._z);
-                //_context.glVertex(_viewPoint._x + 1.0, _viewPoint._y, _viewPoint._z);
-                //_context.glVertex(_viewPoint._x, _viewPoint._y - 1.0, _viewPoint._z);
-                //_context.glVertex(_viewPoint._x, _viewPoint._y + 1.0, _viewPoint._z);
-
-                //_context.glColor(0.0f, 1.0f, 0.0f);
-                //_context.glVertex(_eyePoint._x - 1.0, _eyePoint._y, _eyePoint._z);
-                //_context.glVertex(_eyePoint._x + 1.0, _eyePoint._y, _eyePoint._z);
-                //_context.glVertex(_eyePoint._x, _eyePoint._y - 1.0, _eyePoint._z);
-                //_context.glVertex(_eyePoint._x, _eyePoint._y + 1.0, _eyePoint._z);
-
-                //_context.glEnd();
-
-                //Matrix m = (Matrix)_transform;
-                //_context.glLoadMatrix((float*)&m);
-                //_context.glTranslate(0.0f, 0.0f, -50.0f);
-
-                //_context.glTranslate(_viewPoint._x, _viewPoint._y, _viewPoint._z);
-                //_context.glRotate(_viewRot._x, 1.0f, 0.0f, 0.0f);
-                //_context.glRotate(_viewRot._y, 0.0f, 1.0f, 0.0f);
-
-                //Matrix m2;
-                //_context.glGet(GLGetMode.MODELVIEW_MATRIX, (float*)&m2);
 
                 _context.gluLookAt(_eyePoint._x, _eyePoint._y, _eyePoint._z, _viewPoint._x, _viewPoint._y, _viewPoint._z, 0.0, 1.0, 0.0);
 

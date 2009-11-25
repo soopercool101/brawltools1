@@ -19,7 +19,7 @@ namespace BrawlLib.SSBBTypes
         public bushort _numFrames;
         public bushort _numEntries;
         public bint _unk2;
-        public bint _unk3;
+        public bint _layer;
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public ResourceGroup* Group { get { return (ResourceGroup*)(Address + _dataOffset); } }
@@ -31,7 +31,7 @@ namespace BrawlLib.SSBBTypes
             set { _stringOffset = (int)value - (int)Address; }
         }
 
-        public CHR0(int size, int frames, int entries)
+        public CHR0(int size, int frames, int entries, int layer)
         {
             _header._tag = Tag;
             _header._size = size;
@@ -44,7 +44,7 @@ namespace BrawlLib.SSBBTypes
             _numFrames = (ushort)frames;
             _numEntries = (ushort)entries;
             _unk2 = 0;
-            _unk3 = 0;
+            _layer = layer;
         }
     }
 

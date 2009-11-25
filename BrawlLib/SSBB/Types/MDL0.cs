@@ -682,16 +682,16 @@ namespace BrawlLib.SSBBTypes
     //0x0850 = bytes per data
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct MDL0Data10
+    public unsafe struct MDL0Texture
     {
         public bint _numEntries;
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-        public MDL0Data10Entry* Entries { get { return (MDL0Data10Entry*)(Address + 4); } }
+        public MDL0TextureEntry* Entries { get { return (MDL0TextureEntry*)(Address + 4); } }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct MDL0Data10Entry
+    public unsafe struct MDL0TextureEntry
     {
         public bint _x;
         public bint _y;

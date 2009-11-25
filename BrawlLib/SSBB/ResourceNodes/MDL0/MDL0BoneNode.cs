@@ -28,8 +28,10 @@ namespace BrawlLib.SSBB.ResourceNodes
         private Vector3 _bMin, _bMax;
         private Matrix43 _transform, _transformInvert;
 
-        public Matrix FrameMatrix        {            get { return _frameMatrix; }        }
-        public Matrix InverseBindMatrix        {            get { return _inverseBindMatrix; }        }
+        [Category("Bone")]
+        public Matrix FrameMatrix { get { return _frameMatrix; } }
+        [Category("Bone")]
+        public Matrix InverseBindMatrix { get { return _inverseBindMatrix; } }
 
         [Category("Bone")]
         public int HeaderLen { get { return Header->_headerLen; } }
@@ -71,11 +73,6 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Bone")]
         public int Part2Offset { get { return Header->_part2Offset; } }
 
-        [Category("Bone"), TypeConverter(typeof(Matrix43StringConverter))]
-        public Matrix43 TransformMatrix { get { return _transform; } set { _transform = value; SignalPropertyChange(); } }
-        [Category("Bone"), TypeConverter(typeof(Matrix43StringConverter))]
-        public Matrix43 TransformInverted { get { return _transformInvert; } set { _transformInvert = value; SignalPropertyChange(); } }
-
         [Category("Data2 Part2")]
         public List<string> Entries { get { return _entries; } }
 
@@ -103,10 +100,6 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             _bMin = Header->_boxMin;
             _bMax = Header->_boxMax;
-
-            //_transform = Header->_transform;
-            //_transformInvert = Header->_transformInv;
-
 
             if (Header->_part2Offset != 0)
             {
@@ -165,7 +158,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
 
             foreach (MDL0BoneNode bone in Children)
-                RecalcBindState();
+                bone.RecalcBindState();
         }
 
         #region Rendering
@@ -267,20 +260,14 @@ namespace BrawlLib.SSBB.ResourceNodes
             fixed (Matrix* m = &_frameState._transform)
                 ctx.glMultMatrix((float*)m);
 
-            //Render node
-            GLDisplayList list;
-            if (!ctx._states.ContainsKey("_NodeDL"))
-                ctx._states["_NodeDL"] = list = new GLDisplayList(BuildNode(ctx));
-            else
-                list = ctx._states["_NodeDL"] as GLDisplayList;
 
+            //Render node
+            GLDisplayList ndl = ctx.FindOrCreate<GLDisplayList>("NodeOrb", CreateNodeOrb);
             if (_nodeColor != Color.Transparent)
                 ctx.glColor(_nodeColor.R, _nodeColor.G, _nodeColor.B, _nodeColor.A);
             else
                 ctx.glColor(DefaultNodeColor.R, DefaultNodeColor.G, DefaultNodeColor.B, DefaultNodeColor.A);
-
-            ctx.glCallList(list);
-
+            ndl.Call();
 
             //Render children
             foreach (MDL0BoneNode n in Children)
@@ -296,7 +283,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             if ((node == null) || (index == 0)) //Reset to bind pose
                 _frameState = _bindState;
             else if ((e = node.FindChild(Name, false) as CHR0EntryNode) != null) //Set to anim pose
-                _frameState = new FrameState(e.Keyframes.AnimFrames[index - 1]);
+                _frameState = new FrameState(e.GetAnimFrame(index - 1));
             else //Set to neutral pose
                 _frameState = _bindState;
 
@@ -309,15 +296,13 @@ namespace BrawlLib.SSBB.ResourceNodes
                 b.ApplyCHR0(node, index);
         }
 
-        private unsafe uint BuildNode(GLContext ctx)
+        private static GLDisplayList CreateNodeOrb(GLContext ctx)
         {
-            uint dl = ctx.glGenLists(1);
-            ctx.glNewList(dl, GLListMode.COMPILE);
+            GLDisplayList list = new GLDisplayList(ctx);
 
+            list.Begin();
             fixed (Vector3* p = _nodeVertices)
             {
-                //ctx.glColor(0.0f, 0.5f, 0.0f);
-
                 Vector3* vp = p;
                 for (int x = 0; x < 6; x++)
                 {
@@ -345,9 +330,16 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             ctx.glEnd();
 
-            ctx.glEndList();
+            list.End();
 
-            return dl;
+            return list;
+        }
+
+        internal override void Bind(GLContext ctx)
+        {
+            _render = true;
+            _boneColor = Color.Transparent;
+            _nodeColor = Color.Transparent;
         }
 
         #endregion

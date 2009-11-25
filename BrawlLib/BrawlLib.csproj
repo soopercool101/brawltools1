@@ -46,7 +46,7 @@
   <ItemGroup>
     <None Include="System\ComponentModel\CustomPropertyDescriptor.cs" />
     <None Include="System\ComponentModel\DelegatePropertyDescriptor.cs" />
-    <None Include="Imaging\Collada.cs" />
+    <None Include="Modeling\Collada.cs" />
     <Compile Include="Imaging\DIB.cs" />
     <Compile Include="Imaging\IImageSource.cs" />
     <Compile Include="Imaging\NVDXT.cs" />
@@ -55,34 +55,17 @@
     <Compile Include="Imaging\TGAImage.cs" />
     <Compile Include="Imaging\WeightedAverage.cs" />
     <Compile Include="Maths.cs" />
-    <Compile Include="Modeling\Animation.cs" />
-    <Compile Include="Modeling\AnimBone.cs" />
-    <Compile Include="Modeling\AnimFrame.cs" />
-    <Compile Include="Modeling\BoneNode.cs" />
     <Compile Include="Modeling\FrameState.cs" />
     <Compile Include="Modeling\IMatrixProvider.cs" />
-    <Compile Include="Modeling\Material.cs" />
-    <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\NodeRef.cs" />
-    <Compile Include="Modeling\Polygon.cs" />
-    <Compile Include="Modeling\PolygonRef.cs" />
     <Compile Include="Modeling\Primitive.cs" />
-    <Compile Include="Modeling\RenderedObject.cs" />
-    <Compile Include="Modeling\Skin.cs" />
-    <Compile Include="Modeling\Vertex.cs" />
-    <Compile Include="Modeling\VertexList.cs" />
+    <Compile Include="Modeling\TextureRef.cs" />
     <Compile Include="OpenGL\Enums.cs" />
-    <None Include="OpenGL\GLBone.cs" />
     <Compile Include="OpenGL\GLContext.cs" />
     <Compile Include="OpenGL\GLDisplayList.cs" />
-    <None Include="OpenGL\GLMaterial.cs" />
-    <None Include="OpenGL\GLModel.cs" />
-    <None Include="OpenGL\GLNode.cs" />
     <Compile Include="OpenGL\GLPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <None Include="OpenGL\GLPolygon.cs" />
-    <None Include="OpenGL\GLPrimitive.cs" />
     <Compile Include="OpenGL\GLTexture.cs" />
     <Compile Include="SSBB\BinaryStringTable.cs" />
     <Compile Include="SSBB\ExportFilters.cs" />
@@ -152,8 +135,17 @@
     <Compile Include="System\Windows\Forms\AnimEditControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="System\Windows\Forms\GLTexturePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\GLTextureWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="System\Windows\Forms\GoodPictureBox.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\ModelAssetPanel.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="System\Windows\Forms\ModelEditControl.cs">
       <SubType>UserControl</SubType>
@@ -168,6 +160,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="System\Windows\Forms\NumericInputBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\ProxySplitter.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="System\Windows\Forms\TextureConverterDialog.cs">
@@ -253,6 +248,9 @@
   <ItemGroup>
     <EmbeddedResource Include="System\Windows\Forms\AnimEditControl.resx">
       <DependentUpon>AnimEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\ModelAssetPanel.resx">
+      <DependentUpon>ModelAssetPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\ModelEditControl.resx">
       <DependentUpon>ModelEditControl.cs</DependentUpon>

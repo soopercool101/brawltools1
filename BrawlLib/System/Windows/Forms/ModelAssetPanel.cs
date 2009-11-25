@@ -1,0 +1,745 @@
+﻿using System;
+using BrawlLib.SSBB.ResourceNodes;
+using System.Drawing;
+using BrawlLib.Modeling;
+using System.ComponentModel;
+using BrawlLib.OpenGL;
+using BrawlLib;
+
+namespace System.Windows.Forms
+{
+    public class ModelAssetPanel : UserControl
+    {
+        #region Designer
+
+        private CheckedListBox lstPolygons;
+        private CheckBox chkAllPoly;
+        private Button btnPolygons;
+        private ProxySplitter spltPolygons;
+        private Panel pnlTextures;
+        private CheckedListBox lstTextures;
+        private CheckBox chkAllTextures;
+        private Button btnTextures;
+        private Panel pnlBones;
+        private CheckedListBox lstBones;
+        private CheckBox chkAllBones;
+        private Button btnBones;
+        private ProxySplitter spltBones;
+        private ContextMenuStrip ctxTextures;
+        private ToolStripMenuItem sourceToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem1;
+        private ToolStripMenuItem viewToolStripMenuItem;
+        private ToolStripMenuItem replaceToolStripMenuItem;
+        private ToolStripMenuItem sizeToolStripMenuItem;
+        private ToolStripMenuItem resetToolStripMenuItem;
+        private ToolStripMenuItem exportToolStripMenuItem;
+        private Panel pnlPolygons;
+
+        private void InitializeComponent()
+        {
+            this.pnlPolygons = new System.Windows.Forms.Panel();
+            this.lstPolygons = new System.Windows.Forms.CheckedListBox();
+            this.chkAllPoly = new System.Windows.Forms.CheckBox();
+            this.btnPolygons = new System.Windows.Forms.Button();
+            this.pnlTextures = new System.Windows.Forms.Panel();
+            this.lstTextures = new System.Windows.Forms.CheckedListBox();
+            this.chkAllTextures = new System.Windows.Forms.CheckBox();
+            this.btnTextures = new System.Windows.Forms.Button();
+            this.pnlBones = new System.Windows.Forms.Panel();
+            this.lstBones = new System.Windows.Forms.CheckedListBox();
+            this.chkAllBones = new System.Windows.Forms.CheckBox();
+            this.btnBones = new System.Windows.Forms.Button();
+            this.ctxTextures = new System.Windows.Forms.ContextMenuStrip();
+            this.sourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.replaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.spltBones = new System.Windows.Forms.ProxySplitter();
+            this.spltPolygons = new System.Windows.Forms.ProxySplitter();
+            this.pnlPolygons.SuspendLayout();
+            this.pnlTextures.SuspendLayout();
+            this.pnlBones.SuspendLayout();
+            this.ctxTextures.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // pnlPolygons
+            // 
+            this.pnlPolygons.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlPolygons.Controls.Add(this.lstPolygons);
+            this.pnlPolygons.Controls.Add(this.chkAllPoly);
+            this.pnlPolygons.Controls.Add(this.btnPolygons);
+            this.pnlPolygons.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlPolygons.Location = new System.Drawing.Point(0, 0);
+            this.pnlPolygons.MinimumSize = new System.Drawing.Size(0, 21);
+            this.pnlPolygons.Name = "pnlPolygons";
+            this.pnlPolygons.Size = new System.Drawing.Size(398, 143);
+            this.pnlPolygons.TabIndex = 0;
+            // 
+            // lstPolygons
+            // 
+            this.lstPolygons.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lstPolygons.CausesValidation = false;
+            this.lstPolygons.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstPolygons.IntegralHeight = false;
+            this.lstPolygons.Location = new System.Drawing.Point(0, 41);
+            this.lstPolygons.Margin = new System.Windows.Forms.Padding(0);
+            this.lstPolygons.Name = "lstPolygons";
+            this.lstPolygons.Size = new System.Drawing.Size(396, 100);
+            this.lstPolygons.TabIndex = 4;
+            this.lstPolygons.ThreeDCheckBoxes = true;
+            this.lstPolygons.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lstPolygons_ItemCheck);
+            this.lstPolygons.SelectedValueChanged += new System.EventHandler(this.lstPolygons_SelectedValueChanged);
+            this.lstPolygons.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstPolygons_KeyDown);
+            // 
+            // chkAllPoly
+            // 
+            this.chkAllPoly.Checked = true;
+            this.chkAllPoly.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkAllPoly.Dock = System.Windows.Forms.DockStyle.Top;
+            this.chkAllPoly.Location = new System.Drawing.Point(0, 21);
+            this.chkAllPoly.Margin = new System.Windows.Forms.Padding(0);
+            this.chkAllPoly.Name = "chkAllPoly";
+            this.chkAllPoly.Padding = new System.Windows.Forms.Padding(1, 0, 0, 0);
+            this.chkAllPoly.Size = new System.Drawing.Size(396, 20);
+            this.chkAllPoly.TabIndex = 5;
+            this.chkAllPoly.Text = "All";
+            this.chkAllPoly.ThreeState = true;
+            this.chkAllPoly.UseVisualStyleBackColor = false;
+            this.chkAllPoly.CheckStateChanged += new System.EventHandler(this.chkAllPoly_CheckStateChanged);
+            // 
+            // btnPolygons
+            // 
+            this.btnPolygons.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnPolygons.Location = new System.Drawing.Point(0, 0);
+            this.btnPolygons.Name = "btnPolygons";
+            this.btnPolygons.Size = new System.Drawing.Size(396, 21);
+            this.btnPolygons.TabIndex = 6;
+            this.btnPolygons.Text = "Polygons";
+            this.btnPolygons.UseVisualStyleBackColor = true;
+            this.btnPolygons.Click += new System.EventHandler(this.btnPolygons_Click);
+            // 
+            // pnlTextures
+            // 
+            this.pnlTextures.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlTextures.Controls.Add(this.lstTextures);
+            this.pnlTextures.Controls.Add(this.chkAllTextures);
+            this.pnlTextures.Controls.Add(this.btnTextures);
+            this.pnlTextures.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlTextures.Location = new System.Drawing.Point(0, 322);
+            this.pnlTextures.MinimumSize = new System.Drawing.Size(0, 21);
+            this.pnlTextures.Name = "pnlTextures";
+            this.pnlTextures.Size = new System.Drawing.Size(398, 150);
+            this.pnlTextures.TabIndex = 2;
+            // 
+            // lstTextures
+            // 
+            this.lstTextures.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lstTextures.ContextMenuStrip = this.ctxTextures;
+            this.lstTextures.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstTextures.FormattingEnabled = true;
+            this.lstTextures.Location = new System.Drawing.Point(0, 41);
+            this.lstTextures.Name = "lstTextures";
+            this.lstTextures.Size = new System.Drawing.Size(396, 107);
+            this.lstTextures.TabIndex = 8;
+            this.lstTextures.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lstTextures_ItemCheck);
+            this.lstTextures.SelectedValueChanged += new System.EventHandler(this.lstTextures_SelectedValueChanged);
+            this.lstTextures.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstTextures_KeyDown);
+            this.lstTextures.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lstTextures_MouseDown);
+            // 
+            // chkAllTextures
+            // 
+            this.chkAllTextures.Checked = true;
+            this.chkAllTextures.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkAllTextures.Dock = System.Windows.Forms.DockStyle.Top;
+            this.chkAllTextures.Location = new System.Drawing.Point(0, 21);
+            this.chkAllTextures.Margin = new System.Windows.Forms.Padding(0);
+            this.chkAllTextures.Name = "chkAllTextures";
+            this.chkAllTextures.Padding = new System.Windows.Forms.Padding(1, 0, 0, 0);
+            this.chkAllTextures.Size = new System.Drawing.Size(396, 20);
+            this.chkAllTextures.TabIndex = 9;
+            this.chkAllTextures.Text = "All";
+            this.chkAllTextures.UseVisualStyleBackColor = false;
+            this.chkAllTextures.CheckStateChanged += new System.EventHandler(this.chkAllTextures_CheckStateChanged);
+            // 
+            // btnTextures
+            // 
+            this.btnTextures.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnTextures.Location = new System.Drawing.Point(0, 0);
+            this.btnTextures.Name = "btnTextures";
+            this.btnTextures.Size = new System.Drawing.Size(396, 21);
+            this.btnTextures.TabIndex = 7;
+            this.btnTextures.Text = "Textures";
+            this.btnTextures.UseVisualStyleBackColor = true;
+            this.btnTextures.Click += new System.EventHandler(this.btnTextures_Click);
+            // 
+            // pnlBones
+            // 
+            this.pnlBones.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlBones.Controls.Add(this.lstBones);
+            this.pnlBones.Controls.Add(this.chkAllBones);
+            this.pnlBones.Controls.Add(this.btnBones);
+            this.pnlBones.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlBones.Location = new System.Drawing.Point(0, 147);
+            this.pnlBones.MinimumSize = new System.Drawing.Size(0, 21);
+            this.pnlBones.Name = "pnlBones";
+            this.pnlBones.Size = new System.Drawing.Size(398, 171);
+            this.pnlBones.TabIndex = 3;
+            // 
+            // lstBones
+            // 
+            this.lstBones.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lstBones.CausesValidation = false;
+            this.lstBones.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstBones.IntegralHeight = false;
+            this.lstBones.Location = new System.Drawing.Point(0, 41);
+            this.lstBones.Margin = new System.Windows.Forms.Padding(0);
+            this.lstBones.Name = "lstBones";
+            this.lstBones.Size = new System.Drawing.Size(396, 128);
+            this.lstBones.TabIndex = 7;
+            this.lstBones.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lstBones_ItemCheck);
+            this.lstBones.SelectedValueChanged += new System.EventHandler(this.lstBones_SelectedValueChanged);
+            this.lstBones.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstBones_KeyDown);
+            // 
+            // chkAllBones
+            // 
+            this.chkAllBones.Checked = true;
+            this.chkAllBones.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkAllBones.Dock = System.Windows.Forms.DockStyle.Top;
+            this.chkAllBones.Location = new System.Drawing.Point(0, 21);
+            this.chkAllBones.Margin = new System.Windows.Forms.Padding(0);
+            this.chkAllBones.Name = "chkAllBones";
+            this.chkAllBones.Padding = new System.Windows.Forms.Padding(1, 0, 0, 0);
+            this.chkAllBones.Size = new System.Drawing.Size(396, 20);
+            this.chkAllBones.TabIndex = 8;
+            this.chkAllBones.Text = "All";
+            this.chkAllBones.UseVisualStyleBackColor = false;
+            this.chkAllBones.CheckStateChanged += new System.EventHandler(this.chkAllBones_CheckStateChanged);
+            // 
+            // btnBones
+            // 
+            this.btnBones.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnBones.Location = new System.Drawing.Point(0, 0);
+            this.btnBones.Name = "btnBones";
+            this.btnBones.Size = new System.Drawing.Size(396, 21);
+            this.btnBones.TabIndex = 9;
+            this.btnBones.Text = "Bones";
+            this.btnBones.UseVisualStyleBackColor = true;
+            this.btnBones.Click += new System.EventHandler(this.btnBones_Click);
+            // 
+            // ctxTextures
+            // 
+            this.ctxTextures.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.sourceToolStripMenuItem,
+            this.sizeToolStripMenuItem,
+            this.toolStripMenuItem1,
+            this.viewToolStripMenuItem,
+            this.exportToolStripMenuItem,
+            this.replaceToolStripMenuItem,
+            this.resetToolStripMenuItem});
+            this.ctxTextures.Name = "ctxTextures";
+            this.ctxTextures.Size = new System.Drawing.Size(125, 142);
+            this.ctxTextures.Opening += new System.ComponentModel.CancelEventHandler(this.ctxTextures_Opening);
+            // 
+            // sourceToolStripMenuItem
+            // 
+            this.sourceToolStripMenuItem.Enabled = false;
+            this.sourceToolStripMenuItem.Name = "sourceToolStripMenuItem";
+            this.sourceToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.sourceToolStripMenuItem.Text = "Source";
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(121, 6);
+            // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.viewToolStripMenuItem.Text = "View...";
+            this.viewToolStripMenuItem.Click += new System.EventHandler(this.viewToolStripMenuItem_Click);
+            // 
+            // replaceToolStripMenuItem
+            // 
+            this.replaceToolStripMenuItem.Name = "replaceToolStripMenuItem";
+            this.replaceToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.replaceToolStripMenuItem.Text = "Replace...";
+            this.replaceToolStripMenuItem.Click += new System.EventHandler(this.replaceToolStripMenuItem_Click);
+            // 
+            // sizeToolStripMenuItem
+            // 
+            this.sizeToolStripMenuItem.Enabled = false;
+            this.sizeToolStripMenuItem.Name = "sizeToolStripMenuItem";
+            this.sizeToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.sizeToolStripMenuItem.Text = "Size";
+            // 
+            // resetToolStripMenuItem
+            // 
+            this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.resetToolStripMenuItem.Text = "Reload";
+            this.resetToolStripMenuItem.Click += new System.EventHandler(this.resetToolStripMenuItem_Click);
+            // 
+            // exportToolStripMenuItem
+            // 
+            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.exportToolStripMenuItem.Text = "Export...";
+            this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
+            // spltBones
+            // 
+            this.spltBones.Cursor = System.Windows.Forms.Cursors.HSplit;
+            this.spltBones.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.spltBones.Location = new System.Drawing.Point(0, 318);
+            this.spltBones.Name = "spltBones";
+            this.spltBones.Size = new System.Drawing.Size(398, 4);
+            this.spltBones.TabIndex = 4;
+            this.spltBones.Text = "proxySplitter1";
+            this.spltBones.Dragged += new System.Windows.Forms.SplitterEventHandler(this.spltBones_Dragged);
+            // 
+            // spltPolygons
+            // 
+            this.spltPolygons.Cursor = System.Windows.Forms.Cursors.HSplit;
+            this.spltPolygons.Dock = System.Windows.Forms.DockStyle.Top;
+            this.spltPolygons.Location = new System.Drawing.Point(0, 143);
+            this.spltPolygons.Name = "spltPolygons";
+            this.spltPolygons.Size = new System.Drawing.Size(398, 4);
+            this.spltPolygons.TabIndex = 1;
+            this.spltPolygons.Text = "proxySplitter1";
+            this.spltPolygons.Dragged += new System.Windows.Forms.SplitterEventHandler(this.spltPolygons_Dragged);
+            // 
+            // ModelAssetPanel
+            // 
+            this.Controls.Add(this.pnlBones);
+            this.Controls.Add(this.spltBones);
+            this.Controls.Add(this.pnlTextures);
+            this.Controls.Add(this.spltPolygons);
+            this.Controls.Add(this.pnlPolygons);
+            this.Name = "ModelAssetPanel";
+            this.Size = new System.Drawing.Size(398, 472);
+            this.pnlPolygons.ResumeLayout(false);
+            this.pnlTextures.ResumeLayout(false);
+            this.pnlBones.ResumeLayout(false);
+            this.ctxTextures.ResumeLayout(false);
+            this.ResumeLayout(false);
+
+        }
+
+        #endregion
+
+        private bool _updating = false;
+        private object _targetObject;
+        public object TargetObject
+        {
+            get { return _targetObject; }
+            set { _targetObject = value; }
+        }
+
+        private MDL0BoneNode _selectedBone;
+        public MDL0BoneNode SelectedBone { get { return _selectedBone; } }
+
+        private MDL0PolygonNode _selectedPolygon;
+        public MDL0PolygonNode SelectedPolygon { get { return _selectedPolygon; } }
+
+        private TextureRef _selectedTexture;
+        public TextureRef SelectedTexture { get { return _selectedTexture; } }
+
+        public event EventHandler TargetChanged;
+        public event EventHandler RenderStateChanged;
+
+        public ModelAssetPanel()
+        {
+            InitializeComponent();
+        }
+
+        public void Attach(MDL0Node model)
+        {
+            lstPolygons.BeginUpdate();
+            lstPolygons.Items.Clear();
+            lstBones.BeginUpdate();
+            lstBones.Items.Clear();
+            lstTextures.BeginUpdate();
+            lstTextures.Items.Clear();
+
+            _selectedBone = null;
+            _selectedPolygon = null;
+            _targetObject = null;
+
+            chkAllPoly.CheckState = CheckState.Checked;
+            chkAllBones.CheckState = CheckState.Checked;
+            chkAllTextures.CheckState = CheckState.Checked;
+
+            if (model != null)
+            {
+                ResourceNode n;
+
+                if ((n = model.FindChild("Polygons", false)) != null)
+                    foreach (MDL0PolygonNode poly in n.Children)
+                        lstPolygons.Items.Add(poly, poly._render);
+
+                if ((n = model.FindChild("Bones", false)) != null)
+                    foreach (MDL0BoneNode bone in n.Children)
+                        WrapBone(bone);
+
+                foreach (TextureRef tref in model._texRefs)
+                    lstTextures.Items.Add(tref, tref.Enabled);
+            }
+
+            lstTextures.EndUpdate();
+            lstPolygons.EndUpdate();
+            lstBones.EndUpdate();
+        }
+        private void WrapBone(MDL0BoneNode bone)
+        {
+            lstBones.Items.Add(bone, bone._render);
+            foreach (MDL0BoneNode b in bone.Children)
+                WrapBone(b);
+        }
+
+        private void spltPolygons_Dragged(object sender, SplitterEventArgs e)
+        {
+            if (e.Y == 0)
+                return;
+
+            //float totalSize = pnlBones.Height + spltBones.Height + pnlMaterials.Height;
+            //float newSize = totalSize - e.Y;
+
+            //pnlMaterials.Height = (int)(newSize * (pnlMaterials.Height / totalSize));
+            pnlPolygons.Height += e.Y;
+        }
+
+        private void spltBones_Dragged(object sender, SplitterEventArgs e)
+        {
+            if (e.Y == 0)
+                return;
+
+            //float totalSize = pnlPolygons.Height + pnlBones.Height + spltBones.Height;
+            //float newSize = totalSize + e.Y;
+
+            //pnlPolygons.Height = (int)(newSize * (pnlPolygons.Height / totalSize));
+            pnlTextures.Height -= e.Y;
+        }
+
+        private void lstPolygons_SelectedValueChanged(object sender, EventArgs e)
+        {
+            _targetObject = _selectedPolygon = lstPolygons.SelectedItem as MDL0PolygonNode;
+            if (TargetChanged != null)
+                TargetChanged(this, null);
+        }
+
+        private void lstPolygons_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if (!_updating)
+            {
+                if (e.CurrentValue == CheckState.Checked)
+                    e.NewValue = CheckState.Indeterminate;
+            }
+
+            MDL0PolygonNode poly = lstPolygons.Items[e.Index] as MDL0PolygonNode;
+
+            poly._render = e.NewValue == CheckState.Checked || e.NewValue == CheckState.Indeterminate;
+            poly._wireframe = e.NewValue == CheckState.Indeterminate;
+
+            if (!_updating)
+                if (RenderStateChanged != null)
+                    RenderStateChanged(this, null);
+        }
+
+        private void lstBones_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            MDL0BoneNode bone = lstBones.Items[e.Index] as MDL0BoneNode;
+
+            bone._render = e.NewValue == CheckState.Checked;
+
+            if (!_updating)
+                if (RenderStateChanged != null)
+                    RenderStateChanged(this, null);
+        }
+
+        private void lstBones_SelectedValueChanged(object sender, EventArgs e)
+        {
+            if (_selectedBone != null)
+                _selectedBone._boneColor = _selectedBone._nodeColor = Color.Transparent;
+
+            if ((_targetObject = _selectedBone = lstBones.SelectedItem as MDL0BoneNode) != null)
+            {
+                _selectedBone._boneColor = Color.FromArgb(0, 128, 255);
+                _selectedBone._nodeColor = Color.FromArgb(255, 128, 0);
+            }
+
+            if (TargetChanged != null)
+                TargetChanged(this, null);
+
+            if (RenderStateChanged != null)
+                RenderStateChanged(this, null);
+        }
+
+        private void lstTextures_SelectedValueChanged(object sender, EventArgs e)
+        {
+            if (_selectedTexture != null)
+                _selectedTexture.Selected = false;
+
+            if ((_targetObject = _selectedTexture = lstTextures.SelectedItem as TextureRef) != null)
+            {
+                _selectedTexture.Selected = true;
+            }
+
+            if (TargetChanged != null)
+                TargetChanged(this, null);
+
+            if (!_updating)
+                if (RenderStateChanged != null)
+                    RenderStateChanged(this, null);
+        }
+
+        private void chkAllPoly_CheckStateChanged(object sender, EventArgs e)
+        {
+            if (lstPolygons.Items.Count == 0)
+                return;
+
+            _updating = true;
+
+            lstPolygons.BeginUpdate();
+            for (int i = 0; i < lstPolygons.Items.Count; i++)
+                lstPolygons.SetItemCheckState(i, chkAllPoly.CheckState);
+            lstPolygons.EndUpdate();
+
+            _updating = false;
+
+            if (RenderStateChanged != null)
+                RenderStateChanged(this, null);
+        }
+
+        private void chkAllBones_CheckStateChanged(object sender, EventArgs e)
+        {
+            if (lstBones.Items.Count == 0)
+                return;
+
+            _updating = true;
+
+            lstBones.BeginUpdate();
+            for (int i = 0; i < lstBones.Items.Count; i++)
+                lstBones.SetItemCheckState(i, chkAllBones.CheckState);
+            lstBones.EndUpdate();
+
+            _updating = false;
+
+            if (RenderStateChanged != null)
+                RenderStateChanged(this, null);
+        }
+
+        private void btnPolygons_Click(object sender, EventArgs e)
+        {
+            if (lstPolygons.Visible)
+            {
+                pnlPolygons.Tag = pnlPolygons.Height;
+                pnlPolygons.Height = btnPolygons.Height;
+                lstPolygons.Visible = chkAllPoly.Visible = spltPolygons.Visible = false;
+            }
+            else
+            {
+                pnlPolygons.Height = (int)pnlPolygons.Tag;
+                lstPolygons.Visible = chkAllPoly.Visible = spltPolygons.Visible = true;
+            }
+        }
+        private void btnBones_Click(object sender, EventArgs e)
+        {
+            if (lstBones.Visible)
+            {
+                pnlBones.Tag = pnlBones.Height;
+                if (lstPolygons.Visible)
+                {
+                    pnlBones.Dock = DockStyle.Bottom;
+                    pnlBones.Height = btnBones.Height;
+                    pnlPolygons.Dock = DockStyle.Fill;
+                }
+                else
+                {
+                    spltPolygons.Visible = false;
+                    pnlBones.Dock = DockStyle.Top;
+                    pnlBones.Height = btnBones.Height;
+                    if (lstTextures.Visible)
+                    {
+                        spltBones.Visible = false;
+                        pnlTextures.Dock = DockStyle.Fill;
+                    }
+                    else
+                        pnlTextures.Dock = DockStyle.Top;
+                }
+                chkAllBones.Visible = lstBones.Visible = false;
+            }
+            else
+            {
+                pnlBones.Height = (int)pnlBones.Tag;
+                if (lstPolygons.Visible)
+                    pnlPolygons.Dock = DockStyle.Top;
+
+                pnlTextures.Dock = DockStyle.Bottom;
+                pnlBones.Dock = DockStyle.Fill;
+                chkAllBones.Visible = lstBones.Visible = true;
+            }
+        }
+        private void btnTextures_Click(object sender, EventArgs e)
+        {
+            if (lstTextures.Visible)
+            {
+                pnlTextures.Tag = pnlTextures.Height;
+                pnlTextures.Height = btnTextures.Height;
+                lstTextures.Visible = chkAllTextures.Visible = spltBones.Visible = false;
+            }
+            else
+            {
+                pnlTextures.Height = (int)pnlTextures.Tag;
+                lstTextures.Visible = chkAllTextures.Visible = spltBones.Visible = true;
+            }
+        }
+
+        private void lstTextures_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            TextureRef tref = lstTextures.Items[e.Index] as TextureRef;
+
+            tref.Enabled = e.NewValue == CheckState.Checked;
+
+            if (!_updating)
+                if (RenderStateChanged != null)
+                    RenderStateChanged(this, null);
+        }
+        private void chkAllTextures_CheckStateChanged(object sender, EventArgs e)
+        {
+            _updating = true;
+
+            lstTextures.BeginUpdate();
+            for (int i = 0; i < lstTextures.Items.Count; i++)
+                lstTextures.SetItemCheckState(i, chkAllTextures.CheckState);
+            lstTextures.EndUpdate();
+
+            _updating = false;
+
+            if (RenderStateChanged != null)
+                RenderStateChanged(this, null);
+        }
+
+        private void viewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_selectedTexture != null)
+                using (GLTextureWindow w = new GLTextureWindow())
+                    w.ShowDialog(this, _selectedTexture.Texture);
+        }
+
+        private void replaceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int index = lstTextures.SelectedIndex;
+            if ((_selectedTexture != null) && (_selectedTexture.Source is TEX0Node))
+            {
+                TEX0Node node = _selectedTexture.Source as TEX0Node;
+                using (TextureConverterDialog dlg = new TextureConverterDialog())
+                    if (dlg.ShowDialog(this, node) == DialogResult.OK)
+                    {
+                        _updating = true;
+                        _selectedTexture.Reload();
+                        lstTextures.SetItemCheckState(index, CheckState.Checked);
+                        lstTextures.SetSelected(index, false);
+                        _updating = false;
+
+                        if (RenderStateChanged != null)
+                            RenderStateChanged(this, null);
+                    }
+            }
+        }
+
+        private void ctxTextures_Opening(object sender, CancelEventArgs e)
+        {
+            if (_selectedTexture == null)
+                e.Cancel = true;
+            else
+            {
+                if (_selectedTexture.Source is TEX0Node)
+                {
+                    viewToolStripMenuItem.Enabled = true;
+                    replaceToolStripMenuItem.Enabled = true;
+                    exportToolStripMenuItem.Enabled = true;
+                    sourceToolStripMenuItem.Text = String.Format("Source: {0}", ((ResourceNode)_selectedTexture.Source).RootNode._origPath);
+                }
+                else if (_selectedTexture.Source is string)
+                {
+                    viewToolStripMenuItem.Enabled = true;
+                    replaceToolStripMenuItem.Enabled = false;
+                    exportToolStripMenuItem.Enabled = false;
+                    sourceToolStripMenuItem.Text = String.Format("Source: {0}", (string)_selectedTexture.Source);
+                }
+                else
+                {
+                    viewToolStripMenuItem.Enabled = false;
+                    replaceToolStripMenuItem.Enabled = false;
+                    exportToolStripMenuItem.Enabled = false;
+                    sourceToolStripMenuItem.Text = "Source: <Not Found>";
+                }
+
+                if (_selectedTexture.Texture != null)
+                    sizeToolStripMenuItem.Text = String.Format("Size: {0} x {1}", _selectedTexture.Texture.Width, _selectedTexture.Texture.Height);
+                else
+                    sizeToolStripMenuItem.Text = "Size: <Not Found>";
+            }
+        }
+
+        private void lstTextures_MouseDown(object sender, MouseEventArgs e)
+        {
+            int index = lstTextures.IndexFromPoint(e.X, e.Y);
+            if (lstTextures.SelectedIndex != index)
+                lstTextures.SelectedIndex = index;
+
+            if (e.Button == MouseButtons.Right)
+            {
+                if (_selectedTexture != null)
+                    lstTextures.ContextMenuStrip = ctxTextures;
+                else
+                    lstTextures.ContextMenuStrip = null;
+            }
+        }
+
+        private void resetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_selectedTexture != null)
+            {
+                _selectedTexture.Reload();
+                if (RenderStateChanged != null)
+                    RenderStateChanged(this, null);
+            }
+        }
+
+        private void lstTextures_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+                lstTextures.SelectedItem = null;
+        }
+        private void lstBones_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+                lstBones.SelectedItem = null;
+        }
+        private void lstPolygons_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+                lstPolygons.SelectedItem = null;
+        }
+
+        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if ((_selectedTexture != null) && (_selectedTexture.Source is TEX0Node))
+            {
+                TEX0Node node = _selectedTexture.Source as TEX0Node;
+                using (SaveFileDialog dlgSave = new SaveFileDialog())
+                {
+                    dlgSave.FileName = node.Name;
+                    dlgSave.Filter = ExportFilters.TEX0;
+                    if (dlgSave.ShowDialog(this) == DialogResult.OK)
+                        node.Export(dlgSave.FileName);
+                }
+            }
+        }
+    }
+}

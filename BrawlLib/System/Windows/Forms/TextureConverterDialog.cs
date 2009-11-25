@@ -46,7 +46,7 @@ namespace System.Windows.Forms
         {
             InitializeComponent();
 
-            openFileDialog1.Filter = "All Image Formats (*.png,*.tga,*.tiff,*.tif,*.bmp,*.jpg,*.jpeg,*.gif)|*.png;*.tga;*.tif;*.tiff;*.bmp;*.jpg;*.jpeg,*.gif|" +
+            dlgOpen.Filter = "All Image Formats (*.png,*.tga,*.tiff,*.tif,*.bmp,*.jpg,*.jpeg,*.gif)|*.png;*.tga;*.tif;*.tiff;*.bmp;*.jpg;*.jpeg,*.gif|" +
             "Portable Network Graphics (*.png)|*.png|" +
             "Truevision TARGA (*.tga)|*.tga|" +
             "Tagged Image File Format (*.tiff,*.tif)|*.tiff;*.tif|" +
@@ -144,9 +144,9 @@ namespace System.Windows.Forms
 
         private bool LoadImages()
         {
-            if (openFileDialog1.ShowDialog(this) != DialogResult.OK)
+            if (dlgOpen.ShowDialog(this) != DialogResult.OK)
                 return false;
-            return LoadImages(openFileDialog1.FileName);
+            return LoadImages(dlgOpen.FileName);
         }
 
         private bool LoadImages(string path)
@@ -439,19 +439,21 @@ namespace System.Windows.Forms
         private Panel panel2;
         private Button button1;
         private Label label9;
-        private OpenFileDialog openFileDialog1;
+        private OpenFileDialog dlgOpen;
 
         private void InitializeComponent()
         {
             this.chkPreview = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.btnRecommend = new System.Windows.Forms.Button();
             this.numLOD = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
             this.cboFormat = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.btnRecommend = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.lblTransparencies = new System.Windows.Forms.Label();
+            this.lblDataSize = new System.Windows.Forms.Label();
             this.lblColors = new System.Windows.Forms.Label();
             this.lblSize = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -466,20 +468,16 @@ namespace System.Windows.Forms
             this.label7 = new System.Windows.Forms.Label();
             this.cboPaletteFormat = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.lblDataSize = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.pictureBox1 = new System.Windows.Forms.GoodPictureBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.txtPath = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.label9 = new System.Windows.Forms.Label();
+            this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numLOD)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.grpPalette.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numPaletteCount)).BeginInit();
             this.groupBox4.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -511,18 +509,6 @@ namespace System.Windows.Forms
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Image";
-            // 
-            // btnRecommend
-            // 
-            this.btnRecommend.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnRecommend.Location = new System.Drawing.Point(75, 14);
-            this.btnRecommend.Name = "btnRecommend";
-            this.btnRecommend.Size = new System.Drawing.Size(98, 21);
-            this.btnRecommend.TabIndex = 5;
-            this.btnRecommend.Text = "Recommend";
-            this.btnRecommend.UseVisualStyleBackColor = true;
-            this.btnRecommend.Click += new System.EventHandler(this.btnRecommend_Click);
             // 
             // numLOD
             // 
@@ -574,6 +560,18 @@ namespace System.Windows.Forms
             this.label4.Text = "Format:";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // btnRecommend
+            // 
+            this.btnRecommend.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRecommend.Location = new System.Drawing.Point(75, 14);
+            this.btnRecommend.Name = "btnRecommend";
+            this.btnRecommend.Size = new System.Drawing.Size(98, 21);
+            this.btnRecommend.TabIndex = 5;
+            this.btnRecommend.Text = "Recommend";
+            this.btnRecommend.UseVisualStyleBackColor = true;
+            this.btnRecommend.Click += new System.EventHandler(this.btnRecommend_Click);
+            // 
             // groupBox2
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
@@ -593,6 +591,15 @@ namespace System.Windows.Forms
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Info";
             // 
+            // label9
+            // 
+            this.label9.Location = new System.Drawing.Point(6, 71);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(85, 20);
+            this.label9.TabIndex = 7;
+            this.label9.Text = "Data Size:";
+            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // lblTransparencies
             // 
             this.lblTransparencies.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
@@ -602,6 +609,16 @@ namespace System.Windows.Forms
             this.lblTransparencies.Size = new System.Drawing.Size(76, 20);
             this.lblTransparencies.TabIndex = 5;
             this.lblTransparencies.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lblDataSize
+            // 
+            this.lblDataSize.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblDataSize.Location = new System.Drawing.Point(97, 71);
+            this.lblDataSize.Name = "lblDataSize";
+            this.lblDataSize.Size = new System.Drawing.Size(76, 20);
+            this.lblDataSize.TabIndex = 6;
+            this.lblDataSize.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblColors
             // 
@@ -771,16 +788,6 @@ namespace System.Windows.Forms
             this.label6.Text = "Format:";
             this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // lblDataSize
-            // 
-            this.lblDataSize.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblDataSize.Location = new System.Drawing.Point(97, 71);
-            this.lblDataSize.Name = "lblDataSize";
-            this.lblDataSize.Size = new System.Drawing.Size(76, 20);
-            this.lblDataSize.TabIndex = 6;
-            this.lblDataSize.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // groupBox4
             // 
             this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -849,19 +856,6 @@ namespace System.Windows.Forms
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // label9
-            // 
-            this.label9.Location = new System.Drawing.Point(6, 71);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(85, 20);
-            this.label9.TabIndex = 7;
-            this.label9.Text = "Data Size:";
-            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
             // TextureConverterDialog
             // 
             this.ClientSize = new System.Drawing.Size(564, 417);
@@ -876,10 +870,8 @@ namespace System.Windows.Forms
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Advanced Texture Converter";
             this.groupBox1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numLOD)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.grpPalette.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numPaletteCount)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);

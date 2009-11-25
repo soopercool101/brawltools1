@@ -110,8 +110,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
 
         private List<IMatrixProvider> _nodes = new List<IMatrixProvider>();
-
         internal List<ResourceNode> _bones = new List<ResourceNode>();
+        internal List<TextureRef> _texRefs = new List<TextureRef>();
 
         protected override void OnPopulate()
         {
@@ -120,14 +120,17 @@ namespace BrawlLib.SSBB.ResourceNodes
                 if ((group = Header->GetEntry(i)) != null)
                     new MDL0GroupNode().Initialize(this, new DataSource(group, 0), i);
 
-            MDL0GroupNode bNode= FindChild("Bones", false) as MDL0GroupNode;
+            MDL0GroupNode bNode = FindChild("Bones", false) as MDL0GroupNode;
             MDL0GroupNode pNode = FindChild("Polygons", false) as MDL0GroupNode;
             MDL0GroupNode mNode = FindChild("Materials1", false) as MDL0GroupNode;
+            MDL0GroupNode t1Node = FindChild("Textures1", false) as MDL0GroupNode;
+            MDL0GroupNode t2Node = FindChild("Textures2", false) as MDL0GroupNode;
             MDL0DefNode nodeMix = FindChild("Definitions/NodeMix", false) as MDL0DefNode;
             MDL0DefNode drawOpa = FindChild("Definitions/DrawOpa", false) as MDL0DefNode;
             MDL0DefNode drawXlu = FindChild("Definitions/DrawXlu", false) as MDL0DefNode;
 
-            IMatrixProvider[] nodeCache = new IMatrixProvider[NumNodes];
+            //IMatrixProvider[] nodeCache = new IMatrixProvider[NumNodes];
+            _nodes = new List<IMatrixProvider>(new IMatrixProvider[NumNodes]);
 
             //Pull out bones
             //foreach (MDL0BoneNode bone in _boneCache)
@@ -136,7 +139,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             {
                 _bones = bNode.Children;
                 foreach (MDL0BoneNode b in bNode._nodeCache)
-                    nodeCache[b.NodeId] = new NodeRef(b);
+                    _nodes[b.NodeId] = new NodeRef(b);
 
                 //Pull out node groups
                 if (nodeMix != null)
@@ -147,9 +150,9 @@ namespace BrawlLib.SSBB.ResourceNodes
                             NodeRef nref = new NodeRef();
 
                             foreach (MDL0NodeType3Entry e in d._entries)
-                                nref._entries.Add(new NodeWeight(nodeCache[e._id], e._value));
+                                nref._entries.Add(new NodeWeight(_nodes[e._id], e._value));
 
-                            nodeCache[d._id] = nref;
+                            _nodes[d._id] = nref;
                         }
 
                 //Attach opaque textures
@@ -182,16 +185,44 @@ namespace BrawlLib.SSBB.ResourceNodes
 
 
             //Link polygons to nodes
-            if ((bNode = FindChild("Polygons", false) as MDL0GroupNode) != null)
-                foreach (MDL0PolygonNode n in bNode.Children)
+            if (pNode != null)
+                foreach (MDL0PolygonNode n in pNode.Children)
                     if (n.NodeId >= 0)
-                        n._singleBind = nodeCache[n.NodeId];
+                        n._singleBind = _nodes[n.NodeId];
+
+            //Get texture references and attach them to texture nodes
+            if (t1Node != null)
+                foreach (MDL0TextureNode t in t1Node.Children)
+                    _texRefs.Add(t._textureReference = new TextureRef(t.Name));
+            if (t2Node != null)
+                foreach (MDL0TextureNode t in t2Node.Children)
+                {
+                    TextureRef tref = null;
+                    foreach (TextureRef tr in _texRefs)
+                        if (tr.Name == t.Name)
+                        { tref = tr; break; }
+                    if (tref == null)
+                        _texRefs.Add(tref = new TextureRef(t.Name));
+                    t._textureReference = tref;
+                }
+
+            //Attach material refs to texture refs
+            if (mNode != null)
+                foreach (MDL0MaterialNode mat in mNode.Children)
+                    foreach (MDL0MaterialRefNode mref in mat.Children)
+                        foreach (TextureRef tref in _texRefs)
+                            if (tref.Name == mref.Name)
+                            {
+                                mref._textureReference = tref;
+                                break;
+                            }
+
+            //Attach texture nodes to materials
 
 
             //Clear caches
             //_boneCache.Clear();
 
-            _nodes = new List<IMatrixProvider>(nodeCache);
         }
 
         internal override void GetStrings(StringTable table)
@@ -228,8 +259,13 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         #region Rendering
 
+        internal bool _bound = false;
+
         internal void Render(GLContext ctx)
         {
+            if (!_bound)
+                Bind(ctx);
+
             ResourceNode group;
 
             ctx.glDisable((uint)GLEnableCap.Lighting);
@@ -272,8 +308,28 @@ namespace BrawlLib.SSBB.ResourceNodes
                     poly.WeightVertices(_nodes);
         }
 
+        private void Bind(GLContext ctx)
+        {
+            _bound = true;
+            foreach (MDL0GroupNode g in Children)
+                g.Bind(ctx);
+        }
+
+        internal void Unbind(GLContext ctx)
+        {
+            _bound = false;
+            foreach (MDL0GroupNode g in Children)
+                g.Unbind(ctx);
+        }
+
         #endregion
 
         internal static ResourceNode TryParse(DataSource source) { return ((MDL0*)source.Address)->_entry._tag == MDL0.Tag ? new MDL0Node() : null; }
+
+        internal void ResetTextures()
+        {
+            foreach (TextureRef tref in _texRefs)
+                tref.Reload();
+        }
     }
 }

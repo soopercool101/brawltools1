@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using BrawlLib.Imaging;
 using System.Drawing.Imaging;
+using BrawlLib.Modeling;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -54,6 +55,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Texture Reference")]
         public int Unknown11 { get { return _unk11; } set { _unk11 = value; SignalPropertyChange(); } }
 
+        internal TextureRef _textureReference;
+
         protected override bool OnInitialize()
         {
             _unk1 = Header->_unk1;
@@ -98,88 +101,17 @@ namespace BrawlLib.SSBB.ResourceNodes
             header->_float = _float;
         }
 
-        internal void Prepare(GLContext ctx)
+
+        internal void Bind(GLContext ctx)
         {
-            GLTexture tex;
-            string name = String.Format("{0}_TexObj", Name);
+            if (_textureReference != null)
+                _textureReference.Prepare(ctx);
+        }
 
-            if (ctx._states.ContainsKey(name))
-            {
-                tex = ctx._states[name] as GLTexture;
-                ctx.glBindTexture(GLTextureTarget.Texture2D, tex._id);
-            }
-            else
-            {
-                uint texId;
-                ctx.glGenTextures(1, &texId);
-                tex = new GLTexture() { _id = texId };
-                ctx._states[name] = tex;
-
-                ctx.glBindTexture(GLTextureTarget.Texture2D, texId);
-
-                Bitmap bmp = null;
-
-                //Find texture
-                TEX0Node tNode = RootNode.FindChild("Textures(NW4R)/" + Name, true) as TEX0Node;
-                if (tNode != null)
-                    bmp = tNode.GetImage(0);
-                else
-                {
-                    //Search for texture in node path
-                    string path = RootNode._origPath;
-                    DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(path));
-                    foreach (FileInfo file in dir.GetFiles(Name + ".*"))
-                    {
-                        if (file.Name.EndsWith(".tga"))
-                        {
-                            bmp = TGA.FromFile(file.FullName);
-                            break;
-                        }
-                        else if (file.Name.EndsWith(".png") || file.Name.EndsWith(".tiff") || file.Name.EndsWith(".tif"))
-                        {
-                            bmp = (Bitmap)Bitmap.FromFile(file.FullName);
-                            break;
-                        }
-                    }
-                }
-
-                if (bmp != null)
-                {
-                    ctx.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MagFilter, (int)GLTextureMagFilter.LINEAR);
-                    ctx.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MinFilter, (int)GLTextureMinFilter.NEAREST_MIPMAP_LINEAR);
-                    ctx.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.BaseLevel, 0);
-
-                    if (tNode != null)
-                        ctx.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MaxLevel, tNode.LevelOfDetail);
-                    else
-                        ctx.glTexParameter(GLTextureTarget.Texture2D, GLTextureParameter.MaxLevel, 0);
-
-
-                    int w = bmp.Width, h = bmp.Height, size = w * h;
-                    BitmapData data = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-                    try
-                    {
-                        using (UnsafeBuffer buffer = new UnsafeBuffer(size << 2))
-                        {
-                            ARGBPixel* sPtr = (ARGBPixel*)data.Scan0;
-                            ABGRPixel* dPtr = (ABGRPixel*)buffer.Address;
-
-                            for (int i = 0; i < size; i++)
-                                *dPtr++ = (ABGRPixel)(*sPtr++);
-
-                            ctx.gluBuild2DMipmaps(GLTextureTarget.Texture2D, GLInternalPixelFormat._4, w, h, GLPixelDataFormat.RGBA, GLPixelDataType.UNSIGNED_BYTE, buffer.Address);
-                        }
-                    }
-                    finally
-                    {
-                        bmp.UnlockBits(data);
-                        bmp.Dispose();
-                    }
-                }
-                else
-                {
-                }
-            }
+        internal void Unbind(GLContext ctx)
+        {
+            if (_textureReference != null)
+                _textureReference.Unbind();
         }
     }
 }
