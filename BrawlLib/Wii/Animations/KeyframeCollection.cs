@@ -163,7 +163,7 @@ namespace BrawlLib.Wii.Animations
             if (upper == 0)
             {
                 count = _count - lower;
-                if (count  <= 0)
+                if (count <= 0)
                     return;
             }
             else if (diff < 1)
@@ -255,6 +255,23 @@ namespace BrawlLib.Wii.Animations
                 CalcAnimFrames(prev, next, offset);
         }
 
+        private void MoveKeyframe(int index, int offset, int newIndex)
+        {
+            KeyframeEntry[] arr = _keyFrames[offset];
+            KeyframeEntry entry = arr[index];
+
+            if (float.IsNaN(entry._value))
+                return;
+
+            arr[newIndex] = entry;
+            arr[entry._prev]._next = (ushort)newIndex;
+            arr[entry._next]._prev = (ushort)newIndex;
+            arr[index] = KeyframeEntry.Empty;
+
+            CalcAnimFrames(entry._prev, newIndex, offset);
+            CalcAnimFrames(newIndex, entry._next, offset);
+        }
+
         public void SetSize(int count)
         {
             if (_count == count)
@@ -305,6 +322,78 @@ namespace BrawlLib.Wii.Animations
                 if (_frames != null)
                     CalcAnimFrames(prev, 0, i);
             }
+        }
+
+        public void Insert(int index)
+        {
+            index++;
+            if ((index > _count) || (index < 1))
+                return;
+
+            for (int i = 0; i < 9; i++)
+                ShiftRight(index, i);
+        }
+        public void Insert(KeyFrameMode mode, int index)
+        {
+            index++;
+            if ((index > _count) || (index < 1))
+                return;
+
+            if (mode >= KeyFrameMode.ScaleXYZ)
+            {
+                int offset = ((int)mode - 9) * 3;
+                for (int i = 0; i < 3; i++)
+                    ShiftRight(index, offset++);
+            }
+            ShiftRight(index, (int)mode);
+        }
+
+        public void Delete(int index)
+        {
+            index++;
+            if ((index > _count) || (index < 1))
+                return;
+
+            for (int i = 0; i < 9; i++)
+                ShiftLeft(index, i);
+        }
+        public void Delete(KeyFrameMode mode, int index)
+        {
+            index++;
+            if ((index > _count) || (index < 1))
+                return;
+
+            if (mode >= KeyFrameMode.ScaleXYZ)
+            {
+                int offset = ((int)mode - 9) * 3;
+                for (int i = 0; i < 3; i++)
+                    ShiftLeft(index, offset++);
+            }
+            ShiftLeft(index, (int)mode);
+        }
+
+        private void ShiftRight(int index, int offset)
+        {
+            KeyframeEntry[] arr = _keyFrames[offset];
+
+            //Delete last keyframe
+            RemoveKeyframe(_count, offset);
+
+            //Move remaining keyframes
+            for (int i = _count; --i >= index; )
+                MoveKeyframe(i, offset, i + 1);
+        }
+
+        private void ShiftLeft(int index, int offset)
+        {
+            KeyframeEntry[] arr = _keyFrames[offset];
+
+            //Delete keyframe
+            RemoveKeyframe(index, offset);
+
+            //Move remaining keyframes
+            for (int i = index; i++ < _count; )
+                MoveKeyframe(i, offset, i - 1);
         }
     }
 

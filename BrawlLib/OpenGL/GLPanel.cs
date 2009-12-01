@@ -43,6 +43,18 @@ namespace BrawlLib.OpenGL
             base.OnLoad(e);
         }
 
+        protected override void DestroyHandle()
+        {
+            DisposeContext();
+            base.DestroyHandle();
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            DisposeContext();
+            base.OnHandleDestroyed(e);
+        }
+
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -79,11 +91,11 @@ namespace BrawlLib.OpenGL
                 base.OnResize(e);
         }
 
-        protected override void OnHandleDestroyed(EventArgs e)
-        {
-            DisposeContext();
-            base.OnHandleDestroyed(e);
-        }
+        //protected override void OnHandleDestroyed(EventArgs e)
+        //{
+        //    DisposeContext();
+        //    base.OnHandleDestroyed(e);
+        //}
 
         internal protected virtual void OnInit()
         {
@@ -97,7 +109,7 @@ namespace BrawlLib.OpenGL
 
             _context.glMatrixMode(GLMatrixMode.Projection);
             _context.glLoadIdentity();
-            _context.gluPerspective(45.0f, (float)Width / (float)Height, 0.01f, 10000.0f);
+            _context.gluPerspective(45.0f, (float)Width / (float)Height, 0.01f, 20000.0f);
         }
         internal protected virtual void OnRender()
         {

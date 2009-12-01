@@ -50,6 +50,19 @@ namespace BrawlLib.SSBB.ResourceNodes
             return n;
         }
 
+        public void InsertKeyframe(int index)
+        {
+            FrameCount++;
+            foreach (CHR0EntryNode c in Children)
+                c.Keyframes.Insert(index);
+        }
+        public void DeleteKeyframe(int index)
+        {
+            foreach (CHR0EntryNode c in Children)
+                c.Keyframes.Delete(index);
+            FrameCount--;
+        }
+
         protected override bool OnInitialize()
         {
             base.OnInitialize();
@@ -140,6 +153,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
 
         internal static ResourceNode TryParse(DataSource source) { return ((CHR0*)source.Address)->_header._tag == CHR0.Tag ? new CHR0Node() : null; }
+
     }
 
     public unsafe class CHR0EntryNode : ResourceNode

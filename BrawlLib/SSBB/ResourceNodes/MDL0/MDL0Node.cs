@@ -260,6 +260,9 @@ namespace BrawlLib.SSBB.ResourceNodes
         #region Rendering
 
         internal bool _bound = false;
+        internal bool _renderPolygons = true;
+        internal bool _renderPolygonsWireframe = false;
+        internal bool _renderBones = true;
 
         internal void Render(GLContext ctx)
         {
@@ -268,22 +271,30 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             ResourceNode group;
 
-            ctx.glDisable((uint)GLEnableCap.Lighting);
-            ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
+            if (_renderPolygons)
+            {
+                ctx.glEnable(GLEnableCap.Lighting);
+                ctx.glEnable(GLEnableCap.DepthTest);
+                if (_renderPolygonsWireframe)
+                    ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
+                else
+                    ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Fill);
 
-            //render bones
-            if ((group = FindChild("Bones", false)) != null)
-                foreach (MDL0BoneNode bone in group.Children)
-                    bone.Render(ctx);
+                if ((group = FindChild("Polygons", false)) != null)
+                    foreach (MDL0PolygonNode poly in group.Children)
+                        poly.Render(ctx);
+            }
 
-            ctx.glEnable(GLEnableCap.Lighting);
-            ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Fill);
-            ctx.glColor(1.0f, 1.0f, 1.0f, 1.0f);
+            if (_renderBones)
+            {
+                ctx.glDisable((uint)GLEnableCap.Lighting);
+                ctx.glDisable((uint)GLEnableCap.DepthTest);
+                ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
 
-            //render polygons
-            if ((group = FindChild("Polygons", false)) != null)
-                foreach (MDL0PolygonNode poly in group.Children)
-                    poly.Render(ctx);
+                if ((group = FindChild("Bones", false)) != null)
+                    foreach (MDL0BoneNode bone in group.Children)
+                        bone.Render(ctx);
+            }
         }
 
         internal void ApplyCHR(CHR0Node node, int index)

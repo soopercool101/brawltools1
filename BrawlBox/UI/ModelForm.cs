@@ -11,19 +11,6 @@ namespace BrawlBox
 {
     class ModelForm : Form
     {
-
-        public ModelForm() { InitializeComponent(); }
-
-        public DialogResult ShowDialog(MDL0Node model) { return ShowDialog(null, model); }
-        public DialogResult ShowDialog(IWin32Window owner, MDL0Node model)
-        {
-            this.Text = String.Format("Advanced Model Editor - {0}", model.Name);
-            modelEditControl1.TargetModel = model;
-            try { return ShowDialog(owner); }
-            finally { modelEditControl1.TargetModel = null; }
-        }
-
-
         #region Designer
 
         private ModelEditControl modelEditControl1;
@@ -50,15 +37,24 @@ namespace BrawlBox
             this.Name = "ModelForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ModelForm_FormClosing);
             this.ResumeLayout(false);
 
         }
 
         #endregion
+        public ModelForm() { InitializeComponent(); }
 
+        public DialogResult ShowDialog(MDL0Node model) { return ShowDialog(null, model); }
+        public DialogResult ShowDialog(IWin32Window owner, MDL0Node model)
+        {
+            this.Text = String.Format("Advanced Model Editor - {0}", model.Name);
+            modelEditControl1.TargetModel = model;
+            try { return ShowDialog(owner); }
+            finally { modelEditControl1.TargetModel = null; }
+        }
 
-
-
+        private void ModelForm_FormClosing(object sender, FormClosingEventArgs e) { e.Cancel = !modelEditControl1.CloseFiles(); }
 
     }
 }

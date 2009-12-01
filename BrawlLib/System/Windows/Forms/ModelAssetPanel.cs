@@ -5,6 +5,7 @@ using BrawlLib.Modeling;
 using System.ComponentModel;
 using BrawlLib.OpenGL;
 using BrawlLib;
+using System.IO;
 
 namespace System.Windows.Forms
 {
@@ -43,26 +44,26 @@ namespace System.Windows.Forms
             this.btnPolygons = new System.Windows.Forms.Button();
             this.pnlTextures = new System.Windows.Forms.Panel();
             this.lstTextures = new System.Windows.Forms.CheckedListBox();
+            this.ctxTextures = new System.Windows.Forms.ContextMenuStrip();
+            this.sourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.replaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chkAllTextures = new System.Windows.Forms.CheckBox();
             this.btnTextures = new System.Windows.Forms.Button();
             this.pnlBones = new System.Windows.Forms.Panel();
             this.lstBones = new System.Windows.Forms.CheckedListBox();
             this.chkAllBones = new System.Windows.Forms.CheckBox();
             this.btnBones = new System.Windows.Forms.Button();
-            this.ctxTextures = new System.Windows.Forms.ContextMenuStrip();
-            this.sourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.replaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.spltBones = new System.Windows.Forms.ProxySplitter();
             this.spltPolygons = new System.Windows.Forms.ProxySplitter();
             this.pnlPolygons.SuspendLayout();
             this.pnlTextures.SuspendLayout();
-            this.pnlBones.SuspendLayout();
             this.ctxTextures.SuspendLayout();
+            this.pnlBones.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlPolygons
@@ -89,7 +90,6 @@ namespace System.Windows.Forms
             this.lstPolygons.Name = "lstPolygons";
             this.lstPolygons.Size = new System.Drawing.Size(396, 100);
             this.lstPolygons.TabIndex = 4;
-            this.lstPolygons.ThreeDCheckBoxes = true;
             this.lstPolygons.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lstPolygons_ItemCheck);
             this.lstPolygons.SelectedValueChanged += new System.EventHandler(this.lstPolygons_SelectedValueChanged);
             this.lstPolygons.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstPolygons_KeyDown);
@@ -106,7 +106,6 @@ namespace System.Windows.Forms
             this.chkAllPoly.Size = new System.Drawing.Size(396, 20);
             this.chkAllPoly.TabIndex = 5;
             this.chkAllPoly.Text = "All";
-            this.chkAllPoly.ThreeState = true;
             this.chkAllPoly.UseVisualStyleBackColor = false;
             this.chkAllPoly.CheckStateChanged += new System.EventHandler(this.chkAllPoly_CheckStateChanged);
             // 
@@ -148,6 +147,67 @@ namespace System.Windows.Forms
             this.lstTextures.SelectedValueChanged += new System.EventHandler(this.lstTextures_SelectedValueChanged);
             this.lstTextures.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstTextures_KeyDown);
             this.lstTextures.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lstTextures_MouseDown);
+            // 
+            // ctxTextures
+            // 
+            this.ctxTextures.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.sourceToolStripMenuItem,
+            this.sizeToolStripMenuItem,
+            this.toolStripMenuItem1,
+            this.viewToolStripMenuItem,
+            this.exportToolStripMenuItem,
+            this.replaceToolStripMenuItem,
+            this.resetToolStripMenuItem});
+            this.ctxTextures.Name = "ctxTextures";
+            this.ctxTextures.Size = new System.Drawing.Size(125, 142);
+            this.ctxTextures.Opening += new System.ComponentModel.CancelEventHandler(this.ctxTextures_Opening);
+            // 
+            // sourceToolStripMenuItem
+            // 
+            this.sourceToolStripMenuItem.Enabled = false;
+            this.sourceToolStripMenuItem.Name = "sourceToolStripMenuItem";
+            this.sourceToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.sourceToolStripMenuItem.Text = "Source";
+            // 
+            // sizeToolStripMenuItem
+            // 
+            this.sizeToolStripMenuItem.Enabled = false;
+            this.sizeToolStripMenuItem.Name = "sizeToolStripMenuItem";
+            this.sizeToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.sizeToolStripMenuItem.Text = "Size";
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(121, 6);
+            // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.viewToolStripMenuItem.Text = "View...";
+            this.viewToolStripMenuItem.Click += new System.EventHandler(this.viewToolStripMenuItem_Click);
+            // 
+            // exportToolStripMenuItem
+            // 
+            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.exportToolStripMenuItem.Text = "Export...";
+            this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
+            // replaceToolStripMenuItem
+            // 
+            this.replaceToolStripMenuItem.Name = "replaceToolStripMenuItem";
+            this.replaceToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.replaceToolStripMenuItem.Text = "Replace...";
+            this.replaceToolStripMenuItem.Click += new System.EventHandler(this.replaceToolStripMenuItem_Click);
+            // 
+            // resetToolStripMenuItem
+            // 
+            this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.resetToolStripMenuItem.Text = "Reload";
+            this.resetToolStripMenuItem.Click += new System.EventHandler(this.resetToolStripMenuItem_Click);
             // 
             // chkAllTextures
             // 
@@ -229,67 +289,6 @@ namespace System.Windows.Forms
             this.btnBones.UseVisualStyleBackColor = true;
             this.btnBones.Click += new System.EventHandler(this.btnBones_Click);
             // 
-            // ctxTextures
-            // 
-            this.ctxTextures.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.sourceToolStripMenuItem,
-            this.sizeToolStripMenuItem,
-            this.toolStripMenuItem1,
-            this.viewToolStripMenuItem,
-            this.exportToolStripMenuItem,
-            this.replaceToolStripMenuItem,
-            this.resetToolStripMenuItem});
-            this.ctxTextures.Name = "ctxTextures";
-            this.ctxTextures.Size = new System.Drawing.Size(125, 142);
-            this.ctxTextures.Opening += new System.ComponentModel.CancelEventHandler(this.ctxTextures_Opening);
-            // 
-            // sourceToolStripMenuItem
-            // 
-            this.sourceToolStripMenuItem.Enabled = false;
-            this.sourceToolStripMenuItem.Name = "sourceToolStripMenuItem";
-            this.sourceToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.sourceToolStripMenuItem.Text = "Source";
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(121, 6);
-            // 
-            // viewToolStripMenuItem
-            // 
-            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.viewToolStripMenuItem.Text = "View...";
-            this.viewToolStripMenuItem.Click += new System.EventHandler(this.viewToolStripMenuItem_Click);
-            // 
-            // replaceToolStripMenuItem
-            // 
-            this.replaceToolStripMenuItem.Name = "replaceToolStripMenuItem";
-            this.replaceToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.replaceToolStripMenuItem.Text = "Replace...";
-            this.replaceToolStripMenuItem.Click += new System.EventHandler(this.replaceToolStripMenuItem_Click);
-            // 
-            // sizeToolStripMenuItem
-            // 
-            this.sizeToolStripMenuItem.Enabled = false;
-            this.sizeToolStripMenuItem.Name = "sizeToolStripMenuItem";
-            this.sizeToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.sizeToolStripMenuItem.Text = "Size";
-            // 
-            // resetToolStripMenuItem
-            // 
-            this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            this.resetToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.resetToolStripMenuItem.Text = "Reload";
-            this.resetToolStripMenuItem.Click += new System.EventHandler(this.resetToolStripMenuItem_Click);
-            // 
-            // exportToolStripMenuItem
-            // 
-            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.exportToolStripMenuItem.Text = "Export...";
-            this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
-            // 
             // spltBones
             // 
             this.spltBones.Cursor = System.Windows.Forms.Cursors.HSplit;
@@ -323,8 +322,8 @@ namespace System.Windows.Forms
             this.Size = new System.Drawing.Size(398, 472);
             this.pnlPolygons.ResumeLayout(false);
             this.pnlTextures.ResumeLayout(false);
-            this.pnlBones.ResumeLayout(false);
             this.ctxTextures.ResumeLayout(false);
+            this.pnlBones.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -333,6 +332,7 @@ namespace System.Windows.Forms
 
         private bool _updating = false;
         private object _targetObject;
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object TargetObject
         {
             get { return _targetObject; }
@@ -340,15 +340,20 @@ namespace System.Windows.Forms
         }
 
         private MDL0BoneNode _selectedBone;
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public MDL0BoneNode SelectedBone { get { return _selectedBone; } }
 
         private MDL0PolygonNode _selectedPolygon;
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public MDL0PolygonNode SelectedPolygon { get { return _selectedPolygon; } }
 
         private TextureRef _selectedTexture;
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public TextureRef SelectedTexture { get { return _selectedTexture; } }
 
-        public event EventHandler TargetChanged;
+        public event EventHandler SelectedPolygonChanged;
+        public event EventHandler SelectedBoneChanged;
+        public event EventHandler SelectedTextureChanged;
         public event EventHandler RenderStateChanged;
 
         public ModelAssetPanel()
@@ -427,22 +432,15 @@ namespace System.Windows.Forms
         private void lstPolygons_SelectedValueChanged(object sender, EventArgs e)
         {
             _targetObject = _selectedPolygon = lstPolygons.SelectedItem as MDL0PolygonNode;
-            if (TargetChanged != null)
-                TargetChanged(this, null);
+            if (SelectedPolygonChanged != null)
+                SelectedPolygonChanged(this, null);
         }
 
         private void lstPolygons_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            if (!_updating)
-            {
-                if (e.CurrentValue == CheckState.Checked)
-                    e.NewValue = CheckState.Indeterminate;
-            }
-
             MDL0PolygonNode poly = lstPolygons.Items[e.Index] as MDL0PolygonNode;
 
-            poly._render = e.NewValue == CheckState.Checked || e.NewValue == CheckState.Indeterminate;
-            poly._wireframe = e.NewValue == CheckState.Indeterminate;
+            poly._render = e.NewValue == CheckState.Checked;
 
             if (!_updating)
                 if (RenderStateChanged != null)
@@ -471,8 +469,8 @@ namespace System.Windows.Forms
                 _selectedBone._nodeColor = Color.FromArgb(255, 128, 0);
             }
 
-            if (TargetChanged != null)
-                TargetChanged(this, null);
+            if (SelectedBoneChanged != null)
+                SelectedBoneChanged(this, null);
 
             if (RenderStateChanged != null)
                 RenderStateChanged(this, null);
@@ -488,8 +486,8 @@ namespace System.Windows.Forms
                 _selectedTexture.Selected = true;
             }
 
-            if (TargetChanged != null)
-                TargetChanged(this, null);
+            if (SelectedTextureChanged != null)
+                SelectedTextureChanged(this, null);
 
             if (!_updating)
                 if (RenderStateChanged != null)
@@ -662,7 +660,7 @@ namespace System.Windows.Forms
                     viewToolStripMenuItem.Enabled = true;
                     replaceToolStripMenuItem.Enabled = true;
                     exportToolStripMenuItem.Enabled = true;
-                    sourceToolStripMenuItem.Text = String.Format("Source: {0}", ((ResourceNode)_selectedTexture.Source).RootNode._origPath);
+                    sourceToolStripMenuItem.Text = String.Format("Source: {0}", Path.GetFileName(((ResourceNode)_selectedTexture.Source).RootNode._origPath));
                 }
                 else if (_selectedTexture.Source is string)
                 {

@@ -27,10 +27,10 @@ namespace System.Windows.Forms
         private float _zoomFactor = 2.5f;
         public float ZoomScale { get { return _zoomFactor; } set { _zoomFactor = value; } }
 
-        private int _zoomInit = -5;
+        private int _zoomInit = 5;
         public int InitialZoomFactor { get { return _zoomInit; } set { _zoomInit = value; } }
 
-        private int _yInit = -100;
+        private int _yInit = 100;
         public int InitialYFactor { get { return _yInit; } set { _yInit = value; } }
 
         private Vector3 _eyePoint;
@@ -115,7 +115,7 @@ namespace System.Windows.Forms
 
         public void ResetCamera()
         {
-            _viewPoint = new Vector3();
+            _viewPoint = new Vector3(0.0f, _yInit * _transFactor, _zoomInit * _zoomFactor);
             _viewRot = new Vector3();
 
             CalcMatrices();
@@ -143,6 +143,8 @@ namespace System.Windows.Forms
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             int z = e.Delta / 120;
+            if (Control.ModifierKeys == Keys.Shift)
+                z *= 32;
 
             Translate(0.0f, 0.0f, -z * _zoomFactor);
 
@@ -169,6 +171,12 @@ namespace System.Windows.Forms
             int yDiff = _lastY - e.Y;
             _lastX = e.X;
             _lastY = e.Y;
+
+            if (Control.ModifierKeys == Keys.Shift)
+            {
+                xDiff *= 16;
+                yDiff *= 16;
+            }
 
             lock(_context)
             {
@@ -201,60 +209,79 @@ namespace System.Windows.Forms
             }
         }
 
-        protected override void OnKeyDown(KeyEventArgs e)
+        protected override bool ProcessKeyMessage(ref Message m)
         {
-            switch (e.KeyCode)
+            if (m.Msg == 0x100)
             {
-                case Keys.NumPad8:
-                case Keys.Up:
-                    {
-                        if (e.Control)
-                            Rotate(-_rotFactor * 4, 0.0f);
-                        else
-                            Translate(0.0f, _transFactor * 8, 0.0f);
-                        break;
-                    }
-                case Keys.NumPad2:
-                case Keys.Down:
-                    {
-                        if (e.Control)
-                            Rotate(_rotFactor * 4, 0.0f);
-                        else
-                            Translate(0.0f, -_transFactor * 8, 0.0f);
-                        break;
-                    }
-                case Keys.NumPad6:
-                case Keys.Right:
-                    {
-                        if (e.Control)
-                            Rotate(0.0f, _rotFactor * 4);
-                        else
-                            Translate(_transFactor * 8, 0.0f, 0.0f);
-                        break;
-                    }
-                case Keys.NumPad4:
-                case Keys.Left:
-                    {
-                        if (e.Control)
-                            Rotate(0.0f, -_rotFactor * 4);
-                        else
-                            Translate(-_transFactor * 8, 0.0f, 0.0f);
-                        break;
-                    }
-                case Keys.Add:
-                case Keys.Oemplus:
-                    {
-                        Translate(0.0f, 0.0f, -_zoomFactor);
-                        break;
-                    }
-                case Keys.Subtract:
-                case Keys.OemMinus:
-                    {
-                        Translate(0.0f, 0.0f, _zoomFactor);
-                        break;
-                    }
+                Keys mod = Control.ModifierKeys;
+                bool ctrl = (mod & Keys.Control) != 0;
+                bool shift = (mod & Keys.Shift) != 0;
+                bool alt = (mod & Keys.Alt) != 0;
+                switch ((Keys)m.WParam)
+                {
+                    case Keys.NumPad8:
+                    case Keys.Up:
+                        {
+                            if (alt)
+                                break;
+                            if (ctrl)
+                                Rotate(-_rotFactor * (shift ? 32 : 4), 0.0f);
+                            else
+                                Translate(0.0f, _transFactor * (shift ? 128 : 8), 0.0f);
+                            return true;
+                        }
+                    case Keys.NumPad2:
+                    case Keys.Down:
+                        {
+                            if (alt)
+                                break;
+                            if (ctrl)
+                                Rotate(_rotFactor * (shift ? 32 : 4), 0.0f);
+                            else
+                                Translate(0.0f, -_transFactor * (shift ? 128 : 8), 0.0f);
+                            return true;
+                        }
+                    case Keys.NumPad6:
+                    case Keys.Right:
+                        {
+                            if (alt)
+                                break;
+                            if (ctrl)
+                                Rotate(0.0f, _rotFactor * (shift ? 32 : 4));
+                            else
+                                Translate(_transFactor * (shift ? 128 : 8), 0.0f, 0.0f);
+                            return true;
+                        }
+                    case Keys.NumPad4:
+                    case Keys.Left:
+                        {
+                            if (alt)
+                                break;
+                            if (ctrl)
+                                Rotate(0.0f, -_rotFactor * (shift ? 32 : 4));
+                            else
+                                Translate(-_transFactor * (shift ? 128 : 8), 0.0f, 0.0f);
+                            return true;
+                        }
+                    case Keys.Add:
+                    case Keys.Oemplus:
+                        {
+                            if (alt)
+                                break;
+                            Translate(0.0f, 0.0f, -_zoomFactor * (shift ? 32 : 2));
+                            return true;
+                        }
+                    case Keys.Subtract:
+                    case Keys.OemMinus:
+                        {
+                            if (alt)
+                                break;
+                            Translate(0.0f, 0.0f, _zoomFactor * (shift ? 32 : 2));
+                            return true;
+                        }
+                }
             }
-            base.OnKeyDown(e);
+            return base.ProcessKeyMessage(ref m);
         }
 
         private void Translate(float x, float y, float z)

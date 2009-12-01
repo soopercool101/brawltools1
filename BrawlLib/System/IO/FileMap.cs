@@ -24,6 +24,9 @@ namespace BrawlLib.IO
                 _baseStream.Dispose();
                 _baseStream = null;
             }
+#if DEBUG
+            Console.WriteLine("Closing file map: {0}", _path);
+#endif
             GC.SuppressFinalize(this); 
         }
 
@@ -53,6 +56,9 @@ namespace BrawlLib.IO
             if (length == 0)
                 length = (int)stream.Length;
 
+#if DEBUG
+            Console.WriteLine("Opening file map: {0}", stream.Name);
+#endif
             switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:
@@ -67,7 +73,10 @@ namespace BrawlLib.IO
         {
             if (length == 0)
                 length = (int)stream.Length;
-
+            
+#if DEBUG
+            Console.WriteLine("Opening file map: {0}", stream.Name);
+#endif
             switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:

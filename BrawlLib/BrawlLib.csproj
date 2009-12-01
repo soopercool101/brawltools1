@@ -144,13 +144,22 @@
     <Compile Include="System\Windows\Forms\GoodPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="System\Windows\Forms\ModelAnimPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="System\Windows\Forms\ModelAssetPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="System\Windows\Forms\ModelEditControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="System\Windows\Forms\ModelOptionPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="System\Windows\Forms\ModelPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\ModelPlaybackPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="System\Windows\Forms\MSBinEditor.cs">
@@ -249,11 +258,20 @@
     <EmbeddedResource Include="System\Windows\Forms\AnimEditControl.resx">
       <DependentUpon>AnimEditControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\ModelAnimPanel.resx">
+      <DependentUpon>ModelAnimPanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\ModelAssetPanel.resx">
       <DependentUpon>ModelAssetPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\ModelEditControl.resx">
       <DependentUpon>ModelEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\ModelOptionPanel.resx">
+      <DependentUpon>ModelOptionPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\ModelPlaybackPanel.resx">
+      <DependentUpon>ModelPlaybackPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\MSBinEditor.resx">
       <DependentUpon>MSBinEditor.cs</DependentUpon>

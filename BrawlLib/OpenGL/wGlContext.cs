@@ -29,7 +29,7 @@ namespace BrawlLib.OpenGL
             }
             if (_hdc)
             {
-                Win32.ReleaseDC(_hwnd, _hdc);
+                //Win32.ReleaseDC(_hwnd, _hdc);
                 _hdc = null;
             }
             base.Dispose();
@@ -61,7 +61,7 @@ namespace BrawlLib.OpenGL
 
         public override void Capture()
         {
-            if (_hglrc)
+            if ((_hdc) && (_hglrc))
             {
                 if (!wGL.wglMakeCurrent(_hdc, _hglrc))
                     throw new Win32Exception(Marshal.GetLastWin32Error());
@@ -69,13 +69,12 @@ namespace BrawlLib.OpenGL
         }
         public override void Swap()
         {
-            if (_hglrc)
+            if ((_hdc) && (_hglrc))
                 wGL.wglSwapBuffers(_hdc);
         }
         public override void Release()
         {
-            if (_hglrc)
-                wGL.wglMakeCurrent(null, null);
+            wGL.wglMakeCurrent(null, null);
         }
 
         internal override void glAccum(GLAccumOp op, float value) { wGL.glAccum(op, value); }

@@ -86,7 +86,6 @@ namespace BrawlLib.SSBB.ResourceNodes
         //public MDL0VertexNode VertexNode { get { return _vertexNode; } }
 
         internal bool _render = true;
-        internal bool _wireframe = false;
 
         private List<Primitive> _primitives;
         public List<Primitive> Primitives
@@ -141,10 +140,10 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (!_render)
                 return;
 
-            if (_wireframe)
-                ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
-            else
-                ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Fill);
+            //if (_wireframe)
+            //    ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
+            //else
+            //    ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Fill);
 
             ctx.glPushMatrix();
 
@@ -169,14 +168,16 @@ namespace BrawlLib.SSBB.ResourceNodes
                 ctx.glEnableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
                 foreach (MDL0MaterialRefNode mr in _material.Children)
                 {
-                    if ((mr._layerId1 == 0) || (!mr._textureReference.Enabled))
+                    //if ((mr._layerId1 == 0) || (!mr._textureReference.Enabled))
+                    //    continue;
+                    if (!mr._textureReference.Enabled)
                         continue;
 
                     mr.Bind(ctx);
                     foreach (Primitive prim in Primitives)
                     {
                         prim.PreparePointers(ctx);
-                        prim.Render(ctx, mr._layerId1);
+                        prim.Render(ctx, 0);
                     }
                 }
                 ctx.glDisableClientState(GLArrayType.TEXTURE_COORD_ARRAY);

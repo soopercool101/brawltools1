@@ -268,6 +268,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             else
                 ctx.glColor(DefaultNodeColor.R, DefaultNodeColor.G, DefaultNodeColor.B, DefaultNodeColor.A);
             ndl.Call();
+            DrawNodeOrients(ctx);
 
             //Render children
             foreach (MDL0BoneNode n in Children)
@@ -301,6 +302,13 @@ namespace BrawlLib.SSBB.ResourceNodes
             GLDisplayList list = new GLDisplayList(ctx);
 
             list.Begin();
+            DrawNodeOrb(ctx);
+            list.End();
+
+            return list;
+        }
+        private static void DrawNodeOrb(GLContext ctx)
+        {
             fixed (Vector3* p = _nodeVertices)
             {
                 Vector3* vp = p;
@@ -312,27 +320,24 @@ namespace BrawlLib.SSBB.ResourceNodes
                     ctx.glEnd();
                 }
             }
-
-            //Render node orients
+        }
+        private static void DrawNodeOrients(GLContext ctx)
+        {
             ctx.glBegin(GLPrimitiveType.Lines);
 
-            ctx.glColor(1.0f, 0.0f, 0.0f);
+            ctx.glColor(1.0f, 0.0f, 0.0f, 1.0f);
             ctx.glVertex(0.0f, 0.0f, 0.0f);
             ctx.glVertex(_nodeRadius * 2, 0.0f, 0.0f);
 
-            ctx.glColor(0.0f, 1.0f, 0.0f);
+            ctx.glColor(0.0f, 1.0f, 0.0f, 1.0f);
             ctx.glVertex(0.0f, 0.0f, 0.0f);
             ctx.glVertex(0.0f, _nodeRadius * 2, 0.0f);
 
-            ctx.glColor(0.0f, 0.0f, 1.0f);
+            ctx.glColor(0.0f, 0.0f, 1.0f, 1.0f);
             ctx.glVertex(0.0f, 0.0f, 0.0f);
             ctx.glVertex(0.0f, 0.0f, _nodeRadius * 2);
 
             ctx.glEnd();
-
-            list.End();
-
-            return list;
         }
 
         internal override void Bind(GLContext ctx)

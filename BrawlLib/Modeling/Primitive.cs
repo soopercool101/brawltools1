@@ -43,7 +43,7 @@ namespace BrawlLib.Modeling
 
         internal unsafe void Render(GLContext ctx, int uvIndex)
         {
-            if (uvIndex-- > 0)
+            if (uvIndex >= 0)
             {
                 if (_precUVs[uvIndex] == null)
                     return;
@@ -60,6 +60,8 @@ namespace BrawlLib.Modeling
         internal unsafe void Precalc(MDL0PolygonNode parent, List<IMatrixProvider> nodes)
         {
             //If already calculated, and no weights, skip?
+            if ((_precVertices != null) && (_weightIndices == null))
+                return;
 
             //Vertices
             Vector3[] verts = parent._vertexNode.Vertices;

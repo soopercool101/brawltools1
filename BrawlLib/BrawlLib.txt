@@ -1,5 +1,5 @@
 ﻿
-BrawlLib Resource Library - Version 0.07
+BrawlLib Resource Library - Version 0.07b
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -11,6 +11,15 @@ they be held accountable for the manner in which it is used.
  ====================================
 |************ Change Log ************|
  ====================================
+ 
+- v0.07b- (11/30/2009)
+	. Various improvements to the model editor:
+		Added option panel.
+		Added cut/copy/paste/insert/delete buttons to animation panel.
+		Animation length can be set from the playback panel.
+		Added context menu for animation list, which allows for faster import/export.
+		Fixed issue with texture layers. Now all textures are rendered until it can be fixed.
+		Adjusted keyboard controls.
 
 - v0.07 - (11/24/2009)
 	. Fixed various issues with OpenGL initialization.
@@ -30,6 +39,8 @@ they be held accountable for the manner in which it is used.
 		Improved mouse/keyboard controls.
 	. Fixed a bug that was causing PAC files to export uncompressed regardless of setting.
 	. Fixed a bug in the CHR0 decoder.
+	. Fixed file alignment for PLT0 files.
+	. Added RSTM decoder.
 
 - v0.06 - (11/08/2009)
 	. Added FileAssociation and FileType classes.

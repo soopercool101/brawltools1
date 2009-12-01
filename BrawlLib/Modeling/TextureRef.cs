@@ -60,6 +60,8 @@ namespace BrawlLib.Modeling
             if (_context == null)
                 return;
 
+            Source = null;
+
             if (Texture != null)
                 Texture.Delete();
             Texture = new GLTexture(_context, 0, 0);

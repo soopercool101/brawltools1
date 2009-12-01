@@ -22,16 +22,19 @@ namespace BrawlLib.OpenGL
 
         public void Unbind()
         {
-            Capture();
-            foreach (object o in _states.Values)
+            try
             {
-                if (o is GLDisplayList)
-                    (o as GLDisplayList).Delete();
-                else if (o is GLTexture)
-                    (o as GLTexture).Delete();
+                Capture();
+                foreach (object o in _states.Values)
+                {
+                    if (o is GLDisplayList)
+                        (o as GLDisplayList).Delete();
+                    else if (o is GLTexture)
+                        (o as GLTexture).Delete();
+                }
             }
+            catch { }
             _states.Clear();
-            Release();
         }
 
         public virtual void Share(GLContext ctx) { }
