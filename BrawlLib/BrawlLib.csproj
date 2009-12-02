@@ -184,6 +184,7 @@
     <Compile Include="Wii\Animations\AnimationCode.cs" />
     <Compile Include="Wii\Animations\AnimationConverter.cs" />
     <Compile Include="Wii\Animations\AnimationFrame.cs" />
+    <Compile Include="Wii\Animations\EncodingTypes.cs" />
     <Compile Include="Wii\Animations\KeyframeCollection.cs" />
     <Compile Include="Wii\Audio\ADPCMStream.cs" />
     <Compile Include="Wii\Audio\AudioConverter.cs" />

@@ -151,7 +151,7 @@ namespace BrawlLib.Wii
 
                             if ((colorIndex = IndexOf(buffer, bLen, "border=")) >= 0)
                             {
-                                tPtr = buffer + colorIndex + 5;
+                                tPtr = buffer + colorIndex + 7;
 
                                 *dPtr++ = 0x11;
                                 ReadHex(ref dPtr, ref tPtr, 4);

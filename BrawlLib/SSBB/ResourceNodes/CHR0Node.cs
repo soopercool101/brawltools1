@@ -182,6 +182,10 @@ namespace BrawlLib.SSBB.ResourceNodes
             } 
         }
 
+#if DEBUG
+        public AnimationCode Code { get { return Header->Code; } }
+#endif
+
         internal int _dataLen;
         internal int _entryLen;
         internal VoidPtr _dataAddr;

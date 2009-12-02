@@ -13,6 +13,7 @@ using BrawlLib.Imaging;
 using System.Reflection;
 using BrawlLib.IO;
 using System.Audio;
+using BrawlLib.Wii.Audio;
 
 namespace BrawlBox
 {
@@ -206,7 +207,7 @@ namespace BrawlBox
             {
                 using (IAudioStream stream = WAV.FromFile(path))
                 {
-                    ADPCM.Encode(stream, null);
+                    AudioConverter.EncodeADPCM(stream);
                 }
             }
         }

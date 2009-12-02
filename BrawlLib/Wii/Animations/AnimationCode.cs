@@ -21,8 +21,11 @@ namespace BrawlLib.Wii.Animations
 
         public uint _data;
 
-        //0000 0000 0000 0000 0000 0000 0000 1001       Has value?
-        //0000 0000 0000 0000 0000 0000 0000 1111       No value?
+        //0000 0000 0000 0000 0000 0000 0000 0001       Unknown, always present.
+
+        //0000 0000 0000 0000 0000 0000 0000 0010       Default/ignore translation? (must be present when there are keyframes)
+        //0000 0000 0000 0000 0000 0000 0000 0100       Default/ignore rotation? (must be present when there are keyframes)
+        //0000 0000 0000 0000 0000 0000 0000 1000       Default/ignore scale
 
         //0000 0000 0000 0000 0000 0000 0001 0000		Scale isotropic
         //0000 0000 0000 0000 0000 0000 0010 0000		Rotation isotropic
@@ -47,6 +50,7 @@ namespace BrawlLib.Wii.Animations
         public bool IsScaleYFixed { get { return (_data & 0x4000) != 0; } set { _data = (_data & 0xFFFFBFFF) | ((value) ? (uint)0x4000 : 0); } }
         public bool IsScaleZFixed { get { return (_data & 0x8000) != 0; } set { _data = (_data & 0xFFFF7FFF) | ((value) ? (uint)0x8000 : 0); } }
         public AnimDataFormat ScaleDataFormat { get { return (AnimDataFormat)((_data >> 25) & 3); } set { _data = (_data & 0xF9FFFFFF) | ((uint)value << 25); } }
+        public bool IgnoreScale { get { return (_data & 0x8) != 0; } set { _data = (_data & 0xFFFFFFF7) | (value ? (uint)8 : 0); } }
 
         public bool HasRotation { get { return (_data & 0x800000) != 0; } set { _data = (_data & 0xFF7FFFFF) | (value ? (uint)0x800000 : 0); } }
         public bool IsRotationIsotropic { get { return (_data & 0x20) != 0; } set { _data = (_data & 0xFFFFFFDF) | (value ? (uint)0x20 : 0); } }
@@ -62,7 +66,9 @@ namespace BrawlLib.Wii.Animations
         public bool IsTranslationZFixed { get { return (_data & 0x200000) != 0; } set { _data = (_data & 0xFFDFFFFF) | ((value) ? (uint)0x200000 : 0); } }
         public AnimDataFormat TranslationDataFormat { get { return (AnimDataFormat)(_data >> 30); } set { _data = (_data & 0x3FFFFFFF) | ((uint)value << 30); } }
 
-        public int ExtraData { get { return (int)(_data & 0x0F); } set { _data = (_data & 0xFFFFFFF0) | (uint)(value & 0x0F); } }
+        public int ExtraData { get { return (int)(_data & 0x6); } set { _data = (_data & 0xFFFFFFF9) | (uint)(value << 1); } }
+
+        public bool ExtBit { get { return (_data & 1) != 0; } set { _data = (_data & 0xFFFFFFFE) | ((value) ? (uint)1 : 0); } }
 
         public static implicit operator AnimationCode(uint data) { return new AnimationCode() { _data = data }; }
         public static implicit operator uint(AnimationCode code) { return code._data; }
@@ -88,6 +94,13 @@ namespace BrawlLib.Wii.Animations
             uint mask = (uint)1 << (22 + i);
             _data = (_data & ~mask) | (p ? mask : 0);
         }
+
+        //public bool GetIgnore(int i) { return (_data & ((uint)1 << (3 - i))) != 0; }
+        //public void SetIgnore(int i, bool p)
+        //{
+        //    uint mask = (uint)1 << (3 - i);
+        //    _data = (_data & ~mask) | (p ? mask : 0);
+        //}
 
         public AnimDataFormat GetFormat(int index)
         {

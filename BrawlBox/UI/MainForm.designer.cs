@@ -176,7 +176,6 @@ namespace BrawlBox
             // 
             // bRStmAudioToolStripMenuItem
             // 
-            this.bRStmAudioToolStripMenuItem.Enabled = false;
             this.bRStmAudioToolStripMenuItem.Name = "bRStmAudioToolStripMenuItem";
             this.bRStmAudioToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.bRStmAudioToolStripMenuItem.Text = "Brstm Audio Stream";
@@ -246,7 +245,7 @@ namespace BrawlBox
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.settingsToolStripMenuItem.Text = "&Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click_1);
             // 
@@ -261,7 +260,7 @@ namespace BrawlBox
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "&About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 

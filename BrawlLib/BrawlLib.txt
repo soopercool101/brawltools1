@@ -1,5 +1,5 @@
 ﻿
-BrawlLib Resource Library - Version 0.07b
+BrawlLib Resource Library - Version 0.07c
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -12,6 +12,10 @@ they be held accountable for the manner in which it is used.
 |************ Change Log ************|
  ====================================
  
+- v0.07c- (12/01/2009)
+	. Fixed various bugs with the CHR0 encoder.
+	. Fixed a bug in the MSBin encoder for border entries.
+
 - v0.07b- (11/30/2009)
 	. Various improvements to the model editor:
 		Added option panel.
@@ -20,6 +24,7 @@ they be held accountable for the manner in which it is used.
 		Added context menu for animation list, which allows for faster import/export.
 		Fixed issue with texture layers. Now all textures are rendered until it can be fixed.
 		Adjusted keyboard controls.
+	. Fixed bug with GLPanel not closing properly.
 
 - v0.07 - (11/24/2009)
 	. Fixed various issues with OpenGL initialization.
