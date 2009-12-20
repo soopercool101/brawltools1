@@ -4,6 +4,7 @@ using BrawlLib.Wii.Audio;
 using System.Audio;
 using System.ComponentModel;
 using System.IO;
+using BrawlLib.IO;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -41,6 +42,13 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Audio Stream")]
         public int BitsPerSample { get { return _bps; } }
 
+        public IAudioStream GetStream()
+        {
+            if (Header != null)
+                return new ADPCMStream(Header);
+            return null;
+        }
+
         protected override bool OnInitialize()
         {
             if ((_name == null) && (_origPath != null))
@@ -71,6 +79,26 @@ namespace BrawlLib.SSBB.ResourceNodes
             else
                 base.Export(outPath);
         }
+
+        public override unsafe void Replace(string fileName)
+        {
+            IAudioStream stream = null;
+
+            if (fileName.EndsWith(".wav"))
+                stream = WAV.FromFile(fileName);
+            else
+                base.Replace(fileName);
+
+            if (stream != null)
+                try { ReplaceRaw(RSTMConverter.Encode(stream)); }
+                finally { stream.Dispose(); }
+        }
+
+        //protected override int OnCalculateSize(bool force)
+        //{
+        //    //Get DATA size
+        //    int dataLen = (_numBlocks - 1) * 0x2000 * _channels;
+        //}
 
         internal static ResourceNode TryParse(DataSource source) { return ((RSTMHeader*)source.Address)->_header._tag == RSTMHeader.Tag ? new RSTMNode() : null; }
     }

@@ -103,7 +103,7 @@ namespace BrawlBox
             return 1;
         }
 
-        public virtual void Export()
+        public virtual string Export()
         {
             string outPath;
             int index = Program.SaveFile(ExportFilter, Text, out outPath);
@@ -113,6 +113,7 @@ namespace BrawlBox
                     _resource.Merge(Control.ModifierKeys == (Keys.Control | Keys.Shift));
                 OnExport(outPath, index);
             }
+            return outPath;
         }
         public virtual void OnExport(string outPath, int filterIndex) { _resource.Export(outPath); }
 

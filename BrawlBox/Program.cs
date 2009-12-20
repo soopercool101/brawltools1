@@ -129,6 +129,9 @@ namespace BrawlBox
             {
                 try
                 {
+                    if (_rootPath == null)
+                        return SaveAs();
+
                     _rootNode.Merge(Control.ModifierKeys == (Keys.Control | Keys.Shift));
                     _rootNode.Export(_rootPath);
                     return true;
@@ -188,13 +191,19 @@ namespace BrawlBox
             return 1;
         }
 
-        internal static void SaveAs()
+        internal static bool SaveAs()
         {
             if(MainForm.Instance.RootNode is GenericWrapper)
             {
                 GenericWrapper w = MainForm.Instance.RootNode as GenericWrapper;
-                w.Export();
+                string path = w.Export();
+                if (path != null)
+                {
+                    _rootPath = path;
+                    return true;
+                }
             }
+            return false;
         }
     }
 }

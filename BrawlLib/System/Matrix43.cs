@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public unsafe struct Matrix43
     {
         public static readonly Matrix43 Identity = ScaleMatrix(1.0f, 1.0f, 1.0f);

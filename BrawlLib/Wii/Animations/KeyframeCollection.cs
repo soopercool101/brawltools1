@@ -193,6 +193,48 @@ namespace BrawlLib.Wii.Animations
             }
         }
 
+        public void Clean()
+        {
+            KeyframeEntry[] arr;
+            int current, next;
+            float left, mid, right;
+
+            for (int i = 0; i < 9; i++)
+            {
+                arr = _keyFrames[i];
+                left = arr[0]._value;
+                current = arr[0]._next;
+
+                //if no entries ignore
+                if (current == 0)
+                    continue;
+
+                //Account for empty first frame?
+
+                mid = arr[current]._value;
+                next = arr[current]._next;
+
+                while (next != 0)
+                {
+                    right = arr[next]._value;
+
+                    //Are they equal (or mostly)
+                    if ((Math.Abs(left - mid) < 0.00001f) && (Math.Abs(left - right) < 0.00001f))
+                        RemoveKeyframe(current, i);
+                    else
+                        left = mid;
+
+                    mid = right;
+                    current = next;
+                    next = arr[next]._next;
+                }
+
+                //Remove last frame if values are equal
+                if (Math.Abs(left - mid) < 0.00001f)
+                    RemoveKeyframe(current, i);
+            }
+        }
+
         private void SetKeyframe(int index, float value, int set)
         {
             if ((index > _count) || (index < 1))
@@ -223,13 +265,6 @@ namespace BrawlLib.Wii.Animations
 
             if (_frames != null)
             {
-                //Set anim frame value
-                //fixed (AnimationFrame* p = _frames)
-                //{
-                //    float* fp = (float*)(p + (index - 1)) + set;
-                //    *fp = value;
-                //}
-
                 CalcAnimFrames(prev, index, set);
                 CalcAnimFrames(index, next, set);
             }
@@ -268,8 +303,11 @@ namespace BrawlLib.Wii.Animations
             arr[entry._next]._prev = (ushort)newIndex;
             arr[index] = KeyframeEntry.Empty;
 
-            CalcAnimFrames(entry._prev, newIndex, offset);
-            CalcAnimFrames(newIndex, entry._next, offset);
+            if (_frames != null)
+            {
+                CalcAnimFrames(entry._prev, newIndex, offset);
+                CalcAnimFrames(newIndex, entry._next, offset);
+            }
         }
 
         public void SetSize(int count)

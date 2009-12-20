@@ -44,5 +44,6 @@ namespace System
         public static void Swap(int* p1, int* p2) { int f = *p1; *p1 = *p2; *p2 = f; }
         public static void Swap(short* p1, short* p2) { short f = *p1; *p1 = *p2; *p2 = f; }
         public static void Swap(ushort* p1, ushort* p2) { ushort f = *p1; *p1 = *p2; *p2 = f; }
+        public static void Swap(byte* p1, byte* p2) { byte f = *p1; *p1 = *p2; *p2 = f; }
     }
 }

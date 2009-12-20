@@ -191,6 +191,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal VoidPtr _dataAddr;
         protected override int OnCalculateSize(bool force)
         {
+            //Keyframes.Clean();
             _dataLen = AnimationConverter.CalculateSize(Keyframes, out _entryLen);
             return _dataLen + _entryLen;
         }

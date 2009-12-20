@@ -112,26 +112,23 @@ namespace BrawlLib.Wii.Animations
                 case AnimDataFormat.F3F:
                     {
                         F3FHeader* header = (F3FHeader*)dataAddr;
-                        F3FEntry* entry = header->Data;
-
                         fCount = header->_numFrames;
+
+                        F3FEntry* entry = header->Data;
                         for (int i = 0; i < fCount; i++, entry++)
                             kf.SetKeyFrame(mode, (int)entry->_index, entry->_value);
                         break;
                     }
                 case AnimDataFormat.F4B:
                     {
-                        fCount = *(bushort*)dataAddr;
-                        bint* sPtr = (bint*)dataAddr + 2;
-                        vStep = *(bfloat*)sPtr++;
-                        vBase = *(bfloat*)sPtr++;
-                        for (int i = 0; i < fCount; i++)
-                        {
-                            int v = *sPtr++;
-                            int frameIndex = (v >> 24) & 0xFF;
-                            int value = (v >> 12) & 0xFFF;
-                            kf.SetKeyFrame(mode, frameIndex, vBase + (value * vStep));
-                        }
+                        F4BHeader* header = (F4BHeader*)dataAddr;
+                        fCount = header->_entries;
+                        vStep = header->_step;
+                        vBase = header->_base;
+
+                        F4BEntry* entry = header->Data;
+                        for (int i = 0; i < fCount; i++, entry++)
+                            kf.SetKeyFrame(mode, entry->FrameIndex, vBase + (entry->Step * vStep));
                         break;
                     }
                 case AnimDataFormat.F6B:
@@ -148,10 +145,11 @@ namespace BrawlLib.Wii.Animations
                     }
                 case AnimDataFormat.F1B:
                     {
-                        vStep = *(bfloat*)dataAddr;
-                        vBase = *((bfloat*)dataAddr + 1);
-                        byte* sPtr = (byte*)dataAddr + 8;
+                        F1BHeader* header = (F1BHeader*)dataAddr;
+                        vStep = header->_step;
+                        vBase = header->_base;
 
+                        byte* sPtr = header->Data;
                         for (int i = 0; i < kf.Count; i++)
                             kf.SetKeyFrame(mode, i, vBase + (*sPtr++ * vStep));
 
@@ -196,7 +194,7 @@ namespace BrawlLib.Wii.Animations
             bool useLinear = group == 1;
 
             bool exist = false;
-            bool isotropic = true;
+            bool isotropic = group == 0;
             AnimDataFormat format = AnimDataFormat.None;
 
             KeyframeEntry[][] arr = new KeyframeEntry[3][];
@@ -305,8 +303,8 @@ namespace BrawlLib.Wii.Animations
                         continue;
 
                     //Evaluate spans until we reach a success.
-                    //A success means that compression using that span is possible. 
-                    //No further evaluation necesary.
+                //A success means that compression using that span is possible. 
+                //No further evaluation necesary.
                 SpanBegin:
                     int span = scaleSpan;
                     int spanEval = scaleSpan - 32;
@@ -404,6 +402,8 @@ namespace BrawlLib.Wii.Animations
                 }
                 //Should we compress here?
             }
+            else //Set isotropic to true, so it sets the default value.
+                isotropic = true;
 
             //Set scale flag
             if (group == 0)
@@ -514,15 +514,12 @@ namespace BrawlLib.Wii.Animations
 
             if (format == AnimDataFormat.F3F)
             {
-                *(bushort*)pVal = (ushort)keyCount;
-                pVal += 2;
+                F3FHeader* header = (F3FHeader*)addr;
+                *header = new F3FHeader(keyCount, 0.0f);
 
+                F3FEntry* entry = header->Data;
                 for (int i = 0; i < keyCount; i++)
-                {
-                    *pVal++ = *order++;
-                    *pVal++ = *value++;
-                    *pVal++ = 0;
-                }
+                    *entry++ = new F3FEntry(*order++, *value++, 0.0f);
 
                 return keyCount * 12 + 8;
             }
@@ -534,10 +531,11 @@ namespace BrawlLib.Wii.Animations
                 span = EvalSpan(255, 32, min, stride, value, keyCount);
                 step = stride / span;
 
-                *pVal++ = step;
-                *pVal++ = min;
-                byte* dPtr = (byte*)pVal;
+                F1BHeader* header = (F1BHeader*)addr;
+                *header = new F1BHeader(step, min);
+
                 int i;
+                byte* dPtr = header->Data;
                 for (i = 0; i < keyCount; i++)
                     *dPtr++ = (byte)(((*value++ - min) / step) + 0.5f);
 
@@ -553,13 +551,12 @@ namespace BrawlLib.Wii.Animations
                 span = EvalSpan(4095, 32, min, stride, value, keyCount);
                 step = stride / span;
 
-                *(bushort*)pVal = (ushort)keyCount;
-                pVal += 2;
-                *pVal++ = step;
-                *pVal++ = min;
-                bint* dPtr = (bint*)pVal;
+                F4BHeader* header = (F4BHeader*)addr;
+                *header = new F4BHeader(keyCount, 0.0f, step, min);
+
+                F4BEntry* entry = header->Data;
                 for (int i = 0; i < keyCount; i++)
-                    *dPtr++ = (*order++ << 24) | ((int)(((*value++ - min) / step) + 0.5f) << 12);
+                    *entry++ = new F4BEntry(*order++, (int)((*value++ - min) / step + 0.5f), 0);
 
                 return keyCount * 4 + 16;
             }
@@ -570,7 +567,7 @@ namespace BrawlLib.Wii.Animations
                 step = stride / span;
 
                 F6BHeader* header = (F6BHeader*)addr;
-                *header = new F6BHeader(keyCount, scaleError, step, min);
+                *header = new F6BHeader(keyCount, 0.0f, step, min);
 
                 F6BEntry* entry = header->Data;
                 for (int i = 0; i < keyCount; i++)

@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace System
 {
-    static class Win32
+    static partial class Win32
     {
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public class SafeHandle : IDisposable

@@ -94,6 +94,11 @@ namespace System.Drawing
                             pal = WeightedAverage.Process(bmp, numColors);
                             break;
                         }
+                    case QuantizationAlgorithm.MedianCut:
+                        {
+                            MedianCut.Quantize(bmp, numColors);
+                            break;
+                        }
                     //case QuantizationAlgorithm.GravityMap:
                     //    {
                     //        pal = GravityMap.Quantize(bmp, numColors);
@@ -290,6 +295,7 @@ namespace System.Drawing
     {
         //NeuQuant,
         //GravityMap,
-        WeightedAverage
+        WeightedAverage,
+        MedianCut
     }
 }

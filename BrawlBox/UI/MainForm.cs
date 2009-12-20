@@ -35,6 +35,9 @@ namespace BrawlBox
             previewPanel1.Dock = DockStyle.Fill;
             msBinEditor1.Dock = DockStyle.Fill;
             animEditControl.Dock = DockStyle.Fill;
+            soundPackControl1.Dock = DockStyle.Fill;
+            soundPackControl1.lstSets.SmallImageList = ResourceTree.Images;
+            audioPlaybackPanel1.Dock = DockStyle.Fill;
         }
 
         public void Reset()
@@ -83,15 +86,28 @@ namespace BrawlBox
                 resourceTree.SelectedNode = _root.FindResource(n, true);
         }
 
+        private Control _currentControl = null;
         private void resourceTree_SelectionChanged(object sender, EventArgs e)
         {
-            if (previewPanel1.Picture != null)
+            Image img = previewPanel1.Picture;
+            if (img != null)
             {
-                previewPanel1.Picture.Dispose();
                 previewPanel1.Picture = null;
+                img.Dispose();
             }
+
+            IAudioStream stream = audioPlaybackPanel1.TargetStream;
+            if (stream != null)
+            {
+                audioPlaybackPanel1.TargetStream = null;
+                stream.Dispose();
+            }
+
             animEditControl.TargetSequence = null;
             msBinEditor1.CurrentNode = null;
+            soundPackControl1.TargetNode = null;
+
+            Control newControl = null;
 
             BaseWrapper w;
             ResourceNode node;
@@ -102,33 +118,27 @@ namespace BrawlBox
                 if (node is IImageSource)
                 {
                     previewPanel1.Picture = ((IImageSource)node).GetImage(0);
-                    previewPanel1.Visible = true;
-                    msBinEditor1.Visible = false;
-                    animEditControl.Visible = false;
-                    splitContainer2.Panel2Collapsed = false;
+                    newControl = previewPanel1;
                 }
                 else if (node is MSBinNode)
                 {
                     msBinEditor1.CurrentNode = node as MSBinNode;
-                    msBinEditor1.Visible = true;
-                    previewPanel1.Visible = false;
-                    animEditControl.Visible = false;
-                    splitContainer2.Panel2Collapsed = false;
+                    newControl = msBinEditor1;
                 }
                 else if (node is CHR0EntryNode)
                 {
                     animEditControl.TargetSequence = node as CHR0EntryNode;
-                    animEditControl.Visible = true;
-                    msBinEditor1.Visible = false;
-                    previewPanel1.Visible = false;
-                    splitContainer2.Panel2Collapsed = false;
+                    newControl = animEditControl;
                 }
-                else
+                else if (node is RSARNode)
                 {
-                    msBinEditor1.Visible = false;
-                    animEditControl.Visible = false;
-                    previewPanel1.Visible = false;
-                    splitContainer2.Panel2Collapsed = true;
+                    soundPackControl1.TargetNode = node as RSARNode;
+                    newControl = soundPackControl1;
+                }
+                else if (node is RSTMNode)
+                {
+                    audioPlaybackPanel1.TargetStream = ((RSTMNode)node).GetStream();
+                    newControl = audioPlaybackPanel1;
                 }
 
                 if ((editToolStripMenuItem.DropDown = w.ContextMenuStrip) != null)
@@ -139,14 +149,19 @@ namespace BrawlBox
             else
             {
                 propertyGrid1.SelectedObject = null;
-                previewPanel1.Visible = false;
-                animEditControl.Visible = false;
-                splitContainer2.Panel2Collapsed = true;
 
                 editToolStripMenuItem.DropDown = null;
                 editToolStripMenuItem.Enabled = false;
             }
 
+            if (_currentControl != newControl)
+            {
+                if (_currentControl != null)
+                    _currentControl.Visible = false;
+                if (newControl != null)
+                    newControl.Visible = true;
+                _currentControl = newControl;
+            }
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -205,9 +220,10 @@ namespace BrawlBox
             string path;
             if (Program.OpenFile("PCM Audio (*.wav)|*.wav", out path) > 0)
             {
-                using (IAudioStream stream = WAV.FromFile(path))
+                if (Program.New<RSTMNode>())
                 {
-                    AudioConverter.EncodeADPCM(stream);
+                    Program.RootNode.Name = Path.GetFileNameWithoutExtension(path);
+                    Program.RootNode.Replace(path);
                 }
             }
         }

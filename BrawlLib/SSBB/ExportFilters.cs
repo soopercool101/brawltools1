@@ -28,5 +28,19 @@ namespace BrawlLib
 
         public static string BRES =
             "BRResource Pack (*.brres)|*.brres";
+
+        public static string RSTM =
+            "All Audio Formats (*.wav, *.brstm)|*.wav;*.brstm|" +
+            "Uncompressed PCM (*.wav)|*.wav|" +
+            "BRSTM Raw Audio (*.brstm)|*.brstm";
+
+        public static string RWSD =
+            "Raw Sound Pack (*.rwsd)|*.rwsd";
+
+        public static string RBNK =
+            "Raw Sound Bank (*.rbnk)|*.rbnk";
+
+        public static string RSEQ =
+            "Raw Sound Requence (*.rseq)|*.rseq";
     }
 }

@@ -22,7 +22,7 @@ namespace BrawlLib.Wii.Audio
 
         private ADPCMState[,] _blockStates;
         private ADPCMState[] _loopStates;
-        private ADPCMState[] _currentStates;
+        internal ADPCMState[] _currentStates;
 
         public ADPCMStream(RSTMHeader* pRSTM)
         {
@@ -38,11 +38,15 @@ namespace BrawlLib.Wii.Audio
             _isLooped = part1->_format._looped != 0;
             _sampleRate = part1->_sampleRate;
             _numSamples = part1->_numSamples;
-            _blockLen = (int)part1->_blockSize;
+            _numBlocks = part1->_numBlocks;
+            _blockLen = part1->_blockSize;
             _loopStartSample = part1->_loopStartSample;
+            _lastBlockSamples = part1->_lastBlockSamples;
+            _lastBlockSize = part1->_lastBlockTotal;
+            _samplesPerBlock = part1->_samplesPerBlock;
             _loopEndSample = _numSamples;
 
-            Init();
+            //Init();
 
             dataAddr = pRSTM->DATAData->Data;
 
@@ -63,12 +67,14 @@ namespace BrawlLib.Wii.Audio
                         sPtr + (x * _blockLen * _numChannels) - ((x == _numBlocks - 1) ? (i * (_blockLen - _lastBlockSize)) : 0), entry[0], entry[1], coefs);
                 }
 
-                _loopStates[i] = new ADPCMState(sPtr + (_loopStartSample * _blockLen * _numChannels), info->_lps, info->_lyn1, info->_lyn2, coefs);
+                int loopBlock = _loopStartSample / _samplesPerBlock;
+                int loopChunk = (_loopStartSample - (loopBlock * _samplesPerBlock)) / 14;
+                _loopStates[i] = new ADPCMState(sPtr + (loopBlock * _blockLen * _numChannels) + (loopChunk * 8), info->_lps, info->_lyn1, info->_lyn2, coefs);
                 _currentStates[i] = _blockStates[i, 0] = new ADPCMState(sPtr, info->_ps, info->_yn1, info->_yn2, coefs);
             }
         }
 
-        public ADPCMStream(WAVEEntry* pWAVE, VoidPtr dataAddr)
+        public ADPCMStream(RWSD_WAVEEntry* pWAVE, VoidPtr dataAddr)
         {
             ADPCMInfo* info;
             short[] coefs;
@@ -82,7 +88,16 @@ namespace BrawlLib.Wii.Audio
             _loopEndSample = _numSamples;
             //_preserveLoopState = true;
 
-            Init();
+            _samplesPerBlock = _blockLen / 8 * 14;
+            _numBlocks = _numSamples.Align(_samplesPerBlock) / _samplesPerBlock;
+
+            if ((_numSamples % _samplesPerBlock) != 0)
+                _lastBlockSamples = _numSamples % _samplesPerBlock;
+            else
+                _lastBlockSamples = _samplesPerBlock;
+
+            _lastBlockSize = _lastBlockSamples.Align(14) / 14 * 8;
+            //Init();
 
             info = &pWAVE->_adpcInfo;
             coefs = info->Coefs;
@@ -95,18 +110,18 @@ namespace BrawlLib.Wii.Audio
             _currentStates[0] = _blockStates[0, 0] = new ADPCMState((byte*)dataAddr, info->_ps, info->_yn1, info->_yn2, coefs);
         }
 
-        public void Init()
-        {
-            _samplesPerBlock = _blockLen / 8 * 14;
-            _numBlocks = _numSamples.Align(_samplesPerBlock) / _samplesPerBlock;
+        //public void Init()
+        //{
+        //    _samplesPerBlock = _blockLen / 8 * 14;
+        //    _numBlocks = _numSamples.Align(_samplesPerBlock) / _samplesPerBlock;
 
-            if ((_numSamples % _samplesPerBlock) != 0)
-                _lastBlockSamples = _numSamples % _samplesPerBlock;
-            else
-                _lastBlockSamples = _samplesPerBlock;
+        //    if ((_numSamples % _samplesPerBlock) != 0)
+        //        _lastBlockSamples = _numSamples % _samplesPerBlock;
+        //    else
+        //        _lastBlockSamples = _samplesPerBlock;
 
-            _lastBlockSize = _lastBlockSamples.Align(14) / 14 * 8;
-        }
+        //    _lastBlockSize = _lastBlockSamples.Align(14) / 14 * 8;
+        //}
 
         private void RefreshStates()
         {

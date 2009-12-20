@@ -5,50 +5,58 @@ using System.Runtime.InteropServices;
 
 namespace BrawlLib.SSBBTypes
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct ruint
-    {
-        public uint _control;
-        public buint _data;
-
-        public VoidPtr Offset(VoidPtr baseAddr) { return baseAddr + _data; }
-
-        public static implicit operator ruint(uint r) { return new ruint() { _control = 1, _data = r }; }
-        public static implicit operator uint(ruint r) { return r._data; }
-    }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct RSARHeader
     {
+        public const int Size = 0x40;
         public const uint Tag = 0x52415352;
 
-        public SSBBCommonHeader _commonHeader;
+        public SSBBCommonHeader _header;
 
-        //public uint _tag;
-        //public buint _version;
-        //public buint _fileSize;
-        //public bushort _unk1; //0x40
-        //public bushort _unk2; //0x03
-        //public buint _symbOffset;
-        //public buint _symbLength;
-        //public buint _infoOffset;
-        //public buint _infoLength;
-        //public buint _fileOffset;
-        //public buint _fileLength;
+        public bint _symbOffset;
+        public bint _symbLength;
+        public bint _infoOffset;
+        public bint _infoLength;
+        public bint _fileOffset;
+        public bint _fileLength;
+        private int _pad1, _pad2, _pad3, _pad4, _pad5, _pad6;
+
+        public void Set(int symbLen, int infoLen, int fileLen)
+        {
+            int offset = 0x40;
+
+            _header._tag = Tag;
+            _header._endian = -2;
+            _header._version = 0x103;
+            _header._firstOffset = 0x40;
+            _header._numEntries = 3;
+
+            _symbOffset = offset;
+            _symbLength = symbLen;
+            _infoOffset = offset += symbLen;
+            _infoLength = infoLen;
+            _fileOffset = offset += infoLen;
+            _fileLength = fileLen;
+
+            _header._length = offset;
+        }
 
         private VoidPtr Address { get { fixed (RSARHeader* ptr = &this)return ptr; } }
 
-        public SYMBHeader* SYMBBlock { get { return (SYMBHeader*)_commonHeader.Entries[0].Address; } }
-        public INFOHeader* INFOBlock { get { return (INFOHeader*)_commonHeader.Entries[1].Address; } }
-        public FILEHeader* FILEBlock { get { return (FILEHeader*)_commonHeader.Entries[2].Address; } }
+        public SYMBHeader* SYMBBlock { get { return (SYMBHeader*)_header.Entries[0].Address; } }
+        public INFOHeader* INFOBlock { get { return (INFOHeader*)_header.Entries[1].Address; } }
+        public FILEHeader* FILEBlock { get { return (FILEHeader*)_header.Entries[2].Address; } }
     }
+
+    #region SYMB
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct SYMBHeader
     {
         public const uint Tag = 0x424D5953;
 
-        public buint _tag;
+        public uint _tag;
         public bint _length;
         public bint _stringOffset;
 
@@ -56,6 +64,14 @@ namespace BrawlLib.SSBBTypes
         public bint _maskOffset2; //For types
         public bint _maskOffset3; //For groups
         public bint _maskOffset4; //For banks
+
+        public SYMBHeader(int length)
+        {
+            _tag = Tag;
+            _length = length;
+            _stringOffset = 0x14;
+            _maskOffset1 = _maskOffset2 = _maskOffset3 = _maskOffset4 = 0;
+        }
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
 
@@ -70,6 +86,8 @@ namespace BrawlLib.SSBBTypes
 
         public string GetStringEntry(int index)
         {
+            if (index < 0)
+                return "<null>";
             return new String((sbyte*)(Address + 8 + StringOffsets[index]));
         }
     }
@@ -77,165 +95,155 @@ namespace BrawlLib.SSBBTypes
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct SYMBMaskHeader
     {
-        public buint _entrySize; //unknown
-        public buint _entryNum; //number of entries in block
-        //entries are 0x14 bytes each
+        public bint _entrySize; //unknown
+        public bint _entryNum; //number of entries in block
 
         private VoidPtr Address { get { fixed (SYMBMaskHeader* ptr = &this)return ptr; } }
         public SYMBMaskEntry* Entries { get { return (SYMBMaskEntry*)(Address + 8); } }
-
-
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct SYMBMaskEntry
     {
-        public buint _unk1;
-        public buint _unk2;
-        public buint _unk3;
-        public buint _unk4;
-        public buint _unk5;
+        public const int Size = 0x14;
 
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint Unknown1 { get { return _unk1; } set { _unk1 = value; } }
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint Unknown2 { get { return _unk2; } set { _unk2 = value; } }
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint Unknown3 { get { return _unk3; } set { _unk3 = value; } }
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint Unknown4 { get { return _unk4; } set { _unk4 = value; } }
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint Unknown5 { get { return _unk5; } set { _unk5 = value; } }
+        public bint _unk1;
+        public bint _unk2;
+        public bint _unk3;
+        public bint _unk4; //String id
+        public bint _unk5; //Index
+
+        public SYMBMaskEntry(int v1, int v2, int v3, int v4, int v5)
+        { _unk1 = v1; _unk2 = v2; _unk3 = v3; _unk4 = v4; _unk5 = v5; }
     }
+
+    #endregion
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct INFOHeader
     {
         public const uint Tag = 0x6F464E49;
 
-        public SSBBEntryHeader _entryHeader;
+        public SSBBEntryHeader _header;
         public RuintCollection _collection;
 
-        public VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-        public VoidPtr OffsetAddress { get { return _collection.Address; } }
+        private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
 
-        public ruint* GroupList { get { return (ruint*)(Address + 8); } }
+        public RuintList* Sounds { get { return (RuintList*)_collection[0]; } }
+        public RuintList* Banks { get { return (RuintList*)_collection[1]; } }
+        public RuintList* Types { get { return (RuintList*)_collection[2]; } }
+        public RuintList* Files { get { return (RuintList*)_collection[3]; } }
+        public RuintList* Groups { get { return (RuintList*)_collection[4]; } }
 
-        //Sounds
-        public uint InfoCount { get { return *((buint*)_collection[0]); } }
-        public ruint* InfoOffsets { get { return (ruint*)(_collection[0] + 4); } }
-        public INFOData1Part1* GetInfoAddress(int index) { return (INFOData1Part1*)(_collection.Address + InfoOffsets[index]); }
-
-        //Banks
-        public uint Info2Count { get { return *((buint*)_collection[1]); } }
-        public ruint* Info2Offsets { get { return (ruint*)(_collection[1] + 4); } }
-        public INFOData2* GetInfo2Address(int index) { return (INFOData2*)(_collection.Address + Info2Offsets[index]); }
-
-        //Types
-        public uint Info3Count { get { return *((buint*)_collection[2]); } }
-        public ruint* Info3Offsets { get { return (ruint*)(_collection[2] + 4); } }
-        public INFOData3* GetInfo3Address(int index) { return (INFOData3*)(_collection.Address + Info3Offsets[index]); }
-
-        //Sets
-        public uint Info4Count { get { return *((buint*)_collection[3]); } }
-        public ruint* Info4Offsets { get { return (ruint*)(_collection[3] + 4); } }
-        public INFOData4* GetInfo4Address(int index) { return (INFOData4*)(_collection.Address + Info4Offsets[index]); }
-
-        //Groups
-        public uint Info5Count { get { return *((buint*)_collection[4]); } }
-        public ruint* Info5Offsets { get { return (ruint*)(_collection[4] + 4); } }
-        public INFOData5* GetInfo5Address(int index) { return (INFOData5*)(_collection.Address + Info5Offsets[index]); }
+        public INFOFooter* Footer { get { return (INFOFooter*)_collection[5]; } }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct INFOData1Part1
+    unsafe struct INFOFooter
+    {
+        bshort _unk1; //8
+        bshort _unk2; //16
+        bshort _unk3; //4
+        bshort _unk4; //4
+        bshort _unk5; //8
+        bshort _unk6; //32
+        bshort _unk7; //32
+        bshort _unk8; //0
+    }
+
+    #region Sounds
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    unsafe struct INFOSoundEntry
     {
         public bint _stringId;
-        public bint _groupId;
-        public buint _unk1;
-        public ruint _offset1;
-        public byte _flag1;
-        public byte _flag2;
-        public byte _flag3;
-        public byte _flag4;
-        public ruint _offset2;
-        public buint _unk2;
-        public buint _unk3;
-        public buint _unk4;
+        public bint _fileId;
+        public bint _unk1; // 0
+        public ruint _part1Offset; //control 1
+        public byte _flag1; //0x20
+        public byte _flag2; //0x40
+        public byte _flag3; //0x03
+        public byte _flag4; //0x00
+        public ruint _part2Offset; //control 0x0103
+        public bint _unk2; //0
+        public bint _unk3; //0
+        public bint _unk4; //0
 
-        public INFOData1Part2* GetPart2(VoidPtr baseAddr) { return (INFOData1Part2*)(baseAddr + _offset2); }
-        public INFOData1Part3* GetPart3(VoidPtr baseAddr) { return (INFOData1Part3*)(baseAddr + _offset1); }
-
+        public INFOSoundPart1* GetPart1(VoidPtr baseAddr) { return (INFOSoundPart1*)(baseAddr + _part1Offset); }
+        public INFOSoundPart2* GetPart2(VoidPtr baseAddr) { return (INFOSoundPart2*)(baseAddr + _part2Offset); }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct INFOData1Part2
+    unsafe struct INFOSoundPart2
     {
-        public buint _groupIndex;
-        public buint _unk2;
-        public buint _unk3;
-        public buint _unk4;
+        public bint _soundIndex;
+        public bint _unk1;
+        public bint _unk2;
+        public bint _unk3;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct INFOData1Part3
+    unsafe struct INFOSoundPart1
     {
-        public buint _unk1;
-        public buint _unk2;
-        public buint _unk3;
+        public bint _unk1;
+        public bint _unk2;
+        public bint _unk3;
     }
+    #endregion
 
-    //Bank info
+    #region Banks
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct INFOData2
+    unsafe struct INFOBankEntry
     {
-        public bint _stringId; //string id
-        public bint _collectionId;
+        public bint _stringId;
+        public bint _fileId;
         public bint _padding;
     }
+    #endregion
 
-    //Type flags?
+    #region Types
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct INFOData3
+    unsafe struct INFOTypeEntry
     {
         public bint _typeId;
         public uint _flags;
         public buint _unk1; //always 0
         public buint _unk2; //always 0
     }
+    #endregion
+
+    #region Files
+
+    //Files can be a group of raw sounds, sequences, or external audio streams.
+    //When they are audio streams, they can be loaded as BGMs using external files, referenced by the _stringOffset field.
+    //When they are raw sounds (RWSD), they contain sounds used in action scripts (usually mono).
+    //Need more info on sequences and banks.
+
+    //Files can be referenced multiple times using loading groups. The _listOffset field contains a list of those references.
+    //When a file is referenced by a group, it is copied to each group's header and data block.
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct INFOData4
+    unsafe struct INFOFileHeader
     {
-        public buint _length;
-        public buint _unk1;
-        public buint _magic;
-        public ruint _stringOffset;
-        public ruint _part2Offset;
+        public bint _headerLen; //Includes padding. Set to file size if external file.
+        public bint _dataLen; //Includes padding. Zero if external file.
+        public bint _magic; //-1
+        public ruint _stringOffset; //External file path, only for BGMs. Path is relative to sound folder
+        public ruint _listOffset; //List of groups this file belongs to. Empty if external file.
 
-        public INFOData4Part2* GetPart2(VoidPtr baseAddr) { return (INFOData4Part2*)(baseAddr + _part2Offset); }
+        public RuintList* GetList(VoidPtr baseAddr) { return (RuintList*)(baseAddr + _listOffset); }
+
         public string GetPath(VoidPtr baseAddr) { return (_stringOffset == 0) ? null : new String((sbyte*)(baseAddr + _stringOffset)); }
     }
 
+    //Attached to a RuintList from INFOSetHeader
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct INFOData4Part2
+    unsafe struct INFOFileEntry
     {
-        public buint _entryCount;
+        public bint _groupId;
+        public bint _index;
 
-        public VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-        public ruint* Entries { get { return (ruint*)(Address + 4); } }
-
-        public INFOData4Part3* GetEntry(VoidPtr baseAddr, int index) { return (INFOData4Part3*)(baseAddr + Entries[index]); }
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct INFOData4Part3
-    {
-        public buint _groupId;
-        public buint _index;
-
-        public uint GroupId { get { return _groupId; } set { _groupId = value; } }
-        public uint Index { get { return _index; } set { _index = value; } }
+        public int GroupId { get { return _groupId; } set { _groupId = value; } }
+        public int Index { get { return _index; } set { _index = value; } }
 
         public override string ToString()
         {
@@ -243,51 +251,51 @@ namespace BrawlLib.SSBBTypes
         }
     }
 
-    //Sound groups
+    #endregion
+
+    #region Groups
+
+    //Groups are a collection of sound files.
+    //Files can appear in multiple groups, but the data is actually copied to each group.
+    //Groups are laid out in two blocks, first the header block, then the data block.
+    //The header block holds all the headers belonging to each file, in sequential order.
+    //The data block holds all the audio data belonging to each file, in sequential order.
+    //Data referenced in the WAVE section is relative to the file's data, not the whole group block.
+    //This means that the headers/data can simply be copied without changing anything.
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct INFOData5
+    unsafe struct INFOGroupHeader
     {
         public bint _id; //string id
         public bint _magic; //always -1
         public bint _unk1; //always 0
         public bint _unk2; //always 0
-        public bint _data1Offset;
-        public bint _data1Length;
-        public bint _data2Offset;
-        public bint _data2Length;
-        public ruint _offset;
+        public bint _headerOffset; //Absolute offset from RSAR file.
+        public bint _headerLength; //Total length of all headers in contained sets.
+        public bint _dataOffset; //Absolute offset from RSAR file.
+        public bint _dataLength; //Total length of all data in contained sets.
+        public ruint _listOffset;
 
-        public RuintList* GetCollection(VoidPtr offset) { return (RuintList*)(offset + _offset); }
+        public RuintList* GetCollection(VoidPtr offset) { return (RuintList*)(offset + _listOffset); }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct INFOData5Entry
+    unsafe struct INFOGroupEntry
     {
-        public buint _groupId;
-        public buint _data1Offset;
-        public buint _data1Length;
-        public buint _data2Offset;
-        public buint _data2Length;
-        public buint _unk;
-
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint GroupId { get { return _groupId; } set { _groupId = value; } }
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint Data1Offset { get { return _data1Offset; } set { _data1Offset = value; } }
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint Data1Length { get { return _data1Length; } set { _data1Length = value; } }
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint Data2Offset { get { return _data2Offset; } set { _data2Offset = value; } }
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint Data2Length { get { return _data2Length; } set { _data2Length = value; } }
-        //[TypeConverter(typeof(UIntToHex))]
-        //public uint Unknown { get { return _unk; } set { _unk = value; } }
+        public bint _fileId;
+        public bint _headerOffset;
+        public bint _headerLength;
+        public bint _dataOffset;
+        public bint _dataLength;
+        public bint _unk;
 
         public override string ToString()
         {
-            return String.Format("[{0:X}]", (uint)_groupId);
+            return String.Format("[{0:X}]", (uint)_fileId);
         }
     }
+
+    #endregion
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct FILEHeader
@@ -296,161 +304,15 @@ namespace BrawlLib.SSBBTypes
 
         public uint _tag;
         public bint _length;
-    }
+        private int _p1, _p2, _p3, _p4, _p5, _p6;
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct RWSDHeader
-    {
-        public const uint Tag = 0x44535752;
-
-        public SSBBCommonHeader _header;
-        
-        private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-        public DATAHeader* DataHeader { get { return (DATAHeader*)(_header.Entries[0].Address); } }
-        public WAVEHeader* WAVEHeader { get { return (WAVEHeader*)(_header.Entries[1].Address); } }
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct DATAHeader
-    {
-        public const uint Tag = 0x41514144;
-
-        public uint _tag;
-        public uint _length;
-        public uint _numEntries;
-
-        private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-        public VoidPtr OffsetAddress { get { return Address + 8; } }
-
-        public ruint* Entries { get { return (ruint*)(Address + 12); } }
-
-        public DATAEntry* GetEntry(int index)
+        public void Set(int length)
         {
-            return (DATAEntry*)(OffsetAddress + Entries[index]._data);
-        }
-
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct DATAEntry
-    {
-        public ruint _part1Offset;
-        public ruint _part2Offset;
-        public ruint _part3Offset;
-
-        private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-
-        public DATAEntryPart1* GetPart1(VoidPtr offset) { return (DATAEntryPart1*)_part1Offset.Offset(offset); }
-        public RuintList* GetPart2(VoidPtr offset) { return (RuintList*)_part2Offset.Offset(offset); }
-        public RuintList* GetPart3(VoidPtr offset) { return (RuintList*)_part3Offset.Offset(offset); }
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct DATAEntryPart1
-    {
-        public bfloat _unk1;
-        public bfloat _unk2;
-        public bushort _unk3;
-        public bushort _unk4;
-        public buint _unk5;
-        public buint _unk6;
-        public buint _unk7;
-        public buint _unk8;
-        public buint _unk9;
-    }
-
-    //These entries are embedded in a list of lists, using RuintList
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct DATAEntryPart2Entry
-    {
-        public bint _unk1; //0
-        public bint _unk2; //0
-        public bint _unk3; //0
-        public bint _unk4; //0
-
-        //[TypeConverter(typeof(IntToHex))]
-        //public int Unknown1 { get { return _unk1; } set { _unk1 = value; } }
-        //[TypeConverter(typeof(IntToHex))]
-        //public int Unknown2 { get { return _unk2; } set { _unk2 = value; } }
-        //[TypeConverter(typeof(IntToHex))]
-        //public int Unknown3 { get { return _unk3; } set { _unk3 = value; } }
-        //[TypeConverter(typeof(IntToHex))]
-        //public int Unknown4 { get { return _unk4; } set { _unk4 = value; } }
-    }
-
-    //These entries are embedded in a list, using RuintList
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct DATAEntryPart3Entry
-    {
-        public bint _index;
-        public buint _magic; //0x7F7F7F7F
-        public bint _unk1; //0
-        public bfloat _unk2; //0.01557922
-        public bfloat _unk3; //1.0
-        public bint _unk4; //0
-        public bint _unk5; //0
-        public bint _unk6; //0
-        public bint _unk7; //0
-        public bint _unk8; //0
-        public bint _unk9; //0
-        public bint _unk10; //0
-
-        public int Index { get { return _index; } set { _index = value; } }
-        public uint Magic { get { return _magic; } set { _magic = value; } }
-        public int Unknown1 { get { return _unk1; } set { _unk1 = value; } }
-        public float Float1 { get { return _unk2; } set { _unk2 = value; } }
-        public float Float2 { get { return _unk3; } set { _unk3 = value; } }
-        public int Unknown4 { get { return _unk4; } set { _unk4 = value; } }
-        public int Unknown5 { get { return _unk5; } set { _unk5 = value; } }
-        public int Unknown6 { get { return _unk6; } set { _unk6 = value; } }
-        public int Unknown7 { get { return _unk7; } set { _unk7 = value; } }
-        public int Unknown8 { get { return _unk8; } set { _unk8 = value; } }
-        public int Unknown9 { get { return _unk9; } set { _unk9 = value; } }
-        public int Unknown10 { get { return _unk10; } set { _unk10 = value; } }
-
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct WAVEHeader
-    {
-        public const uint Tag = 0x45564157;
-
-        public buint _tag;
-        public buint _length;
-        public buint _numEntries;
-        
-        private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-
-        public buint* Entries { get { return (buint*)(Address + 12); } }
-        public WAVEEntry* GetEntry(int index)
-        {
-            return (WAVEEntry*)(Address + Entries[index]);
+            _tag = Tag;
+            _length = length;
+            _p1 = _p2 = _p3 = _p4 = _p5 = _p6 = 0;
         }
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct WAVEEntry
-    {
-        public AudioFormatInfo _format;
 
-        public bushort _frequency;
-        public bushort _unk3; //0x00
-        public buint _flags;
-        public bint _nibbles; //Includes ALL data, not just samples
-        public bint _unk4; //0x1C
-        public bint _offset;
-        public bint _unk5; //0
-        public bint _unk6; //0x20
-        public bint _unk7; //0
-        public bint _unk8; //0x3C
-        public int _unk9; //1
-        public int _unk10; //1
-        public int _unk11; //1
-        public int _unk12; //1
-        public int _unk13; //0
-
-        public ADPCMInfo _adpcInfo;
-
-        public int NumSamples { get { return (_nibbles / 16 * 14) + ((_nibbles % 16) - 2); } }
-    }
 }

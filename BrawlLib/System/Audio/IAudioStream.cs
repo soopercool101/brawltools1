@@ -13,7 +13,13 @@ namespace System.Audio
         int LoopEndSample { get; }
         int SamplePosition { get; set; }
 
+        //Reads numSamples audio samples into the address specified by destAddr.
+        //Returns the actual number of samples read.
+        //Cannot loop automatically, because sample offsets would then be incorrect.
         int ReadSamples(VoidPtr destAddr, int numSamples);
+
+        //Wraps the stream to the loop context.
+        //Must be used manually in order to track stream state. (Just good coding practice)
         void Wrap();
     }
 }

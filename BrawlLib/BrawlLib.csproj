@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>10.0.20506</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{462D0BBF-CE82-405B-8848-2F91E9E14C55}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -47,8 +47,10 @@
     <None Include="System\ComponentModel\CustomPropertyDescriptor.cs" />
     <None Include="System\ComponentModel\DelegatePropertyDescriptor.cs" />
     <None Include="Modeling\Collada.cs" />
+    <Compile Include="Imaging\CIE.cs" />
     <Compile Include="Imaging\DIB.cs" />
     <Compile Include="Imaging\IImageSource.cs" />
+    <Compile Include="Imaging\MedianCut.cs" />
     <Compile Include="Imaging\NVDXT.cs" />
     <Compile Include="Imaging\PixelTypes.cs" />
     <None Include="Imaging\Squish.cs" />
@@ -67,8 +69,12 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="OpenGL\GLTexture.cs" />
+    <Compile Include="Platform\Win32.DirectSound.cs" />
+    <Compile Include="Platform\Win32.DirectSoundBuffer.cs" />
+    <Compile Include="Platform\Win32.OpenGL.cs" />
     <Compile Include="SSBB\BinaryStringTable.cs" />
     <Compile Include="SSBB\ExportFilters.cs" />
+    <Compile Include="SSBB\LabelBuilder.cs" />
     <Compile Include="SSBB\NodeComparer.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0BoneNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0ColorNode.cs" />
@@ -86,24 +92,40 @@
     <Compile Include="SSBB\ResourceNodes\MSBinNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\FILENode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\INFONode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RBNKNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\RSARBankNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSAREntryNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSARExtFileNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\RSARFolderNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\RSARGroupNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\RSARListNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\RSARNode.cs" />
-    <Compile Include="SSBB\ResourceNodes\RSAR\RSARSetNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSARFileNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\RSARSoundNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\RSARTypeNode.cs" />
-    <Compile Include="SSBB\ResourceNodes\RSAR\RWSDNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RSAR\RSEQNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RWSD\RWSDDataNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RWSD\RWSDGroupNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RWSD\RWSDNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\SYMBNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSTMNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\RWSD\RWSDSoundNode.cs" />
     <Compile Include="SSBB\StringTable.cs" />
+    <Compile Include="SSBB\Types\RBNK.cs" />
+    <Compile Include="SSBB\Types\RSEQ.cs" />
+    <Compile Include="SSBB\Types\RWSD.cs" />
     <Compile Include="System\Audio\ADPCM.cs" />
+    <Compile Include="System\Audio\AudioDevice.cs" />
     <Compile Include="System\Audio\AudioProvider.cs" />
-    <Compile Include="System\Audio\G726.cs" />
+    <Compile Include="System\Audio\AudioBuffer.cs" />
+    <Compile Include="System\Audio\BufferData.cs" />
     <Compile Include="System\Audio\IAudioStream.cs" />
     <Compile Include="System\Audio\PCMStream.cs" />
+    <Compile Include="System\Audio\wAudioBuffer.cs" />
+    <Compile Include="System\Audio\wAudioDevice.cs" />
+    <Compile Include="System\Audio\wAudioProvider.cs" />
     <Compile Include="System\Audio\WAV.cs" />
+    <Compile Include="System\DVector3.cs" />
     <Compile Include="System\IO\FileAssociation.cs" />
     <Compile Include="System\Matrix.cs" />
     <Compile Include="System\Matrix43.cs" />
@@ -134,6 +156,15 @@
     <Compile Include="System\ByteExtension.cs" />
     <Compile Include="System\Windows\Forms\AnimEditControl.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\AudioPlaybackPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\BrstmConverterDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\CustomTrackBar.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="System\Windows\Forms\GLTexturePanel.cs">
       <SubType>UserControl</SubType>
@@ -174,6 +205,9 @@
     <Compile Include="System\Windows\Forms\ProxySplitter.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="System\Windows\Forms\SoundPackControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="System\Windows\Forms\TextureConverterDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -181,6 +215,7 @@
     <Compile Include="System\Windows\Forms\TransformEditControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="System\PString.cs" />
     <Compile Include="Wii\Animations\AnimationCode.cs" />
     <Compile Include="Wii\Animations\AnimationConverter.cs" />
     <Compile Include="Wii\Animations\AnimationFrame.cs" />
@@ -188,6 +223,8 @@
     <Compile Include="Wii\Animations\KeyframeCollection.cs" />
     <Compile Include="Wii\Audio\ADPCMStream.cs" />
     <Compile Include="Wii\Audio\AudioConverter.cs" />
+    <Compile Include="Wii\Audio\RSARConverter.cs" />
+    <Compile Include="Wii\Audio\RSTMConverter.cs" />
     <Compile Include="Wii\Compression\Common.cs" />
     <Compile Include="Wii\Compression\LZ77.cs" />
     <Compile Include="System\IO\FileMap.cs" />
@@ -259,6 +296,9 @@
     <EmbeddedResource Include="System\Windows\Forms\AnimEditControl.resx">
       <DependentUpon>AnimEditControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\AudioPlaybackPanel.resx">
+      <DependentUpon>AudioPlaybackPanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\ModelAnimPanel.resx">
       <DependentUpon>ModelAnimPanel.cs</DependentUpon>
     </EmbeddedResource>
@@ -279,6 +319,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\ProgressWindow.resx">
       <DependentUpon>ProgressWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\SoundPackControl.resx">
+      <DependentUpon>SoundPackControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\TextureConverterDialog.resx">
       <DependentUpon>TextureConverterDialog.cs</DependentUpon>

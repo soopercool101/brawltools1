@@ -16,6 +16,9 @@ namespace BrawlBox.NodeWrappers
             _menu = new ContextMenuStrip();
             _menu.Items.Add(new ToolStripMenuItem("Ne&w", null,
                 new ToolStripMenuItem("Folder", null, NewFolderAction),
+                new ToolStripMenuItem("Sound", null,
+                    new ToolStripMenuItem("From File", null, ImportSoundAction),
+                    new ToolStripMenuItem("From Existing", null, NewSoundAction)),
                 new ToolStripMenuItem("Bank", null, NewBankAction),
                 new ToolStripMenuItem("Type", null, NewTypeAction),
                 new ToolStripMenuItem("Group", null, NewGroupAction)
@@ -30,6 +33,8 @@ namespace BrawlBox.NodeWrappers
             _menu.Closing += MenuClosing;
         }
         protected static void NewFolderAction(object sender, EventArgs e) { GetInstance<RSARFolderWrapper>().NewFolder(); }
+        protected static void ImportSoundAction(object sender, EventArgs e) { GetInstance<RSARFolderWrapper>().ImportSound(); }
+        protected static void NewSoundAction(object sender, EventArgs e) { GetInstance<RSARFolderWrapper>().NewSound(); }
         protected static void NewBankAction(object sender, EventArgs e) { GetInstance<RSARFolderWrapper>().NewBank(); }
         protected static void NewTypeAction(object sender, EventArgs e) { GetInstance<RSARFolderWrapper>().NewType(); }
         protected static void NewGroupAction(object sender, EventArgs e) { GetInstance<RSARFolderWrapper>().NewGroup(); }
@@ -50,6 +55,16 @@ namespace BrawlBox.NodeWrappers
 
         public void NewFolder()
         {
+        }
+        public void ImportSound()
+        {
+        }
+        public void NewSound()
+        {
+            using (CloneSoundDialog dlg = new CloneSoundDialog())
+            {
+                dlg.ShowDialog(null, this.ResourceNode as RSARFolderNode);
+            }
         }
         public void NewBank()
         {

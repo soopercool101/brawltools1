@@ -83,10 +83,18 @@ namespace BrawlLib.SSBB.ResourceNodes
         MDL0Group = 0x0601,
 
         RSARFolder = 0x0701,
-        RSARSound = 0x0709,
+        RSARFile = 0x0709,
         RSARGroup = 0x070A,
         RSARType = 0x070B,
-        RSARBank = 0x070C
+        RSARBank = 0x070C,
+
+        RWSD = 0x0800,
+        RWSDGroup = 0x0801,
+        //RWSDDataEntry = 0x0800,
+        //RWSDWaveEntry= 0x0800,
+
+        RBNK = 0x0900,
+        RSEQ = 0x0A00
     }
 
     public abstract class ResourceNode : IDisposable

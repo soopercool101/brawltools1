@@ -159,7 +159,7 @@ namespace System.Audio
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct WaveFormatEx
+    public unsafe struct WaveFormatEx
     {
         public WaveFormatTag wFormatTag;
         public ushort nChannels;

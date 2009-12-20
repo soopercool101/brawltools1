@@ -32,12 +32,12 @@ namespace BrawlLib.SSBB.ResourceNodes
                 //case 0: t = typeof(RSARSoundNode); break;
                 case 1: t = typeof(RSARBankNode); break;
                 case 2: t = typeof(RSARTypeNode); break;
-                case 3: t = typeof(RSARSetNode); break;
+                case 3: t = typeof(RSARFileNode); break;
                 case 4: t = typeof(RSARGroupNode); break;
                 default: return;
             }
 
-            ruint* groups = Header->INFOBlock->GroupList;
+            ruint* groups = (ruint*)&Header->INFOBlock->_collection;
             ruint* list = (ruint*)((uint)groups + groups[_index] + 4);
 
             int count = *((bint*)list - 1);
@@ -46,28 +46,4 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
     }
 
-    public unsafe class RSAREntryNode : ResourceNode
-    {
-        internal RSARNode RSARNode
-        {
-            get
-            {
-                ResourceNode n = this;
-                while (((n = n.Parent) != null) && !(n is RSARNode)) ;
-                return n as RSARNode;
-            }
-        }
-        internal virtual int StringId { get { return 0; } }
-
-        //protected override bool OnInitialize()
-        //{
-        //    RSARNode p = RSARNode;
-        //    if (p != null)
-        //        _name = p.Header->SYMBBlock->GetStringEntry(StringId);
-        //    else
-        //        _name = String.Format("Entry{0}", StringId);
-
-        //    return false;
-        //}
-    }
 }

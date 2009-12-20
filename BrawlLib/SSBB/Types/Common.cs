@@ -43,7 +43,7 @@ namespace BrawlLib.SSBBTypes
         public uint _tag;
         public short _endian;
         public short _version;
-        public buint _length;
+        public bint _length;
         public bushort _firstOffset;
         public bushort _numEntries;
 
@@ -54,25 +54,66 @@ namespace BrawlLib.SSBBTypes
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    unsafe struct ruint
+    {
+        public int _control;
+        public bint _data;
+
+        public ruint(int control, int data)
+        {
+            _control = control;
+            _data = data;
+        }
+
+        public VoidPtr Offset(VoidPtr baseAddr) { return baseAddr + _data; }
+
+        public static implicit operator ruint(int r) { return new ruint() { _control = 1, _data = r }; }
+        public static implicit operator int(ruint r) { return r._data; }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct RuintList
     {
-        public buint _numEntries;
+        public bint _numEntries;
 
         public VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public ruint* Entries { get { return (ruint*)(Address + 4); } }
+        public VoidPtr Data { get { return Address + _numEntries * 8 + 4; } }
 
-        public VoidPtr GetEntry(VoidPtr offset, int index) { return offset + Entries[index]; }
+        public VoidPtr this[int index]
+        {
+            get { return (int)Entries[index]; }
+            set { Entries[index] = (int)value; }
+        }
+
+        public VoidPtr Get(VoidPtr offset, int index) { return offset + Entries[index]; }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct RuintCollection
     {
-        public ruint _first;
+        private ruint _first;
 
         public VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public ruint* Entries { get { return (ruint*)Address; } }
 
-        public VoidPtr this[int index] { get { return Address + Entries[index]; } }
+        public VoidPtr this[int index] 
+        { 
+            get { return Address + Entries[index]; }
+            set { Entries[index] = (int)(value - Address); }
+        }
+
+        public VoidPtr Offset(VoidPtr offset) { return Address + offset; }
+
+        public VoidPtr Get(int index) { return Address + Entries[index]; }
+
+        //public void Set(int index, int control, VoidPtr address)
+        //{
+        //    int addr = Address;
+        //    ruint* e = (ruint*)addr + index;
+        //    e->_control = control;
+        //    e->_data = (int)address - addr;
+        //}
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -223,11 +264,16 @@ namespace BrawlLib.SSBBTypes
         public byte _looped;
         public byte _channels;
         public byte _unk;
+
+        public AudioFormatInfo(byte encoding, byte looped, byte channels, byte unk)
+        { _encoding = encoding; _looped = looped; _channels = channels; _unk = unk; }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct ADPCMInfo
+    public unsafe struct ADPCMInfo
     {
+        public const int Size = 0x2E;
+
         public fixed short _coefs[16];
 
         public bushort _gain;
