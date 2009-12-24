@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Audio;
+using System.ComponentModel;
 
 namespace System.Windows.Forms
 {
@@ -112,9 +113,17 @@ namespace System.Windows.Forms
         private DateTime _sampleTime;
 
         private IAudioStream _targetStream;
-        public IAudioStream TargetStream
+        //public IAudioStream TargetStream
+        //{
+        //    get { return _targetStream; }
+        //    set { TargetChanged(value); }
+        //}
+
+        private IAudioSource _targetSource;
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public IAudioSource TargetSource
         {
-            get { return _targetStream; }
+            get { return _targetSource; }
             set { TargetChanged(value); }
         }
 
@@ -146,17 +155,28 @@ namespace System.Windows.Forms
                 _buffer = null;
             }
 
+            if (_targetStream != null)
+            {
+                _targetStream.Dispose();
+                _targetStream = null;
+            }
+
+            _targetSource = null;
+
             //Reset fields
             chkLoop.Checked = false;
         }
 
-        private void TargetChanged(IAudioStream newTarget)
+        private void TargetChanged(IAudioSource newTarget)
         {
-            if (_targetStream == newTarget)
+            if (_targetSource == newTarget)
                 return;
 
             Close();
-            if ((_targetStream = newTarget) == null)
+
+            if ((_targetSource = newTarget) == null)
+                return;
+            if ((_targetStream = _targetSource.CreateStream()) == null)
                 return;
 
             //Create provider
@@ -166,14 +186,19 @@ namespace System.Windows.Forms
                 _provider.Attach(this);
             }
 
+            chkLoop.Checked = false;
+            chkLoop.Enabled = _targetStream.IsLooping;
+
             //Create buffer for stream
             _buffer = _provider.CreateBuffer(_targetStream);
 
             _sampleTime = new DateTime((long)_targetStream.Samples * 10000000 / _targetStream.Frequency);
 
             trackBar1.Value = 0;
+            trackBar1.TickStyle = TickStyle.None;
             trackBar1.Maximum = _targetStream.Samples;
             trackBar1.TickFrequency = _targetStream.Samples / 8;
+            trackBar1.TickStyle = TickStyle.BottomRight;
 
             UpdateTimeDisplay();
         }

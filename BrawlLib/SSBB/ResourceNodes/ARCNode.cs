@@ -122,6 +122,14 @@ namespace BrawlLib.SSBB.ResourceNodes
             _replSrc = _replUncompSrc = new DataSource(address, size);
         }
 
+        public override unsafe void Export(string outPath)
+        {
+            if (outPath.EndsWith(".pair", StringComparison.OrdinalIgnoreCase))
+                ExportPair(outPath);
+            else
+                base.Export(outPath);
+        }
+
         public void ExportPair(string path)
         {
             if (Path.HasExtension(path))

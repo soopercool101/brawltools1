@@ -70,12 +70,6 @@ namespace System.Audio
         //internal bool _playing = false;
         //public bool IsPlaying { get { return _playing; } }
 
-        //The number of samples to play.
-        //Can be used with Loop for automatic looping.
-        //If not looped, the buffer will automatically stop upon reaching this value.
-        //internal int _totalSamples;
-        //public int TotalSamples { get { return _totalSamples; } set { _totalSamples = value; } }
-
         //Byte offset within buffer in which playback is commencing.
         internal abstract int PlayCursor { get; set; }
 
@@ -127,158 +121,34 @@ namespace System.Audio
             if (sampleDifference == 0)
                 return;
 
-            //Advance sample read position.
-            _readSample += sampleDifference;
             //Set new read offset.
             _readOffset = byteOffset;
 
             //Update looping
             if (_source != null)
             {
-                if (_loop)
+                if ((_loop) && (_source.IsLooping))
                 {
-                    int start, end;
-                    if (_source.IsLooping)
-                    {
-                        start = _source.LoopStartSample;
-                        end = _source.LoopEndSample;
-                    }
-                    else
-                    {
-                        start = 0;
-                        end = _source.Samples;
-                    }
+                    int start = _source.LoopStartSample;
+                    int end = _source.LoopEndSample;
+                    int newSample = _readSample + sampleDifference;
 
-                    _readSample = start + ((_readSample - start) % (end - start));
+                    if ((newSample >= end) && (_writeSample < _readSample))
+                        _readSample = start + ((newSample - start) % (end - start));
+                    else
+                        _readSample = Math.Min(newSample, _source.Samples);
                 }
-                else if (_readSample >= _source.Samples)
+                else
                 {
-                    _readSample = _source.Samples;
-                    Stop();
+                    _readSample = Math.Min(_readSample + sampleDifference, _source.Samples);
+                    //if (_readSample >= _source.Samples)
+                    //    Stop();
                 }
             }
+            else
+                _readSample += sampleDifference;
+
         }
-
-
-        //Fills the buffer starting from writeOffset, taking into account circular wrapping.
-        //Divides available samples by 8, so as not to flood the buffer all at once. Also reduces initialization and fill time.
-        //Calls Update to move readOffset ahead.
-        //public virtual void Fill()
-        //{
-        //    if (_source == null)
-        //        return;
-
-        //    Update();
-
-        //    //Get number of samples available for writing. 
-        //    int sampleCount = (((_readOffset <= _writeOffset) ? (_readOffset + _dataLength) : _readOffset) - _writeOffset) / _blockAlign / 8;
-        //    int byteCount = sampleCount * _blockAlign;
-
-        //    //Lock buffer and fill
-        //    BufferData data = Lock(_writeOffset, byteCount);
-        //    data.Fill(_source, _loop);
-        //    Unlock(data);
-
-        //    //Advance offsets
-        //    _writeOffset = (_writeOffset + byteCount) % _dataLength;
-        //    _writeSample = _source.SamplePosition;
-
-
-            //int samplesRead, bytesRead;
-            //if (!_loop)
-            //{
-            //    //Fill first part of buffer
-            //    samplesRead = _source.ReadSamples(data._part1Address, data._part1Samples);
-
-            //    //If not all samples could be read
-            //    if (samplesRead < data._part1Samples)
-            //    {
-            //        //Zero remaining
-            //        bytesRead = samplesRead * _blockAlign;
-            //        Memory.Fill((VoidPtr)data._part1Address + bytesRead, (uint)(data._part1Length - bytesRead), 0);
-            //        //Zero second part if exists.
-            //        if (data.IsSplit)
-            //            Memory.Fill(data._part2Address, (uint)data._part2Length, 0);
-            //    }
-            //    else if (data.IsSplit)
-            //    {
-            //        //Fill second part of buffer.
-            //        samplesRead = _source.ReadSamples(data._part2Address, data._part2Samples);
-
-            //        //If not all samples could be read, zero fill
-            //        if (samplesRead < data._part2Samples)
-            //        {
-            //            bytesRead = samplesRead * _blockAlign;
-            //            Memory.Fill((VoidPtr)data._part2Address + bytesRead, (uint)(data._part2Length - bytesRead), 0);
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    //When looping you don't have to worry about filling the remainder
-            //    int end = _source.IsLooping ? _source.LoopEndSample : _source.Samples;
-
-            //    //Does end fall within sample range?
-            //    if ((_writeSample <= end) && ((_writeSample + sampleCount) > end))
-            //    {
-            //        //We must loop!
-            //        int loopSamples = end - _writeSample;
-
-            //        if (loopSamples > data._part1Samples)
-            //        {
-            //            samplesRead = _source.ReadSamples(data._part1Address, data._part1Length);
-            //        }
-
-            //        if (samplesRead < loopSamples)
-            //        {
-            //            //Continue loop samples to next part
-            //            samplesRead = _source.ReadSamples(data._part2Address, loopSamples - data._part1Samples);
-            //            bytesRead = samplesRead * _blockAlign;
-            //            //Wrap source
-            //            if (_source.IsLooping)
-            //                _source.Wrap();
-            //            else
-            //                _source.SamplePosition = 0;
-            //            //Finish reading
-            //            _source.ReadSamples((VoidPtr)data._part2Address + bytesRead, data._part2Length - bytesRead);
-            //        }
-            //        if (loopSamples < data._part1Samples)
-            //        {
-            //        }
-            //    }
-            //    else
-            //    {
-            //        _source.ReadSamples(data._part1Address, data._part1Samples);
-            //        if (data.IsSplit)
-            //            _source.ReadSamples(data._part2Address, data._part2Samples);
-            //    }
-            //}
-
-            //if(_loop)
-            //{
-            //    bool loop = (_writeSample <= end) && ((_writeSample + sampleCount) > end);
-            //    if (loop)
-            //    {
-
-            //    }
-            //}
-            //bool loop = _loop && (_writeSampleOffset <= _loopEndSample) && ((_writeSampleOffset + numSamples) > _loopEndSample);
-            //if (loop)
-            //    numSamples = _loopEndSample - _writeSampleOffset;
-
-
-            //stream.ReadSamples(data.Part1Address, (int)data.Part1Length / _blockAlign);
-            //if (data.IsSplit)
-            //    stream.ReadSamples(data.Part2Address, (int)data.Part2Length / _blockAlign);
-
-            //Unlock(data);
-
-            //Advance positions.
-            //_writeOffset = (_writeOffset + byteCount) % _dataLength;
-            //_writeOffset += byteCount;
-            //_writeSample = _source.SamplePosition;
-            //_writeSample += sampleCount;
-        //}
 
         public virtual void Fill()
         {
@@ -301,25 +171,13 @@ namespace System.Audio
 
             //Lock buffer and fill
             BufferData data = Lock(_writeOffset, byteCount);
-            data.Fill(source, loop);
-            Unlock(data);
+            try { data.Fill(source, loop); }
+            finally { Unlock(data); }
 
             //Advance offsets
             _writeOffset = (_writeOffset + byteCount) % _dataLength;
             _writeSample = source.SamplePosition;
         }
-
-        //internal void Fill(IAudioStream stream, int samples, bool loop, bool manage)
-        //{
-        //    if (stream == null)
-        //        return;
-
-        //        Update();
-
-        //    //Get number of samples available for writing. 
-        //    int sampleCount = (((_readOffset <= _writeOffset) ? (_readOffset + _dataLength) : _readOffset) - _writeOffset) / _blockAlign / 8;
-        //    int byteCount = sampleCount * _blockAlign;
-        //}
 
     }
 }

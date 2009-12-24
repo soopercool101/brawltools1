@@ -50,29 +50,43 @@ namespace System.Windows.Forms
         private ToolStripMenuItem exportToolStripMenuItem;
         private ToolStripMenuItem replaceToolStripMenuItem;
         private SaveFileDialog dlgSave;
-        private Button btnMath;
+        private Button btnClear;
         private Button btnDelete;
         private Button btnInsert;
         private GroupBox grpTransAll;
+        private IContainer components;
+        private Button btnClean;
+        private Button btnPasteAll;
+        private Button btnCopyAll;
         private Label label13;
 
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Animations", System.Windows.Forms.HorizontalAlignment.Left);
             this.grpTransform = new System.Windows.Forms.GroupBox();
             this.btnPaste = new System.Windows.Forms.Button();
             this.btnCopy = new System.Windows.Forms.Button();
             this.btnCut = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
+            this.numScaleZ = new System.Windows.Forms.NumericInputBox();
+            this.numTransX = new System.Windows.Forms.NumericInputBox();
+            this.numScaleY = new System.Windows.Forms.NumericInputBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.numScaleX = new System.Windows.Forms.NumericInputBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.numRotZ = new System.Windows.Forms.NumericInputBox();
             this.label8 = new System.Windows.Forms.Label();
+            this.numRotY = new System.Windows.Forms.NumericInputBox();
             this.label9 = new System.Windows.Forms.Label();
+            this.numRotX = new System.Windows.Forms.NumericInputBox();
             this.label10 = new System.Windows.Forms.Label();
+            this.numTransZ = new System.Windows.Forms.NumericInputBox();
             this.label11 = new System.Windows.Forms.Label();
+            this.numTransY = new System.Windows.Forms.NumericInputBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
-            this.btnMath = new System.Windows.Forms.Button();
+            this.btnClear = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.btnInsert = new System.Windows.Forms.Button();
             this.grpExt = new System.Windows.Forms.GroupBox();
@@ -81,8 +95,8 @@ namespace System.Windows.Forms
             this.btnOpen = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.listAnims = new System.Windows.Forms.ListView();
-            this.nameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.ctxAnim = new System.Windows.Forms.ContextMenuStrip();
+            this.nameColumn = new System.Windows.Forms.ColumnHeader();
+            this.ctxAnim = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.sourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -90,15 +104,9 @@ namespace System.Windows.Forms
             this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
             this.dlgSave = new System.Windows.Forms.SaveFileDialog();
             this.grpTransAll = new System.Windows.Forms.GroupBox();
-            this.numScaleZ = new System.Windows.Forms.NumericInputBox();
-            this.numTransX = new System.Windows.Forms.NumericInputBox();
-            this.numScaleY = new System.Windows.Forms.NumericInputBox();
-            this.numScaleX = new System.Windows.Forms.NumericInputBox();
-            this.numRotZ = new System.Windows.Forms.NumericInputBox();
-            this.numRotY = new System.Windows.Forms.NumericInputBox();
-            this.numRotX = new System.Windows.Forms.NumericInputBox();
-            this.numTransZ = new System.Windows.Forms.NumericInputBox();
-            this.numTransY = new System.Windows.Forms.NumericInputBox();
+            this.btnClean = new System.Windows.Forms.Button();
+            this.btnPasteAll = new System.Windows.Forms.Button();
+            this.btnCopyAll = new System.Windows.Forms.Button();
             this.grpTransform.SuspendLayout();
             this.grpExt.SuspendLayout();
             this.ctxAnim.SuspendLayout();
@@ -176,6 +184,39 @@ namespace System.Windows.Forms
             this.label5.Text = "Translation X:";
             this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // numScaleZ
+            // 
+            this.numScaleZ.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.numScaleZ.Location = new System.Drawing.Point(86, 192);
+            this.numScaleZ.Name = "numScaleZ";
+            this.numScaleZ.Size = new System.Drawing.Size(82, 20);
+            this.numScaleZ.TabIndex = 20;
+            this.numScaleZ.Text = "0";
+            this.numScaleZ.ValueChanged += new System.EventHandler(this.BoxChanged);
+            // 
+            // numTransX
+            // 
+            this.numTransX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.numTransX.Location = new System.Drawing.Point(86, 16);
+            this.numTransX.Name = "numTransX";
+            this.numTransX.Size = new System.Drawing.Size(82, 20);
+            this.numTransX.TabIndex = 3;
+            this.numTransX.Text = "0";
+            this.numTransX.ValueChanged += new System.EventHandler(this.BoxChanged);
+            // 
+            // numScaleY
+            // 
+            this.numScaleY.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.numScaleY.Location = new System.Drawing.Point(86, 172);
+            this.numScaleY.Name = "numScaleY";
+            this.numScaleY.Size = new System.Drawing.Size(82, 20);
+            this.numScaleY.TabIndex = 19;
+            this.numScaleY.Text = "0";
+            this.numScaleY.ValueChanged += new System.EventHandler(this.BoxChanged);
+            // 
             // label6
             // 
             this.label6.Location = new System.Drawing.Point(6, 36);
@@ -184,6 +225,17 @@ namespace System.Windows.Forms
             this.label6.TabIndex = 5;
             this.label6.Text = "Translation Y:";
             this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // numScaleX
+            // 
+            this.numScaleX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.numScaleX.Location = new System.Drawing.Point(86, 152);
+            this.numScaleX.Name = "numScaleX";
+            this.numScaleX.Size = new System.Drawing.Size(82, 20);
+            this.numScaleX.TabIndex = 18;
+            this.numScaleX.Text = "0";
+            this.numScaleX.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // label7
             // 
@@ -194,6 +246,17 @@ namespace System.Windows.Forms
             this.label7.Text = "Translation Z:";
             this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // numRotZ
+            // 
+            this.numRotZ.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.numRotZ.Location = new System.Drawing.Point(86, 124);
+            this.numRotZ.Name = "numRotZ";
+            this.numRotZ.Size = new System.Drawing.Size(82, 20);
+            this.numRotZ.TabIndex = 17;
+            this.numRotZ.Text = "0";
+            this.numRotZ.ValueChanged += new System.EventHandler(this.BoxChanged);
+            // 
             // label8
             // 
             this.label8.Location = new System.Drawing.Point(6, 84);
@@ -202,6 +265,17 @@ namespace System.Windows.Forms
             this.label8.TabIndex = 7;
             this.label8.Text = "Rotation X:";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // numRotY
+            // 
+            this.numRotY.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.numRotY.Location = new System.Drawing.Point(86, 104);
+            this.numRotY.Name = "numRotY";
+            this.numRotY.Size = new System.Drawing.Size(82, 20);
+            this.numRotY.TabIndex = 16;
+            this.numRotY.Text = "0";
+            this.numRotY.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // label9
             // 
@@ -212,6 +286,17 @@ namespace System.Windows.Forms
             this.label9.Text = "Rotation Y:";
             this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // numRotX
+            // 
+            this.numRotX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.numRotX.Location = new System.Drawing.Point(86, 84);
+            this.numRotX.Name = "numRotX";
+            this.numRotX.Size = new System.Drawing.Size(82, 20);
+            this.numRotX.TabIndex = 15;
+            this.numRotX.Text = "0";
+            this.numRotX.ValueChanged += new System.EventHandler(this.BoxChanged);
+            // 
             // label10
             // 
             this.label10.Location = new System.Drawing.Point(6, 124);
@@ -221,6 +306,17 @@ namespace System.Windows.Forms
             this.label10.Text = "Rotation Z:";
             this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // numTransZ
+            // 
+            this.numTransZ.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.numTransZ.Location = new System.Drawing.Point(86, 56);
+            this.numTransZ.Name = "numTransZ";
+            this.numTransZ.Size = new System.Drawing.Size(82, 20);
+            this.numTransZ.TabIndex = 14;
+            this.numTransZ.Text = "0";
+            this.numTransZ.ValueChanged += new System.EventHandler(this.BoxChanged);
+            // 
             // label11
             // 
             this.label11.Location = new System.Drawing.Point(6, 152);
@@ -229,6 +325,17 @@ namespace System.Windows.Forms
             this.label11.TabIndex = 10;
             this.label11.Text = "Scale X:";
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // numTransY
+            // 
+            this.numTransY.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.numTransY.Location = new System.Drawing.Point(86, 36);
+            this.numTransY.Name = "numTransY";
+            this.numTransY.Size = new System.Drawing.Size(82, 20);
+            this.numTransY.TabIndex = 13;
+            this.numTransY.Text = "0";
+            this.numTransY.ValueChanged += new System.EventHandler(this.BoxChanged);
             // 
             // label12
             // 
@@ -248,14 +355,15 @@ namespace System.Windows.Forms
             this.label13.Text = "Scale Y:";
             this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // btnMath
+            // btnClear
             // 
-            this.btnMath.Location = new System.Drawing.Point(116, 14);
-            this.btnMath.Name = "btnMath";
-            this.btnMath.Size = new System.Drawing.Size(50, 20);
-            this.btnMath.TabIndex = 26;
-            this.btnMath.Text = "Math...";
-            this.btnMath.UseVisualStyleBackColor = true;
+            this.btnClear.Location = new System.Drawing.Point(116, 14);
+            this.btnClear.Name = "btnClear";
+            this.btnClear.Size = new System.Drawing.Size(50, 20);
+            this.btnClear.TabIndex = 26;
+            this.btnClear.Text = "Clear";
+            this.btnClear.UseVisualStyleBackColor = true;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
             // btnDelete
             // 
@@ -354,7 +462,7 @@ namespace System.Windows.Forms
             this.listAnims.Location = new System.Drawing.Point(0, 69);
             this.listAnims.MultiSelect = false;
             this.listAnims.Name = "listAnims";
-            this.listAnims.Size = new System.Drawing.Size(173, 246);
+            this.listAnims.Size = new System.Drawing.Size(173, 221);
             this.listAnims.TabIndex = 24;
             this.listAnims.UseCompatibleStateImageBehavior = false;
             this.listAnims.View = System.Windows.Forms.View.Details;
@@ -404,116 +512,50 @@ namespace System.Windows.Forms
             // 
             // grpTransAll
             // 
-            this.grpTransAll.Controls.Add(this.btnMath);
+            this.grpTransAll.Controls.Add(this.btnClean);
+            this.grpTransAll.Controls.Add(this.btnPasteAll);
+            this.grpTransAll.Controls.Add(this.btnCopyAll);
+            this.grpTransAll.Controls.Add(this.btnClear);
             this.grpTransAll.Controls.Add(this.btnInsert);
             this.grpTransAll.Controls.Add(this.btnDelete);
             this.grpTransAll.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.grpTransAll.Enabled = false;
-            this.grpTransAll.Location = new System.Drawing.Point(0, 315);
+            this.grpTransAll.Location = new System.Drawing.Point(0, 290);
             this.grpTransAll.Name = "grpTransAll";
-            this.grpTransAll.Size = new System.Drawing.Size(173, 40);
+            this.grpTransAll.Size = new System.Drawing.Size(173, 65);
             this.grpTransAll.TabIndex = 25;
             this.grpTransAll.TabStop = false;
             this.grpTransAll.Text = "Transform All";
             // 
-            // numScaleZ
+            // btnClean
             // 
-            this.numScaleZ.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.numScaleZ.Location = new System.Drawing.Point(86, 192);
-            this.numScaleZ.Name = "numScaleZ";
-            this.numScaleZ.Size = new System.Drawing.Size(82, 20);
-            this.numScaleZ.TabIndex = 20;
-            this.numScaleZ.Text = "0";
-            this.numScaleZ.ValueChanged += new System.EventHandler(this.BoxChanged);
+            this.btnClean.Location = new System.Drawing.Point(116, 40);
+            this.btnClean.Name = "btnClean";
+            this.btnClean.Size = new System.Drawing.Size(50, 20);
+            this.btnClean.TabIndex = 29;
+            this.btnClean.Text = "Clean";
+            this.btnClean.UseVisualStyleBackColor = true;
+            this.btnClean.Click += new System.EventHandler(this.btnClean_Click);
             // 
-            // numTransX
+            // btnPasteAll
             // 
-            this.numTransX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.numTransX.Location = new System.Drawing.Point(86, 16);
-            this.numTransX.Name = "numTransX";
-            this.numTransX.Size = new System.Drawing.Size(82, 20);
-            this.numTransX.TabIndex = 3;
-            this.numTransX.Text = "0";
-            this.numTransX.ValueChanged += new System.EventHandler(this.BoxChanged);
+            this.btnPasteAll.Location = new System.Drawing.Point(62, 40);
+            this.btnPasteAll.Name = "btnPasteAll";
+            this.btnPasteAll.Size = new System.Drawing.Size(50, 20);
+            this.btnPasteAll.TabIndex = 28;
+            this.btnPasteAll.Text = "Paste";
+            this.btnPasteAll.UseVisualStyleBackColor = true;
+            this.btnPasteAll.Click += new System.EventHandler(this.btnPasteAll_Click);
             // 
-            // numScaleY
+            // btnCopyAll
             // 
-            this.numScaleY.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.numScaleY.Location = new System.Drawing.Point(86, 172);
-            this.numScaleY.Name = "numScaleY";
-            this.numScaleY.Size = new System.Drawing.Size(82, 20);
-            this.numScaleY.TabIndex = 19;
-            this.numScaleY.Text = "0";
-            this.numScaleY.ValueChanged += new System.EventHandler(this.BoxChanged);
-            // 
-            // numScaleX
-            // 
-            this.numScaleX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.numScaleX.Location = new System.Drawing.Point(86, 152);
-            this.numScaleX.Name = "numScaleX";
-            this.numScaleX.Size = new System.Drawing.Size(82, 20);
-            this.numScaleX.TabIndex = 18;
-            this.numScaleX.Text = "0";
-            this.numScaleX.ValueChanged += new System.EventHandler(this.BoxChanged);
-            // 
-            // numRotZ
-            // 
-            this.numRotZ.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.numRotZ.Location = new System.Drawing.Point(86, 124);
-            this.numRotZ.Name = "numRotZ";
-            this.numRotZ.Size = new System.Drawing.Size(82, 20);
-            this.numRotZ.TabIndex = 17;
-            this.numRotZ.Text = "0";
-            this.numRotZ.ValueChanged += new System.EventHandler(this.BoxChanged);
-            // 
-            // numRotY
-            // 
-            this.numRotY.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.numRotY.Location = new System.Drawing.Point(86, 104);
-            this.numRotY.Name = "numRotY";
-            this.numRotY.Size = new System.Drawing.Size(82, 20);
-            this.numRotY.TabIndex = 16;
-            this.numRotY.Text = "0";
-            this.numRotY.ValueChanged += new System.EventHandler(this.BoxChanged);
-            // 
-            // numRotX
-            // 
-            this.numRotX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.numRotX.Location = new System.Drawing.Point(86, 84);
-            this.numRotX.Name = "numRotX";
-            this.numRotX.Size = new System.Drawing.Size(82, 20);
-            this.numRotX.TabIndex = 15;
-            this.numRotX.Text = "0";
-            this.numRotX.ValueChanged += new System.EventHandler(this.BoxChanged);
-            // 
-            // numTransZ
-            // 
-            this.numTransZ.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.numTransZ.Location = new System.Drawing.Point(86, 56);
-            this.numTransZ.Name = "numTransZ";
-            this.numTransZ.Size = new System.Drawing.Size(82, 20);
-            this.numTransZ.TabIndex = 14;
-            this.numTransZ.Text = "0";
-            this.numTransZ.ValueChanged += new System.EventHandler(this.BoxChanged);
-            // 
-            // numTransY
-            // 
-            this.numTransY.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.numTransY.Location = new System.Drawing.Point(86, 36);
-            this.numTransY.Name = "numTransY";
-            this.numTransY.Size = new System.Drawing.Size(82, 20);
-            this.numTransY.TabIndex = 13;
-            this.numTransY.Text = "0";
-            this.numTransY.ValueChanged += new System.EventHandler(this.BoxChanged);
+            this.btnCopyAll.Location = new System.Drawing.Point(8, 40);
+            this.btnCopyAll.Name = "btnCopyAll";
+            this.btnCopyAll.Size = new System.Drawing.Size(50, 20);
+            this.btnCopyAll.TabIndex = 27;
+            this.btnCopyAll.Text = "Copy";
+            this.btnCopyAll.UseVisualStyleBackColor = true;
+            this.btnCopyAll.Click += new System.EventHandler(this.btnCopyAll_Click);
             // 
             // ModelAnimPanel
             // 
@@ -665,7 +707,7 @@ namespace System.Windows.Forms
         private void UpdatePropDisplay()
         {
             grpTransAll.Enabled = _enableTransform && (_selectedAnim != null);
-            btnInsert.Enabled = btnDelete.Enabled = _animFrame != 0;
+            btnInsert.Enabled = btnDelete.Enabled = btnClear.Enabled = _animFrame != 0;
             grpTransform.Enabled = _enableTransform && (_transformObject != null);
             for (int i = 0; i < 9; i++)
                 ResetBox(i);
@@ -862,9 +904,11 @@ namespace System.Windows.Forms
                 _selectedAnim = null;
 
             if (_selectedAnim == null)
-                btnInsert.Enabled = btnDelete.Enabled = btnMath.Enabled = false;
+                btnInsert.Enabled = btnDelete.Enabled = btnClear.Enabled = false;
             else
-                btnInsert.Enabled = btnDelete.Enabled = btnMath.Enabled = true;
+                btnInsert.Enabled = btnDelete.Enabled = btnClear.Enabled = true;
+
+            _copyAllIndex = -1;
 
             if (SelectedAnimationChanged != null)
                 SelectedAnimationChanged(this, null);
@@ -942,27 +986,27 @@ namespace System.Windows.Forms
                 _selectedAnim.Replace(dlgOpen.FileName);
 
                 //Search for non-existant bones and ask for deletion.
-                List<CHR0EntryNode> badNodes = new List<CHR0EntryNode>();
-                ResourceNode group = _targetModel.FindChild("Bones", false);
-                foreach (CHR0EntryNode node in _selectedAnim.Children)
-                {
-                    if (group.FindChild(node.Name, true) == null)
-                    {
-                        badNodes.Add(node);
-                    }
-                }
+                //List<CHR0EntryNode> badNodes = new List<CHR0EntryNode>();
+                //ResourceNode group = _targetModel.FindChild("Bones", false);
+                //foreach (CHR0EntryNode node in _selectedAnim.Children)
+                //{
+                //    if (group.FindChild(node.Name, true) == null)
+                //    {
+                //        badNodes.Add(node);
+                //    }
+                //}
 
-                if (badNodes.Count > 0)
-                {
-                    if (MessageBox.Show(this, "The imported animation contains bone references that do not exist in the current model. Would you like to delete these references?", "CHR0 Import", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    {
-                        foreach (CHR0EntryNode n in badNodes)
-                        {
-                            n.Remove();
-                            n.Dispose();
-                        }
-                    }
-                }
+                //if (badNodes.Count > 0)
+                //{
+                //    if (MessageBox.Show(this, "The imported animation contains bone references that do not exist in the current model. Would you like to delete these references?", "CHR0 Import", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                //    {
+                //        foreach (CHR0EntryNode n in badNodes)
+                //        {
+                //            n.Remove();
+                //            n.Dispose();
+                //        }
+                //    }
+                //}
 
                 if (SelectedAnimationChanged != null)
                     SelectedAnimationChanged(this, null);
@@ -987,6 +1031,96 @@ namespace System.Windows.Forms
             _selectedAnim.DeleteKeyframe(_animFrame - 1);
             if (AnimStateChanged != null)
                 AnimStateChanged(this, null);
+        }
+
+        private int _copyAllIndex = -1;
+        private void btnCopyAll_Click(object sender, EventArgs e)
+        {
+            _copyAllIndex = _animFrame;
+        }
+
+        private void btnPasteAll_Click(object sender, EventArgs e)
+        {
+            if (_copyAllIndex < 0)
+                return;
+
+            AnimationFrame frame;
+
+            ResourceNode group = null;
+            MDL0BoneNode bone;
+            if ((_copyAllIndex == 0) || (_animFrame == 0))
+                if ((group = _targetModel.FindChild("Bones", false)) == null)
+                    return;
+
+            foreach (CHR0EntryNode entry in _selectedAnim.Children)
+            {
+                string name = entry._name;
+                bone = null;
+
+                //Get state from index
+                if (_copyAllIndex == 0)
+                {
+                    //Find bone in model
+                    if ((bone = group.FindChild(name, true) as MDL0BoneNode) == null)
+                        continue;
+                    //Get bind pose
+                    frame = (AnimationFrame)bone._bindState;
+                }
+                else
+                    frame = entry.GetAnimFrame(_copyAllIndex - 1);
+
+                //Set current frame
+                if (_animFrame == 0)
+                {
+                    //Find bone
+                    if ((bone == null) && ((bone = group.FindChild(name, true) as MDL0BoneNode) == null))
+                        continue;
+                    //Set bind pose
+                    FrameState state = new FrameState(frame);
+                    bone._bindState = state;
+                    bone.RecalcBindState();
+                    bone.SignalPropertyChange();
+                }
+                else
+                    entry.SetKeyframe(_animFrame - 1, frame);
+            }
+
+            UpdateModel();
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            if (_animFrame == 0)
+                return;
+
+            foreach (CHR0EntryNode entry in _selectedAnim.Children)
+                entry.RemoveKeyframe(_animFrame - 1);
+
+            UpdateModel();
+        }
+
+        private void btnClean_Click(object sender, EventArgs e)
+        {
+            ResourceNode group = _targetModel.FindChild("Bones", false);
+            if (group == null)
+                return;
+
+            List<CHR0EntryNode> badNodes = new List<CHR0EntryNode>();
+            foreach (CHR0EntryNode entry in _selectedAnim.Children)
+            {
+                if (group.FindChild(entry._name, true) == null)
+                    badNodes.Add(entry);
+                else
+                    entry.Keyframes.Clean();
+            }
+
+            foreach (CHR0EntryNode n in badNodes)
+            {
+                n.Remove();
+                n.Dispose();
+            }
+
+            UpdatePropDisplay();
         }
     }
 }

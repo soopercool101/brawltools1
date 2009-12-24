@@ -8,7 +8,7 @@ using BrawlLib.IO;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    public unsafe class RSTMNode : ResourceNode
+    public unsafe class RSTMNode : ResourceNode, IAudioSource
     {
         internal RSTMHeader* Header { get { return (RSTMHeader*)WorkingUncompressed.Address; } }
         public override ResourceType ResourceType { get { return ResourceType.RSTM; } }
@@ -42,7 +42,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Audio Stream")]
         public int BitsPerSample { get { return _bps; } }
 
-        public IAudioStream GetStream()
+        public IAudioStream CreateStream()
         {
             if (Header != null)
                 return new ADPCMStream(Header);
@@ -93,12 +93,6 @@ namespace BrawlLib.SSBB.ResourceNodes
                 try { ReplaceRaw(RSTMConverter.Encode(stream)); }
                 finally { stream.Dispose(); }
         }
-
-        //protected override int OnCalculateSize(bool force)
-        //{
-        //    //Get DATA size
-        //    int dataLen = (_numBlocks - 1) * 0x2000 * _channels;
-        //}
 
         internal static ResourceNode TryParse(DataSource source) { return ((RSTMHeader*)source.Address)->_header._tag == RSTMHeader.Tag ? new RSTMNode() : null; }
     }

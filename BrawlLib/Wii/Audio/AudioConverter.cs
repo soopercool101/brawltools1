@@ -7,192 +7,6 @@ namespace BrawlLib.Wii.Audio
 {
     public unsafe class AudioConverter
     {
-        //public static void EncodeADPCM(IAudioStream source)
-        //{
-        //    //Handle left and right channels separately
-
-        //    int samples = source.Samples;
-        //    int blocks = (samples + 0x37FF) / 0x3800;
-
-        //    source.SamplePosition = 0;
-        //    short* left = (short*)Marshal.AllocHGlobal(samples * 2);
-        //    short* right = (short*)Marshal.AllocHGlobal(samples * 2);
-        //    uint sample;
-        //    for (int i = 0; i < samples; i++)
-        //    {
-        //        source.ReadSamples(&sample, 1);
-        //        left[i] = (short)(sample >> 16);
-        //        right[i] = (short)(sample & 0xFFFF);
-        //    }
-
-        //    short[,] coefsl = CalcCoefs(left, samples);
-        //    short[,] coefsr = CalcCoefs(right, samples);
-
-        //    Marshal.FreeHGlobal((IntPtr)left);
-        //    Marshal.FreeHGlobal((IntPtr)right);
-        //}
-
-        //private static short[,] CalculateCoefs(short* source, int samples)
-        //{
-        //    short[,] coefs = new short[8,2];
-
-        //    int channels = 2;
-        //    int numBlocks = (samples + 13) / 14;
-        //    int unusedCounter = 0;
-
-        //    int x;
-
-        //    short* sampleBuffer = stackalloc short[0x3800];
-
-        //    short* blockBuffer = stackalloc short[14 * channels];
-        //    double* doubleBuffer = stackalloc double[channels];
-        //    double* channelMix = stackalloc double[(channels + 1) * (channels + 1)];
-        //    int* channelPtrs = stackalloc int[channels + 1];
-        //    double** pChannels = (double**)&channelPtrs;
-        //    for (int i = 0; i < channels + 1; i++)
-        //        pChannels[i] = channelMix + ((channels + 1) * i);
-
-        //    int* anotherBuffer= stackalloc int[channels + 1];
-        //    double* omgBuffer = stackalloc double[channels + 1];
-
-        //    short* pBlock1 = blockBuffer, pBlock2 = blockBuffer + 14;
-
-        //    int multiIndex = 0;
-        //    //int* multiBufferData = stackalloc int[numBlocks];
-        //    double** multiBuffer = (double**)Marshal.AllocHGlobal(numBlocks * 4);
-
-        //    int* bufferArrayData = stackalloc int[8];
-        //    double** bufferArray = (double**)bufferArrayData;
-        //    for (int i = 0; i < 8; i++)
-        //        bufferArray[i] = (double*)Marshal.AllocHGlobal((channels + 1) * 8);
-
-        //    double* buffer2 = stackalloc double[channels + 1];
-
-        //    for (int i = 0; i < 14; i++)
-        //        pBlock2[i] = 0;
-
-        //    for (int i = 0; i < samples; i += 0x3800)
-        //    {
-        //        int blockSamples = Math.Min(samples - i, 0x3800);
-
-        //        //Fill buffer
-        //        for (x = 0; x < blockSamples; x++)
-        //            sampleBuffer[x] = *source++;
-        //        //Zero remaining
-        //        while (x < 0x3800)
-        //            sampleBuffer[x++] = 0;
-
-        //        for (x = 0; x < 0x3800; x += 14)
-        //        {
-        //            //copy buffer contents
-        //            for (int y = 0; y < 14; y++)
-        //            {
-        //                pBlock1[y] = pBlock2[y];
-        //                pBlock2[y] = sampleBuffer[x + y];
-        //            }
-
-        //            //Calculate something
-        //            Something1(pBlock2, channels, 14, doubleBuffer);
-
-        //            if (Math.Abs(doubleBuffer[0]) > 10.0)
-        //            {
-        //                int temp;
-        //                Something2(pBlock2, channels, 14, pChannels);
-        //                if (!Something3(pChannels, channels, anotherBuffer, &temp))
-        //                {
-        //                    Something4(pChannels, channels, anotherBuffer, doubleBuffer);
-        //                    doubleBuffer[0] = 1.0;
-        //                    if (Something5(doubleBuffer, omgBuffer, channels) == 0)
-        //                    {
-        //                        multiBuffer[multiIndex] = (double*)Marshal.AllocHGlobal((channels + 1) * 8);
-        //                        multiBuffer[multiIndex][0] = 1.0;
-
-        //                        for (int z = 1; z <= channels; z++)
-        //                        {
-        //                            if(omgBuffer[z] >= 1.0)
-        //                                omgBuffer[z] = 0.9999999999;
-        //                            if(omgBuffer[z] <= -1.0)
-        //                                omgBuffer[z] = -0.9999999999;
-        //                        }
-
-        //                        Something6(omgBuffer, multiBuffer[multiIndex], channels);
-        //                        multiIndex++;
-        //                    }
-        //                }
-        //            }
-        //            unusedCounter++;
-        //        }
-        //    }
-
-        //    doubleBuffer[0] = 1.0;
-        //    for (int i = 1; i <= channels; i++)
-        //        doubleBuffer[i] = 0.0;
-
-        //    for (int i = 0; i < multiIndex; i++)
-        //    {
-        //        Something7(multiBuffer[i], channels, bufferArray[0]);
-        //        for (x = 1; x <= channels; x++)
-        //            doubleBuffer[x] += bufferArray[0][x];
-        //    }
-
-        //    for (int i = 1; i <= channels; i++)
-        //        doubleBuffer[i] /= multiIndex;
-
-        //    double tempVar;
-        //    Something8(doubleBuffer, channels, omgBuffer, bufferArray[0], &tempVar);
-        //    for (int i = 1; i <= channels; i++)
-        //    {
-        //        if (omgBuffer[i] >= 1.0)
-        //            omgBuffer[i] = 0.9999999999;
-        //        if (omgBuffer[i] <= -1.0)
-        //            omgBuffer[i] = -0.9999999999;
-        //    }
-
-        //    Something6(omgBuffer, bufferArray[0], channels);
-        //    for (int i = 0; i < 3; )
-        //    {
-        //        for (x = 0; x <= channels; x++)
-        //            buffer2[x] = 0.0;
-        //        buffer2[channels - 1] = -1.0;
-
-        //        Something9(bufferArray, buffer2, channels, 1 << i++, 0.01);
-        //        Something10(bufferArray, channels, 1 << i, multiBuffer, multiIndex, 2, 0.0);
-        //    }
-
-        //    for (int i = 0; i < 8; i++)
-        //    {
-        //        for (int y = 0; y < channels; y++)
-        //        {
-        //            double d = -bufferArray[i][y + 1] * 2048;
-        //            if (d > 0.0)
-        //            {
-        //                if (d > 32767)
-        //                    coefs[i, y] = 32767;
-        //                else
-        //                    coefs[i, y] = (short)(d + 0.5);
-        //            }
-        //            else
-        //            {
-        //                if (d < -32768)
-        //                    coefs[i, y] = -32768;
-        //                else
-        //                    coefs[i, y] = (short)(d - 0.5);
-        //            }
-        //        }
-        //    }
-
-        //    //free memory
-
-        //    for (int i = 0; i < 8; i++)
-        //        Marshal.FreeHGlobal((IntPtr)bufferArray[i]);
-
-        //    for (int i = 0; i < multiIndex; i++)
-        //        Marshal.FreeHGlobal((IntPtr)multiBuffer[i]);
-
-        //    Marshal.FreeHGlobal((IntPtr)multiBuffer);
-
-        //    return coefs;
-        //}
 
         public static void CalcCoefs(short* source, int samples, short* dest)
         {
@@ -356,28 +170,12 @@ namespace BrawlLib.Wii.Audio
 
         public static unsafe void EncodeBlock(short* source, int samples, byte* dest, short* coefs)
         {
-            int x, y;
-            short* blockBuffer = stackalloc short[16];
-
-            blockBuffer[0] = *source++;
-            blockBuffer[1] = *source++;
-            for (int i = 0; i < samples; i += 14, dest += 8)
-            {
-                int chunkSamples = samples - i;
-                if (chunkSamples > 14) chunkSamples = 14;
-
-                for (x = 0, y = 2; x < chunkSamples; x++)
-                    blockBuffer[y++] = *source++;
-
-                while (y < 16)
-                    blockBuffer[y++] = 0;
-
-                EncodeChunk(blockBuffer, dest, coefs, blockBuffer);
-            }
+            for (int i = 0; i < samples; i += 14, source += 14, dest += 8)
+                EncodeChunk(source, Math.Min(samples - i, 14), dest, coefs);
         }
 
         //Make sure source includes the yn values (16 samples total)
-        private static unsafe void EncodeChunk(short* source, byte* dest, short* coefs, short* yn)
+        private static unsafe void EncodeChunk(short* source, int samples, byte* dest, short* coefs)
         {
             //int* sampleBuffer = stackalloc int[14];
             int* buffer1 = stackalloc int[128];
@@ -406,7 +204,7 @@ namespace BrawlLib.Wii.Audio
                 //Round and clamp samples for this coef set
                 distance = 0;
                 sPtr = source;
-                for (int y = 0; y < 14; y++)
+                for (int y = 0; y < samples; y++)
                 {
                     //Multiply previous samples by coefs
                     *t1++ = v1 = ((*sPtr++ * coefs[1]) + (*sPtr++ * coefs[0])) >> 11;
@@ -432,7 +230,7 @@ namespace BrawlLib.Wii.Audio
                     t1 = p1;
                     t2 = p2;
                     sPtr = source + 2;
-                    for (int y = 0; y < 14; y++)
+                    for (int y = 0; y < samples; y++)
                     {
                         //Multiply previous 
                         v1 = ((*t1++ * coefs[1]) + (*t1++ * coefs[0]));
@@ -467,7 +265,7 @@ namespace BrawlLib.Wii.Audio
                         distAccum += v3 * v3;
 
                         //Break if we're higher than a previous search
-                        if (distAccum > bestDistance)
+                        if (distAccum >= bestDistance)
                             break;
                     }
 
@@ -477,7 +275,7 @@ namespace BrawlLib.Wii.Audio
 
                 } while ((scale < 12) && (index > 1));
 
-                if (distAccum <= bestDistance)
+                if (distAccum < bestDistance)
                 {
                     bestDistance = distAccum;
                     bestIndex = i;
@@ -485,15 +283,24 @@ namespace BrawlLib.Wii.Audio
                 }
             }
 
-            p1 = buffer1 + (bestIndex << 4) + 14;
+            p1 = buffer1 + (bestIndex << 4) + 2;
             p2 = buffer2 + (bestIndex * 14);
 
             //Set resulting yn values
-            *yn++ = (short)*p1++;
-            *yn++ = (short)*p1++;
+            //*yn++ = (short)*p1++;
+            //*yn++ = (short)*p1++;
+
+            //Write converted samples
+            sPtr = source + 2;
+            for (int i = 0; i < samples; i++)
+                *sPtr++ = (short)*p1++;
 
             //Write ps
             *dest++ = (byte)((bestIndex << 4) | (bestScale & 0xF));
+
+            //Zero remaining samples
+            for (int i = samples; i < 14; i++)
+                p2[i] = 0;
 
             //Write output samples
             for (int y = 0; y++ < 7; )

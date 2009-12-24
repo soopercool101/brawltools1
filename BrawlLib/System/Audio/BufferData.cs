@@ -37,6 +37,7 @@ namespace System.Audio
             int blockAlign = stream.BitsPerSample * stream.Channels / 8;
             int samplePos = stream.SamplePosition;
             int sampleCount = _sampleLength;
+            int samplesRead;
             bool end = false;
 
             loop = loop && stream.IsLooping;
@@ -62,14 +63,15 @@ namespace System.Audio
                         end = true;
                     }
 
-                    if (blockSamples > 0)
-                    {
-                        stream.ReadSamples(blockAddr, blockSamples);
-                        samplePos += blockSamples;
-                    }
+                    samplesRead = stream.ReadSamples(blockAddr, blockSamples);
+                    samplePos += samplesRead;
 
-                    //Wrap stream to loop context
-                    if (loop && end)
+                    if (samplesRead < blockSamples)
+                    {
+                        blockSamples = samplesRead;
+                        end = true;
+                    }
+                    else if (loop && end)
                     {
                         stream.Wrap();
                         samplePos = stream.SamplePosition;

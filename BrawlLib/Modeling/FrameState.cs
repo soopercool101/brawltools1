@@ -4,7 +4,7 @@ using BrawlLib.Wii.Animations;
 
 namespace BrawlLib.Modeling
 {
-    [StructLayout(LayoutKind.Sequential, Pack=1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct FrameState
     {
         public static readonly FrameState Neutral = new FrameState(new Vector3(1.0f), new Vector3(), new Vector3());
@@ -31,7 +31,7 @@ namespace BrawlLib.Modeling
 
         internal Matrix _transform, _iTransform;
 
-        public FrameState(AnimationFrame frame) 
+        public FrameState(AnimationFrame frame)
         {
             _scale = frame.Scale;
             _rotate = frame.Rotation;
@@ -53,5 +53,7 @@ namespace BrawlLib.Modeling
             _transform = Matrix.TransformMatrix(_scale, _rotate, _translate);
             _iTransform = Matrix.ReverseTransformMatrix(_scale, _rotate, _translate);
         }
+
+        public static explicit operator AnimationFrame(FrameState state) { return new AnimationFrame(state._scale, state._rotate, state._translate); }
     }
 }

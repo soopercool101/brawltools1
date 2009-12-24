@@ -46,19 +46,8 @@ namespace BrawlBox
             resourceTree.SelectedNode = null;
             resourceTree.Clear();
 
-            //propertyGrid1.SelectedObject = null;
-            //if (previewPanel1.Picture != null)
-            //{
-            //    previewPanel1.Picture.Dispose();
-            //    previewPanel1.Picture = null;
-            //}
-            //audioPlaybackControl1.TargetObject = null;
-            //splitContainer2.Panel2Collapsed = true;
-
             if (Program.RootNode != null)
             {
-                this.Text = String.Format("{0} - {1}", Program.AssemblyTitle, Program.RootPath);
-
                 _root = BaseWrapper.Wrap(Program.RootNode);
                 resourceTree.BeginUpdate();
                 resourceTree.Nodes.Add(_root);
@@ -72,12 +61,20 @@ namespace BrawlBox
             }
             else
             {
-                this.Text = Program.AssemblyTitle;
-
                 closeToolStripMenuItem.Enabled = false;
                 saveAsToolStripMenuItem.Enabled = false;
                 saveToolStripMenuItem.Enabled = false;
             }
+
+            UpdateName();
+        }
+
+        public void UpdateName()
+        {
+            if (Program.RootNode != null)
+                this.Text = String.Format("{0} - {1}", Program.AssemblyTitle, Program.RootPath);
+            else
+                this.Text = Program.AssemblyTitle;
         }
 
         public void TargetResource(ResourceNode n)
@@ -96,13 +93,7 @@ namespace BrawlBox
                 img.Dispose();
             }
 
-            IAudioStream stream = audioPlaybackPanel1.TargetStream;
-            if (stream != null)
-            {
-                audioPlaybackPanel1.TargetStream = null;
-                stream.Dispose();
-            }
-
+            audioPlaybackPanel1.TargetSource = null;
             animEditControl.TargetSequence = null;
             msBinEditor1.CurrentNode = null;
             soundPackControl1.TargetNode = null;
@@ -135,9 +126,9 @@ namespace BrawlBox
                     soundPackControl1.TargetNode = node as RSARNode;
                     newControl = soundPackControl1;
                 }
-                else if (node is RSTMNode)
+                else if (node is IAudioSource)
                 {
-                    audioPlaybackPanel1.TargetStream = ((RSTMNode)node).GetStream();
+                    audioPlaybackPanel1.TargetSource = node as IAudioSource;
                     newControl = audioPlaybackPanel1;
                 }
 
@@ -222,8 +213,17 @@ namespace BrawlBox
             {
                 if (Program.New<RSTMNode>())
                 {
-                    Program.RootNode.Name = Path.GetFileNameWithoutExtension(path);
-                    Program.RootNode.Replace(path);
+                    using (BrstmConverterDialog dlg = new BrstmConverterDialog())
+                    {
+                        dlg.AudioSource = path;
+                        if (dlg.ShowDialog(this) == DialogResult.OK)
+                        {
+                            Program.RootNode.Name = Path.GetFileNameWithoutExtension(dlg.AudioSource);
+                            Program.RootNode.ReplaceRaw(dlg.AudioData);
+                        }
+                        else
+                            Program.Close(true);
+                    }
                 }
             }
         }

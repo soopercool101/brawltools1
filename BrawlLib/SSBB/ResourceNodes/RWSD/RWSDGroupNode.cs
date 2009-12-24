@@ -28,29 +28,36 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override void OnPopulate()
         {
-            VoidPtr offset = &Header->_list;
-            int count = Header->_list._numEntries;
+            int count;
 
             if (_index == 0)
             {
+                RWSD_DATAHeader* header = Header;
+                VoidPtr offset = &header->_list;
+                count = header->_list._numEntries;
+
                 LabelItem[] list = ((RWSDNode)_parent)._labels; //Get labels from parent
                 ((RWSDNode)_parent)._labels = null; //Clear labels, no more use for them!
 
                 for (int i = 0; i < count; i++)
                 {
                     RWSDDataNode node = new RWSDDataNode();
+                    node._offset = offset;
                     if (list != null)
                     {
                         node._soundIndex = list[i].Tag;
                         node._name = list[i].String;
                     }
-                    node.Initialize(this, Header->_list.Get(offset, i), 0);
+                    node.Initialize(this, header->_list.Get(offset, i), 0);
                 }
             }
             else
+            {
+                RWSD_WAVEHeader* header = (RWSD_WAVEHeader*)Header;
+                count = header->_entries;
                 for (int i = 0; i < count; i++)
-                    new RWSDSoundNode().Initialize(this, Header->_list.Get(offset, i), 0);
-
+                    new RWSDSoundNode().Initialize(this, header->GetEntry(i), 0);
+            }
         }
     }
 }

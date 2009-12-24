@@ -17,31 +17,58 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
 
         //Finds labels using LABL block between header and footer, also initializes array
-        protected bool GetLabels(int count)
-        {
-            RWSDHeader* header = (RWSDHeader*)WorkingUncompressed.Address;
-            int len = header->_header._length;
-            RSEQ_LABLHeader* labl = (RSEQ_LABLHeader*)((int)header + len);
+        //protected bool GetLabels(int count)
+        //{
+        //    RWSDHeader* header = (RWSDHeader*)WorkingUncompressed.Address;
+        //    int len = header->_header._length;
+        //    RSEQ_LABLHeader* labl = (RSEQ_LABLHeader*)((int)header + len);
 
-            if ((WorkingUncompressed.Length > len) && (labl->_tag == RSEQ_LABLHeader.Tag))
+        //    if ((WorkingUncompressed.Length > len) && (labl->_tag == RSEQ_LABLHeader.Tag))
+        //    {
+        //        _labels = new LabelItem[count];
+        //        count = labl->_numEntries;
+        //        for (int i = 0; i < count; i++)
+        //        {
+        //            RSEQ_LABLEntry* entry = labl->Get(i);
+        //            _labels[i] = new LabelItem() { String = entry->Name, Tag = entry->_id };
+        //        }
+        //        return true;
+        //    }
+
+        //    return false;
+        //}
+
+        private void ParseBlocks()
+        {
+            VoidPtr dataAddr = Header;
+            int len = Header->_header._length;
+            int total = WorkingUncompressed.Length;
+
+            //Look for labl block
+            RSEQ_LABLHeader* labl = (RSEQ_LABLHeader*)(dataAddr + len);
+            if ((total > len) && (labl->_tag == RSEQ_LABLHeader.Tag))
             {
+                int count = labl->_numEntries;
                 _labels = new LabelItem[count];
                 count = labl->_numEntries;
                 for (int i = 0; i < count; i++)
                 {
                     RSEQ_LABLEntry* entry = labl->Get(i);
                     _labels[i] = new LabelItem() { String = entry->Name, Tag = entry->_id };
-                    //_labels[i] = labl->GetString(i);
                 }
-                return true;
+                len += labl->_size;
             }
 
-            return false;
+            //Set data source
+            if (total > len)
+                _audioSource = new DataSource(dataAddr + len, total - len);
         }
 
         protected override bool OnInitialize()
         {
             base.OnInitialize();
+
+            ParseBlocks();
 
             return true;
         }
@@ -97,7 +124,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             //Get labels
             RSARNode parent;
             int count = Header->Data->_list._numEntries;
-            if ((!GetLabels(count)) && ((parent = RSARNode) != null))
+            if ((_labels == null) && ((parent = RSARNode) != null))
             {
                 _labels = new LabelItem[count];// new string[count];
 

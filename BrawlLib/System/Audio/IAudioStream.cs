@@ -8,9 +8,9 @@ namespace System.Audio
         int Samples { get; }
         int Channels { get; }
         int Frequency { get; }
-        bool IsLooping { get; }
-        int LoopStartSample { get; }
-        int LoopEndSample { get; }
+        bool IsLooping { get; set; }
+        int LoopStartSample { get; set; }
+        int LoopEndSample { get; set; }
         int SamplePosition { get; set; }
 
         //Reads numSamples audio samples into the address specified by destAddr.

@@ -15,15 +15,19 @@ namespace System.Audio
         private int _frequency;
         private int _samplePos;
 
+        private bool _looped;
+        private int _loopStart;
+        private int _loopEnd;
+
         public WaveFormatTag Format { get { return WaveFormatTag.WAVE_FORMAT_PCM; } }
         public int BitsPerSample { get { return _bps; } }
         public int Samples { get { return _numSamples; } }
         public int Channels { get { return _numChannels; } }
         public int Frequency { get { return _frequency; } }
 
-        public bool IsLooping { get { return false; } }
-        public int LoopStartSample { get { return 0; } }
-        public int LoopEndSample { get { return 0; } }
+        public bool IsLooping { get { return _looped; } set { _looped = value; } }
+        public int LoopStartSample { get { return _loopStart; } set { _loopStart = value; } }
+        public int LoopEndSample { get { return _loopEnd; } set { _loopEnd = value; } }
 
         public int SamplePosition
         {
@@ -62,7 +66,10 @@ namespace System.Audio
             return max;
         }
 
-        public void Wrap() { }
+        public void Wrap() 
+        {
+            SamplePosition = _loopStart;
+        }
 
         public void Dispose()
         {

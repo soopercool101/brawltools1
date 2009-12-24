@@ -85,23 +85,14 @@ namespace System.Drawing
             {
                 switch (mode)
                 {
-                    //case QuantizationAlgorithm.NeuQuant:
-                    //    {
-                    //        break;
-                    //    }
                     case QuantizationAlgorithm.WeightedAverage:
                         {
                             pal = WeightedAverage.Process(bmp, numColors);
                             break;
                         }
-                    case QuantizationAlgorithm.MedianCut:
-                        {
-                            MedianCut.Quantize(bmp, numColors);
-                            break;
-                        }
-                    //case QuantizationAlgorithm.GravityMap:
+                    //case QuantizationAlgorithm.MedianCut:
                     //    {
-                    //        pal = GravityMap.Quantize(bmp, numColors);
+                    //        MedianCut.Quantize(bmp, numColors);
                     //        break;
                     //    }
                 }
@@ -293,9 +284,7 @@ namespace System.Drawing
     }
     public enum QuantizationAlgorithm
     {
-        //NeuQuant,
-        //GravityMap,
-        WeightedAverage,
-        MedianCut
+        WeightedAverage
+        //MedianCut
     }
 }

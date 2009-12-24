@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace System.Audio
+namespace BrawlLib.Wii.Audio
 {
-    [StructLayout( LayoutKind.Sequential, Pack= 1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal unsafe struct ADPCMState
     {
         public byte* _srcPtr;
@@ -66,24 +66,4 @@ namespace System.Audio
             return _yn1 = (short)outSample.Clamp(-32768, 32767);
         }
     }
-
-    //public unsafe class ADPCM
-    //{
-    //    public static void Encode(IAudioStream source, VoidPtr dest)
-    //    {
-    //        G726State state = new G726State();
-
-    //        short* blockBuffer = stackalloc short[28];
-    //        short* outBuffer = stackalloc short[14];
-    //        byte law = 0x30;
-
-    //        source.SamplePosition = 0;
-    //        int numSamples = source.Samples;
-    //        for(int i = 0 ; i < numSamples ; i += 14)
-    //        {
-    //            source.ReadSamples(blockBuffer, 14);
-    //            G726.G726_encode(blockBuffer, outBuffer, 14, &law, 4, (i == 0) ? (short)1 : (short)0, &state);
-    //        }
-    //    }
-    //}
 }

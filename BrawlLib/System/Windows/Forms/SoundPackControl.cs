@@ -12,9 +12,9 @@ namespace System.Windows.Forms
         private ColumnHeader clmName;
         private ContextMenuStrip contextMenuStrip1;
         private System.ComponentModel.IContainer components;
-        private ToolStripMenuItem exportToolStripMenuItem;
-        private ToolStripMenuItem replaceToolStripMenuItem;
-        private ToolStripMenuItem pathToolStripMenuItem;
+        private ToolStripMenuItem mnuExport;
+        private ToolStripMenuItem mnuReplace;
+        private ToolStripMenuItem mnuPath;
         private ColumnHeader clmPath;
 
         private void InitializeComponent()
@@ -25,9 +25,9 @@ namespace System.Windows.Forms
             this.clmPath = new System.Windows.Forms.ColumnHeader();
             this.lstSets = new System.Windows.Forms.ListView();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.replaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuExport = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuReplace = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuPath = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -54,6 +54,7 @@ namespace System.Windows.Forms
             this.clmIndex,
             this.clmName,
             this.clmPath});
+            this.lstSets.ContextMenuStrip = this.contextMenuStrip1;
             this.lstSets.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lstSets.FullRowSelect = true;
             this.lstSets.GridLines = true;
@@ -66,33 +67,37 @@ namespace System.Windows.Forms
             this.lstSets.TabIndex = 0;
             this.lstSets.UseCompatibleStateImageBehavior = false;
             this.lstSets.View = System.Windows.Forms.View.Details;
+            this.lstSets.SelectedIndexChanged += new System.EventHandler(this.lstSets_SelectedIndexChanged);
             // 
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.exportToolStripMenuItem,
-            this.replaceToolStripMenuItem,
-            this.pathToolStripMenuItem});
+            this.mnuExport,
+            this.mnuReplace,
+            this.mnuPath});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(153, 92);
+            this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
-            // exportToolStripMenuItem
+            // mnuExport
             // 
-            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.exportToolStripMenuItem.Text = "Export";
+            this.mnuExport.Name = "mnuExport";
+            this.mnuExport.Size = new System.Drawing.Size(152, 22);
+            this.mnuExport.Text = "Export";
+            this.mnuExport.Click += new System.EventHandler(this.mnuExport_Click);
             // 
-            // replaceToolStripMenuItem
+            // mnuReplace
             // 
-            this.replaceToolStripMenuItem.Name = "replaceToolStripMenuItem";
-            this.replaceToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.replaceToolStripMenuItem.Text = "Replace";
+            this.mnuReplace.Name = "mnuReplace";
+            this.mnuReplace.Size = new System.Drawing.Size(152, 22);
+            this.mnuReplace.Text = "Replace";
             // 
-            // pathToolStripMenuItem
+            // mnuPath
             // 
-            this.pathToolStripMenuItem.Name = "pathToolStripMenuItem";
-            this.pathToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.pathToolStripMenuItem.Text = "Path...";
+            this.mnuPath.Name = "mnuPath";
+            this.mnuPath.Size = new System.Drawing.Size(152, 22);
+            this.mnuPath.Text = "Path...";
+            this.mnuPath.Click += new System.EventHandler(this.mnuPath_Click);
             // 
             // SoundPackControl
             // 
@@ -113,6 +118,8 @@ namespace System.Windows.Forms
             set { _targetNode = value; NodeChanged(); }
         }
 
+        private SoundPackItem _selectedItem;
+
         public SoundPackControl() { InitializeComponent(); }
 
         private void NodeChanged()
@@ -128,10 +135,55 @@ namespace System.Windows.Forms
 
             lstSets.EndUpdate();
         }
+
+        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (_selectedItem == null)
+                e.Cancel = true;
+            else
+            {
+                if (_selectedItem._node is RSARExtFileNode)
+                    mnuExport.Enabled = false;
+                else
+                    mnuExport.Enabled = true;
+            }
+        }
+
+        private void mnuPath_Click(object sender, EventArgs e)
+        {
+            using (SoundPathChanger dlg = new SoundPathChanger())
+            {
+                dlg.FilePath = _selectedItem._node._extPath;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    _selectedItem._node.ExtPath = dlg.FilePath;
+                    _selectedItem.SubItems[2].Text = dlg.FilePath;
+                }
+            }
+        }
+
+        private void lstSets_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lstSets.SelectedIndices.Count == 0)
+                _selectedItem = null;
+            else
+                _selectedItem = lstSets.SelectedItems[0] as SoundPackItem;
+        }
+
+        private void mnuExport_Click(object sender, EventArgs e)
+        {
+            using(SaveFileDialog dlg = new SaveFileDialog())
+            {
+                dlg.FileName = _selectedItem.SubItems[1].Text;
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                    _selectedItem._node.Export(dlg.FileName);
+            }
+        }
     }
 
     public class SoundPackItem : ListViewItem
     {
+        public RSARFileNode _node;
 
         public SoundPackItem(RSARFileNode file)
         {
@@ -139,9 +191,9 @@ namespace System.Windows.Forms
 
             Text = file.FileIndex.ToString();
             SubItems.Add(file.Name);
+            _node = file;
 
-            if (file is RSARExtFileNode)
-                SubItems.Add(((RSARExtFileNode)file).ExtPath);
+            SubItems.Add(file.ExtPath);
         }
     }
 }

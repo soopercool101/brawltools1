@@ -258,9 +258,22 @@ namespace BrawlLib.SSBB.ResourceNodes
             Keyframes.SetKeyFrame(mode, index, value);
             SignalPropertyChange();
         }
+        public void SetKeyframe(int index, AnimationFrame frame)
+        {
+            float* v = (float*)&frame;
+            for (int i = 0; i < 9; i++)
+                Keyframes.SetKeyFrame((KeyFrameMode)i, index, v[i]);
+            SignalPropertyChange();
+        }
         public void RemoveKeyframe(KeyFrameMode mode, int index)
         {
             Keyframes.RemoveKeyframe(mode, index);
+            SignalPropertyChange();
+        }
+        public void RemoveKeyframe(int index)
+        {
+            for (int i = 0; i < 9; i++)
+                Keyframes.RemoveKeyframe((KeyFrameMode)i, index);
             SignalPropertyChange();
         }
 

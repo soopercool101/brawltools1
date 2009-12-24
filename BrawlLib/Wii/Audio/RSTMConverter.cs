@@ -13,18 +13,42 @@ namespace BrawlLib.Wii.Audio
             int tmp;
             bool looped = stream.IsLooping;
             int channels = stream.Channels;
-            int samples = looped ? stream.LoopEndSample : stream.Samples; //Set sample size to end sample. That way the audio gets cut off when encoding.
-            int blocks = (samples + 0x37FF) / 0x3800;
+            int samples;
+            int blocks;
             int sampleRate = stream.Frequency;
             int lbSamples, lbSize, lbTotal;
+            int loopPadding, loopStart, totalSamples;
+            short* tPtr;
+
+            if (looped)
+            {
+                loopStart = stream.LoopStartSample;
+                samples = stream.LoopEndSample; //Set sample size to end sample. That way the audio gets cut off when encoding.
+
+                //If loop point doesn't land on a block, pad the stream so that it does.
+                if ((tmp = loopStart % 0x3800) != 0)
+                {
+                    loopPadding = 0x3800 - tmp;
+                    loopStart += loopPadding;
+                }
+                else
+                    loopPadding = 0;
+                
+                totalSamples = loopPadding + samples;
+            }
+            else
+            {
+                loopPadding = loopStart = 0;
+                totalSamples = samples = stream.Samples;
+            }
+
+            blocks = (totalSamples + 0x37FF) / 0x3800;
 
             //Initialize stream info
-            if ((tmp = samples % 0x3800) != 0)
+            if ((tmp = totalSamples % 0x3800) != 0)
             {
                 lbSamples = tmp;
-                lbSize = tmp / 14 * 8;
-                if ((tmp = lbSamples % 14) != 0)
-                    lbSize += (tmp + 1) / 2 + 1;
+                lbSize = (lbSamples + 13) / 14 * 8;
                 lbTotal = lbSize.Align(0x20);
             }
             else
@@ -59,8 +83,8 @@ namespace BrawlLib.Wii.Audio
             part1->_format = new AudioFormatInfo(2, (byte)(looped ? 1 : 0), (byte)channels, 0);
             part1->_sampleRate = (ushort)sampleRate;
             part1->_unk1 = 0;
-            part1->_loopStartSample = looped ? stream.LoopStartSample : 0;
-            part1->_numSamples = samples;
+            part1->_loopStartSample = loopStart;
+            part1->_numSamples = totalSamples;
             part1->_dataOffset = rstmSize + headSize + adpcSize + 0x20;
             part1->_numBlocks = blocks;
             part1->_blockSize = 0x2000;
@@ -80,16 +104,20 @@ namespace BrawlLib.Wii.Audio
             //Create buffer for each channel
             int* bufferData = stackalloc int[channels];
             short** channelBuffers = (short**)bufferData;
+            int bufferSamples = totalSamples + 2; //Add two samples for initial yn values
             for (int i = 0; i < channels; i++)
             {
-                channelBuffers[i] = (short*)Marshal.AllocHGlobal(samples * 2 + 4) + 2; //Add two samples for initial yn values
-                channelBuffers[i][-2] = channelBuffers[i][-1] = 0; //Clear initial yn
+                channelBuffers[i] = tPtr = (short*)Marshal.AllocHGlobal(bufferSamples * 2); //Two bytes per sample
+
+                //Zero padding samples and initial yn values
+                for (int x = 0; x < (loopPadding + 2); x++)
+                    *tPtr++ = 0;
             }
 
             //Fill buffers
             stream.SamplePosition = 0;
             short* sampleBuffer = stackalloc short[channels];
-            for (int i = 0; i < samples; i++)
+            for (int i = loopPadding + 2; i < bufferSamples; i++)
             {
                 stream.ReadSamples(sampleBuffer, 1);
                 for (int x = 0; x < channels; x++)
@@ -98,32 +126,45 @@ namespace BrawlLib.Wii.Audio
 
             //Calculate coefs
             for (int i = 0; i < channels; i++)
-                AudioConverter.CalcCoefs(channelBuffers[i], samples, (short*)pAdpcm[i]);
+                AudioConverter.CalcCoefs(channelBuffers[i] + 2, totalSamples, (short*)pAdpcm[i]);
 
             //Encode blocks
             byte* dPtr = (byte*)data->Data;
             bshort* pyn = (bshort*)adpc->Data;
-            for (int sIndex = 0, bIndex = 1; sIndex < samples; sIndex += 0x3800, bIndex++)
+            for (int sIndex = 0, bIndex = 1; sIndex < totalSamples; sIndex += 0x3800, bIndex++)
             {
-                int blockSamples = Math.Min(samples - sIndex, 0x3800);
-                for(int x = 0 ; x < channels ; x++)
+                int blockSamples = Math.Min(totalSamples - sIndex, 0x3800);
+                for (int x = 0; x < channels; x++)
                 {
                     short* sPtr = channelBuffers[x] + sIndex;
 
                     //Set block yn values
-                    if (bIndex > 1)
+                    if (bIndex != blocks)
                     {
-                        *pyn++ = sPtr[1];
-                        *pyn++ = sPtr[0];
+                        *pyn++ = sPtr[0x3801];
+                        *pyn++ = sPtr[0x3800];
                     }
 
-                    //Encode block (need to deal with yn)
+                    //Encode block (include yn in sPtr)
                     AudioConverter.EncodeBlock(sPtr, blockSamples, dPtr, (short*)pAdpcm[x]);
 
+                    //Set initial ps
+                    if (bIndex == 1)
+                        pAdpcm[x]->_ps = *dPtr;
+
                     //Advance output pointer
-                    dPtr += (bIndex == blocks) ? lbTotal : 0x2000;
+                    if (bIndex == blocks)
+                    {
+                        //Fill remaining
+                        dPtr += lbSize;
+                        for (int i = lbSize; i < lbTotal; i++)
+                            *dPtr++ = 0;
+                    }
+                    else
+                        dPtr += 0x2000;
                 }
             }
+
 
             //Reverse coefs
             for (int i = 0; i < channels; i++)
@@ -133,42 +174,28 @@ namespace BrawlLib.Wii.Audio
                     *p = p->Reverse();
             }
 
-            //Free memory
-            for (int i = 0; i < channels; i++)
-                Marshal.FreeHGlobal((IntPtr)(channelBuffers[i] - 2));
-
             //Write loop states
             if (looped)
             {
-                int sample = stream.LoopStartSample;
-                if (sample != 0) //Only need to set states if loop start > 0
+                //Can't we just use block states?
+                int loopBlock = loopStart / 0x3800;
+                int loopChunk = (loopStart - (loopBlock * 0x3800)) / 14;
+                dPtr = (byte*)data->Data + (loopBlock * 0x2000 * channels) + (loopChunk * 8);
+                tmp = (loopBlock == blocks - 1) ? lbTotal : 0x2000;
+
+                for (int i = 0; i < channels; i++, dPtr += tmp)
                 {
-                    //Can't we just use block states?
-
-                    //The loop state is set to the last two encoded samples. 
-                    //This means we will have to decode the stream until we reach the specified sample.
-                    using (ADPCMStream str = new ADPCMStream(rstm))
-                    {
-                        //Read yn samples into buffer
-                        short* buffer = stackalloc short[4];
-                        str.SamplePosition = sample - 2;
-                        str.ReadSamples(buffer, 2);
-
-                        //Get ps values and write states
-                        int block = sample / 0x3800;
-                        int chunk = (sample - (block * 0x3800)) / 14;
-
-                        byte* bPtr = (byte*)data->Data + (block * 0x2000 * channels) + (chunk * 8);
-                        int bOffset = (block == blocks - 1) ? lbSize : 0x2000;
-                        for (int i = 0; i < channels; i++, bPtr += bOffset)
-                        {
-                            pAdpcm[i]->_ps = *bPtr;
-                            pAdpcm[i]->_yn2 = buffer[i];
-                            pAdpcm[i]->_yn1 = buffer[i + channels];
-                        }
-                    }
+                    //Use adjusted samples for yn values
+                    tPtr = channelBuffers[i] + loopStart;
+                    pAdpcm[i]->_lps = *dPtr;
+                    pAdpcm[i]->_lyn2 = *tPtr++;
+                    pAdpcm[i]->_lyn1 = *tPtr;
                 }
             }
+
+            //Free memory
+            for (int i = 0; i < channels; i++)
+                Marshal.FreeHGlobal((IntPtr)channelBuffers[i]);
 
             return map;
         }

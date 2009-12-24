@@ -30,8 +30,12 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            if (_origPath != null)
+            if ((_name == null) && (_origPath != null))
                 _name = Path.GetFileNameWithoutExtension(this._origPath);
+
+            _files = new List<RSARFileNode>();
+            _children = new List<ResourceNode>();
+            OnPopulate();
 
             return true;
         }
@@ -42,9 +46,12 @@ namespace BrawlLib.SSBB.ResourceNodes
         //        new RSARFolderNode().Initialize(this, Header, 0);
         //}
 
-        private List<RSARFileNode> _files = new List<RSARFileNode>();
+        private List<RSARFileNode> _files;
         [Browsable(false)]
-        public List<RSARFileNode> Files { get { return _files; } }
+        public List<RSARFileNode> Files
+        {
+            get { return _files; }
+        }
 
         protected override void OnPopulate()
         {

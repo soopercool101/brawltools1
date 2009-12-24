@@ -6,6 +6,14 @@ using System.Runtime.InteropServices;
 
 namespace BrawlLib.Wii.Animations
 {
+    //Format	Keys	Total	Size
+
+    //F3F	    100	    200	    1208
+    //F1F	    200	    200	    800
+    //F6B	    100	    200	    616
+    //F4B       100	    200	    416
+    //F1B	    200	    200	    208
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct F3FHeader
     {
@@ -13,13 +21,13 @@ namespace BrawlLib.Wii.Animations
 
         public bushort _numFrames;
         public bushort _unk;
-        public bfloat _frequency;
+        public bfloat _frameScale;
 
-        public F3FHeader(int entries, float frequency)
+        public F3FHeader(int entries, float frameScale)
         {
             _numFrames = (ushort)entries;
             _unk = 0;
-            _frequency = frequency;
+            _frameScale = frameScale;
         }
 
         private VoidPtr Address { get { fixed (void* p = &this)return p; } }
@@ -49,15 +57,15 @@ namespace BrawlLib.Wii.Animations
 
         public bushort _numFrames;
         public bushort _unk1;
-        public bfloat _error;
+        public bfloat _frameScale; // = 1 / num frames. Percent each animation frame takes up.
         public bfloat _step;
         public bfloat _base;
 
-        public F6BHeader(int frames, float error, float step, float floor)
+        public F6BHeader(int frames, float frameScale, float step, float floor)
         {
             _numFrames = (ushort)frames;
             _unk1 = 0;
-            _error = error;
+            _frameScale = frameScale;
             _step = step;
             _base = floor;
         }
@@ -75,11 +83,11 @@ namespace BrawlLib.Wii.Animations
         public bushort _step;
         public bushort _unk;
 
-        public F6BEntry(int index, int step)
+        public F6BEntry(int index, int step, int unk)
         {
             _data = (ushort)(index << 5);
             _step = (ushort)step;
-            _unk = 0;
+            _unk = (ushort)unk;
         }
 
         public int FrameIndex
@@ -96,15 +104,15 @@ namespace BrawlLib.Wii.Animations
 
         public bushort _entries;
         public bushort _unk;
-        public bfloat _frequency;
+        public bfloat _frameScale;
         public bfloat _step;
         public bfloat _base;
 
-        public F4BHeader(int entries, float frequency, float step, float floor)
+        public F4BHeader(int entries, float frameScale, float step, float floor)
         {
             _entries = (ushort)entries;
             _unk = 0;
-            _frequency = frequency;
+            _frameScale = frameScale;
             _step = step;
             _base = floor;
         }
@@ -120,6 +128,9 @@ namespace BrawlLib.Wii.Animations
         public const int Size = 4;
 
         public buint _data;
+
+        //Flags
+        //0x3E0 = Loop frame?
 
         public F4BEntry(int index, int step, int flags)
         {

@@ -2,6 +2,7 @@
 using BrawlLib.SSBBTypes;
 using System.IO;
 using BrawlLib.IO;
+using System.ComponentModel;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -10,11 +11,15 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal INFOFileHeader* Header { get { return (INFOFileHeader*)WorkingUncompressed.Address; } }
         internal DataSource _audioSource;
 
+        internal string _extPath;
         internal int _fileIndex;
         //internal string[] _labels;
         internal LabelItem[] _labels;
-
+        
+        [Browsable(false)]
         public int FileIndex { get { return _fileIndex; } }
+        [Browsable(false)]
+        public string ExtPath { get { return _extPath; } set { _extPath = value; SignalPropertyChange(); } }
 
         protected virtual void GetStrings(LabelBuilder builder) { }
 

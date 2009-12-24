@@ -172,8 +172,11 @@ namespace BrawlLib.Wii.Animations
         {
             int dataSize = 0;
             entrySize = 8;
-
             int count = kf.Count;
+
+#if DEBUG
+            kf.Clean();
+#endif
             kf._evalCode = AnimationCode.Default;
 
             for (int i = 0; i < 3; i++)
@@ -191,7 +194,7 @@ namespace BrawlLib.Wii.Animations
             int maxEntries;
             int evalCount;
             int scaleSpan;
-            bool useLinear = group == 1;
+            //bool useLinear = group == 1;
 
             bool exist = false;
             bool isotropic = group == 0;
@@ -273,16 +276,17 @@ namespace BrawlLib.Wii.Animations
                 {
                     evalCount = 1;
                     maxEntries = count[0];
-                    useLinear &= count[0] == numFrames;
+                    //useLinear &= count[0] == numFrames;
                 }
                 else
                 {
                     evalCount = 3;
                     maxEntries = Math.Max(Math.Max(count[0], count[1]), count[2]);
-                    useLinear &= (count[0] == numFrames) && (count[1] == numFrames) && (count[2] == numFrames);
+                    //useLinear &= (count[0] == numFrames) && (count[1] == numFrames) && (count[2] == numFrames);
                 }
 
-                scaleSpan = useLinear ? 255 : 4095;
+                scaleSpan = group == 1 ? 255 : 4095;
+                //scaleSpan = useLinear ? 255 : 4095;
 
                 //Determine if values are scalable
                 for (int i = 0; i < evalCount; i++)
@@ -302,9 +306,9 @@ namespace BrawlLib.Wii.Animations
                     if (range == 0.0f)
                         continue;
 
-                    //Evaluate spans until we reach a success.
+                //Evaluate spans until we reach a success.
                 //A success means that compression using that span is possible. 
-                //No further evaluation necesary.
+                //No further evaluation necessary.
                 SpanBegin:
                     int span = scaleSpan;
                     int spanEval = scaleSpan - 32;
@@ -348,25 +352,46 @@ namespace BrawlLib.Wii.Animations
                 if (!isFixed[0] || !isFixed[1] || !isFixed[2])
                 {
                     bool scale = (isotropic) ? isScalable[0] : (isScalable[0] && isScalable[1] && isScalable[2]);
-                    if (useLinear) //rotation
+                    float frameSpan = (float)numFrames / maxEntries;
+
+                    if (scale)
                     {
-                        if (scaleSpan == 255)
+                        if ((scaleSpan == 255) && (frameSpan < 4.0f))
                             format = AnimDataFormat.F1B;
+                        else if (scaleSpan <= 4095)
+                            format = AnimDataFormat.F4B;
+                        else if ((group != 1) || (frameSpan > 1.5f))
+                            format = AnimDataFormat.F6B;
                         else
                             format = AnimDataFormat.F1F;
                     }
                     else
                     {
-                        if (scale)
-                        {
-                            if (scaleSpan == 4095)
-                                format = AnimDataFormat.F4B;
-                            else
-                                format = AnimDataFormat.F6B;
-                        }
-                        else
+                        if ((group != 1) || (frameSpan > 3.0f))
                             format = AnimDataFormat.F3F;
+                        else
+                            format = AnimDataFormat.F1F;
                     }
+
+                    //if (useLinear) //rotation
+                    //{
+                    //    if (scaleSpan == 255)
+                    //        format = AnimDataFormat.F1B;
+                    //    else
+                    //        format = AnimDataFormat.F1F;
+                    //}
+                    //else
+                    //{
+                    //    if (scale)
+                    //    {
+                    //        if (scaleSpan == 4095)
+                    //            format = AnimDataFormat.F4B;
+                    //        else
+                    //            format = AnimDataFormat.F6B;
+                    //    }
+                    //    else
+                    //        format = AnimDataFormat.F3F;
+                    //}
                 }
 
                 //calculate size
@@ -488,96 +513,147 @@ namespace BrawlLib.Wii.Animations
             KeyframeEntry[] arr = kf._keyFrames[index];
             KeyframeEntry frame;
             bfloat* pVal = (bfloat*)addr;
-
+            float val;
+            float min = float.MaxValue, max = float.MinValue, stride, step;
+            int span, i;
+            float* fPtr;
 
             if (format == AnimDataFormat.F1F)
             {
-                for (int i = 1; i <= numFrames; i++)
-                    *pVal++ = arr[i]._value;
+                //Use anim frames, just in case not all frames are key.
+                fixed (AnimationFrame* p = kf.AnimFrames)
+                {
+                    fPtr = (float*)p + index;
+                    for (i = 0; i < numFrames; i++, fPtr += 9)
+                        *pVal++ = *fPtr;
+                }
+
+                //for (int i = 1; i <= numFrames; i++)
+                //    *pVal++ = arr[i]._value;
                 return numFrames * 4;
             }
 
-            float val;
-            float min = float.MaxValue, max = float.MinValue, stride, step;
-            float* value = stackalloc float[numFrames];
-            int* order = stackalloc int[numFrames];
-            int keyCount = 0, next, span;
-
-            for (frame = arr[0], next = frame._next; next != 0; next = frame._next )
-            {
-                order[keyCount] = next - 1;
-                frame = arr[next];
-                value[keyCount++] = val = frame._value;
-                min = Math.Min(min, val);
-                max = Math.Max(max, val);
-            }
-
-            if (format == AnimDataFormat.F3F)
-            {
-                F3FHeader* header = (F3FHeader*)addr;
-                *header = new F3FHeader(keyCount, 0.0f);
-
-                F3FEntry* entry = header->Data;
-                for (int i = 0; i < keyCount; i++)
-                    *entry++ = new F3FEntry(*order++, *value++, 0.0f);
-
-                return keyCount * 12 + 8;
-            }
-
-            stride = max - min;
             if (format == AnimDataFormat.F1B)
             {
+                float* value = stackalloc float[numFrames];
+
+                //Use anim frames, just in case not all frames are key.
+                fixed (AnimationFrame* p = kf.AnimFrames)
+                {
+                    fPtr = (float*)p + index;
+                    //Get min/max
+                    for (i = 0; i < numFrames; i++, fPtr += 9)
+                    {
+                        value[i] = val = *fPtr;
+                        if (val > max) max = val;
+                        if (val < min) min = val;
+                    }
+                }
+                stride = max - min;
+
                 //Find best span
-                span = EvalSpan(255, 32, min, stride, value, keyCount);
+                span = EvalSpan(255, 32, min, stride, value, numFrames);
                 step = stride / span;
 
                 F1BHeader* header = (F1BHeader*)addr;
                 *header = new F1BHeader(step, min);
 
-                int i;
                 byte* dPtr = header->Data;
-                for (i = 0; i < keyCount; i++)
+                for (i = 0; i < numFrames; i++)
                     *dPtr++ = (byte)(((*value++ - min) / step) + 0.5f);
 
                 //Fill remaining bytes
-                while (i++ % 4 != 0)
+                while ((i++ & 3) != 0)
                     *dPtr++ = 0;
 
                 return (8 + numFrames).Align(4);
+
             }
-            else if (format == AnimDataFormat.F4B)
+
             {
-                //Find best span
-                span = EvalSpan(4095, 32, min, stride, value, keyCount);
-                step = stride / span;
+                float* value = stackalloc float[numFrames];
+                int* order = stackalloc int[numFrames];
+                int keyCount = 0, next;
+                float frameScale = 1.0f / numFrames;
 
-                F4BHeader* header = (F4BHeader*)addr;
-                *header = new F4BHeader(keyCount, 0.0f, step, min);
+                for (frame = arr[0], next = frame._next; next != 0; next = frame._next)
+                {
+                    order[keyCount] = next - 1;
+                    frame = arr[next];
+                    value[keyCount++] = val = frame._value;
+                    min = Math.Min(min, val);
+                    max = Math.Max(max, val);
+                }
 
-                F4BEntry* entry = header->Data;
-                for (int i = 0; i < keyCount; i++)
-                    *entry++ = new F4BEntry(*order++, (int)((*value++ - min) / step + 0.5f), 0);
+                if (format == AnimDataFormat.F3F)
+                {
+                    F3FHeader* header = (F3FHeader*)addr;
+                    *header = new F3FHeader(keyCount, frameScale);
 
-                return keyCount * 4 + 16;
-            }
-            else if (format == AnimDataFormat.F6B)
-            {
-                //Find best span
-                span = EvalSpan(65535, 32, min, stride, value, keyCount);
-                step = stride / span;
+                    F3FEntry* entry = header->Data;
+                    for (i = 0; i < keyCount; i++)
+                        *entry++ = new F3FEntry(*order++, *value++, 0.0f);
 
-                F6BHeader* header = (F6BHeader*)addr;
-                *header = new F6BHeader(keyCount, 0.0f, step, min);
+                    return keyCount * 12 + 8;
+                }
 
-                F6BEntry* entry = header->Data;
-                for (int i = 0; i < keyCount; i++)
-                    *entry++ = new F6BEntry(*order++, (int)((*value++ - min) / step + 0.5f));
+                stride = max - min;
+                //if (format == AnimDataFormat.F1B)
+                //{
+                //    //Find best span
+                //    span = EvalSpan(255, 32, min, stride, value, keyCount);
+                //    step = stride / span;
 
-                //Fill remaining bytes
-                if ((keyCount & 1) == 0)
-                    entry->_data = 0;
+                //    F1BHeader* header = (F1BHeader*)addr;
+                //    *header = new F1BHeader(step, min);
 
-                return ((keyCount * 6) + 16).Align(4);
+                //    int i;
+                //    byte* dPtr = header->Data;
+                //    for (i = 0; i < keyCount; i++)
+                //        *dPtr++ = (byte)(((*value++ - min) / step) + 0.5f);
+
+                //    //Fill remaining bytes
+                //    while (i++ % 4 != 0)
+                //        *dPtr++ = 0;
+
+                //    return (8 + numFrames).Align(4);
+                //}
+
+                if (format == AnimDataFormat.F4B)
+                {
+                    //Find best span
+                    span = EvalSpan(4095, 32, min, stride, value, keyCount);
+                    step = stride / span;
+
+                    F4BHeader* header = (F4BHeader*)addr;
+                    *header = new F4BHeader(keyCount, frameScale, step, min);
+
+                    F4BEntry* entry = header->Data;
+                    for (i = 0; i < keyCount; i++)
+                        *entry++ = new F4BEntry(*order++, (int)((*value++ - min) / step + 0.5f), 0);//(int)((0 - min) / step + 0.5f));
+
+                    return keyCount * 4 + 16;
+                }
+
+                if (format == AnimDataFormat.F6B)
+                {
+                    //Find best span
+                    span = EvalSpan(65535, 32, min, stride, value, keyCount);
+                    step = stride / span;
+
+                    F6BHeader* header = (F6BHeader*)addr;
+                    *header = new F6BHeader(keyCount, frameScale, step, min);
+
+                    F6BEntry* entry = header->Data;
+                    for (i = 0; i < keyCount; i++)
+                        *entry++ = new F6BEntry(*order++, (int)((*value++ - min) / step + 0.5f), 0);//(int)((0 - min) / step + 0.5f));
+
+                    //Fill remaining bytes
+                    if ((i & 1) == 0)
+                        entry->_data = 0;
+
+                    return ((keyCount * 6) + 16).Align(4);
+                }
             }
 
             return 0;

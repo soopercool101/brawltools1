@@ -30,11 +30,8 @@ namespace BrawlBox
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.resourceTree = new BrawlBox.ResourceTree();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -54,7 +51,6 @@ namespace BrawlBox
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
-            this.resourceTree = new BrawlBox.ResourceTree();
             this.audioPlaybackPanel1 = new System.Windows.Forms.AudioPlaybackPanel();
             this.soundPackControl1 = new System.Windows.Forms.SoundPackControl();
             this.msBinEditor1 = new System.Windows.Forms.MSBinEditor();
@@ -68,31 +64,6 @@ namespace BrawlBox
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // imageList1
-            // 
-            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
-            this.imageList1.TransparentColor = System.Drawing.Color.White;
-            this.imageList1.Images.SetKeyName(0, "Unknown.png");
-            this.imageList1.Images.SetKeyName(1, "Folder.png");
-            this.imageList1.Images.SetKeyName(2, "ARC.png");
-            this.imageList1.Images.SetKeyName(3, "BRES.png");
-            this.imageList1.Images.SetKeyName(4, "TEX0.png");
-            this.imageList1.Images.SetKeyName(5, "PLT0.png");
-            this.imageList1.Images.SetKeyName(6, "MDL0.png");
-            this.imageList1.Images.SetKeyName(7, "RSAR.png");
-            this.imageList1.Images.SetKeyName(8, "RSTM.png");
-            this.imageList1.Images.SetKeyName(9, "S.png");
-            this.imageList1.Images.SetKeyName(10, "G.png");
-            this.imageList1.Images.SetKeyName(11, "T.png");
-            this.imageList1.Images.SetKeyName(12, "B.png");
-            this.imageList1.Images.SetKeyName(13, "MSG.png");
-            this.imageList1.Images.SetKeyName(14, "CHR.png");
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
             // splitContainer1
             // 
@@ -111,6 +82,20 @@ namespace BrawlBox
             this.splitContainer1.Size = new System.Drawing.Size(617, 411);
             this.splitContainer1.SplitterDistance = 229;
             this.splitContainer1.TabIndex = 1;
+            // 
+            // resourceTree
+            // 
+            this.resourceTree.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.resourceTree.HideSelection = false;
+            this.resourceTree.ImageIndex = 0;
+            this.resourceTree.Indent = 20;
+            this.resourceTree.Location = new System.Drawing.Point(0, 24);
+            this.resourceTree.Name = "resourceTree";
+            this.resourceTree.SelectedImageIndex = 0;
+            this.resourceTree.ShowIcons = true;
+            this.resourceTree.Size = new System.Drawing.Size(229, 387);
+            this.resourceTree.TabIndex = 0;
+            this.resourceTree.SelectionChanged += new System.EventHandler(this.resourceTree_SelectionChanged);
             // 
             // menuStrip1
             // 
@@ -285,27 +270,12 @@ namespace BrawlBox
             this.propertyGrid1.Size = new System.Drawing.Size(384, 238);
             this.propertyGrid1.TabIndex = 2;
             // 
-            // resourceTree
-            // 
-            this.resourceTree.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.resourceTree.HideSelection = false;
-            this.resourceTree.ImageIndex = 0;
-            this.resourceTree.Indent = 20;
-            this.resourceTree.Location = new System.Drawing.Point(0, 24);
-            this.resourceTree.Name = "resourceTree";
-            this.resourceTree.SelectedImageIndex = 0;
-            this.resourceTree.ShowIcons = true;
-            this.resourceTree.Size = new System.Drawing.Size(229, 387);
-            this.resourceTree.TabIndex = 0;
-            this.resourceTree.SelectionChanged += new System.EventHandler(this.resourceTree_SelectionChanged);
-            // 
             // audioPlaybackPanel1
             // 
             this.audioPlaybackPanel1.Location = new System.Drawing.Point(149, 92);
             this.audioPlaybackPanel1.Name = "audioPlaybackPanel1";
             this.audioPlaybackPanel1.Size = new System.Drawing.Size(70, 111);
             this.audioPlaybackPanel1.TabIndex = 4;
-            this.audioPlaybackPanel1.TargetStream = null;
             this.audioPlaybackPanel1.Visible = false;
             // 
             // soundPackControl1
@@ -366,9 +336,6 @@ namespace BrawlBox
         #endregion
 
         public ResourceTree resourceTree;
-        private System.Windows.Forms.ImageList imageList1;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private GoodPictureBox previewPanel1;

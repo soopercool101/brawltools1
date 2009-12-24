@@ -3,15 +3,15 @@ using System.Runtime.InteropServices;
 
 namespace BrawlLib.Wii.Animations
 {
-
+    //I = index, S = scale, F = flags, V = value
     public enum AnimDataFormat : byte
     {
         None = 0,
-        F4B = 1,
-        F6B = 2,
-        F3F = 3,
-        F1B = 4,
-        F1F = 6
+        F4B = 1, //Stepped,Indexed - Frame_I8S12F12
+        F6B = 2, //Stepped,Indexed - Frame_I11S16F16
+        F3F = 3, //Absolute,Indexed - Frame_IVF32
+        F1B = 4, //Stepped - Frame_S8
+        F1F = 6 //Absolute - Frame_V32
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

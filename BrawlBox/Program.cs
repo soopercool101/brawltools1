@@ -193,15 +193,20 @@ namespace BrawlBox
 
         internal static bool SaveAs()
         {
-            if(MainForm.Instance.RootNode is GenericWrapper)
+            if (MainForm.Instance.RootNode is GenericWrapper)
             {
-                GenericWrapper w = MainForm.Instance.RootNode as GenericWrapper;
-                string path = w.Export();
-                if (path != null)
+                try
                 {
-                    _rootPath = path;
-                    return true;
+                    GenericWrapper w = MainForm.Instance.RootNode as GenericWrapper;
+                    string path = w.Export();
+                    if (path != null)
+                    {
+                        _rootPath = path;
+                        MainForm.Instance.UpdateName();
+                        return true;
+                    }
                 }
+                catch (Exception x) { MessageBox.Show(x.Message); }
             }
             return false;
         }

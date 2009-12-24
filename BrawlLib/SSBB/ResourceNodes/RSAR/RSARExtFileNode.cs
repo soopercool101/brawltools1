@@ -7,15 +7,15 @@ namespace BrawlLib.SSBB.ResourceNodes
     {
         internal INFOFileHeader* Header { get { return (INFOFileHeader*)WorkingUncompressed.Address; } }
 
-        internal string _externalPath;
-        public string ExtPath { get { return _externalPath; } set { _externalPath = value; SignalPropertyChange(); } }
+        //internal string _externalPath;
+        //public string ExtPath { get { return _externalPath; } set { _externalPath = value; SignalPropertyChange(); } }
 
         protected override bool OnInitialize()
         {
             RSARNode parent = RSARNode;
-            _externalPath = Header->GetPath(&RSARNode.Header->INFOBlock->_collection);
+            _extPath = Header->GetPath(&RSARNode.Header->INFOBlock->_collection);
             if (_name != null)
-                _name = String.Format("[{0:X3}] {1}", _fileIndex, _externalPath);
+                _name = String.Format("[{0:X3}] {1}", _fileIndex, _extPath);
 
             return false;
         }

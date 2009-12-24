@@ -114,11 +114,11 @@
     <Compile Include="SSBB\Types\RBNK.cs" />
     <Compile Include="SSBB\Types\RSEQ.cs" />
     <Compile Include="SSBB\Types\RWSD.cs" />
-    <Compile Include="System\Audio\ADPCM.cs" />
     <Compile Include="System\Audio\AudioDevice.cs" />
     <Compile Include="System\Audio\AudioProvider.cs" />
     <Compile Include="System\Audio\AudioBuffer.cs" />
     <Compile Include="System\Audio\BufferData.cs" />
+    <Compile Include="System\Audio\IAudioSource.cs" />
     <Compile Include="System\Audio\IAudioStream.cs" />
     <Compile Include="System\Audio\PCMStream.cs" />
     <Compile Include="System\Audio\wAudioBuffer.cs" />
@@ -208,6 +208,9 @@
     <Compile Include="System\Windows\Forms\SoundPackControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="System\Windows\Forms\SoundPathChanger.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="System\Windows\Forms\TextureConverterDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -221,6 +224,7 @@
     <Compile Include="Wii\Animations\AnimationFrame.cs" />
     <Compile Include="Wii\Animations\EncodingTypes.cs" />
     <Compile Include="Wii\Animations\KeyframeCollection.cs" />
+    <Compile Include="Wii\Audio\ADPCMState.cs" />
     <Compile Include="Wii\Audio\ADPCMStream.cs" />
     <Compile Include="Wii\Audio\AudioConverter.cs" />
     <Compile Include="Wii\Audio\RSARConverter.cs" />
@@ -299,6 +303,9 @@
     <EmbeddedResource Include="System\Windows\Forms\AudioPlaybackPanel.resx">
       <DependentUpon>AudioPlaybackPanel.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\BrstmConverterDialog.resx">
+      <DependentUpon>BrstmConverterDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\ModelAnimPanel.resx">
       <DependentUpon>ModelAnimPanel.cs</DependentUpon>
     </EmbeddedResource>
@@ -322,6 +329,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\SoundPackControl.resx">
       <DependentUpon>SoundPackControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\SoundPathChanger.resx">
+      <DependentUpon>SoundPathChanger.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\TextureConverterDialog.resx">
       <DependentUpon>TextureConverterDialog.cs</DependentUpon>

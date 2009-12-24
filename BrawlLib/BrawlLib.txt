@@ -1,5 +1,5 @@
 ﻿
-BrawlLib Resource Library - Version 0.07c
+BrawlLib Resource Library - Version 0.08
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -11,6 +11,13 @@ they be held accountable for the manner in which it is used.
  ====================================
 |************ Change Log ************|
  ====================================
+
+- v0.08 - (12/24/2009)
+	. Completed audio encoder.
+	. Completed BRSAR encoder, along with BrsarConverterDialog.
+	. Added audio provider classes/controls for audio playback.
+	. Added minimal support for RWSD/RBNK/RSEQ files.
+	. Added CopyAll/PasteAll/Clean/Clear controls to animation editor.
  
 - v0.07c- (12/01/2009)
 	. Fixed various bugs with the CHR0 encoder.

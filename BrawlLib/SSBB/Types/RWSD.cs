@@ -130,17 +130,12 @@ namespace BrawlLib.SSBBTypes
 
         public buint _tag;
         public buint _length;
-
-        public RuintList _list;
-        //public buint _numEntries;
+        public bint _entries;
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
+        public bint* Entries { get { return (bint*)(Address + 12); } }
 
-        //public buint* Entries { get { return (buint*)(Address + 12); } }
-        public RWSD_WAVEEntry* GetEntry(int index)
-        {
-            return (RWSD_WAVEEntry*)_list[index];
-        }
+        public RWSD_WAVEEntry* GetEntry(int index) { return (RWSD_WAVEEntry*)(Address + Entries[index]); }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
