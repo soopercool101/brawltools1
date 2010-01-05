@@ -37,6 +37,10 @@ namespace BrawlLib.Imaging
             val = B - p.B;
             return dist + val;
         }
+        public float Luminance()
+        {
+            return (0.299f * R) + (0.587f * G) + (0.114f * B);
+        }
         public bool IsGreyscale()
         {
             return (R == G) && (G == B);
@@ -59,13 +63,105 @@ namespace BrawlLib.Imaging
 
         public override string ToString()
         {
-            return String.Format("A:{0:X}, R:{1:X}, G:{2:X}, B:{3:X}", A, R, G, B);
+            return String.Format("A:{0:X2} R:{1:X2} G:{2:X2} B:{3:X2}", A, R, G, B);
         }
         public override int GetHashCode() { return (int)this; }
         public override bool Equals(object obj)
         {
             if (obj is ARGBPixel) return (ARGBPixel)obj == this;
             return false;
+        }
+
+        internal unsafe ARGBPixel Inverse()
+        {
+            return new ARGBPixel(A, (byte)(255 - R), (byte)(255 - G), (byte)(255 - B));
+        }
+        internal unsafe ARGBPixel Lighten(int amount)
+        {
+            return new ARGBPixel(A, (byte)Math.Min(R + amount, 255), (byte)Math.Min(G + amount, 255), (byte)Math.Min(B + amount, 255));
+        }
+        internal unsafe ARGBPixel Darken(int amount)
+        {
+            return new ARGBPixel(A, (byte)Math.Max(R - amount, 0), (byte)Math.Max(G - amount, 0), (byte)Math.Max(B - amount, 0));
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct HSVPixel
+    {
+        public ushort H;
+        public byte S, V;
+
+        public HSVPixel(ushort h, byte s, byte v) { H = h; S = s; V = v; }
+
+        public static explicit operator HSVPixel(ARGBPixel p)
+        {
+            HSVPixel outp;
+
+            int min = Math.Min(Math.Min(p.R, p.G), p.B);
+            int max = Math.Max(Math.Max(p.R, p.G), p.B);
+            int diff = max - min;
+
+            if (diff == 0)
+            {
+                outp.H = 0;
+                outp.S = 0;
+            }
+            else
+            {
+                if (max == p.R)
+                    outp.H = (ushort)((60 * ((float)(p.G - p.B) / diff) + 360) % 360);
+                else if (max == p.G)
+                    outp.H = (ushort)(60 * ((float)(p.B - p.R) / diff) + 120);
+                else
+                    outp.H = (ushort)(60 * ((float)(p.R - p.G) / diff) + 240);
+
+                if (max == 0)
+                    outp.S = 0;
+                else
+                    outp.S = (byte)(diff * 100 / max);
+            }
+
+            outp.V = (byte)(max * 100 / 255);
+
+            return outp;
+        }
+        public static explicit operator ARGBPixel(HSVPixel pixel)
+        {
+            ARGBPixel newPixel;
+
+            byte v = (byte)(pixel.V * 255 / 100);
+            if (pixel.S == 0)
+                newPixel = new ARGBPixel(255, v, v, v);
+            else
+            {
+                int h = (pixel.H / 60) % 6;
+                float f = (pixel.H / 60.0f) - (pixel.H / 60);
+
+                byte p = (byte)(pixel.V * (100 - pixel.S) * 255 / 10000);
+                byte q = (byte)(pixel.V * (100 - (int)(f * pixel.S)) * 255 / 10000);
+                byte t = (byte)(pixel.V * (100 - (int)((1.0f - f) * pixel.S)) * 255 / 10000);
+
+                switch (h)
+                {
+                    case 0: newPixel = new ARGBPixel(255, v, t, p); break;
+                    case 1: newPixel = new ARGBPixel(255, q, v, p); break;
+                    case 2: newPixel = new ARGBPixel(255, p, v, t); break;
+                    case 3: newPixel = new ARGBPixel(255, p, q, v); break;
+                    case 4: newPixel = new ARGBPixel(255, t, p, v); break;
+                    default: newPixel = new ARGBPixel(255, v, p, q); break;
+                }
+            }
+            return newPixel;
+        }
+        public static explicit operator Color(HSVPixel p)
+        {
+            ARGBPixel np = (ARGBPixel)p;
+            return Color.FromArgb(*(int*)&np);
+        }
+        public static explicit operator HSVPixel(Color c)
+        {
+            return (HSVPixel)(ARGBPixel)c;
         }
     }
 
@@ -101,6 +197,11 @@ namespace BrawlLib.Imaging
         public static explicit operator RGBPixel(Color p) { return new RGBPixel() { R = p.R, G = p.G, B = p.B }; }
 
         public static RGBPixel FromIntensity(byte value) { return new RGBPixel() { R = value, G = value, B = value }; }
+
+        public override string ToString()
+        {
+            return String.Format("R:{0:X2} G:{1:X2} B:{2:X2}", R, G, B);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -115,68 +216,68 @@ namespace BrawlLib.Imaging
         public ushort _data;
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe struct ColorF4
-    {
-        private const float ColorFactor = 1.0f / 255.0f;
+    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
+    //unsafe struct ColorF4
+    //{
+    //    private const float ColorFactor = 1.0f / 255.0f;
 
-        public float A;
-        public float R;
-        public float G;
-        public float B;
+    //    public float A;
+    //    public float R;
+    //    public float G;
+    //    public float B;
 
-        public ColorF4(float a, float r, float g, float b)
-        {
-            A = a;
-            R = r;
-            G = g;
-            B = b;
-        }
+    //    public ColorF4(float a, float r, float g, float b)
+    //    {
+    //        A = a;
+    //        R = r;
+    //        G = g;
+    //        B = b;
+    //    }
 
-        public float DistanceTo(ColorF4 p)
-        {
-            float a = A - p.A;
-            float r = R - p.R;
-            float g = G - p.G;
-            float b = B - p.B;
-            return (a * a) + (r * r) + (g * g) + (b * b);
-        }
+    //    public float DistanceTo(ColorF4 p)
+    //    {
+    //        float a = A - p.A;
+    //        float r = R - p.R;
+    //        float g = G - p.G;
+    //        float b = B - p.B;
+    //        return (a * a) + (r * r) + (g * g) + (b * b);
+    //    }
 
-        public Color ToColor()
-        {
-            return Color.FromArgb((int)(A / ColorFactor + 0.5f), (int)(R / ColorFactor + 0.5f), (int)(G / ColorFactor + 0.5f), (int)(B / ColorFactor + 0.5f));
-        }
+    //    public Color ToColor()
+    //    {
+    //        return Color.FromArgb((int)(A / ColorFactor + 0.5f), (int)(R / ColorFactor + 0.5f), (int)(G / ColorFactor + 0.5f), (int)(B / ColorFactor + 0.5f));
+    //    }
 
-        public static ColorF4 Factor(ColorF4 p1, ColorF4 p2, float factor)
-        {
-            float f1 = factor, f2 = 1.0f - factor;
-            return new ColorF4((p1.A * f1) + (p2.A * f2), (p1.R * f1) + (p2.R * f2), (p1.G * f1) + (p2.G * f2), (p1.B * f1) + (p2.B * f2));
-        }
-        public void Factor(ColorF4 p, float factor)
-        {
-            float f1 = 1.0f - factor, f2 = factor;
-            A = (A * f1) + (p.A * f2);
-            R = (R * f1) + (p.R * f2);
-            G = (G * f1) + (p.G * f2);
-            B = (B * f1) + (p.B * f2);
-        }
+    //    public static ColorF4 Factor(ColorF4 p1, ColorF4 p2, float factor)
+    //    {
+    //        float f1 = factor, f2 = 1.0f - factor;
+    //        return new ColorF4((p1.A * f1) + (p2.A * f2), (p1.R * f1) + (p2.R * f2), (p1.G * f1) + (p2.G * f2), (p1.B * f1) + (p2.B * f2));
+    //    }
+    //    public void Factor(ColorF4 p, float factor)
+    //    {
+    //        float f1 = 1.0f - factor, f2 = factor;
+    //        A = (A * f1) + (p.A * f2);
+    //        R = (R * f1) + (p.R * f2);
+    //        G = (G * f1) + (p.G * f2);
+    //        B = (B * f1) + (p.B * f2);
+    //    }
 
-        public static explicit operator ColorF4(ARGBPixel p) { return new ColorF4(p.A * ColorFactor, p.R * ColorFactor, p.G * ColorFactor, p.B * ColorFactor); }
+    //    public static explicit operator ColorF4(ARGBPixel p) { return new ColorF4(p.A * ColorFactor, p.R * ColorFactor, p.G * ColorFactor, p.B * ColorFactor); }
 
-        public static bool operator ==(ColorF4 p1, ColorF4 p2) { return (p1.A == p2.A) && (p1.R == p2.R) && (p1.G == p2.G) && (p1.B == p2.B); }
-        public static bool operator !=(ColorF4 p1, ColorF4 p2) { return (p1.A != p2.A) || (p1.R != p2.R) || (p1.G != p2.G) || (p1.B != p2.B); }
+    //    public static bool operator ==(ColorF4 p1, ColorF4 p2) { return (p1.A == p2.A) && (p1.R == p2.R) && (p1.G == p2.G) && (p1.B == p2.B); }
+    //    public static bool operator !=(ColorF4 p1, ColorF4 p2) { return (p1.A != p2.A) || (p1.R != p2.R) || (p1.G != p2.G) || (p1.B != p2.B); }
 
-        public static ColorF4 operator *(ColorF4 c1, ColorF4 c2) { return new ColorF4(c1.A * c2.A, c1.R * c2.R, c1.G * c2.G, c1.B * c2.B); }
-        public static ColorF4 operator *(ColorF4 c1, float f) { return new ColorF4(c1.A * f, c1.R * f, c1.G * f, c1.B * f); }
-        public static ColorF4 operator +(ColorF4 c1, ColorF4 c2) { return new ColorF4(c1.A + c2.A, c1.R + c2.R, c1.G + c2.G, c1.B + c2.B); }
-        public static ColorF4 operator /(ColorF4 c1, float f) { return new ColorF4(c1.A / f, c1.R / f, c1.G / f, c1.B / f); }
+    //    public static ColorF4 operator *(ColorF4 c1, ColorF4 c2) { return new ColorF4(c1.A * c2.A, c1.R * c2.R, c1.G * c2.G, c1.B * c2.B); }
+    //    public static ColorF4 operator *(ColorF4 c1, float f) { return new ColorF4(c1.A * f, c1.R * f, c1.G * f, c1.B * f); }
+    //    public static ColorF4 operator +(ColorF4 c1, ColorF4 c2) { return new ColorF4(c1.A + c2.A, c1.R + c2.R, c1.G + c2.G, c1.B + c2.B); }
+    //    public static ColorF4 operator /(ColorF4 c1, float f) { return new ColorF4(c1.A / f, c1.R / f, c1.G / f, c1.B / f); }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is ColorF4)
-                return this == (ColorF4)obj;
-            return base.Equals(obj);
-        }
-        public override int GetHashCode() { return base.GetHashCode(); }
-    }
+    //    public override bool Equals(object obj)
+    //    {
+    //        if (obj is ColorF4)
+    //            return this == (ColorF4)obj;
+    //        return base.Equals(obj);
+    //    }
+    //    public override int GetHashCode() { return base.GetHashCode(); }
+    //}
 }

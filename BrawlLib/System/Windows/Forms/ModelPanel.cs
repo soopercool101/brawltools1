@@ -142,7 +142,7 @@ namespace System.Windows.Forms
 
         protected override void OnMouseWheel(MouseEventArgs e)
         {
-            int z = e.Delta / 120;
+            float z = (float)e.Delta / 120;
             if (Control.ModifierKeys == Keys.Shift)
                 z *= 32;
 

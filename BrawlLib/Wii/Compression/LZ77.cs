@@ -185,7 +185,7 @@ namespace BrawlLib.Wii.Compression
         public static int Compact(VoidPtr srcAddr, uint srcLen, Stream outStream, string name)
         {
             using (LZ77 lz = new LZ77())
-            using (ProgressWindow prog = new ProgressWindow("LZ77", String.Format("Compressing {0}, please wait...", name), false))
+            using (ProgressWindow prog = new ProgressWindow(null, "LZ77", String.Format("Compressing {0}, please wait...", name), false))
                 return lz.Compress(srcAddr, srcLen, outStream, prog);
         }
 

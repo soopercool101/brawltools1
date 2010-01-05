@@ -12,7 +12,7 @@ namespace System.Windows.Forms
 {
     public partial class TextureConverterDialog : Form
     {
-        private Bitmap _source, _preview;
+        private Bitmap _source, _preview, _indexed;
         private ColorInformation _colorInfo;
         private UnsafeBuffer _cmprBuffer;
         private ColorPalette _tempPalette;
@@ -63,7 +63,7 @@ namespace System.Windows.Forms
             foreach (QuantizationAlgorithm f in Enum.GetValues(typeof(QuantizationAlgorithm)))
                 cboAlgorithm.Items.Add(f);
 
-            cboAlgorithm.SelectedItem = QuantizationAlgorithm.WeightedAverage;
+            cboAlgorithm.SelectedItem = QuantizationAlgorithm.MedianCut;
         }
 
         public DialogResult ShowDialog(IWin32Window owner, BRESNode parent)
@@ -185,6 +185,19 @@ namespace System.Windows.Forms
             pictureBox1.Picture = null;
             if (_preview != null) { _preview.Dispose(); _preview = null; }
             if (_source != null) { _source.Dispose(); _source = null; }
+            if (_indexed != null) { _indexed.Dispose(); _indexed = null; }
+        }
+
+        private void CopyPreview(Bitmap src)
+        {
+            Rectangle r = new Rectangle(0, 0, src.Width, src.Height);
+            BitmapData srcData = src.LockBits(r, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            BitmapData dstData = _preview.LockBits(r, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+
+            Memory.Move(dstData.Scan0, srcData.Scan0, (uint)(srcData.Stride * src.Height));
+
+            _preview.UnlockBits(dstData);
+            src.UnlockBits(srcData);
         }
 
         private void UpdatePreview()
@@ -193,37 +206,44 @@ namespace System.Windows.Forms
                 return;
 
             //Copy source to preview
-            Rectangle r = new Rectangle(0, 0, _source.Width, _source.Height);
-            BitmapData srcData = _source.LockBits(r, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-            BitmapData dstData = _preview.LockBits(r, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            //Rectangle r = new Rectangle(0, 0, _source.Width, _source.Height);
+            //BitmapData srcData = _source.LockBits(r, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            //BitmapData dstData = _preview.LockBits(r, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
 
-            Memory.Move(dstData.Scan0, srcData.Scan0, (uint)(srcData.Stride * _source.Height));
+            //Memory.Move(dstData.Scan0, srcData.Scan0, (uint)(srcData.Stride * _source.Height));
 
-            _preview.UnlockBits(dstData);
-            _source.UnlockBits(srcData);
+            //_preview.UnlockBits(dstData);
+            //_source.UnlockBits(srcData);
 
             if (_cmprBuffer != null) { _cmprBuffer.Dispose(); _cmprBuffer = null; }
+            if (_indexed != null) { _indexed.Dispose(); _indexed = null; }
 
-            switch ((WiiPixelFormat)cboFormat.SelectedItem)
+            WiiPixelFormat format = (WiiPixelFormat)cboFormat.SelectedItem;
+            switch (format)
             {
-                case WiiPixelFormat.I4: _preview.Clamp(WiiPixelFormat.I4); break;
-                case WiiPixelFormat.I8: _preview.Clamp(WiiPixelFormat.I8); break;
-                case WiiPixelFormat.IA4: _preview.Clamp(WiiPixelFormat.IA4); break;
-                case WiiPixelFormat.IA8: _preview.Clamp(WiiPixelFormat.IA8); break;
-                case WiiPixelFormat.RGB565: _preview.Clamp(WiiPixelFormat.RGB565); break;
-                case WiiPixelFormat.RGB5A3: _preview.Clamp(WiiPixelFormat.RGB5A3); break;
-                case WiiPixelFormat.RGBA8: break;
+                case WiiPixelFormat.I4: //_preview.Clamp(WiiPixelFormat.I4); break;
+                case WiiPixelFormat.I8: //_preview.Clamp(WiiPixelFormat.I8); break;
+                case WiiPixelFormat.IA4: //_preview.Clamp(WiiPixelFormat.IA4); break;
+                case WiiPixelFormat.IA8: //_preview.Clamp(WiiPixelFormat.IA8); break;
+                case WiiPixelFormat.RGB565: //_preview.Clamp(WiiPixelFormat.RGB565); break;
+                case WiiPixelFormat.RGB5A3: //_preview.Clamp(WiiPixelFormat.RGB5A3); break;
+                case WiiPixelFormat.RGBA8:
+                    {
+                        CopyPreview(_source);
+                        _preview.Clamp(format);
+                        break;
+                    }
                 case WiiPixelFormat.CMPR:
                     {
+                        CopyPreview(_source);
                         _cmprBuffer = TextureConverter.CMPR.GeneratePreview(_preview);
                         break;
                     }
                 case WiiPixelFormat.CI4:
                 case WiiPixelFormat.CI8:
                     {
-                        _tempPalette = _preview.GeneratePalette((QuantizationAlgorithm)cboAlgorithm.SelectedItem, (int)numPaletteCount.Value);
-                        _tempPalette.Clamp((WiiPaletteFormat)cboPaletteFormat.SelectedItem);
-                        _preview.Clamp(_tempPalette);
+                        _indexed = _source.Quantize((QuantizationAlgorithm)cboAlgorithm.SelectedItem, (int)numPaletteCount.Value, format, (WiiPaletteFormat)cboPaletteFormat.SelectedItem, null);
+                        CopyPreview(_indexed);
                         break;
                     }
             }
@@ -351,7 +371,7 @@ namespace System.Windows.Forms
         {
             TextureConverter format = TextureConverter.Get((WiiPixelFormat)cboFormat.SelectedItem);
             if (format.IsIndexed)
-                _textureData = format.EncodeTextureIndexed(_source, (int)numLOD.Value, _tempPalette, (WiiPaletteFormat)cboPaletteFormat.SelectedItem, out _paletteData);
+                _textureData = format.EncodeTextureIndexed(_indexed, (int)numLOD.Value, (WiiPaletteFormat)cboPaletteFormat.SelectedItem, out _paletteData);
             else
             {
                 if ((format.RawFormat == WiiPixelFormat.CMPR) && (_cmprBuffer != null))

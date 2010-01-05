@@ -77,7 +77,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (HasPalette)
             {
                 PLT0Node pn = this.GetPaletteNode();
-                tMap = TextureConverter.Get(Format).EncodeTextureIndexed(bmp, LevelOfDetail, pn.Colors, pn.Format, QuantizationAlgorithm.WeightedAverage, out pMap);
+                tMap = TextureConverter.Get(Format).EncodeTextureIndexed(bmp, LevelOfDetail, pn.Colors, pn.Format, QuantizationAlgorithm.MedianCut, out pMap);
                 pn.ReplaceRaw(pMap);
             }
             else

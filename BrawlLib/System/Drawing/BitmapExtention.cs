@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using BrawlLib.Imaging;
 using BrawlLib.Wii.Textures;
+using System.Windows.Forms;
 
 namespace System.Drawing
 {
@@ -70,35 +71,41 @@ namespace System.Drawing
 
             bmp.Palette = pal;
         }
-        public static unsafe ColorPalette GeneratePalette(this Bitmap bmp, QuantizationAlgorithm mode, int numColors)
-        {
-            ColorInformation info = bmp.GetColorInformation();
+        //public static unsafe ColorPalette GeneratePalette(this Bitmap bmp, QuantizationAlgorithm mode, int numColors)
+        //{
+        //    ColorInformation info = bmp.GetColorInformation();
 
-            ColorPalette pal = ColorPaletteExtension.CreatePalette(ColorPaletteFlags.None, numColors);
-            if (info.UniqueColors.Length <= numColors)
-            {
-                //Use original colors
-                for (int i = 0; i < info.UniqueColors.Length; i++)
-                    pal.Entries[i] = (Color)info.UniqueColors[i];
-            }
-            else
-            {
-                switch (mode)
-                {
-                    case QuantizationAlgorithm.WeightedAverage:
-                        {
-                            pal = WeightedAverage.Process(bmp, numColors);
-                            break;
-                        }
-                    //case QuantizationAlgorithm.MedianCut:
-                    //    {
-                    //        MedianCut.Quantize(bmp, numColors);
-                    //        break;
-                    //    }
-                }
-            }
-            return pal;
+        //    ColorPalette pal = ColorPaletteExtension.CreatePalette(ColorPaletteFlags.None, numColors);
+        //    if (info.UniqueColors.Length <= numColors)
+        //    {
+        //        //Use original colors
+        //        for (int i = 0; i < info.UniqueColors.Length; i++)
+        //            pal.Entries[i] = (Color)info.UniqueColors[i];
+        //    }
+        //    else
+        //    {
+        //        switch (mode)
+        //        {
+        //            case QuantizationAlgorithm.WeightedAverage:
+        //                {
+        //                    pal = WeightedAverage.Process(bmp, numColors);
+        //                    break;
+        //                }
+        //            //case QuantizationAlgorithm.MedianCut:
+        //            //    {
+        //            //        MedianCut.Quantize(bmp, numColors);
+        //            //        break;
+        //            //    }
+        //        }
+        //    }
+        //    return pal;
+        //}
+
+        public static Bitmap Quantize(this Bitmap bmp, QuantizationAlgorithm algorithm, int numColors, WiiPixelFormat texFormat, WiiPaletteFormat palFormat, IProgressTracker progress)
+        {
+            return MedianCut.Quantize(bmp, numColors, texFormat, palFormat, progress);
         }
+
         public static unsafe Bitmap IndexColors(this Bitmap src, ColorPalette palette, PixelFormat format)
         {
             int w = src.Width, h = src.Height;
@@ -249,7 +256,7 @@ namespace System.Drawing
 
             return dst;
         }
-        public static Bitmap GenerateMip(this Bitmap bmp, int level)
+        public static unsafe Bitmap GenerateMip(this Bitmap bmp, int level)
         {
             if (level <= 1)
                 return (Bitmap)bmp.Clone();
@@ -257,19 +264,76 @@ namespace System.Drawing
             int scale = 1 << (level - 1);
             int w = bmp.Width / scale, h = bmp.Height / scale;
 
-            Bitmap dst = new Bitmap(w, h, PixelFormat.Format32bppArgb);
+            Bitmap dst = new Bitmap(w, h, bmp.PixelFormat);
 
-            using (Graphics g = Graphics.FromImage(dst))
+            //Step-scale indexed elements
+            if (bmp.IsIndexed())
             {
-                g.CompositingMode = CompositingMode.SourceCopy;
-                g.CompositingQuality = CompositingQuality.HighQuality;
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                g.SmoothingMode = SmoothingMode.AntiAlias;
+                BitmapData srcData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
+                BitmapData dstData = dst.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadWrite, bmp.PixelFormat);
 
-                g.DrawImage(bmp, new Rectangle(0, 0, w, h));
+                float xStep = (float)bmp.Width / w;
+                float yStep = (float)bmp.Height / h;
+                int x, y;
+                float fx, fy;
+
+                byte* sPtr, dPtr = (byte*)dstData.Scan0;
+                if (bmp.PixelFormat == PixelFormat.Format8bppIndexed)
+                {
+                    for (y = 0, fy = 0.5f; y < h; y++, fy += yStep, dPtr += dstData.Stride)
+                    {
+                        sPtr = (byte*)srcData.Scan0 + ((int)fy * srcData.Stride);
+                        for (x = 0, fx = 0.5f; x < w; x++, fx += xStep)
+                            dPtr[x] = sPtr[(int)fx];
+                    }
+                }
+                else
+                {
+                    for (y = 0, fy = 0.5f; y < h; y++, fy += yStep, dPtr += dstData.Stride)
+                    {
+                        sPtr = (byte*)srcData.Scan0 + ((int)fy * srcData.Stride);
+                        int b = 0, ind;
+                        for (x = 0, fx = 0.5f; x < w; x++, fx += xStep)
+                        {
+                            ind = (int)fx;
+                            if ((x & 1) == 0)
+                            {
+                                if ((ind & 1) == 0)
+                                    b = sPtr[ind >> 1] & 0xF0;
+                                else
+                                    b = sPtr[ind >> 1] << 4;
+                            }
+                            else
+                            {
+                                if ((ind & 1) == 0)
+                                    b |= sPtr[ind >> 1] >> 4;
+                                else
+                                    b |= sPtr[ind >> 1] & 0xF;
+                                dPtr[x >> 1] = (byte)b;
+                            }
+                        }
+                        if ((x & 1) != 0)
+                            dPtr[x >> 1] = (byte)b;
+                    }
+
+                }
+
+                bmp.UnlockBits(srcData);
+                dst.UnlockBits(dstData);
             }
+            else
+            {
+                using (Graphics g = Graphics.FromImage(dst))
+                {
+                    g.CompositingMode = CompositingMode.SourceCopy;
+                    g.CompositingQuality = CompositingQuality.HighQuality;
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
 
+                    g.DrawImage(bmp, new Rectangle(0, 0, w, h));
+                }
+            }
             return dst;
         }
 
@@ -284,7 +348,7 @@ namespace System.Drawing
     }
     public enum QuantizationAlgorithm
     {
-        WeightedAverage
-        //MedianCut
+        //WeightedAverage
+        MedianCut
     }
 }

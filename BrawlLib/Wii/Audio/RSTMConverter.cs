@@ -3,12 +3,13 @@ using BrawlLib.IO;
 using System.Audio;
 using BrawlLib.SSBBTypes;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace BrawlLib.Wii.Audio
 {
     public static class RSTMConverter
     {
-        public static unsafe FileMap Encode(IAudioStream stream)
+        public static unsafe FileMap Encode(IAudioStream stream, IProgressTracker progress)
         {
             int tmp;
             bool looped = stream.IsLooping;
@@ -41,6 +42,9 @@ namespace BrawlLib.Wii.Audio
                 loopPadding = loopStart = 0;
                 totalSamples = samples = stream.Samples;
             }
+
+            if (progress != null)
+                progress.Begin(0, totalSamples * channels * 3, 0);
 
             blocks = (totalSamples + 0x37FF) / 0x3800;
 
@@ -126,7 +130,7 @@ namespace BrawlLib.Wii.Audio
 
             //Calculate coefs
             for (int i = 0; i < channels; i++)
-                AudioConverter.CalcCoefs(channelBuffers[i] + 2, totalSamples, (short*)pAdpcm[i]);
+                AudioConverter.CalcCoefs(channelBuffers[i] + 2, totalSamples, (short*)pAdpcm[i], progress);
 
             //Encode blocks
             byte* dPtr = (byte*)data->Data;
@@ -163,8 +167,13 @@ namespace BrawlLib.Wii.Audio
                     else
                         dPtr += 0x2000;
                 }
-            }
 
+                if (progress != null)
+                {
+                    if ((sIndex % 0x3800) == 0)
+                        progress.Update(progress.CurrentValue + (0x7000 * channels));
+                }
+            }
 
             //Reverse coefs
             for (int i = 0; i < channels; i++)
@@ -196,6 +205,9 @@ namespace BrawlLib.Wii.Audio
             //Free memory
             for (int i = 0; i < channels; i++)
                 Marshal.FreeHGlobal((IntPtr)channelBuffers[i]);
+
+            if (progress != null)
+                progress.Finish();
 
             return map;
         }

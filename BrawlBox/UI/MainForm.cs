@@ -38,6 +38,7 @@ namespace BrawlBox
             soundPackControl1.Dock = DockStyle.Fill;
             soundPackControl1.lstSets.SmallImageList = ResourceTree.Images;
             audioPlaybackPanel1.Dock = DockStyle.Fill;
+            clrControl.Dock = DockStyle.Fill;
         }
 
         public void Reset()
@@ -97,6 +98,7 @@ namespace BrawlBox
             animEditControl.TargetSequence = null;
             msBinEditor1.CurrentNode = null;
             soundPackControl1.TargetNode = null;
+            clrControl.TargetNode = null;
 
             Control newControl = null;
 
@@ -131,6 +133,11 @@ namespace BrawlBox
                     audioPlaybackPanel1.TargetSource = node as IAudioSource;
                     newControl = audioPlaybackPanel1;
                 }
+                else if (node is CLR0EntryNode)
+                {
+                    clrControl.TargetNode = node as CLR0EntryNode;
+                    newControl = clrControl;
+                }
 
                 if ((editToolStripMenuItem.DropDown = w.ContextMenuStrip) != null)
                     editToolStripMenuItem.Enabled = true;
@@ -163,7 +170,7 @@ namespace BrawlBox
 
 
 
-        private static string _inFilter = "All Supported Formats (*.pac,*.pcs,*.brres,*.plt0,*.tex0,*.mdl0,*.chr0,*.brstm,*.brsar,*.msbin)|*.pac;*.pcs;*.brres;*.plt0;*.tex0;*.mdl0;*.chr0;*.brstm;*.brsar;*.msbin|" +
+        private static string _inFilter = "All Supported Formats |*.pac;*.pcs;*.brres;*.plt0;*.tex0;*.mdl0;*.chr0;*.brstm;*.brsar;*.msbin;*.rwsd;*.rseq;*.rbnk;*.clr0;*.vis0|" +
                     "PAC File Archive (*.pac)|*.pac|" +
                     "Compressed File Package (*.pcs)|*.pcs|" +
                     "BRRES Resource Package (*.brres)|*.brres|" +
@@ -173,7 +180,12 @@ namespace BrawlBox
                     "CHR0 Raw Animation (*.chr0)|*.chr0|" +
                     "BRSTM Audio Stream (*.brstm)|*.brstm|" +
                     "BRSAR Audio Package (*.brsar)|*.brsar|" +
-                    "MSBin Message Pack (*.msbin)|*.msbin";
+                    "MSBin Message Pack (*.msbin)|*.msbin|" +
+                    "Raw Sound Pack (*.rwsd)|*.rwsd|" +
+                    "Raw Sound Sequence (*.rseq)|*.rseq|" +
+                    "Raw Sound Bank (*.rbnk)|*.rbnk|" +
+                    "Color Sequence (*.clr0)|*.clr0|" + 
+                    "VIS Sequence (*.vis0)|*.vis0";
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {

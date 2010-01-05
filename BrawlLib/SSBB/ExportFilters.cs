@@ -42,5 +42,11 @@ namespace BrawlLib
 
         public static string RSEQ =
             "Raw Sound Requence (*.rseq)|*.rseq";
+
+        public static string CLR0 =
+            "Color Sequence (*.clr0)|*.clr0";
+
+        public static string VIS0 =
+            "VIS0 (*.vis0)|*.vis0";
     }
 }

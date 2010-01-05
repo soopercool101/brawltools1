@@ -51,6 +51,7 @@ namespace BrawlBox
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
+            this.clrControl = new System.Windows.Forms.CLRControl();
             this.audioPlaybackPanel1 = new System.Windows.Forms.AudioPlaybackPanel();
             this.soundPackControl1 = new System.Windows.Forms.SoundPackControl();
             this.msBinEditor1 = new System.Windows.Forms.MSBinEditor();
@@ -251,6 +252,7 @@ namespace BrawlBox
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.Controls.Add(this.clrControl);
             this.splitContainer2.Panel2.Controls.Add(this.audioPlaybackPanel1);
             this.splitContainer2.Panel2.Controls.Add(this.soundPackControl1);
             this.splitContainer2.Panel2.Controls.Add(this.msBinEditor1);
@@ -269,6 +271,14 @@ namespace BrawlBox
             this.propertyGrid1.PropertySort = System.Windows.Forms.PropertySort.Categorized;
             this.propertyGrid1.Size = new System.Drawing.Size(384, 238);
             this.propertyGrid1.TabIndex = 2;
+            // 
+            // clrControl
+            // 
+            this.clrControl.Location = new System.Drawing.Point(256, 110);
+            this.clrControl.Name = "clrControl";
+            this.clrControl.Size = new System.Drawing.Size(98, 47);
+            this.clrControl.TabIndex = 5;
+            this.clrControl.Visible = false;
             // 
             // audioPlaybackPanel1
             // 
@@ -361,6 +371,7 @@ namespace BrawlBox
         private ToolStripMenuItem bRStmAudioToolStripMenuItem;
         private SoundPackControl soundPackControl1;
         private AudioPlaybackPanel audioPlaybackPanel1;
+        private CLRControl clrControl;
     }
 }
 

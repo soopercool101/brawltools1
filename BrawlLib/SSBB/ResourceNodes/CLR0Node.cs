@@ -3,16 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using BrawlLib.SSBBTypes;
+using System.ComponentModel;
+using BrawlLib.Imaging;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
     public unsafe class CLR0Node : BRESEntryNode
     {
         internal CLR0* Header { get { return (CLR0*)WorkingUncompressed.Address; } }
+        public override ResourceType ResourceType { get { return ResourceType.CLR0; } }
+
+        internal int _numFrames, _unk1, _unk2;
+
+        [Category("CLR0")]
+        public int FrameCount { get { return _numFrames; } }
+        [Category("CLR0")]
+        public int Unknown1 { get { return _unk1; } set { _unk1 = value; SignalPropertyChange(); } }
+        [Category("CLR0")]
+        public int Unknown2 { get { return _unk2; } set { _unk2 = value; SignalPropertyChange(); } }
 
         protected override bool OnInitialize()
         {
             base.OnInitialize();
+
+            _numFrames = Header->_frames;
+            _unk1 = Header->_unk1;
+            _unk2 = Header->_unk2;
 
             if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
@@ -20,14 +36,56 @@ namespace BrawlLib.SSBB.ResourceNodes
             return Header->Group->_numEntries > 0;
         }
 
+        public CLR0EntryNode CreateEntry()
+        {
+            CLR0EntryNode node = new CLR0EntryNode();
+            node.NumEntries = _numFrames + 1;
+            node.Name = this.FindName();
+            this.AddChild(node);
+            return node;
+        }
+
         //To do
-        //protected override int OnCalculateSize(bool force)
-        //{
-        //    int size = CLR0.Size + 0x18 + (Children.Count * 0x10);
-        //    foreach (CHR0EntryNode n in Children)
-        //        size += n.CalculateSize(force);
-        //    return size;
-        //}
+        protected override int OnCalculateSize(bool force)
+        {
+            int size = CLR0.Size + 0x18;// +(Children.Count * 0x10);
+            size += Children.Count * ((_numFrames + 1) * 4 + 0x20);
+            return size;
+        }
+
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
+        {
+            int count = Children.Count;
+            int stride = (_numFrames + 1) * 4 * count;
+
+            CLR0Entry* pEntry = (CLR0Entry*)( address + 0x3C + (count * 0x10));
+            ABGRPixel* pData = (ABGRPixel*)(((int)pEntry + count * 0x10));
+
+            CLR0* header = (CLR0*)address;
+            *header = new CLR0(length, _unk1, _numFrames, count, _unk2);
+
+            ResourceGroup* group = header->Group;
+            *group = new ResourceGroup(count);
+
+            ResourceEntry* entry = group->First;
+            foreach (CLR0EntryNode n in Children)
+            {
+                entry->_dataOffset = (int)pEntry - (int)group;
+                *pEntry = new CLR0Entry(n._flags, (ABGRPixel)n._baseColor, (int)pData - ((int)pEntry + 12));
+
+                entry++;
+                pEntry++;
+
+                foreach (ARGBPixel p in n._colors)
+                    *pData++ = (ABGRPixel)p;
+
+                n._changed = false;
+            }
+
+            _replSrc.Close();
+            _replUncompSrc.Close();
+            _replSrc = _replUncompSrc = new DataSource(address, length);
+        }
 
         protected override void OnPopulate()
         {
@@ -71,14 +129,47 @@ namespace BrawlLib.SSBB.ResourceNodes
     {
         internal CLR0Entry* Header { get { return (CLR0Entry*)WorkingUncompressed.Address; } }
 
-        //To do
-        //protected override int OnCalculateSize(bool force)
-        //{
-        //    return base.OnCalculateSize(force);
-        //}
+        internal int _flags;
+        [Category("CLR0 Entry")]
+        public int Flags { get { return _flags; } set { _flags = value; SignalPropertyChange(); } }
+
+        internal ARGBPixel _baseColor;
+        [Browsable(false)]
+        public ARGBPixel BaseColor { get { return _baseColor; } set { _baseColor = value; SignalPropertyChange(); } }
+
+        internal List<ARGBPixel> _colors = new List<ARGBPixel>();
+        [Browsable(false)]
+        public List<ARGBPixel> Colors { get { return _colors; } }
+
+        internal int _numEntries;
+        [Browsable(false)]
+        internal int NumEntries
+        {
+            get { return _numEntries; }
+            set
+            {
+                if (value > _numEntries)
+                    for (int i = value - _numEntries; i-- > 0; )
+                        _colors.Add(_baseColor);
+                else if (value < _colors.Count)
+                    _colors.RemoveRange(value, _colors.Count - value);
+
+                _numEntries = value;
+            }
+        }
 
         protected override bool OnInitialize()
         {
+            _flags = Header->_flags;
+            _baseColor = (ARGBPixel)Header->_baseColor;
+
+            _numEntries = ((CLR0Node)_parent)._numFrames + 1;
+            _colors.Clear();
+
+            ABGRPixel* data = Header->Data;
+            for (int i = 0; i < _numEntries; i++)
+                _colors.Add((ARGBPixel)(*data++));
+
             if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
             //Get size

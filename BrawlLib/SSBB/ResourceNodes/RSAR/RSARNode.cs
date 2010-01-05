@@ -55,6 +55,12 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override void OnPopulate()
         {
+            //Get files
+            GetFiles();
+
+            //Enumerate entries, attaching them to the files.
+
+
             RSARHeader* rsar = Header;
             SYMBHeader* symb = rsar->SYMBBlock;
             sbyte* offset = (sbyte*)symb + 8;
@@ -78,45 +84,45 @@ namespace BrawlLib.SSBB.ResourceNodes
                     case 3:
                         {
                             //Get files
-                            INFOFileHeader* fileHeader;
-                            INFOFileEntry* fileEntry;
-                            RuintList* entryList;
-                            INFOGroupHeader* group;
-                            INFOGroupEntry* gEntry;
-                            RuintList* groupList = rsar->INFOBlock->Groups;
-                            RSARFileNode n;
-                            DataSource source;
+                            //INFOFileHeader* fileHeader;
+                            //INFOFileEntry* fileEntry;
+                            //RuintList* entryList;
+                            //INFOGroupHeader* group;
+                            //INFOGroupEntry* gEntry;
+                            //RuintList* groupList = rsar->INFOBlock->Groups;
+                            //RSARFileNode n;
+                            //DataSource source;
 
-                            for (int x = 0; x < count; x++)
-                            {
-                                fileHeader = (INFOFileHeader*)(gOffset + list[x]);
-                                entryList = fileHeader->GetList(gOffset);
-                                if (entryList->_numEntries == 0)
-                                {
-                                    //Must be external file.
-                                    n = new RSARExtFileNode();
-                                    source = new DataSource(fileHeader, 0);
-                                }
-                                else
-                                {
-                                    //use first entry
-                                    fileEntry = (INFOFileEntry*)entryList->Get(gOffset, 0);
-                                    //Find group with matching ID
-                                    group = (INFOGroupHeader*)groupList->Get(gOffset, fileEntry->_groupId);
-                                    //Find group entry with matching index
-                                    gEntry = (INFOGroupEntry*)group->GetCollection(gOffset)->Get(gOffset, fileEntry->_index);
+                            //for (int x = 0; x < count; x++)
+                            //{
+                            //    fileHeader = (INFOFileHeader*)(gOffset + list[x]);
+                            //    entryList = fileHeader->GetList(gOffset);
+                            //    if (entryList->_numEntries == 0)
+                            //    {
+                            //        //Must be external file.
+                            //        n = new RSARExtFileNode();
+                            //        source = new DataSource(fileHeader, 0);
+                            //    }
+                            //    else
+                            //    {
+                            //        //use first entry
+                            //        fileEntry = (INFOFileEntry*)entryList->Get(gOffset, 0);
+                            //        //Find group with matching ID
+                            //        group = (INFOGroupHeader*)groupList->Get(gOffset, fileEntry->_groupId);
+                            //        //Find group entry with matching index
+                            //        gEntry = (INFOGroupEntry*)group->GetCollection(gOffset)->Get(gOffset, fileEntry->_index);
 
-                                    //Create node and parse
-                                    source = new DataSource((int)rsar + group->_headerOffset + gEntry->_headerOffset, gEntry->_headerLength);
-                                    if ((n = NodeFactory.GetRaw(source) as RSARFileNode) == null)
-                                        n = new RSARFileNode();
-                                    n._audioSource = new DataSource((int)rsar + group->_dataOffset + gEntry->_dataOffset, gEntry->_dataLength);
-                                }
-                                n._fileIndex = x;
-                                n._parent = this; //This is so that the node won't add itself to the child list.
-                                n.Initialize(this, source);
-                                _files.Add(n);
-                            }
+                            //        //Create node and parse
+                            //        source = new DataSource((int)rsar + group->_headerOffset + gEntry->_headerOffset, gEntry->_headerLength);
+                            //        if ((n = NodeFactory.GetRaw(source) as RSARFileNode) == null)
+                            //            n = new RSARFileNode();
+                            //        n._audioSource = new DataSource((int)rsar + group->_dataOffset + gEntry->_dataOffset, gEntry->_dataLength);
+                            //    }
+                            //    n._fileIndex = x;
+                            //    n._parent = this; //This is so that the node won't add itself to the child list.
+                            //    n.Initialize(this, source);
+                            //    _files.Add(n);
+                            //}
                             continue;
                         }
                     case 4: t = typeof(RSARGroupNode); break;
@@ -147,6 +153,63 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
             Sort(true);
 
+        }
+
+        private void GetFiles()
+        {
+
+            RSARHeader* rsar = Header;
+            //SYMBHeader* symb = rsar->SYMBBlock;
+            //sbyte* offset = (sbyte*)symb + 8;
+            //buint* stringOffsets = symb->StringOffsets;
+
+            VoidPtr gOffset = (VoidPtr)rsar->INFOBlock + 8;
+            ruint* groups = (ruint*)gOffset;
+
+            ruint* list = (ruint*)((uint)groups + groups[3] + 4);
+            int count = *((bint*)list - 1);
+
+
+            //Get files
+            INFOFileHeader* fileHeader;
+            INFOFileEntry* fileEntry;
+            RuintList* entryList;
+            INFOGroupHeader* group;
+            INFOGroupEntry* gEntry;
+            RuintList* groupList = rsar->INFOBlock->Groups;
+            RSARFileNode n;
+            DataSource source;
+
+            for (int x = 0; x < count; x++)
+            {
+                fileHeader = (INFOFileHeader*)(gOffset + list[x]);
+                entryList = fileHeader->GetList(gOffset);
+                if (entryList->_numEntries == 0)
+                {
+                    //Must be external file.
+                    n = new RSARExtFileNode();
+                    source = new DataSource(fileHeader, 0);
+                }
+                else
+                {
+                    //use first entry
+                    fileEntry = (INFOFileEntry*)entryList->Get(gOffset, 0);
+                    //Find group with matching ID
+                    group = (INFOGroupHeader*)groupList->Get(gOffset, fileEntry->_groupId);
+                    //Find group entry with matching index
+                    gEntry = (INFOGroupEntry*)group->GetCollection(gOffset)->Get(gOffset, fileEntry->_index);
+
+                    //Create node and parse
+                    source = new DataSource((int)rsar + group->_headerOffset + gEntry->_headerOffset, gEntry->_headerLength);
+                    if ((n = NodeFactory.GetRaw(source) as RSARFileNode) == null)
+                        n = new RSARFileNode();
+                    n._audioSource = new DataSource((int)rsar + group->_dataOffset + gEntry->_dataOffset, gEntry->_dataLength);
+                }
+                n._fileIndex = x;
+                n._parent = this; //This is so that the node won't add itself to the child list.
+                n.Initialize(this, source);
+                _files.Add(n);
+            }
         }
 
         internal void Sort(bool sortChildren)

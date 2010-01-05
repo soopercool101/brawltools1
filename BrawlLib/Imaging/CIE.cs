@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace BrawlLib.Imaging
 {
-    [StructLayout( LayoutKind.Sequential, Pack=1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct LabPixel
     {
         public double L;

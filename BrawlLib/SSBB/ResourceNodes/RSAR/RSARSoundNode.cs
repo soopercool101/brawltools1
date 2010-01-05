@@ -1,10 +1,11 @@
 ﻿using System;
 using BrawlLib.SSBBTypes;
 using System.ComponentModel;
+using System.Audio;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    public unsafe class RSARSoundNode : RSAREntryNode
+    public unsafe class RSARSoundNode : RSAREntryNode, IAudioSource
     {
         internal INFOSoundEntry* Header { get { return (INFOSoundEntry*)WorkingUncompressed.Address; } }
         internal override int StringId { get { return Header->_stringId; } }
@@ -17,7 +18,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         //[Category("RSAR Sound")]
         //public int StringId { get { return Header->_stringId; } }
         [Category("RSAR Sound")]
-        public int GroupId { get { return Header->_fileId; } }
+        public int FileId { get { return Header->_fileId; } }
         [Category("RSAR Sound")]
         public int Unknown1 { get { return Header->_unk1; } }
         [Category("RSAR Sound")]
@@ -63,5 +64,10 @@ namespace BrawlLib.SSBB.ResourceNodes
             return false;
         }
 
+
+        public IAudioStream CreateStream()
+        {
+            return null;
+        }
     }
 }

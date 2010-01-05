@@ -7,7 +7,7 @@ namespace System.Windows.Forms
 {
     public class GoodPictureBox : Panel
     {
-        private HatchBrush _brush = new HatchBrush(HatchStyle.LargeCheckerBoard, Color.LightGray, Color.GhostWhite);
+        internal static HatchBrush _brush = new HatchBrush(HatchStyle.LargeCheckerBoard, Color.LightGray, Color.GhostWhite);
 
         //private Color _transColor = Color.Magenta;
         //public Color TransparentColor
@@ -25,7 +25,7 @@ namespace System.Windows.Forms
 
         public GoodPictureBox()
         {
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.Opaque | ControlStyles.OptimizedDoubleBuffer, true);
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.Opaque | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
         }
 
         protected override void OnPaint(PaintEventArgs e)

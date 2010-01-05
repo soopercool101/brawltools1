@@ -9,11 +9,22 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal INFOBankEntry* Header { get { return (INFOBankEntry*)WorkingUncompressed.Address; } }
         internal override int StringId { get { return Header->_stringId; } }
 
+        internal RBNKNode _rbnk;
+
         [Category("INFO Bank")]
-        public int SoundPack { get { return Header->_fileId; } }
+        public int FileIndex { get { return Header->_fileId; } }
         [Category("INFO Bank")]
         public int Padding { get { return Header->_padding; } }
 
         public override ResourceType ResourceType { get { return ResourceType.RSARBank; } }
+
+        protected override bool OnInitialize()
+        {
+            base.OnInitialize();
+
+            //Attach to file node
+
+            return false;
+        }
     }
 }

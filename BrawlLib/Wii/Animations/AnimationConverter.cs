@@ -238,6 +238,7 @@ namespace BrawlLib.Wii.Animations
                 if ((isFixed[0] != isFixed[1]) || (isFixed[0] != isFixed[2]))
                     isotropic = false;
 
+                int maxIndex = 0;
                 for (int i = 0; i < 3; i++)
                 {
                     int* pOrder = order[i];
@@ -246,15 +247,25 @@ namespace BrawlLib.Wii.Animations
                     float min = float.MaxValue, max = float.MinValue;
                     eCount = 0;
 
-                    for (entry = arr[i][0]; entry._next != 0; eCount++)
+                    for (int x = arr[i][0]._next; x != 0; x = arr[i][x]._next, eCount++)
                     {
-                        *pOrder++ = entry._next;
-                        entry = arr[i][entry._next];
-                        v = entry._value;
-                        *pValue++ = v;
+                        *pOrder++ = x;
+                        maxIndex = Math.Max(maxIndex, x);
+
+                        *pValue++ = v = arr[i][x]._value;
                         min = Math.Min(min, v);
                         max = Math.Max(max, v);
                     }
+
+                    //for (entry = arr[i][0]; entry._next != 0; eCount++)
+                    //{
+                    //    entry = arr[i][index = entry._next];
+                    //    *pOrder++ = index;
+                    //    *pValue++ = v = entry._value;
+                    //    maxIndex = Math.Max(maxIndex, index);
+                    //    min = Math.Min(min, v);
+                    //    max = Math.Max(max, v);
+                    //}
                     count[i] = eCount;
                     floor[i] = min;
                     ceil[i] = max;
@@ -285,7 +296,7 @@ namespace BrawlLib.Wii.Animations
                     //useLinear &= (count[0] == numFrames) && (count[1] == numFrames) && (count[2] == numFrames);
                 }
 
-                scaleSpan = group == 1 ? 255 : 4095;
+                scaleSpan = (group == 1) ? 255 : (maxIndex <= 255) ? 4095 : (maxIndex <= 2047) ? 65535 : -1;
                 //scaleSpan = useLinear ? 255 : 4095;
 
                 //Determine if values are scalable
@@ -334,9 +345,9 @@ namespace BrawlLib.Wii.Animations
                     }
                     else
                     {
-                        if (scaleSpan == 255)
+                        if ((scaleSpan <= 255) && (maxIndex <= 255))
                             scaleSpan = 4095;
-                        else if (scaleSpan == 4095)
+                        else if ((scaleSpan <= 4095) && (maxIndex <= 2047))
                             scaleSpan = 65535;
                         else
                         {
@@ -356,22 +367,29 @@ namespace BrawlLib.Wii.Animations
 
                     if (scale)
                     {
-                        if ((scaleSpan == 255) && (frameSpan < 4.0f))
+                        if ((group == 1) && (scaleSpan <= 255) && (frameSpan < 4.0f))
                             format = AnimDataFormat.F1B;
-                        else if (scaleSpan <= 4095)
+                        else if ((scaleSpan <= 4095) && (maxIndex <= 255))
                             format = AnimDataFormat.F4B;
-                        else if ((group != 1) || (frameSpan > 1.5f))
+                        else if ((frameSpan > 1.5f) && (maxIndex <= 2047))
                             format = AnimDataFormat.F6B;
-                        else
+                        else if ((group == 1) && (frameSpan <= 3.0f))
                             format = AnimDataFormat.F1F;
-                    }
-                    else
-                    {
-                        if ((group != 1) || (frameSpan > 3.0f))
+                        else
                             format = AnimDataFormat.F3F;
-                        else
-                            format = AnimDataFormat.F1F;
                     }
+                    else if ((group == 1) && (frameSpan <= 3.0f))
+                        format = AnimDataFormat.F1F;
+                    else
+                        format = AnimDataFormat.F3F;
+
+                    //else
+                    //{
+                    //    if ((group != 1) || (frameSpan > 3.0f))
+                    //        format = AnimDataFormat.F3F;
+                    //    else
+                    //        format = AnimDataFormat.F1F;
+                    //}
 
                     //if (useLinear) //rotation
                     //{

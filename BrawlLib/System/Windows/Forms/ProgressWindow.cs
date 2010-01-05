@@ -16,9 +16,14 @@ namespace System.Windows.Forms
         public string Caption { get { return label1.Text; } set { label1.Text = value; } }
 
         public ProgressWindow() { InitializeComponent(); }
-        public ProgressWindow(string title, string caption, bool canCancel)
+        public ProgressWindow(Form owner, string title, string caption, bool canCancel)
             : this()
-        { Text = title; Caption = caption; CanCancel = CanCancel;}
+        {
+            Owner = owner;
+            Text = title; 
+            Caption = caption; 
+            CanCancel = CanCancel; 
+        }
 
         private void btnCancel_Click(object sender, EventArgs e) { Cancel(); }
 
@@ -28,11 +33,14 @@ namespace System.Windows.Forms
             progressBar1.MaxValue = max;
             progressBar1.CurrentValue = current;
 
-            //Owner = Form.ActiveForm;
-            //Owner.Enabled = false;
+            if (Owner != null)
+                Owner.Enabled = false;
+
             Show();
 
-            //CenterToParent();
+            if (Owner != null)
+                CenterToParent();
+
             Application.DoEvents();
         }
         public void Update(float value)
@@ -43,7 +51,9 @@ namespace System.Windows.Forms
         }
         public void Finish()
         {
-            //Owner.Enabled = true;
+            if (Owner != null)
+                Owner.Enabled = true;
+
             Close();
         }
         public void Cancel() { _cancelled = true; }

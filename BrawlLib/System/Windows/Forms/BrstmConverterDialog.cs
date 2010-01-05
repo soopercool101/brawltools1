@@ -42,6 +42,11 @@ namespace System.Windows.Forms
         private IContainer components;
         private Label lblSamples;
         private Label lblFrequency;
+        private Button btnEndSet;
+        private Button btnStartSet;
+        private Button btnLoopRW;
+        private Button btnFFwd;
+        private Button btnSeekEnd;
         private Button btnBrowse;
 
         private void InitializeComponent()
@@ -71,6 +76,8 @@ namespace System.Windows.Forms
             this.pnlLoopStart = new System.Windows.Forms.Panel();
             this.customTrackBar1 = new System.Windows.Forms.CustomTrackBar();
             this.grpLoop = new System.Windows.Forms.GroupBox();
+            this.btnEndSet = new System.Windows.Forms.Button();
+            this.btnStartSet = new System.Windows.Forms.Button();
             this.numLoopStart = new System.Windows.Forms.NumericUpDown();
             this.numLoopEnd = new System.Windows.Forms.NumericUpDown();
             this.lblEnd = new System.Windows.Forms.Label();
@@ -79,6 +86,9 @@ namespace System.Windows.Forms
             this.chkLoopEnable = new System.Windows.Forms.CheckBox();
             this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
             this.tmrUpdate = new System.Windows.Forms.Timer(this.components);
+            this.btnFFwd = new System.Windows.Forms.Button();
+            this.btnLoopRW = new System.Windows.Forms.Button();
+            this.btnSeekEnd = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.pnlInfo.SuspendLayout();
             this.panel4.SuspendLayout();
@@ -202,7 +212,7 @@ namespace System.Windows.Forms
             // btnPlay
             // 
             this.btnPlay.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.btnPlay.Location = new System.Drawing.Point(124, 86);
+            this.btnPlay.Location = new System.Drawing.Point(126, 86);
             this.btnPlay.Name = "btnPlay";
             this.btnPlay.Size = new System.Drawing.Size(75, 20);
             this.btnPlay.TabIndex = 7;
@@ -213,7 +223,7 @@ namespace System.Windows.Forms
             // btnRewind
             // 
             this.btnRewind.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.btnRewind.Location = new System.Drawing.Point(92, 86);
+            this.btnRewind.Location = new System.Drawing.Point(72, 86);
             this.btnRewind.Name = "btnRewind";
             this.btnRewind.Size = new System.Drawing.Size(26, 20);
             this.btnRewind.TabIndex = 8;
@@ -254,6 +264,9 @@ namespace System.Windows.Forms
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.btnSeekEnd);
+            this.groupBox2.Controls.Add(this.btnLoopRW);
+            this.groupBox2.Controls.Add(this.btnFFwd);
             this.groupBox2.Controls.Add(this.chkLoop);
             this.groupBox2.Controls.Add(this.lblPlayTime);
             this.groupBox2.Controls.Add(this.pnlLoop);
@@ -273,7 +286,7 @@ namespace System.Windows.Forms
             this.chkLoop.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.chkLoop.Enabled = false;
-            this.chkLoop.Location = new System.Drawing.Point(34, 86);
+            this.chkLoop.Location = new System.Drawing.Point(10, 86);
             this.chkLoop.Name = "chkLoop";
             this.chkLoop.Size = new System.Drawing.Size(52, 20);
             this.chkLoop.TabIndex = 10;
@@ -352,6 +365,8 @@ namespace System.Windows.Forms
             // 
             // grpLoop
             // 
+            this.grpLoop.Controls.Add(this.btnEndSet);
+            this.grpLoop.Controls.Add(this.btnStartSet);
             this.grpLoop.Controls.Add(this.numLoopStart);
             this.grpLoop.Controls.Add(this.numLoopEnd);
             this.grpLoop.Controls.Add(this.lblEnd);
@@ -365,6 +380,26 @@ namespace System.Windows.Forms
             this.grpLoop.TabStop = false;
             this.grpLoop.Text = "Loop";
             // 
+            // btnEndSet
+            // 
+            this.btnEndSet.Location = new System.Drawing.Point(289, 19);
+            this.btnEndSet.Name = "btnEndSet";
+            this.btnEndSet.Size = new System.Drawing.Size(15, 20);
+            this.btnEndSet.TabIndex = 13;
+            this.btnEndSet.Text = "*";
+            this.btnEndSet.UseVisualStyleBackColor = true;
+            this.btnEndSet.Click += new System.EventHandler(this.btnEndSet_Click);
+            // 
+            // btnStartSet
+            // 
+            this.btnStartSet.Location = new System.Drawing.Point(141, 19);
+            this.btnStartSet.Name = "btnStartSet";
+            this.btnStartSet.Size = new System.Drawing.Size(15, 20);
+            this.btnStartSet.TabIndex = 4;
+            this.btnStartSet.Text = "*";
+            this.btnStartSet.UseVisualStyleBackColor = true;
+            this.btnStartSet.Click += new System.EventHandler(this.btnStartSet_Click);
+            // 
             // numLoopStart
             // 
             this.numLoopStart.Increment = new decimal(new int[] {
@@ -372,9 +407,9 @@ namespace System.Windows.Forms
             0,
             0,
             0});
-            this.numLoopStart.Location = new System.Drawing.Point(67, 19);
+            this.numLoopStart.Location = new System.Drawing.Point(59, 19);
             this.numLoopStart.Name = "numLoopStart";
-            this.numLoopStart.Size = new System.Drawing.Size(91, 20);
+            this.numLoopStart.Size = new System.Drawing.Size(81, 20);
             this.numLoopStart.TabIndex = 10;
             this.numLoopStart.ValueChanged += new System.EventHandler(this.numLoopStart_ValueChanged);
             // 
@@ -385,24 +420,24 @@ namespace System.Windows.Forms
             0,
             0,
             0});
-            this.numLoopEnd.Location = new System.Drawing.Point(208, 19);
+            this.numLoopEnd.Location = new System.Drawing.Point(207, 19);
             this.numLoopEnd.Name = "numLoopEnd";
-            this.numLoopEnd.Size = new System.Drawing.Size(91, 20);
+            this.numLoopEnd.Size = new System.Drawing.Size(81, 20);
             this.numLoopEnd.TabIndex = 11;
             this.numLoopEnd.ValueChanged += new System.EventHandler(this.numLoopEnd_ValueChanged);
             // 
             // lblEnd
             // 
-            this.lblEnd.Location = new System.Drawing.Point(162, 19);
+            this.lblEnd.Location = new System.Drawing.Point(160, 19);
             this.lblEnd.Name = "lblEnd";
-            this.lblEnd.Size = new System.Drawing.Size(40, 20);
+            this.lblEnd.Size = new System.Drawing.Size(41, 20);
             this.lblEnd.TabIndex = 2;
             this.lblEnd.Text = "End:";
             this.lblEnd.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblStart
             // 
-            this.lblStart.Location = new System.Drawing.Point(21, 19);
+            this.lblStart.Location = new System.Drawing.Point(13, 19);
             this.lblStart.Name = "lblStart";
             this.lblStart.Size = new System.Drawing.Size(40, 20);
             this.lblStart.TabIndex = 12;
@@ -433,6 +468,41 @@ namespace System.Windows.Forms
             // 
             this.tmrUpdate.Interval = 10;
             this.tmrUpdate.Tick += new System.EventHandler(this.tmrUpdate_Tick);
+            // 
+            // btnFFwd
+            // 
+            this.btnFFwd.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.btnFFwd.Enabled = false;
+            this.btnFFwd.Location = new System.Drawing.Point(202, 86);
+            this.btnFFwd.Name = "btnFFwd";
+            this.btnFFwd.Size = new System.Drawing.Size(26, 20);
+            this.btnFFwd.TabIndex = 11;
+            this.btnFFwd.Text = ">";
+            this.btnFFwd.UseVisualStyleBackColor = true;
+            this.btnFFwd.Click += new System.EventHandler(this.btnFFwd_Click);
+            // 
+            // btnLoopRW
+            // 
+            this.btnLoopRW.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.btnLoopRW.Enabled = false;
+            this.btnLoopRW.Location = new System.Drawing.Point(99, 86);
+            this.btnLoopRW.Name = "btnLoopRW";
+            this.btnLoopRW.Size = new System.Drawing.Size(26, 20);
+            this.btnLoopRW.TabIndex = 12;
+            this.btnLoopRW.Text = "<";
+            this.btnLoopRW.UseVisualStyleBackColor = true;
+            this.btnLoopRW.Click += new System.EventHandler(this.btnLoopRW_Click);
+            // 
+            // btnSeekEnd
+            // 
+            this.btnSeekEnd.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.btnSeekEnd.Location = new System.Drawing.Point(229, 86);
+            this.btnSeekEnd.Name = "btnSeekEnd";
+            this.btnSeekEnd.Size = new System.Drawing.Size(26, 20);
+            this.btnSeekEnd.TabIndex = 13;
+            this.btnSeekEnd.Text = ">|";
+            this.btnSeekEnd.UseVisualStyleBackColor = true;
+            this.btnSeekEnd.Click += new System.EventHandler(this.btnSeekEnd_Click);
             // 
             // BrstmConverterDialog
             // 
@@ -727,7 +797,8 @@ namespace System.Windows.Forms
         private void btnOkay_Click(object sender, EventArgs e)
         {
             Stop();
-            _audioData = RSTMConverter.Encode(_sourceStream);
+            using(ProgressWindow progress = new ProgressWindow(this, "Brstm Converter", "Encoding, please wait...", false))
+            _audioData = RSTMConverter.Encode(_sourceStream, progress);
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -740,7 +811,7 @@ namespace System.Windows.Forms
 
         private void chkLoopEnable_CheckedChanged(object sender, EventArgs e)
         {
-            pnlLoop.Visible = grpLoop.Enabled = chkLoop.Enabled = chkLoopEnable.Checked;
+            pnlLoop.Visible = grpLoop.Enabled = chkLoop.Enabled = btnFFwd.Enabled = btnLoopRW.Enabled = chkLoopEnable.Checked;
             if (!chkLoopEnable.Checked)
                 chkLoop.Checked = false;
 
@@ -797,9 +868,12 @@ namespace System.Windows.Forms
                 _sourceStream.LoopEndSample = (int)numLoopEnd.Value;
         }
 
-        private void btnBrowse_Click(object sender, EventArgs e)
-        {
-            LoadAudio();
-        }
+        private void btnBrowse_Click(object sender, EventArgs e) { LoadAudio(); }
+        private void btnStartSet_Click(object sender, EventArgs e) { numLoopStart.Value = customTrackBar1.Value; }
+        private void btnEndSet_Click(object sender, EventArgs e) { numLoopEnd.Value = customTrackBar1.Value; }
+        private void btnLoopRW_Click(object sender, EventArgs e) { Seek((int)numLoopStart.Value); }
+        private void btnFFwd_Click(object sender, EventArgs e) { Seek((int)numLoopEnd.Value); }
+        private void btnSeekEnd_Click(object sender, EventArgs e) { Seek(customTrackBar1.Maximum); }
+
     }
 }

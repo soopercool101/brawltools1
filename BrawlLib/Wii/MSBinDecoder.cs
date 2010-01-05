@@ -6,6 +6,9 @@ namespace BrawlLib.Wii
     {
         internal static string DecodeString(byte* sPtr, int len)
         {
+            if (len == 0)
+                return "";
+
             byte* buffer = stackalloc byte[1024];
 
             byte* dPtr = buffer;

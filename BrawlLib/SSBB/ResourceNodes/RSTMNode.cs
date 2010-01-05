@@ -90,7 +90,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                 base.Replace(fileName);
 
             if (stream != null)
-                try { ReplaceRaw(RSTMConverter.Encode(stream)); }
+                try { ReplaceRaw(RSTMConverter.Encode(stream, null)); }
                 finally { stream.Dispose(); }
         }
 

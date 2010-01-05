@@ -14,24 +14,24 @@ namespace BrawlLib.SSBB.ResourceNodes
             RSARNode parent;
 
             //Find bank entry in rsar
-            if ((_name == null) && ((parent = RSARNode) != null))
-            {
-                RSARHeader* rsar = parent.Header;
-                RuintList* list = rsar->INFOBlock->Banks;
-                VoidPtr offset = &rsar->INFOBlock->_collection;
-                SYMBHeader* symb = rsar->SYMBBlock;
+            //if ((_name == null) && ((parent = RSARNode) != null))
+            //{
+            //    RSARHeader* rsar = parent.Header;
+            //    RuintList* list = rsar->INFOBlock->Banks;
+            //    VoidPtr offset = &rsar->INFOBlock->_collection;
+            //    SYMBHeader* symb = rsar->SYMBBlock;
 
-                int count = list->_numEntries;
-                for (int i = 0; i < count; i++)
-                {
-                    INFOBankEntry* bank = (INFOBankEntry*)list->Get(offset, i);
-                    if (bank->_fileId == _fileIndex)
-                    {
-                        _name = symb->GetStringEntry(bank->_stringId);
-                        break;
-                    }
-                }
-            }
+            //    int count = list->_numEntries;
+            //    for (int i = 0; i < count; i++)
+            //    {
+            //        INFOBankEntry* bank = (INFOBankEntry*)list->Get(offset, i);
+            //        if (bank->_fileId == _fileIndex)
+            //        {
+            //            _name = symb->GetStringEntry(bank->_stringId);
+            //            break;
+            //        }
+            //    }
+            //}
             
             base.OnInitialize();
 

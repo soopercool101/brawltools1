@@ -41,11 +41,15 @@ namespace BrawlLib.Wii.Textures
             int offset = 0;
             while (mipLevel-- > 1)
             {
-                offset += ((width.Align(BlockWidth) * height.Align(BlockHeight)) * BitsPerPixel) / 8;
-                width = Math.Max(width / 2, 1);
-                height = Math.Max(height / 2, 1);
+                offset += ((width.Align(BlockWidth) * height.Align(BlockHeight)) * BitsPerPixel) >> 3;
+                width = Math.Max(width >> 1, 1);
+                height = Math.Max(height >> 1, 1);
             }
             return offset;
+        }
+        public int GetFileSize(int width, int height, int mipLevels)
+        {
+            return GetMipOffset(width, height, mipLevels + 1) + 0x40;
         }
 
         //public virtual void GeneratePreviewIndexed(Bitmap src, Bitmap dst, int numColors, WiiPaletteFormat format)
@@ -66,67 +70,110 @@ namespace BrawlLib.Wii.Textures
 
         public virtual FileMap EncodeTextureIndexed(Bitmap src, int mipLevels, int numColors, WiiPaletteFormat format, QuantizationAlgorithm algorithm, out FileMap paletteFile)
         {
-            ColorPalette pal = src.GeneratePalette(algorithm, numColors);
-            pal.Clamp(format);
-            return EncodeTextureIndexed(src, mipLevels, pal, format, out paletteFile);
+            using (Bitmap indexed = src.Quantize(algorithm, numColors, RawFormat, format, null))
+            {
+                return EncodeTextureIndexed(indexed, mipLevels, format, out paletteFile);
+            }
+            //ColorPalette pal = src.GeneratePalette(algorithm, numColors);
+            //pal.Clamp(format);
+            //return EncodeTextureIndexed(src, mipLevels, pal, format, out paletteFile);
         }
-        public virtual FileMap EncodeTextureIndexed(Bitmap src, int mipLevels, ColorPalette palette, WiiPaletteFormat format, out FileMap paletteFile)
+        //public virtual FileMap EncodeTextureIndexed(Bitmap src, int mipLevels, ColorPalette palette, WiiPaletteFormat format, out FileMap paletteFile)
+        //{
+        //    _workingPalette = palette;
+        //    FileMap map = EncodeTexture(src, mipLevels);
+        //    paletteFile = EncodePalette(palette, format);
+        //    _workingPalette = null;
+        //    return map;
+        //}
+        public virtual FileMap EncodeTextureIndexed(Bitmap src, int mipLevels, WiiPaletteFormat format, out FileMap paletteFile)
         {
-            _workingPalette = palette;
-            FileMap map = EncodeTexture(src, mipLevels);
-            paletteFile = EncodePalette(palette, format);
-            _workingPalette = null;
-            return map;
+            if (!src.IsIndexed())
+                throw new ArgumentException("Source image must be indexed.");
+
+            FileMap texMap = EncodeTexture(src, mipLevels);
+            paletteFile = EncodePalette(src.Palette, format);
+            return texMap;
+
+            //int w = src.Width, h = src.Height;
+            //int bw = BlockWidth, bh = BlockHeight;
+            //int aw = w.Align(bw), ah = h.Align(bh);
+
+            //paletteFile = null;
+            //FileMap texFile = FileMap.FromTempFile(GetFileSize(w, h, mipLevels));
+            //try
+            //{
+            //    //Build TEX header
+            //    TEX0* header = (TEX0*)texFile.Address;
+            //    *header = new TEX0(w, h, RawFormat, mipLevels);
+
+            //    int sStep = bw * Image.GetPixelFormatSize(src.PixelFormat) / 8;
+            //    int dStep = bw * bh * BitsPerPixel / 8;
+            //    VoidPtr baseAddr = header->PixelData;
+            //    using (DIB dib = DIB.FromBitmap(src, bw, bh, src.PixelFormat))
+            //    {
+            //        for (int i = 1; i <= mipLevels; i++)
+            //        {
+            //            int mw = w, mh = h;
+            //            VoidPtr dAddr = baseAddr;
+            //            //int mw = dib.Width, mh = dib.Height, aw = mw.Align(BlockWidth);
+            //            //VoidPtr dstAddr = header->PixelData;
+            //            if (i != 1)
+            //            {
+            //                dAddr += GetMipOffset(ref mw, ref mh, i);
+            //                using (Bitmap mip = src.GenerateMip(i))
+            //                {
+            //                    dib.ReadBitmap(mip, mw, mh);
+            //                }
+            //            }
+
+            //            mw = mw.Align(bw);
+            //            mh = mh.Align(bh);
+
+            //            int bStride = mw * BitsPerPixel / 8;
+            //            for (int y = 0; y < mh; y += bh)
+            //            {
+            //                VoidPtr sPtr = (int)dib.Scan0 + (y * dib.Stride);
+            //                VoidPtr dPtr = dAddr + (y * bStride);
+            //                for (int x = 0; x < mw; x += bw, dPtr += dStep, sPtr += sStep)
+            //                    EncodeBlock((ARGBPixel*)sPtr, dPtr, aw);
+            //            }
+            //        }
+            //    }
+
+            //    paletteFile = EncodePalette(src.Palette, format);
+            //    return texFile;
+            //}
+            //catch (Exception x)
+            //{
+            //    texFile.Dispose();
+            //    return null;
+            //}
         }
+
         public virtual FileMap EncodeTexture(Bitmap src, int mipLevels)
         {
-            //paletteFile = null;
             int w = src.Width, h = src.Height;
-            int aw = w.Align(BlockWidth), ah = h.Align(BlockHeight);
             int bw = BlockWidth, bh = BlockHeight;
+            //int aw = w.Align(bw), ah = h.Align(bh);
 
-            int fileSize = GetMipOffset(w, h, mipLevels + 1) + 0x40;
-            //paletteFile = null;
-            FileMap fileView = FileMap.FromTempFile(fileSize);
+            //int fileSize = GetMipOffset(w, h, mipLevels + 1) + 0x40;
+            FileMap fileView = FileMap.FromTempFile(GetFileSize(w, h, mipLevels));
+            //FileMap fileView = FileMap.FromTempFile(fileSize);
             try
             {
                 //Build TEX header
                 TEX0* header = (TEX0*)fileView.Address;
                 *header = new TEX0(w, h, RawFormat, mipLevels);
 
-                int sStep = bw * Image.GetPixelFormatSize(PixelFormat.Format32bppArgb) / 8;
+                int sStep = bw * Image.GetPixelFormatSize(src.PixelFormat) / 8;
                 int dStep = bw * bh * BitsPerPixel / 8;
                 VoidPtr baseAddr = header->PixelData;
-                using (DIB dib = DIB.FromBitmap(src, bw, bh, PixelFormat.Format32bppArgb))
-                {
+
+                using (DIB dib = DIB.FromBitmap(src, bw, bh, src.PixelFormat))
                     for (int i = 1; i <= mipLevels; i++)
-                    {
                         EncodeLevel(header, dib, src, dStep, sStep, i);
 
-                        //int mw = w, mh = h;
-                        //VoidPtr dstAddr = baseAddr;
-                        //if (i != 1)
-                        //{
-                        //    dstAddr += GetMipOffset(ref mw, ref mh, i);
-                        //    using (Bitmap mip = src.GenerateMip((int)i))
-                        //    {
-                        //        dib.ReadBitmap(mip, mw, mh);
-                        //    }
-                        //}
-
-                        //mw = mw.Align(bw);
-                        //mh = mh.Align(bh);
-
-                        //int bStride = mw * BitsPerPixel / 8;
-                        //for (int y = 0; y < mh; y += bh)
-                        //{
-                        //    VoidPtr sPtr = (int)dib.Scan0 + (y * dib.Stride);
-                        //    VoidPtr dPtr = dstAddr + (y * bStride);
-                        //    for (int x = 0; x < mw; x += bw, dPtr += dStep, sPtr += sStep)
-                        //        EncodeBlock((ARGBPixel*)sPtr, dPtr, aw, i);
-                        //}
-                    }
-                }
                 return fileView;
             }
             catch (Exception x)
@@ -144,9 +191,7 @@ namespace BrawlLib.Wii.Textures
             {
                 dstAddr += GetMipOffset(ref mw, ref mh, level);
                 using (Bitmap mip = src.GenerateMip(level))
-                {
                     dib.ReadBitmap(mip, mw, mh);
-                }
             }
 
             mw = mw.Align(BlockWidth);

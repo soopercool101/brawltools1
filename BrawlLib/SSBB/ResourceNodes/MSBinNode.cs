@@ -25,7 +25,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             for (index = 1, last = offsets[0]; last != length; index++)
             {
                 current = offsets[index];
-                if ((current <= last) || (current > length))
+                if ((current < last) || (current > length))
                     break;
 
                 _strings.Add(MSBinDecoder.DecodeString(floor + last, current - last));
@@ -71,7 +71,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             for (index = 0, last = 0; last != length; index++)
             {
                 current = offsets[index];
-                if ((current <= last) || (current > length))
+                if ((current < last) || (current > length))
                     return null;
 
                 last = current;

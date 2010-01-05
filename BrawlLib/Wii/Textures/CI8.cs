@@ -35,10 +35,11 @@ namespace BrawlLib.Wii.Textures
 
         protected override void EncodeBlock(ARGBPixel* sPtr, VoidPtr blockAddr, int width)
         {
+            byte* stPtr = (byte*)sPtr;
             byte* dPtr = (byte*)blockAddr;
-            for (int y = 0; y < BlockHeight; y++, sPtr += width)
+            for (int y = 0; y < BlockHeight; y++, stPtr += width)
                 for (int x = 0; x < BlockWidth; )
-                    *dPtr++ = (byte)_workingPalette.FindMatch(sPtr[x++]);
+                    *dPtr++ = stPtr[x++];
         }
     }
 }

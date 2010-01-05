@@ -15,29 +15,35 @@ namespace BrawlLib.SSBBTypes
         public bint _numEntries2; //Has string entry
         int _pad1, _pad2, _pad3;
 
+        //From here begins file data. All offsets are relative to this location (0x20).
+
+
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         //public FDefLookupHeader* LookupHeader { get { return (FDefLookupHeader*)(Address + _lookupOffset + 0x20); } }
 
+        public bint* LookupEntries { get { return (bint*)(Address + _lookupOffset + 0x20); } }
         public FDefStringEntry* StringEntries { get { return (FDefStringEntry*)(Address + _lookupOffset + 0x20) + (_numLookupEntries * 4); } }
         public VoidPtr StringTable { get { return (Address + _lookupOffset + 0x20) + (_numLookupEntries * 4) + (_numEntries1 * 8) + (_numEntries2 * 8); } }
         public FDefAttributes* Attributes { get { return (FDefAttributes*)(Address + 0x20); } }
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
-    //unsafe struct FDefLookupHeader
-    //{
-    //    bint _offset1;
-    //    bint _offset2;
-    //    bint _offset3;
-    //    bint _offset4;
-    //    bint _offset5;
-    //    bint _offset6;
-    //    bint _offset7;
-    //    bint _offset8;
 
-    //    private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-    //    public bint* Data { get { return (bint*)(Address + 0x20); } }
-    //}
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    unsafe struct FDefEntry1
+    {
+        public bint _part1Offset;
+        public bint _unk1; //0
+        public bint _unk2; //0
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    unsafe struct FDefEntry1Part1
+    {
+        public bint _unk1; //0
+        public bint _unk2; //6
+        public bint _unk3; //0x18000100
+    }
+
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct FDefStringEntry
