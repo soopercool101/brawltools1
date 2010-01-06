@@ -1,5 +1,5 @@
 
-BrawlBox Data Viewer - Version 0.61
+BrawlBox Data Viewer - Version 0.62
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -17,6 +17,14 @@ http://www.smashboards.com/showthread.php?t=238861
  ====================================
 |************ Change Log ************|
  ====================================
+
+- v0.62 - (01/05/2010)
+	. Added support for CLR0 nodes.
+	. Added color dialog for CLR0 and PLT0 editing.
+	. New Median Cut quantizer using method from GIMP library.
+	. Added features to BRSTM converter dialog.
+	. Fixed CHR bug that was causing long animations to cut short.
+	. Fixed bug in MSBin parser/decoder dealing with empty strings.
 
 - v0.61 - (12/24/2009)
 	. Added audio playback controls.

@@ -21,11 +21,11 @@ namespace System.Windows.Forms
             this.btnOkay = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.pnlColors = new System.Windows.Forms.Panel();
+            this.pnlNew = new System.Windows.Forms.BufferedPanel();
+            this.pnlOld = new System.Windows.Forms.BufferedPanel();
             this.lblOld = new System.Windows.Forms.Label();
             this.lblNew = new System.Windows.Forms.Label();
             this.chkAlpha = new System.Windows.Forms.CheckBox();
-            this.pnlNew = new System.Windows.Forms.BufferedPanel();
-            this.pnlOld = new System.Windows.Forms.BufferedPanel();
             this.goodColorControl1 = new System.Windows.Forms.GoodColorControl();
             this.pnlColors.SuspendLayout();
             this.SuspendLayout();
@@ -63,6 +63,24 @@ namespace System.Windows.Forms
             this.pnlColors.Size = new System.Drawing.Size(180, 37);
             this.pnlColors.TabIndex = 3;
             // 
+            // pnlNew
+            // 
+            this.pnlNew.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlNew.Location = new System.Drawing.Point(90, 0);
+            this.pnlNew.Name = "pnlNew";
+            this.pnlNew.Size = new System.Drawing.Size(90, 37);
+            this.pnlNew.TabIndex = 6;
+            this.pnlNew.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlNew_Paint);
+            // 
+            // pnlOld
+            // 
+            this.pnlOld.Dock = System.Windows.Forms.DockStyle.Left;
+            this.pnlOld.Location = new System.Drawing.Point(0, 0);
+            this.pnlOld.Name = "pnlOld";
+            this.pnlOld.Size = new System.Drawing.Size(90, 37);
+            this.pnlOld.TabIndex = 5;
+            this.pnlOld.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlOld_Paint);
+            // 
             // lblOld
             // 
             this.lblOld.BackColor = System.Drawing.Color.White;
@@ -97,24 +115,6 @@ namespace System.Windows.Forms
             this.chkAlpha.UseVisualStyleBackColor = true;
             this.chkAlpha.CheckedChanged += new System.EventHandler(this.chkAlpha_CheckedChanged);
             // 
-            // pnlNew
-            // 
-            this.pnlNew.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlNew.Location = new System.Drawing.Point(90, 0);
-            this.pnlNew.Name = "pnlNew";
-            this.pnlNew.Size = new System.Drawing.Size(90, 37);
-            this.pnlNew.TabIndex = 6;
-            this.pnlNew.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlNew_Paint);
-            // 
-            // pnlOld
-            // 
-            this.pnlOld.Dock = System.Windows.Forms.DockStyle.Left;
-            this.pnlOld.Location = new System.Drawing.Point(0, 0);
-            this.pnlOld.Name = "pnlOld";
-            this.pnlOld.Size = new System.Drawing.Size(90, 37);
-            this.pnlOld.TabIndex = 5;
-            this.pnlOld.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlOld_Paint);
-            // 
             // goodColorControl1
             // 
             this.goodColorControl1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
@@ -140,6 +140,7 @@ namespace System.Windows.Forms
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "GoodColorDialog";
+            this.ShowInTaskbar = false;
             this.Text = "Color Selector";
             this.pnlColors.ResumeLayout(false);
             this.ResumeLayout(false);

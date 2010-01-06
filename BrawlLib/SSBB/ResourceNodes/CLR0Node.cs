@@ -16,7 +16,17 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal int _numFrames, _unk1, _unk2;
 
         [Category("CLR0")]
-        public int FrameCount { get { return _numFrames; } }
+        public uint FrameCount
+        {
+            get { return (uint)_numFrames; }
+            set
+            {
+                _numFrames = (int)value;
+                foreach (CLR0EntryNode n in Children)
+                    n.NumEntries = _numFrames + 1;
+                SignalPropertyChange();
+            }
+        }
         [Category("CLR0")]
         public int Unknown1 { get { return _unk1; } set { _unk1 = value; SignalPropertyChange(); } }
         [Category("CLR0")]
@@ -58,7 +68,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             int count = Children.Count;
             int stride = (_numFrames + 1) * 4 * count;
 
-            CLR0Entry* pEntry = (CLR0Entry*)( address + 0x3C + (count * 0x10));
+            CLR0Entry* pEntry = (CLR0Entry*)(address + 0x3C + (count * 0x10));
             ABGRPixel* pData = (ABGRPixel*)(((int)pEntry + count * 0x10));
 
             CLR0* header = (CLR0*)address;
@@ -71,7 +81,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             foreach (CLR0EntryNode n in Children)
             {
                 entry->_dataOffset = (int)pEntry - (int)group;
-                *pEntry = new CLR0Entry(n._flags, (ABGRPixel)n._baseColor, (int)pData - ((int)pEntry + 12));
+                *pEntry = new CLR0Entry(n._flags, (ABGRPixel)n._colorMask, (int)pData - ((int)pEntry + 12));
 
                 entry++;
                 pEntry++;
@@ -125,17 +135,18 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     }
 
-    public unsafe class CLR0EntryNode : ResourceNode
+    public unsafe class CLR0EntryNode : ResourceNode, IColorSource
     {
         internal CLR0Entry* Header { get { return (CLR0Entry*)WorkingUncompressed.Address; } }
+        public override ResourceType ResourceType { get { return ResourceType.CLR0Entry; } }
 
         internal int _flags;
         [Category("CLR0 Entry")]
         public int Flags { get { return _flags; } set { _flags = value; SignalPropertyChange(); } }
 
-        internal ARGBPixel _baseColor;
+        internal ARGBPixel _colorMask;
         [Browsable(false)]
-        public ARGBPixel BaseColor { get { return _baseColor; } set { _baseColor = value; SignalPropertyChange(); } }
+        public ARGBPixel ColorMask { get { return _colorMask; } set { _colorMask = value; SignalPropertyChange(); } }
 
         internal List<ARGBPixel> _colors = new List<ARGBPixel>();
         [Browsable(false)]
@@ -149,8 +160,11 @@ namespace BrawlLib.SSBB.ResourceNodes
             set
             {
                 if (value > _numEntries)
+                {
+                    ARGBPixel p = _numEntries > 0 ? _colors[_numEntries - 1] : new ARGBPixel(255, 0, 0, 0);
                     for (int i = value - _numEntries; i-- > 0; )
-                        _colors.Add(_baseColor);
+                        _colors.Add(p);
+                }
                 else if (value < _colors.Count)
                     _colors.RemoveRange(value, _colors.Count - value);
 
@@ -161,7 +175,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected override bool OnInitialize()
         {
             _flags = Header->_flags;
-            _baseColor = (ARGBPixel)Header->_baseColor;
+            _colorMask = (ARGBPixel)Header->_colorMask;
 
             _numEntries = ((CLR0Node)_parent)._numFrames + 1;
             _colors.Clear();
@@ -181,5 +195,24 @@ namespace BrawlLib.SSBB.ResourceNodes
             CLR0Entry* header = (CLR0Entry*)dataAddress;
             header->ResourceStringAddress = stringTable[Name] + 4;
         }
+
+        #region IColorSource Members
+
+        [Browsable(false)]
+        public bool HasPrimary { get { return true; } }
+        [Browsable(false)]
+        public ARGBPixel PrimaryColor
+        {
+            get { return _colorMask; }
+            set { _colorMask = value; SignalPropertyChange(); }
+        }
+        [Browsable(false)]
+        public string PrimaryColorName { get { return "Color Mask"; } }
+        [Browsable(false)]
+        public int ColorCount { get { return _numEntries; } }
+        public ARGBPixel GetColor(int index) { return Colors[index]; }
+        public void SetColor(int index, ARGBPixel color) { Colors[index] = color; SignalPropertyChange(); }
+
+        #endregion
     }
 }

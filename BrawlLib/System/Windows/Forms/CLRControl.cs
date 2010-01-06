@@ -10,49 +10,50 @@ namespace System.Windows.Forms
     {
         #region Designer
 
-        private Label label1;
+        private Label lblPrimary;
         private Label lblBase;
         private Label lblColor;
         private ContextMenuStrip ctxMenu;
         private IContainer components;
         private ToolStripMenuItem copyToolStripMenuItem;
         private ToolStripMenuItem pasteToolStripMenuItem;
+        private Panel pnlPrimary;
         private ListBox lstColors;
     
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblPrimary = new System.Windows.Forms.Label();
             this.lstColors = new System.Windows.Forms.ListBox();
             this.ctxMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lblBase = new System.Windows.Forms.Label();
             this.lblColor = new System.Windows.Forms.Label();
+            this.pnlPrimary = new System.Windows.Forms.Panel();
             this.ctxMenu.SuspendLayout();
+            this.pnlPrimary.SuspendLayout();
             this.SuspendLayout();
             // 
-            // label1
+            // lblPrimary
             // 
-            this.label1.Location = new System.Drawing.Point(5, 1);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(70, 20);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Base Color:";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblPrimary.Location = new System.Drawing.Point(0, 2);
+            this.lblPrimary.Name = "lblPrimary";
+            this.lblPrimary.Size = new System.Drawing.Size(75, 20);
+            this.lblPrimary.TabIndex = 0;
+            this.lblPrimary.Text = "Base Color:";
+            this.lblPrimary.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lstColors
             // 
-            this.lstColors.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.lstColors.ContextMenuStrip = this.ctxMenu;
+            this.lstColors.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lstColors.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.lstColors.FormattingEnabled = true;
             this.lstColors.IntegralHeight = false;
-            this.lstColors.Location = new System.Drawing.Point(0, 23);
+            this.lstColors.Location = new System.Drawing.Point(0, 24);
             this.lstColors.Name = "lstColors";
-            this.lstColors.Size = new System.Drawing.Size(334, 219);
+            this.lstColors.Size = new System.Drawing.Size(334, 218);
             this.lstColors.TabIndex = 1;
             this.lstColors.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.lstColors_DrawItem);
             this.lstColors.DoubleClick += new System.EventHandler(this.lstColors_DoubleClick);
@@ -86,7 +87,7 @@ namespace System.Windows.Forms
             // 
             this.lblBase.BackColor = System.Drawing.Color.Transparent;
             this.lblBase.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBase.Location = new System.Drawing.Point(88, 1);
+            this.lblBase.Location = new System.Drawing.Point(88, 2);
             this.lblBase.Name = "lblBase";
             this.lblBase.Size = new System.Drawing.Size(112, 20);
             this.lblBase.TabIndex = 2;
@@ -95,55 +96,71 @@ namespace System.Windows.Forms
             // lblColor
             // 
             this.lblColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblColor.Location = new System.Drawing.Point(202, 1);
+            this.lblColor.Location = new System.Drawing.Point(202, 2);
             this.lblColor.Name = "lblColor";
             this.lblColor.Size = new System.Drawing.Size(41, 20);
             this.lblColor.TabIndex = 3;
             this.lblColor.Click += new System.EventHandler(this.lblBase_Click);
             // 
+            // pnlPrimary
+            // 
+            this.pnlPrimary.Controls.Add(this.lblPrimary);
+            this.pnlPrimary.Controls.Add(this.lblBase);
+            this.pnlPrimary.Controls.Add(this.lblColor);
+            this.pnlPrimary.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlPrimary.Location = new System.Drawing.Point(0, 0);
+            this.pnlPrimary.Name = "pnlPrimary";
+            this.pnlPrimary.Size = new System.Drawing.Size(334, 24);
+            this.pnlPrimary.TabIndex = 4;
+            // 
             // CLRControl
             // 
-            this.Controls.Add(this.lblColor);
-            this.Controls.Add(this.lblBase);
             this.Controls.Add(this.lstColors);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.pnlPrimary);
             this.DoubleBuffered = true;
             this.Name = "CLRControl";
             this.Size = new System.Drawing.Size(334, 242);
             this.ctxMenu.ResumeLayout(false);
+            this.pnlPrimary.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private CLR0EntryNode _targetNode;
+        private ARGBPixel _primaryColor;
+        private ARGBPixel _copyColor;
+
+        private IColorSource _colorSource;
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public CLR0EntryNode TargetNode
+        public IColorSource ColorSource
         {
-            get { return _targetNode; }
-            set
-            {
-                _targetNode = value;
-                NodeChanged();
-            }
+            get { return _colorSource; }
+            set { _colorSource = value; SourceChanged(); }
         }
+
 
         private GoodColorDialog dlgColor = new GoodColorDialog();
 
         public CLRControl() { InitializeComponent(); }
 
-        private void NodeChanged()
+        private void SourceChanged()
         {
             lstColors.BeginUpdate();
             lstColors.Items.Clear();
 
-            if (_targetNode != null)
+            if (_colorSource != null)
             {
-                foreach (ARGBPixel p in _targetNode._colors)
-                    lstColors.Items.Add(p);
+                int count = _colorSource.ColorCount;
+                for (int i = 0; i < count; i++)
+                    lstColors.Items.Add(_colorSource.GetColor(i));
 
-                UpdateBase();
+                if (pnlPrimary.Visible = _colorSource.HasPrimary)
+                {
+                    _primaryColor = _colorSource.PrimaryColor;
+                    lblPrimary.Text = _colorSource.PrimaryColorName;
+                    UpdateBase();
+                }
             }
 
             lstColors.EndUpdate();
@@ -151,7 +168,7 @@ namespace System.Windows.Forms
 
         private void UpdateBase()
         {
-            RGBPixel p = (RGBPixel)_targetNode._baseColor;
+            RGBPixel p = (RGBPixel)_primaryColor;
             lblBase.Text = p.ToString();
             lblColor.BackColor = (Color)p;
         }
@@ -160,20 +177,16 @@ namespace System.Windows.Forms
         {
             int index = lstColors.SelectedIndex;
 
-            if ((_targetNode == null) || (index < 0))
+            if ((_colorSource == null) || (index < 0))
                 return;
 
-            ARGBPixel p = (ARGBPixel)lstColors.Items[index];
-            dlgColor.Color = (Color)p;
-            dlgColor.EditAlpha = true;
+            dlgColor.Color = (Color)(ARGBPixel)lstColors.Items[index];
             if (dlgColor.ShowDialog(this) == DialogResult.OK)
             {
-                p = (ARGBPixel)dlgColor.Color;
+                ARGBPixel p = (ARGBPixel)dlgColor.Color;
                 lstColors.Items[index] = p;
-                _targetNode._colors[index] = p;
-                _targetNode.SignalPropertyChange();
+                _colorSource.SetColor(index, p);
             }
-
         }
 
         private static Font _renderFont = new Font(FontFamily.GenericMonospace, 9.0f);
@@ -206,25 +219,22 @@ namespace System.Windows.Forms
 
         private void lblBase_Click(object sender, EventArgs e)
         {
-            if (_targetNode == null)
+            if (_colorSource == null)
                 return;
 
-            dlgColor.EditAlpha = false;
-            dlgColor.Color = (Color)_targetNode._baseColor;
+            dlgColor.Color = (Color)_primaryColor;
             if (dlgColor.ShowDialog(this) == DialogResult.OK)
             {
-                _targetNode.BaseColor = (ARGBPixel)dlgColor.Color;
+                _primaryColor = (ARGBPixel)dlgColor.Color;
+                _colorSource.PrimaryColor = _primaryColor;
                 UpdateBase();
             }
         }
 
-        ARGBPixel _copyColor;
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (lstColors.SelectedIndex >= 0)
-            {
                 _copyColor = (ARGBPixel)lstColors.SelectedItem;
-            }
         }
 
         private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -233,9 +243,8 @@ namespace System.Windows.Forms
             if (index >= 0)
             {
                 lstColors.Items[index] = _copyColor;
-                _targetNode._colors[index] = _copyColor;
-                _targetNode.SignalPropertyChange();
-                lstColors.Invalidate();
+                _colorSource.SetColor(index, _copyColor);
+                //lstColors.Invalidate();
             }
         }
 

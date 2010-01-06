@@ -98,7 +98,7 @@ namespace BrawlBox
             animEditControl.TargetSequence = null;
             msBinEditor1.CurrentNode = null;
             soundPackControl1.TargetNode = null;
-            clrControl.TargetNode = null;
+            clrControl.ColorSource = null;
 
             Control newControl = null;
 
@@ -133,9 +133,9 @@ namespace BrawlBox
                     audioPlaybackPanel1.TargetSource = node as IAudioSource;
                     newControl = audioPlaybackPanel1;
                 }
-                else if (node is CLR0EntryNode)
+                else if (node is IColorSource)
                 {
-                    clrControl.TargetNode = node as CLR0EntryNode;
+                    clrControl.ColorSource = node as IColorSource;
                     newControl = clrControl;
                 }
 

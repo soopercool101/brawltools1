@@ -263,42 +263,14 @@ namespace BrawlLib.Wii.Textures
 
         public static Bitmap Decode(TEX0* texture, int mipLevel) { return Get(texture->PixelFormat).DecodeTexture(texture, mipLevel); }
         public static Bitmap DecodeIndexed(TEX0* texture, PLT0* palette, int mipLevel) { return Get(texture->PixelFormat).DecodeTextureIndexed(texture, palette, mipLevel); }
+        public static Bitmap DecodeIndexed(TEX0* texture, ColorPalette palette, int mipLevel) { return Get(texture->PixelFormat).DecodeTextureIndexed(texture, palette, mipLevel); }
 
         public static FileMap EncodePalette(ColorPalette pal, WiiPaletteFormat format)
         {
-            int count = pal.Entries.Length;
-            int viewLen = (pal.Entries.Length * 2) + 0x40;
-            FileMap fileView = FileMap.FromTempFile(viewLen);
+            FileMap fileView = FileMap.FromTempFile((pal.Entries.Length * 2) + 0x40);
             try
             {
-                PLT0* header = (PLT0*)fileView.Address;
-                *header = new PLT0(count, format);
-
-                switch (format)
-                {
-                    case WiiPaletteFormat.IA8:
-                        {
-                            IA8Pixel* dPtr = (IA8Pixel*)header->PaletteData;
-                            for (int i = 0; i < count; i++)
-                                dPtr[i] = (IA8Pixel)pal.Entries[i];
-                            break;
-                        }
-                    case WiiPaletteFormat.RGB565:
-                        {
-                            wRGB565Pixel* dPtr = (wRGB565Pixel*)header->PaletteData;
-                            for (int i = 0; i < count; i++)
-                                dPtr[i] = (wRGB565Pixel)pal.Entries[i];
-                            break;
-                        }
-                    case WiiPaletteFormat.RGB5A3:
-                        {
-                            wRGB5A3Pixel* dPtr = (wRGB5A3Pixel*)header->PaletteData;
-                            for (int i = 0; i < count; i++)
-                                dPtr[i] = (wRGB5A3Pixel)pal.Entries[i];
-                            break;
-                        }
-                }
-
+                EncodePalette(fileView.Address, pal, format);
                 return fileView;
             }
             catch (Exception x)
@@ -308,6 +280,38 @@ namespace BrawlLib.Wii.Textures
                 //MessageBox.Show(x.ToString());
                 //fileView.Dispose();
                 //return null;
+            }
+        }
+        public static void EncodePalette(VoidPtr destAddr, ColorPalette pal, WiiPaletteFormat format)
+        {
+            int count = pal.Entries.Length;
+
+            PLT0* header = (PLT0*)destAddr;
+            *header = new PLT0(count, format);
+
+            switch (format)
+            {
+                case WiiPaletteFormat.IA8:
+                    {
+                        IA8Pixel* dPtr = (IA8Pixel*)header->PaletteData;
+                        for (int i = 0; i < count; i++)
+                            dPtr[i] = (IA8Pixel)pal.Entries[i];
+                        break;
+                    }
+                case WiiPaletteFormat.RGB565:
+                    {
+                        wRGB565Pixel* dPtr = (wRGB565Pixel*)header->PaletteData;
+                        for (int i = 0; i < count; i++)
+                            dPtr[i] = (wRGB565Pixel)pal.Entries[i];
+                        break;
+                    }
+                case WiiPaletteFormat.RGB5A3:
+                    {
+                        wRGB5A3Pixel* dPtr = (wRGB5A3Pixel*)header->PaletteData;
+                        for (int i = 0; i < count; i++)
+                            dPtr[i] = (wRGB5A3Pixel)pal.Entries[i];
+                        break;
+                    }
             }
         }
 

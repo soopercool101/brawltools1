@@ -49,6 +49,7 @@
     <None Include="Modeling\Collada.cs" />
     <Compile Include="Imaging\CIE.cs" />
     <Compile Include="Imaging\DIB.cs" />
+    <Compile Include="Imaging\IColorSource.cs" />
     <Compile Include="Imaging\IImageSource.cs" />
     <Compile Include="Imaging\MedianCut.cs" />
     <Compile Include="Imaging\NVDXT.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0UVNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0VertexNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MSBinNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\ResourceType.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\FILENode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\INFONode.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\RBNKNode.cs" />

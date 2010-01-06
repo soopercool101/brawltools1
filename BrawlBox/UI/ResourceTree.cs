@@ -26,17 +26,19 @@ namespace BrawlBox
                         Resources.Folder,
                         Resources.ARC,
                         Resources.BRES,
+                        Resources.MSG,
                         Resources.TEX0,
                         Resources.PLT0,
                         Resources.MDL0,
+                        Resources.CHR,
+                        Resources.Unknown,
+                        Resources.Unknown,
                         Resources.RSAR,
                         Resources.RSTM,
                         Resources.S,
                         Resources.G,
                         Resources.T,
-                        Resources.B,
-                        Resources.MSG,
-                        Resources.CHR
+                        Resources.B
                     });
                 }
                 return _imgList;

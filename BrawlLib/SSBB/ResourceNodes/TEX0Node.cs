@@ -57,7 +57,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             PLT0Node plt = GetPaletteNode();
             if (plt != null)
-                return TextureConverter.DecodeIndexed(Header, plt.Header, index + 1);
+                return TextureConverter.DecodeIndexed(Header, plt.Palette, index + 1);
             else
                 return TextureConverter.Decode(Header, index + 1);
         }

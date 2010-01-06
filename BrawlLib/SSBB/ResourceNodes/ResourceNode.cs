@@ -56,52 +56,6 @@ namespace BrawlLib.SSBB.ResourceNodes
         public override int GetHashCode() { return base.GetHashCode(); }
     }
 
-    //Lower byte is resource type
-    //Upper byte is entry type/flags
-    public enum ResourceType : int
-    {
-        Unknown = 0x0000,
-        Container = 0x0001,
-
-        ARCEntry = 0x0200,
-
-        ARC = 0x0202,
-        BRES = 0x0203,
-        MSBin = 0x020D,
-
-        BRESEntry = 0x0300,
-        BRESGroup = 0x0301,
-        TEX0 = 0x0304,
-        PLT0 = 0x0305,
-        MDL0 = 0x0306,
-        CLR0 = 0x0307,
-        VIS0 = 0x0308,
-
-        CHR0 = 0x030E,
-        CHR0Entry = 0x0E00,
-
-        RSAR = 0x0007,
-        RSTM = 0x0008,
-
-
-        MDL0Group = 0x0601,
-
-        RSARFolder = 0x0701,
-        RSARFile = 0x0709,
-        RSARGroup = 0x070A,
-        RSARType = 0x070B,
-        RSARBank = 0x070C,
-
-        RWSD = 0x0800,
-        RWSDGroup = 0x0801,
-        //RWSDDataEntry = 0x0800,
-        //RWSDWaveEntry= 0x0800,
-
-        RBNK = 0x0900,
-        RSEQ = 0x0A00,
-
-    }
-
     public abstract class ResourceNode : IDisposable
     {
         //Need to modulate these sources, create a new class.

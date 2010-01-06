@@ -53,14 +53,14 @@ namespace BrawlLib.SSBBTypes
 
         public bint _stringOffset;
         public bint _flags; //1 Block count?
-        public ABGRPixel _baseColor; //Base color?
+        public ABGRPixel _colorMask; //Used as a mask for source color before applying frames
         public bint _dataOffset; //Offset from itself
 
-        public CLR0Entry(int flags, ABGRPixel baseColor, int dataOffset)
+        public CLR0Entry(int flags, ABGRPixel mask, int dataOffset)
         {
             _stringOffset = 0;
             _flags = flags;
-            _baseColor = baseColor;
+            _colorMask = mask;
             _dataOffset = dataOffset;
         }
 

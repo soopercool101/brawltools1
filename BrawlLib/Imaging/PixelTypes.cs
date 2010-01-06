@@ -4,6 +4,7 @@ using System.Drawing;
 
 namespace BrawlLib.Imaging
 {
+    
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct ARGBPixel
     {
