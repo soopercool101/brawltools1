@@ -55,11 +55,17 @@ namespace BrawlLib.SSBB.ResourceNodes
             return node;
         }
 
-        //To do
         protected override int OnCalculateSize(bool force)
         {
             int size = CLR0.Size + 0x18;// +(Children.Count * 0x10);
-            size += Children.Count * ((_numFrames + 1) * 4 + 0x20);
+            foreach (CLR0EntryNode n in Children)
+            {
+                if (n._numEntries == 0)
+                    size += 0x20;
+                else
+                    size += ((_numFrames + 1) * 4) + 0x20;
+            }
+            //size += Children.Count * ((_numFrames + 1) * 4 + 0x20);
             return size;
         }
 
@@ -67,6 +73,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             int count = Children.Count;
             int stride = (_numFrames + 1) * 4 * count;
+            int data;
 
             CLR0Entry* pEntry = (CLR0Entry*)(address + 0x3C + (count * 0x10));
             ABGRPixel* pData = (ABGRPixel*)(((int)pEntry + count * 0x10));
@@ -81,7 +88,13 @@ namespace BrawlLib.SSBB.ResourceNodes
             foreach (CLR0EntryNode n in Children)
             {
                 entry->_dataOffset = (int)pEntry - (int)group;
-                *pEntry = new CLR0Entry(n._flags, (ABGRPixel)n._colorMask, (int)pData - ((int)pEntry + 12));
+
+                if (n._numEntries == 0)
+                    *(ABGRPixel*)&data = (ABGRPixel)n._solidColor;
+                else
+                    data = (int)pData - ((int)pEntry + 12);
+
+                *pEntry = new CLR0Entry(n._flags, (ABGRPixel)n._colorMask, data);
 
                 entry++;
                 pEntry++;
@@ -140,9 +153,9 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal CLR0Entry* Header { get { return (CLR0Entry*)WorkingUncompressed.Address; } }
         public override ResourceType ResourceType { get { return ResourceType.CLR0Entry; } }
 
-        internal int _flags;
-        [Category("CLR0 Entry")]
-        public int Flags { get { return _flags; } set { _flags = value; SignalPropertyChange(); } }
+        internal CLR0EntryFlags _flags;
+        //[Browsable(false)]
+        public CLR0EntryFlags Flags { get { return _flags; } set { _flags = value; SignalPropertyChange(); } }
 
         internal ARGBPixel _colorMask;
         [Browsable(false)]
@@ -150,7 +163,11 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         internal List<ARGBPixel> _colors = new List<ARGBPixel>();
         [Browsable(false)]
-        public List<ARGBPixel> Colors { get { return _colors; } }
+        public List<ARGBPixel> Colors { get { return _colors; } set { _colors = value; SignalPropertyChange(); } }
+
+        internal ARGBPixel _solidColor;
+        [Browsable(false)]
+        public ARGBPixel SolidColor { get { return _solidColor; } set { _solidColor = value; SignalPropertyChange(); } }
 
         internal int _numEntries;
         [Browsable(false)]
@@ -159,6 +176,9 @@ namespace BrawlLib.SSBB.ResourceNodes
             get { return _numEntries; }
             set
             {
+                if (_numEntries == 0)
+                    return;
+
                 if (value > _numEntries)
                 {
                     ARGBPixel p = _numEntries > 0 ? _colors[_numEntries - 1] : new ARGBPixel(255, 0, 0, 0);
@@ -174,20 +194,41 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            _flags = Header->_flags;
+            _flags = Header->Flags;
             _colorMask = (ARGBPixel)Header->_colorMask;
 
-            _numEntries = ((CLR0Node)_parent)._numFrames + 1;
             _colors.Clear();
-
-            ABGRPixel* data = Header->Data;
-            for (int i = 0; i < _numEntries; i++)
-                _colors.Add((ARGBPixel)(*data++));
+            if ((_flags & CLR0EntryFlags.IsSolid) != 0)
+            {
+                _numEntries = 0;
+                _solidColor = (ARGBPixel)Header->SolidColor;
+            }
+            else
+            {
+                _numEntries = ((CLR0Node)_parent)._numFrames + 1;
+                ABGRPixel* data = Header->Data;
+                for (int i = 0; i < _numEntries; i++)
+                    _colors.Add((ARGBPixel)(*data++));
+            }
 
             if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
-            //Get size
+
             return false;
+        }
+
+        public void MakeSolid(ARGBPixel color)
+        {
+            _numEntries = 0;
+            _flags |= CLR0EntryFlags.IsSolid;
+            _solidColor = color;
+            SignalPropertyChange();
+        }
+        public void MakeList()
+        {
+            int entries = ((CLR0Node)_parent)._numFrames + 1;
+            _numEntries = _colors.Count;
+            NumEntries = entries;
         }
 
         protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)
@@ -207,11 +248,18 @@ namespace BrawlLib.SSBB.ResourceNodes
             set { _colorMask = value; SignalPropertyChange(); }
         }
         [Browsable(false)]
-        public string PrimaryColorName { get { return "Color Mask"; } }
+        public string PrimaryColorName { get { return "Mask:"; } }
         [Browsable(false)]
-        public int ColorCount { get { return _numEntries; } }
-        public ARGBPixel GetColor(int index) { return Colors[index]; }
-        public void SetColor(int index, ARGBPixel color) { Colors[index] = color; SignalPropertyChange(); }
+        public int ColorCount { get { return (_numEntries == 0) ? 1 : _numEntries; } }
+        public ARGBPixel GetColor(int index) { return (_numEntries == 0) ? _solidColor : _colors[index]; }
+        public void SetColor(int index, ARGBPixel color) 
+        {
+            if (_numEntries == 0)
+                _solidColor = color;
+            else
+                _colors[index] = color;
+            SignalPropertyChange(); 
+        }
 
         #endregion
     }

@@ -110,7 +110,7 @@ namespace System.Windows.Forms
             _context.glOrtho(0.0, 1.0, 1.0, 0.0, -0.1, 1.0);
         }
 
-        private static unsafe GLTexture CreateBG(GLContext ctx)
+        internal static unsafe GLTexture CreateBG(GLContext ctx)
         {
             GLTexture tex = new GLTexture(ctx, 16, 16);
             tex.Bind();

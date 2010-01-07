@@ -10,6 +10,8 @@ using BrawlLib.SSBB.ResourceNodes;
 
 namespace System.Windows.Forms
 {
+    public delegate void GLRenderEventHandler(object sender, GLContext context);
+
     public unsafe class ModelPanel : GLPanel
     {
         private bool _grabbing = false;
@@ -38,6 +40,8 @@ namespace System.Windows.Forms
         private float _viewDistance = 5.0f;
         private Matrix43 _viewMatrix = Matrix43.Identity;
         //private Matrix _vMatrix = Matrix.Identity;
+
+        public event GLRenderEventHandler PreRender, PostRender;
 
         private List<ResourceNode> _resourceList = new List<ResourceNode>();
 
@@ -384,7 +388,13 @@ namespace System.Windows.Forms
 
                 _context.gluLookAt(_eyePoint._x, _eyePoint._y, _eyePoint._z, _viewPoint._x, _viewPoint._y, _viewPoint._z, 0.0, 1.0, 0.0);
 
+                if (PreRender != null)
+                    PreRender(this, _context);
+
                 _model.Render(_context);
+
+                if (PostRender != null)
+                    PostRender(this, _context);
             }
         }
     }

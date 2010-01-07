@@ -985,29 +985,6 @@ namespace System.Windows.Forms
             {
                 _selectedAnim.Replace(dlgOpen.FileName);
 
-                //Search for non-existant bones and ask for deletion.
-                //List<CHR0EntryNode> badNodes = new List<CHR0EntryNode>();
-                //ResourceNode group = _targetModel.FindChild("Bones", false);
-                //foreach (CHR0EntryNode node in _selectedAnim.Children)
-                //{
-                //    if (group.FindChild(node.Name, true) == null)
-                //    {
-                //        badNodes.Add(node);
-                //    }
-                //}
-
-                //if (badNodes.Count > 0)
-                //{
-                //    if (MessageBox.Show(this, "The imported animation contains bone references that do not exist in the current model. Would you like to delete these references?", "CHR0 Import", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                //    {
-                //        foreach (CHR0EntryNode n in badNodes)
-                //        {
-                //            n.Remove();
-                //            n.Dispose();
-                //        }
-                //    }
-                //}
-
                 if (SelectedAnimationChanged != null)
                     SelectedAnimationChanged(this, null);
             }
@@ -1034,56 +1011,40 @@ namespace System.Windows.Forms
         }
 
         private int _copyAllIndex = -1;
+
+        private static Dictionary<string, AnimationFrame> _copyAllState = new Dictionary<string, AnimationFrame>();
+
         private void btnCopyAll_Click(object sender, EventArgs e)
         {
-            _copyAllIndex = _animFrame;
+            _copyAllState.Clear();
+
+            if (_animFrame == 0)
+                foreach (MDL0BoneNode bone in _targetModel.FindChildrenByType("Bones", ResourceType.MDL0Bone))
+                    _copyAllState[bone._name] = (AnimationFrame)bone._bindState;
+            else
+                foreach (CHR0EntryNode entry in _selectedAnim.Children)
+                    _copyAllState[entry._name] = entry.GetAnimFrame(_animFrame - 1);
         }
 
         private void btnPasteAll_Click(object sender, EventArgs e)
         {
-            if (_copyAllIndex < 0)
+            if (_copyAllState.Count == 0)
                 return;
 
-            AnimationFrame frame;
-
-            ResourceNode group = null;
-            MDL0BoneNode bone;
-            if ((_copyAllIndex == 0) || (_animFrame == 0))
-                if ((group = _targetModel.FindChild("Bones", false)) == null)
-                    return;
-
-            foreach (CHR0EntryNode entry in _selectedAnim.Children)
+            if (_animFrame == 0)
             {
-                string name = entry._name;
-                bone = null;
-
-                //Get state from index
-                if (_copyAllIndex == 0)
-                {
-                    //Find bone in model
-                    if ((bone = group.FindChild(name, true) as MDL0BoneNode) == null)
-                        continue;
-                    //Get bind pose
-                    frame = (AnimationFrame)bone._bindState;
-                }
-                else
-                    frame = entry.GetAnimFrame(_copyAllIndex - 1);
-
-                //Set current frame
-                if (_animFrame == 0)
-                {
-                    //Find bone
-                    if ((bone == null) && ((bone = group.FindChild(name, true) as MDL0BoneNode) == null))
-                        continue;
-                    //Set bind pose
-                    FrameState state = new FrameState(frame);
-                    bone._bindState = state;
-                    bone.RecalcBindState();
-                    bone.SignalPropertyChange();
-                }
-                else
-                    entry.SetKeyframe(_animFrame - 1, frame);
+                foreach (MDL0BoneNode bone in _targetModel.FindChildrenByType("Bones", ResourceType.MDL0Bone))
+                    if (_copyAllState.ContainsKey(bone._name))
+                    {
+                        bone._bindState = new FrameState(_copyAllState[bone._name]);
+                        bone.RecalcBindState();
+                        bone.SignalPropertyChange();
+                    }
             }
+            else
+                foreach (CHR0EntryNode entry in _selectedAnim.Children)
+                    if (_copyAllState.ContainsKey(entry._name))
+                        entry.SetKeyframe(_animFrame - 1, _copyAllState[entry._name]);
 
             UpdateModel();
         }

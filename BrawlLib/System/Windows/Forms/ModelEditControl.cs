@@ -38,6 +38,7 @@ namespace System.Windows.Forms
 
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.btnAssetToggle = new System.Windows.Forms.Button();
             this.btnAnimToggle = new System.Windows.Forms.Button();
             this.pnlPlayback = new System.Windows.Forms.Panel();
@@ -52,7 +53,7 @@ namespace System.Windows.Forms
             this.label15 = new System.Windows.Forms.Label();
             this.lblFrameCount = new System.Windows.Forms.Label();
             this.btnPlaybackToggle = new System.Windows.Forms.Button();
-            this.animTimer = new System.Windows.Forms.Timer();
+            this.animTimer = new System.Windows.Forms.Timer(this.components);
             this.spltAssets = new System.Windows.Forms.Splitter();
             this.btnOptionToggle = new System.Windows.Forms.Button();
             this.modelPanel1 = new System.Windows.Forms.ModelPanel();
@@ -60,6 +61,9 @@ namespace System.Windows.Forms
             this.pnlAssets = new System.Windows.Forms.ModelAssetPanel();
             this.pnlAnim = new System.Windows.Forms.ModelAnimPanel();
             this.pnlPlayback.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numTotalFrames)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numFPS)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numFrameIndex)).BeginInit();
             this.SuspendLayout();
             // 
             // btnAssetToggle
@@ -285,6 +289,7 @@ namespace System.Windows.Forms
             this.modelPanel1.TabIndex = 0;
             this.modelPanel1.TranslationScale = 0.05F;
             this.modelPanel1.ZoomScale = 2.5F;
+            this.modelPanel1.PreRender += new System.Windows.Forms.GLRenderEventHandler(this.modelPanel1_PreRender);
             // 
             // pnlOptions
             // 
@@ -295,8 +300,9 @@ namespace System.Windows.Forms
             this.pnlOptions.Size = new System.Drawing.Size(446, 19);
             this.pnlOptions.TabIndex = 10;
             this.pnlOptions.Visible = false;
-            this.pnlOptions.RenderStateChanged += new System.EventHandler(this.RenderStateChanged);
             this.pnlOptions.ClearColorChanged += new System.EventHandler(this.pnlOptions_ClearColorChanged);
+            this.pnlOptions.RenderStateChanged += new System.EventHandler(this.RenderStateChanged);
+            this.pnlOptions.FloorRenderChanged += new System.EventHandler(this.pnlOptions_FloorRenderChanged);
             this.pnlOptions.CamResetClicked += new System.EventHandler(this.pnlOptions_CamResetClicked);
             // 
             // pnlAssets
@@ -307,8 +313,8 @@ namespace System.Windows.Forms
             this.pnlAssets.Size = new System.Drawing.Size(101, 546);
             this.pnlAssets.TabIndex = 4;
             this.pnlAssets.Visible = false;
-            this.pnlAssets.SelectedBoneChanged += new System.EventHandler(this.pnlAssets_SelectedBoneChanged);
             this.pnlAssets.RenderStateChanged += new System.EventHandler(this.RenderStateChanged);
+            this.pnlAssets.SelectedBoneChanged += new System.EventHandler(this.pnlAssets_SelectedBoneChanged);
             // 
             // pnlAnim
             // 
@@ -319,11 +325,11 @@ namespace System.Windows.Forms
             this.pnlAnim.Size = new System.Drawing.Size(173, 546);
             this.pnlAnim.TabIndex = 12;
             this.pnlAnim.Visible = false;
-            this.pnlAnim.RenderStateChanged += new System.EventHandler(this.RenderStateChanged);
-            this.pnlAnim.AnimStateChanged += new System.EventHandler(this.pnlAnim_AnimStateChanged);
-            this.pnlAnim.SelectedAnimationChanged += new System.EventHandler(this.pnlAnim_SelectedAnimationChanged);
             this.pnlAnim.ReferenceLoaded += new System.Windows.Forms.ModelAnimPanel.ReferenceEventHandler(this.pnlAnim_ReferenceLoaded);
+            this.pnlAnim.RenderStateChanged += new System.EventHandler(this.RenderStateChanged);
             this.pnlAnim.ReferenceClosed += new System.Windows.Forms.ModelAnimPanel.ReferenceEventHandler(this.pnlAnim_ReferenceClosed);
+            this.pnlAnim.SelectedAnimationChanged += new System.EventHandler(this.pnlAnim_SelectedAnimationChanged);
+            this.pnlAnim.AnimStateChanged += new System.EventHandler(this.pnlAnim_AnimStateChanged);
             // 
             // ModelEditControl
             // 
@@ -340,6 +346,9 @@ namespace System.Windows.Forms
             this.Name = "ModelEditControl";
             this.Size = new System.Drawing.Size(754, 546);
             this.pnlPlayback.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numTotalFrames)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numFPS)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numFrameIndex)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -626,6 +635,44 @@ namespace System.Windows.Forms
             if (_animFrame < _selectedAnim.FrameCount)
                 SetFrame(_animFrame);
             numTotalFrames.Value = _selectedAnim.FrameCount;
+        }
+
+        private void pnlOptions_FloorRenderChanged(object sender, EventArgs e)
+        {
+            modelPanel1.Invalidate();
+        }
+
+        private void modelPanel1_PreRender(object sender, GLContext context)
+        {
+            if (pnlOptions.RenderFloor)
+            {
+                GLTexture _bgTex = context.FindOrCreate<GLTexture>("TexBG", GLTexturePanel.CreateBG);
+
+                float s = 10.0f, t = 10.0f;
+                float e = 30.0f;
+
+                context.glDisable((uint)GLEnableCap.Lighting);
+                context.glDisable((uint)GLEnableCap.DepthTest);
+                context.glPolygonMode(GLFace.Front, GLPolygonMode.Fill);
+                context.glPolygonMode(GLFace.Back, GLPolygonMode.Line);
+
+                context.glEnable(GLEnableCap.Texture2D);
+                _bgTex.Bind();
+
+                context.glColor(0.5f, 0.5f, 0.75f, 1.0f);
+                context.glBegin(GLPrimitiveType.Quads);
+
+                context.glTexCoord(0.0f, 0.0f);
+                context.glVertex(-e, 0.0f, -e);
+                context.glTexCoord(s, 0.0f);
+                context.glVertex(e, 0.0f, -e);
+                context.glTexCoord(s, t);
+                context.glVertex(e, 0.0f, e);
+                context.glTexCoord(0, t);
+                context.glVertex(-e, 0.0f, e);
+
+                context.glEnd();
+            }
         }
     }
 }

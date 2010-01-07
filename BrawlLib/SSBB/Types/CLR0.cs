@@ -46,6 +46,16 @@ namespace BrawlLib.SSBBTypes
         }
     }
 
+    [Flags]
+    public enum CLR0EntryFlags : int
+    {
+        Flag1 = 0x0001,
+        IsSolid1 = 0x0002,
+        Flag2 = 0x0100,
+        IsSolid2 = 0x0200,
+        IsSolid = 0x0202
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     unsafe struct CLR0Entry
     {
@@ -54,18 +64,21 @@ namespace BrawlLib.SSBBTypes
         public bint _stringOffset;
         public bint _flags; //1 Block count?
         public ABGRPixel _colorMask; //Used as a mask for source color before applying frames
-        public bint _dataOffset; //Offset from itself
+        public bint _data; //Could be offset or color! Offset from itself
 
-        public CLR0Entry(int flags, ABGRPixel mask, int dataOffset)
+        public CLR0Entry(CLR0EntryFlags flags, ABGRPixel mask, int data)
         {
             _stringOffset = 0;
-            _flags = flags;
+            _flags = (int)flags;
             _colorMask = mask;
-            _dataOffset = dataOffset;
+            _data = data;
         }
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-        public ABGRPixel* Data { get { return (ABGRPixel*)(Address + _dataOffset + 12); } }
+        public ABGRPixel* Data { get { return (ABGRPixel*)(Address + _data + 12); } }
+
+        public CLR0EntryFlags Flags { get { return (CLR0EntryFlags)(int)_flags; } set { _flags = (int)value; } }
+        public ABGRPixel SolidColor { get { return *(ABGRPixel*)(Address + 12); } set { *(ABGRPixel*)(Address + 12) = value; } }
 
         public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
         public VoidPtr ResourceStringAddress

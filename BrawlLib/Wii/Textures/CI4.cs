@@ -47,8 +47,8 @@ namespace BrawlLib.Wii.Textures
         {
             byte* stPtr = (byte*)sPtr;
             byte* dPtr = (byte*)blockAddr;
-            for (int y = 0; y < BlockHeight; y++, stPtr += width)
-                for (int x = 0; x < BlockWidth; )
+            for (int y = 0; y < BlockHeight; y++, stPtr += width / 2)
+                for (int x = 0; x < BlockWidth / 2; )
                     *dPtr++ = stPtr[x++];
                     //*dPtr++ = (byte)((_workingPalette.FindMatch(sPtr[x++]) << 4) | (_workingPalette.FindMatch(sPtr[x++]) & 0x0F));
         }

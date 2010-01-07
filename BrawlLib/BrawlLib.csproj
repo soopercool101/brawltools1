@@ -111,7 +111,9 @@
     <Compile Include="SSBB\ResourceNodes\RSTMNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RWSD\RWSDSoundNode.cs" />
     <Compile Include="SSBB\StringTable.cs" />
+    <Compile Include="SSBB\Types\EFLS.cs" />
     <Compile Include="SSBB\Types\RBNK.cs" />
+    <Compile Include="SSBB\Types\REFF.cs" />
     <Compile Include="SSBB\Types\RSEQ.cs" />
     <Compile Include="SSBB\Types\RWSD.cs" />
     <Compile Include="System\Audio\AudioDevice.cs" />
@@ -186,6 +188,9 @@
     </Compile>
     <Compile Include="System\Windows\Forms\GoodPictureBox.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\GradientDialog.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="System\Windows\Forms\ModelAnimPanel.cs">
       <SubType>UserControl</SubType>
@@ -326,6 +331,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\GoodColorDialog.resx">
       <DependentUpon>GoodColorDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\GradientDialog.resx">
+      <DependentUpon>GradientDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\ModelAnimPanel.resx">
       <DependentUpon>ModelAnimPanel.cs</DependentUpon>

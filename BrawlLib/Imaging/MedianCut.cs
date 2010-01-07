@@ -235,7 +235,7 @@ namespace BrawlLib.Imaging
                         _idFunc(*sPtr++, &id);
                         val = _groupTable[id]->_box->_index << 4;
 
-                        if (_width > 1)
+                        if (x > 1)
                         {
                             _idFunc(*sPtr++, &id);
                             val |= _groupTable[id]->_box->_index & 0xF;

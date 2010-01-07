@@ -46,6 +46,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         BRESGroup = 0x0301,
 
         MDL0Group = 0x0701,
+        MDL0Bone = 0x0714,
 
         CHR0Entry = 0x0800,
         CLR0Entry = 0x0900,

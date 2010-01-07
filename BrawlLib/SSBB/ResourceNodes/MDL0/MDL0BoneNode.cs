@@ -17,6 +17,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         private List<string> _entries = new List<string>();
 
         internal MDL0Bone* Header { get { return (MDL0Bone*)WorkingUncompressed.Address; } }
+        public override ResourceType ResourceType { get { return ResourceType.MDL0Bone; } }
+
         protected override int DataLength { get { return Header->_headerLen; } }
 
         internal FrameState _bindState;

@@ -14,6 +14,7 @@ namespace System.Windows.Forms
         private CheckBox chkBones;
         private ColorDialog dlgColor;
         private Button btnCamReset;
+        private CheckBox chkFloor;
         private Label label1;
     
         private void InitializeComponent()
@@ -24,6 +25,7 @@ namespace System.Windows.Forms
             this.chkBones = new System.Windows.Forms.CheckBox();
             this.dlgColor = new System.Windows.Forms.ColorDialog();
             this.btnCamReset = new System.Windows.Forms.Button();
+            this.chkFloor = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // lblBackColor
@@ -73,7 +75,8 @@ namespace System.Windows.Forms
             // 
             // btnCamReset
             // 
-            this.btnCamReset.Location = new System.Drawing.Point(231, 0);
+            this.btnCamReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCamReset.Location = new System.Drawing.Point(319, 0);
             this.btnCamReset.Name = "btnCamReset";
             this.btnCamReset.Size = new System.Drawing.Size(85, 20);
             this.btnCamReset.TabIndex = 7;
@@ -81,15 +84,26 @@ namespace System.Windows.Forms
             this.btnCamReset.UseVisualStyleBackColor = true;
             this.btnCamReset.Click += new System.EventHandler(this.btnCamReset_Click);
             // 
+            // chkFloor
+            // 
+            this.chkFloor.Location = new System.Drawing.Point(234, 1);
+            this.chkFloor.Name = "chkFloor";
+            this.chkFloor.Size = new System.Drawing.Size(61, 20);
+            this.chkFloor.TabIndex = 8;
+            this.chkFloor.Text = "Floor";
+            this.chkFloor.UseVisualStyleBackColor = true;
+            this.chkFloor.CheckedChanged += new System.EventHandler(this.chkFloor_CheckedChanged);
+            // 
             // ModelOptionPanel
             // 
+            this.Controls.Add(this.chkFloor);
             this.Controls.Add(this.btnCamReset);
             this.Controls.Add(this.chkBones);
             this.Controls.Add(this.chkPolygons);
             this.Controls.Add(this.lblBackColor);
             this.Controls.Add(this.label1);
             this.Name = "ModelOptionPanel";
-            this.Size = new System.Drawing.Size(322, 19);
+            this.Size = new System.Drawing.Size(410, 19);
             this.ResumeLayout(false);
 
         }
@@ -101,6 +115,7 @@ namespace System.Windows.Forms
         public event EventHandler RenderStateChanged;
         public event EventHandler ClearColorChanged;
         public event EventHandler CamResetClicked;
+        public event EventHandler FloorRenderChanged;
 
         private MDL0Node _targetModel;
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -129,6 +144,13 @@ namespace System.Windows.Forms
         {
             get { return _clearColor; }
             set { lblBackColor.BackColor = _clearColor = value; }
+        }
+
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool RenderFloor
+        {
+            get { return chkFloor.Checked; }
+            set { chkFloor.Checked = value; }
         }
 
         public ModelOptionPanel() { InitializeComponent(); }
@@ -170,6 +192,12 @@ namespace System.Windows.Forms
         {
             if (CamResetClicked != null)
                 CamResetClicked(this, null);
+        }
+
+        private void chkFloor_CheckedChanged(object sender, EventArgs e)
+        {
+            if (FloorRenderChanged != null)
+                FloorRenderChanged(this, null);
         }
     }
 }
