@@ -27,15 +27,24 @@ namespace BrawlBox
         }
         private unsafe void btnOkay_Click(object sender, EventArgs e)
         {
-            if (txtName.Text.Length == 0)
-                return;
+            string name = txtName.Text;
+            if (name.Length == 0)
+                name = "<null>";
 
-            if (_node.Parent != null)
+            if (name.Equals("<null>", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!_node.AllowNullNames)
+                {
+                    MessageBox.Show(this, "Name cannot be null!", "What the...");
+                    return;
+                }
+            }
+            else if ((!_node.AllowDuplicateNames) && (_node.Parent != null))
             {
                 //No duplicates
                 foreach (ResourceNode c in _node.Parent.Children)
                 {
-                    if ((c.Name == txtName.Text) && (c.GetType() == _node.GetType()) && (c != _node))
+                    if ((c.Name == name) && (c.GetType() == _node.GetType()) && (c != _node))
                     {
                         MessageBox.Show(this, "A resource with that name already exists!", "What the...");
                         return;
@@ -48,10 +57,10 @@ namespace BrawlBox
             {
                 PLT0Node plt = ((TEX0Node)_node).GetPaletteNode();
                 if (plt != null)
-                    plt.Name = txtName.Text;
+                    plt.Name = name;
             }
 
-            _node.Name = txtName.Text;
+            _node.Name = name;
             DialogResult = DialogResult.OK;
             Close();
         }

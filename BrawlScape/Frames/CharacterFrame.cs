@@ -68,7 +68,9 @@ namespace BrawlScape
         private void modelList_ResourceChanged(ModelDefinition resource)
         {
             textureList.SecondarySource = resource;
-            modelPanel.TargetModel = (resource != null) ? resource.Model : null;
+            modelPanel.ClearTargets();
+            if (resource != null)
+                modelPanel.AddTarget(resource.Model);
         }
 
         private void characterContext_Opening(object sender, CancelEventArgs e) { if (charList.SelectedResource == null) e.Cancel = true; }

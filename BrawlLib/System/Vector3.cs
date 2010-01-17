@@ -88,5 +88,55 @@ namespace System
         {
             return String.Format("({0},{1},{2})", _x, _y, _z);
         }
+
+        public bool Contained(Vector3 start, Vector3 end, float expansion) { return Contained(this, start, end, expansion); }
+        public static unsafe bool Contained(Vector3 point, Vector3 start, Vector3 end, float expansion)
+        {
+            float* sPtr = (float*)&point;
+            float* s1 = (float*)&start, s2 = (float*)&end;
+            float* temp;
+            for (int i = 0; i < 3; i++)
+            {
+                if (s1[i] > s2[i])
+                { temp = s1; s1 = s2; s2 = temp; }
+
+                if ((sPtr[i] < (s1[i] - expansion)) || (sPtr[i] > (s2[i] + expansion)))
+                    return false;
+            }
+            return true;
+        }
+
+        public static Vector3 IntersectZ(Vector3 ray1, Vector3 ray2, float z)
+        {
+            float a = ray2._z - ray1._z;
+
+            float tanX = (ray1._y - ray2._y) / a;
+            float tanY = (ray2._x - ray1._x) / a;
+
+            a = z - ray1._z;
+            return new Vector3(tanY * a + ray1._x, -tanX * a + ray1._y, z);
+        }
+
+        public float TrueDistance(Vector3 p)
+        {
+            float lenX = Math.Abs(p._x - _x);
+            float lenY = Math.Abs(p._y - _y);
+            float lenZ = Math.Abs(p._z - _z);
+            float h;
+
+            if (lenX == 0.0f)
+                h = lenY;
+            else if (lenY == 0.0f)
+                h = lenX;
+            else
+                h = (float)(lenX / Math.Cos(Math.Atan(lenY / lenX)));
+
+            if (lenZ == 0.0f)
+                return h;
+            else if (h == 0.0f)
+                return lenZ;
+            else
+                return (float)(h / Math.Cos(Math.Atan(lenZ / h)));
+        }
     }
 }

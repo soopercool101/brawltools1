@@ -13,6 +13,13 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         public override ResourceType ResourceType { get { return ResourceType.RSAR; } }
 
+        private List<RSARFileNode> _files;
+        [Browsable(false)]
+        public List<RSARFileNode> Files
+        {
+            get { return _files; }
+        }
+
         public T GetResource<T>(int index) where T : ResourceNode
         {
             ResourceNode folder = null;
@@ -40,18 +47,6 @@ namespace BrawlLib.SSBB.ResourceNodes
             return true;
         }
 
-        //protected override void OnPopulate()
-        //{
-        //    for (int i = 0; i < 3; i++)
-        //        new RSARFolderNode().Initialize(this, Header, 0);
-        //}
-
-        private List<RSARFileNode> _files;
-        [Browsable(false)]
-        public List<RSARFileNode> Files
-        {
-            get { return _files; }
-        }
 
         protected override void OnPopulate()
         {
@@ -310,10 +305,6 @@ namespace BrawlLib.SSBB.ResourceNodes
             rsar->Set(symbLen, infoLen, fileLen);
 
             _entryList.Clear();
-
-            _replSrc.Close();
-            _replUncompSrc.Close();
-            _replSrc = _replUncompSrc = new DataSource(address, length);
         }
 
 

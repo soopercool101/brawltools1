@@ -55,10 +55,6 @@ namespace BrawlLib.SSBB.ResourceNodes
                 current += MSBinDecoder.EncodeString(s, current);
             }
             *offsets = (int)current - (int)address;
-
-            _replSrc.Close();
-            _replUncompSrc.Close();
-            _replSrc = _replUncompSrc = new DataSource(address, length);
         }
 
 

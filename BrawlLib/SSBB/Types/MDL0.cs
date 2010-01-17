@@ -482,7 +482,7 @@ namespace BrawlLib.SSBBTypes
         public const int Size = 52;
 
         public bint _stringOffset;
-        public bint _unk1;
+        public bint _secondaryOffset;
         public bint _unk2;
         public bint _unk3;
         public bint _unk4;
@@ -502,6 +502,13 @@ namespace BrawlLib.SSBBTypes
         {
             get { return (VoidPtr)this.Address + _stringOffset; }
             set { _stringOffset = (int)value - (int)Address; }
+        }
+
+        public string SecondaryTexture { get { return (_secondaryOffset == 0) ? null : new String((sbyte*)this.SecondaryTextureAddress); } }
+        public VoidPtr SecondaryTextureAddress
+        {
+            get { return Address + _secondaryOffset; }
+            set { _secondaryOffset = (int)value - (int)Address; }
         }
     }
 

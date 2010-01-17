@@ -368,14 +368,7 @@ namespace System.Windows.Forms
         public MDL0Node TargetModel
         {
             get { return _targetModel; }
-            set
-            {
-                if (_targetModel == value)
-                    return;
-
-                _targetModel = value;
-                ModelChanged();
-            }
+            set { ModelChanged(value); }
         }
 
         public ModelEditControl() { InitializeComponent(); }
@@ -447,17 +440,12 @@ namespace System.Windows.Forms
             return base.ProcessKeyPreview(ref m);
         }
 
-        public void AddReference(ResourceNode node)
-        {
-            modelPanel1.AddReference(node);
-        }
-
         public bool CloseFiles()
         {
             return pnlAnim.CloseReferences();
         }
 
-        private void ModelChanged()
+        private void ModelChanged(MDL0Node model)
         {
             //if (_externalNode != null)
             //{
@@ -465,7 +453,16 @@ namespace System.Windows.Forms
             //    _externalNode = null;
             //}
 
-            modelPanel1.TargetModel = _targetModel;
+            if (_targetModel != null)
+                modelPanel1.RemoveTarget(_targetModel);
+
+            if ((_targetModel = model) != null)
+                modelPanel1.AddTarget(_targetModel);
+
+            modelPanel1.ResetCamera();
+
+            //modelPanel1.TargetModel = _targetModel;
+
             pnlOptions.TargetModel = _targetModel;
             pnlAnim.TargetModel = _targetModel;
             pnlAssets.Attach(_targetModel);

@@ -37,7 +37,7 @@ namespace BrawlBox
             FullPath = Process.GetCurrentProcess().MainModule.FileName;
 
             _openDlg = new OpenFileDialog();
-            _saveDlg = new SaveFileDialog();
+            _saveDlg = new SaveFileDialog() { AddExtension = false };
             _folderDlg = new FolderBrowserDialog();
         }
 
@@ -166,18 +166,24 @@ namespace BrawlBox
         public static int SaveFile(string filter, string name, out string fileName) { return SaveFile(filter, name, out fileName, true); }
         public static int SaveFile(string filter, string name, out string fileName, bool categorize)
         {
+            int fIndex = 0;
+            fileName = null;
+
             _saveDlg.Filter = filter;
             _saveDlg.FileName = name;
+            _saveDlg.FilterIndex = 1;
             if (_saveDlg.ShowDialog() == DialogResult.OK)
             {
-                fileName = _saveDlg.FileName;
-                if ((categorize) && (_saveDlg.FilterIndex == 1))
-                    return CategorizeFilter(_saveDlg.FileName, filter);
+                if ((categorize) && (_saveDlg.FilterIndex == 1) && (Path.HasExtension(_saveDlg.FileName)))
+                    fIndex = CategorizeFilter(_saveDlg.FileName, filter);
                 else
-                    return _saveDlg.FilterIndex;
+                    fIndex = _saveDlg.FilterIndex;
+
+                //Fix extension
+                fileName = ApplyExtension(_saveDlg.FileName, filter, fIndex - 1);
             }
-            fileName = null;
-            return 0;
+
+            return fIndex;
         }
         public static int CategorizeFilter(string path, string filter)
         {
@@ -189,6 +195,23 @@ namespace BrawlBox
                     if (s.Equals(ext, StringComparison.OrdinalIgnoreCase))
                         return (i + 1) / 2;
             return 1;
+        }
+        public static string ApplyExtension(string path, string filter, int filterIndex)
+        {
+            int index = filter.IndexOfOccurance('|', filterIndex * 2 + 1);
+            if (index == -1)
+                return path;
+
+            index = filter.IndexOf('.', index);
+            int len = Math.Max(filter.Length, filter.IndexOfAny(new char[] { ';', '|' })) - index;
+            int tmp;
+
+            //If path has no extension apply it.
+            //If extension is numeric, apply again. This is for number-indexed resources.
+            if ((!Path.HasExtension(path)) || (int.TryParse(Path.GetExtension(path), out tmp)))
+                return path + filter.Substring(index, len);
+
+            return path;
         }
 
         internal static bool SaveAs()

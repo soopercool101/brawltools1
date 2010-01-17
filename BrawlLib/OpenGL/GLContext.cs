@@ -63,8 +63,41 @@ namespace BrawlLib.OpenGL
         public virtual void Swap() { }
         public virtual void Release() { }
 
+        internal unsafe void DrawBox(Vector3 p1, Vector3 p2)
+        {
+            glBegin(GLPrimitiveType.QuadStrip);
+
+            glVertex(p1._x, p1._y, p1._z);
+            glVertex(p1._x, p2._y, p1._z);
+            glVertex(p2._x, p1._y, p1._z);
+            glVertex(p2._x, p2._y, p1._z);
+            glVertex(p2._x, p1._y, p2._z);
+            glVertex(p2._x, p2._y, p2._z);
+            glVertex(p1._x, p1._y, p2._z);
+            glVertex(p1._x, p2._y, p2._z);
+            glVertex(p1._x, p1._y, p1._z);
+            glVertex(p1._x, p2._y, p1._z);
+
+            glEnd();
+
+            glBegin(GLPrimitiveType.Quads);
+
+            glVertex(p1._x, p2._y, p1._z);
+            glVertex(p1._x, p2._y, p2._z);
+            glVertex(p2._x, p2._y, p2._z);
+            glVertex(p2._x, p2._y, p1._z);
+
+            glVertex(p1._x, p1._y, p1._z);
+            glVertex(p1._x, p1._y, p2._z);
+            glVertex(p2._x, p1._y, p2._z);
+            glVertex(p2._x, p1._y, p1._z);
+
+            glEnd();
+        }
+
+
         internal abstract void glAccum(GLAccumOp op, float value);
-        internal abstract void glActiveTexture(GLMultiTextureTarget texture);
+        //internal abstract void glActiveTexture(GLMultiTextureTarget texture);
         internal abstract void glAlphaFunc(GLAlphaFunc func, float refValue);
         internal abstract bool glAreTexturesResident(int num, uint* textures, bool* residences);
         internal abstract void glArrayElement(int index);
@@ -454,7 +487,7 @@ namespace BrawlLib.OpenGL
         #endregion
 
         internal abstract void glReadBuffer(uint mode);
-        internal abstract void glReadPixels(int x, int y, int width, int height, uint format, uint type, out void* pixels);
+        internal abstract void glReadPixels(int x, int y, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
 
         #region glRect
 
@@ -612,5 +645,6 @@ namespace BrawlLib.OpenGL
 
         internal abstract void gluQuadricDrawStyle(int quad, GLUQuadricDrawStyle draw);
         internal abstract void gluLookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ);
+        internal abstract void gluUnProject(double winX, double winY, double winZ, double* model, double* proj, int* view, double* objX, double* objY, double* objZ);
     }
 }

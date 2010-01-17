@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0B8588FD-74EE-4A7D-A397-91EA3F6A2C77}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -51,6 +51,7 @@
     <Compile Include="NodeWrappers\BRESWrapper.cs" />
     <Compile Include="NodeWrappers\CHR0Wrapper.cs" />
     <Compile Include="NodeWrappers\CLR0Wrapper.cs" />
+    <Compile Include="NodeWrappers\CollisionWrapper.cs" />
     <Compile Include="NodeWrappers\GenericWrapper.cs" />
     <Compile Include="NodeWrappers\MDL0GroupWrapper.cs" />
     <Compile Include="NodeWrappers\MDL0Wrapper.cs" />

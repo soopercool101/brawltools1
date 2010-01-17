@@ -8,7 +8,11 @@ namespace BrawlLib
     {
         SortedList<string, VoidPtr> _table = new SortedList<string, VoidPtr>(StringComparer.Ordinal);
 
-        public void Add(string s) { if (!_table.ContainsKey(s)) _table.Add(s, 0); }
+        public void Add(string s)
+        {
+            if ((!String.IsNullOrEmpty(s)) && (!_table.ContainsKey(s)))
+                _table.Add(s, 0);
+        }
 
         public int GetTotalSize()
         {

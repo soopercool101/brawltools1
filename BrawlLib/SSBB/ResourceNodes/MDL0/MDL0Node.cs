@@ -13,7 +13,7 @@ using BrawlLib.Wii.Models;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    public unsafe class MDL0Node : BRESEntryNode
+    public unsafe class MDL0Node : BRESEntryNode, IRenderedObject
     {
         internal MDL0* Header { get { return (MDL0*)WorkingUncompressed.Address; } }
 
@@ -243,6 +243,14 @@ namespace BrawlLib.SSBB.ResourceNodes
                 base.Export(outPath);
         }
 
+        //protected override int OnCalculateSize(bool force)
+        //{
+        //    int size = 0;
+        //    //Definitions
+
+        //    return size;
+        //}
+
         protected internal override void PostProcess(VoidPtr bresAddress, VoidPtr dataAddress, int dataLength, StringTable stringTable)
         {
             base.PostProcess(bresAddress, dataAddress, dataLength, stringTable);
@@ -263,11 +271,32 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal bool _renderPolygons = true;
         internal bool _renderPolygonsWireframe = false;
         internal bool _renderBones = true;
+        internal bool _visible = true;
 
-        internal void Render(GLContext ctx)
+        public void Attach(GLContext context)
         {
-            if (!_bound)
-                Bind(ctx);
+            _visible = true;
+            ApplyCHR(null, 0);
+            foreach (MDL0GroupNode g in Children)
+                g.Bind(context);
+        }
+
+        public void Detach(GLContext context)
+        {
+            foreach (MDL0GroupNode g in Children)
+                g.Unbind(context);
+        }
+
+        public void Refesh(GLContext context)
+        {
+            foreach (TextureRef tref in _texRefs)
+                tref.Reload();
+        }
+
+        public void Render(GLContext ctx)
+        {
+            if (!_visible)
+                return;
 
             ResourceNode group;
 
@@ -319,28 +348,8 @@ namespace BrawlLib.SSBB.ResourceNodes
                     poly.WeightVertices(_nodes);
         }
 
-        private void Bind(GLContext ctx)
-        {
-            _bound = true;
-            foreach (MDL0GroupNode g in Children)
-                g.Bind(ctx);
-        }
-
-        internal void Unbind(GLContext ctx)
-        {
-            _bound = false;
-            foreach (MDL0GroupNode g in Children)
-                g.Unbind(ctx);
-        }
-
         #endregion
 
         internal static ResourceNode TryParse(DataSource source) { return ((MDL0*)source.Address)->_entry._tag == MDL0.Tag ? new MDL0Node() : null; }
-
-        internal void ResetTextures()
-        {
-            foreach (TextureRef tref in _texRefs)
-                tref.Reload();
-        }
     }
 }

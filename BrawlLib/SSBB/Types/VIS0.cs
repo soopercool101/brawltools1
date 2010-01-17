@@ -14,9 +14,9 @@ namespace BrawlLib.SSBBTypes
         public bint _dataOffset; //0x24
         public bint _stringOffset;
         public bint _unk1;
-        public bshort _unk2;
+        public bshort _frameCount;
         public bshort _numEntries;
-        public bint _unk3;
+        public bint _unk2; //0
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public ResourceGroup* Group { get { return (ResourceGroup*)(Address + _dataOffset); } }
@@ -35,12 +35,9 @@ namespace BrawlLib.SSBBTypes
         public bint _stringOffset;
         public bint _flags;
 
-        //public bushort _part1;
-        //public bushort _part2;
-        //public buint _part3;
-        //public buint _part4;
-
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
+
+        public VoidPtr Data { get { return Address + 8; } }
 
         public string ResourceString { get { return new String((sbyte*)ResourceStringAddress); } }
         public VoidPtr ResourceStringAddress
@@ -49,10 +46,13 @@ namespace BrawlLib.SSBBTypes
             set { _stringOffset = (int)value - (int)Address; }
         }
 
-        //public uint Value { get { return (_part1 == 0) ? _part3 : _part4; } }
-        //public string GetString() 
-        //{
-        //    return new string((sbyte*)(Address + ((_part1 == 0) ? _part2 : (uint)_part3))); 
-        //}
+        public VIS0Flags Flags { get { return (VIS0Flags)(int)_flags; } set { _flags = (int)value; } }
+    }
+
+    public enum VIS0Flags : int
+    {
+        None = 0x00,
+        Enabled = 0x01,
+        Constant = 0x02
     }
 }

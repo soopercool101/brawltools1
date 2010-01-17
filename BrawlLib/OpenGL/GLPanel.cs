@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 
@@ -10,12 +7,22 @@ namespace BrawlLib.OpenGL
     public abstract unsafe class GLPanel : UserControl
     {
         internal protected GLContext _context;
+
+        private bool _projectionChanged = true;
+        private bool _modelviewChanged = true;
+        private int _updateCounter;
+        internal GLCamera _camera;
+
+        public GLPanel()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.Opaque, true);
+            SetStyle(ControlStyles.ResizeRedraw, false);
+        }
         protected override void Dispose(bool disposing)
         {
             DisposeContext();
             base.Dispose(disposing);
         }
-
         private void DisposeContext()
         {
             if (_context != null)
@@ -26,11 +33,8 @@ namespace BrawlLib.OpenGL
             }
         }
 
-        public GLPanel()
-        {
-            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.Opaque, true);
-            SetStyle(ControlStyles.ResizeRedraw, false);
-        }
+        public void BeginUpdate() { _updateCounter++; }
+        public void EndUpdate() { if ((_updateCounter = Math.Max(_updateCounter - 1, 0)) == 0) Invalidate(); }
 
         protected override void OnLoad(EventArgs e)
         {
@@ -57,38 +61,62 @@ namespace BrawlLib.OpenGL
 
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
+        public virtual float GetDepth(int x, int y)
+        {
+            float val;
+            _context.Capture();
+            _context.glReadPixels(x, Height - y, 1, 1, GLPixelDataFormat.DEPTH_COMPONENT, GLPixelDataType.FLOAT, &val);
+            return val;
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (_context != null)
-            {
-                if (Monitor.TryEnter(_context))
-                {
-                    try
-                    {
-                        _context.Capture();
-                        OnRender();
-                        _context.glFinish();
-                        _context.Swap();
-                        _context.Release();
-                    }
-                    finally { Monitor.Exit(_context); }
-                }
-            }
-            else
+            if (_updateCounter > 0)
+                return;
+
+            if (_context == null)
                 base.OnPaint(e);
+            else if (Monitor.TryEnter(_context))
+            {
+                try
+                {
+                    _context.Capture();
+
+                    //Set projection
+                    if (_projectionChanged)
+                    {
+                        OnResized();
+                        _projectionChanged = false;
+                    }
+
+                    //Set modelview
+                    //if (_modelviewChanged)
+                    //{
+                    //    _modelviewChanged = false;
+                    //}
+
+                    if (_camera != null)
+                    {
+                        fixed (Matrix* p = &_camera._matrix)
+                        {
+                            _context.glMatrixMode(GLMatrixMode.ModelView);
+                            _context.glLoadMatrix((float*)p);
+                        }
+                    }
+
+                    OnRender();
+                    _context.glFinish();
+                    _context.Swap();
+                    _context.Release();
+                }
+                finally { Monitor.Exit(_context); }
+            }
         }
 
         protected override void OnResize(EventArgs e)
         {
-            if (_context != null)
-            {
-                _context.Capture();
-                OnResized();
-                _context.Release();
-                Invalidate();
-            }
-            else
-                base.OnResize(e);
+            _projectionChanged = true;
+            Invalidate();
         }
 
         //protected override void OnHandleDestroyed(EventArgs e)
@@ -101,16 +129,90 @@ namespace BrawlLib.OpenGL
         {
             _context.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
             _context.glClearDepth(1.0f);
-            OnResized();
         }
+
+        internal float _fovY = 45.0f, _nearZ = 1.0f, _farZ = 20000.0f, _aspect;
+
+        internal Matrix _projectionMatrix;
+        internal Matrix _projectionInverse;
+
+        public Vector3 UnProject(Vector3 point) { return UnProject(point._x, point._y, point._z); }
+        public Vector3 UnProject(float x, float y, float z)
+        {
+            if (_camera == null)
+                return new Vector3();
+
+            Vector4 v;
+            v.x = 2 * x / Width - 1;
+            v.y = 2 * (Height - y) / Height - 1;
+            v.z = 2 * z - 1;
+            v.w = 1.0f;
+
+            return (Vector3)(_camera._matrixInverse * _projectionInverse * v);
+        }
+
+
+        public Vector3 TraceZ(Vector3 point, float z)
+        {
+            if (_camera == null)
+                return new Vector3();
+
+            double a = point._z - z;
+            //Perform trig functions, using camera for angles
+
+            //Get angle, truncating to MOD 180
+            //double angleX = _camera._rotation._y - ((int)(_camera._rotation._y / 180.0) * 180);
+
+            double angleX = Math.IEEERemainder(-_camera._rotation._y, 180.0);
+            if (angleX < -90.0f)
+                angleX = -180.0f - angleX;
+            if (angleX > 90.0f)
+                angleX = 180.0f - angleX;
+
+            double angleY = Math.IEEERemainder(_camera._rotation._x, 180.0);
+            if (angleY < -90.0f)
+                angleY = -180.0f - angleY;
+            if (angleY > 90.0f)
+                angleY = 180.0f - angleY;
+
+            float lenX = (float)(Math.Tan(angleX * Math.PI / 180.0) * a);
+            float lenY = (float)(Math.Tan(angleY * Math.PI / 180.0) * a);
+
+            return new Vector3(point._x + lenX, point._y + lenY, z);
+        }
+
+
+        protected void CalculateProjection()
+        {
+            //float cotan = (float)(1 / Math.Tan(_fovY / 2 * Math.PI / 180.0));
+
+            _projectionMatrix = Matrix.ProjectionMatrix(_fovY, _aspect, _nearZ, _farZ);
+            _projectionInverse = Matrix.ReverseProjectionMatrix(_fovY, _aspect, _nearZ, _farZ);
+
+            //_projectionMatrix[0] = cotan / _aspect;
+            //_projectionMatrix[5] = cotan;
+            //_projectionMatrix[10] = (_farZ + _nearZ) / (_nearZ - _farZ);
+            //_projectionMatrix[11] = -1.0;
+            //_projectionMatrix[14] = (2.0 * _farZ * _nearZ) / (_nearZ - _farZ);
+
+            //_projectionInverse[0] = _aspect / cotan;
+            //_projectionInverse[5] = 1.0 / cotan;
+            //_projectionInverse[11] = 1.0 / _projectionMatrix[14];
+            //_projectionInverse[14] = -1.0;
+            //_projectionInverse[15] = _projectionMatrix[10] / _projectionMatrix[14];
+        }
+
         internal protected virtual void OnResized()
         {
-            _context.glViewport(0, 0, Width, Height);
+            _aspect = (float)Width / Height;
+            CalculateProjection();
 
+            _context.glViewport(0, 0, Width, Height);
             _context.glMatrixMode(GLMatrixMode.Projection);
-            _context.glLoadIdentity();
-            _context.gluPerspective(45.0f, (float)Width / (float)Height, 0.01f, 20000.0f);
+            fixed (Matrix* p = &_projectionMatrix)
+                _context.glLoadMatrix((float*)p);
         }
+
         internal protected virtual void OnRender()
         {
             _context.glClear(GLClearMask.ColorBuffer | GLClearMask.DepthBuffer);

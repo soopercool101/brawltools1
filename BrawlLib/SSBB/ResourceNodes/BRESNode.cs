@@ -183,10 +183,6 @@ namespace BrawlLib.SSBB.ResourceNodes
                 rGroup = (ResourceGroup*)rGroup->EndAddress;
             }
             _stringTable.Clear();
-
-            _replSrc.Close();
-            _replUncompSrc.Close();
-            _replSrc = _replUncompSrc = new DataSource(address, size);
         }
 
         internal static ResourceNode TryParse(DataSource source) { return ((BRESHeader*)source.Address)->_tag == BRESHeader.Tag ? new BRESNode() : null; }

@@ -45,16 +45,28 @@ namespace BrawlBox
         #endregion
         public ModelForm() { InitializeComponent(); }
 
+        private MDL0Node _model;
+
         public DialogResult ShowDialog(MDL0Node model) { return ShowDialog(null, model); }
         public DialogResult ShowDialog(IWin32Window owner, MDL0Node model)
         {
             this.Text = String.Format("Advanced Model Editor - {0}", model.Name);
-            modelEditControl1.TargetModel = model;
+            _model = model;
             try { return ShowDialog(owner); }
-            finally { modelEditControl1.TargetModel = null; }
+            finally { _model = null; }
         }
 
-        private void ModelForm_FormClosing(object sender, FormClosingEventArgs e) { e.Cancel = !modelEditControl1.CloseFiles(); }
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            modelEditControl1.TargetModel = _model;
+        }
+
+        private void ModelForm_FormClosing(object sender, FormClosingEventArgs e) 
+        {
+            if(!(e.Cancel = !modelEditControl1.CloseFiles()))
+                modelEditControl1.TargetModel = null;
+        }
 
     }
 }

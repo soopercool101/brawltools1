@@ -16,6 +16,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         ARC = 0x0202,
         BRES = 0x0203,
         MSBin = 0x0204,
+        EFLS = 0x0215,
+        CollisionDef = 0x0216,
 
         TEX0 = 0x0305,
         PLT0 = 0x0306,

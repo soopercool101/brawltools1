@@ -116,10 +116,6 @@ namespace BrawlLib.SSBB.ResourceNodes
                     node.Rebuild(entry->Data, entry->Length, force);
                 entry = entry->Next;
             }
-
-            _replSrc.Close();
-            _replUncompSrc.Close();
-            _replSrc = _replUncompSrc = new DataSource(address, size);
         }
 
         public override unsafe void Export(string outPath)

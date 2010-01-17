@@ -17,7 +17,10 @@ namespace BrawlLib.OpenGL
         {
             uint id;
             ctx.glGenTextures(1, &id);
-            _id = id;
+            if ((_id = id) == 0)
+            {
+                ctx.CheckErrors();
+            }
 
             _context = ctx;
             _width = width;

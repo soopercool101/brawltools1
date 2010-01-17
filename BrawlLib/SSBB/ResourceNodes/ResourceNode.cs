@@ -113,6 +113,11 @@ namespace BrawlLib.SSBB.ResourceNodes
         public virtual int Level { get { return _parent == null ? 0 : _parent.Level + 1; } }
 
         [Browsable(false)]
+        public virtual bool AllowDuplicateNames { get { return false; } }
+        [Browsable(false)]
+        public virtual bool AllowNullNames { get { return false; } }
+
+        [Browsable(false)]
         public virtual string Name
         {
             get { return _name; }
@@ -523,14 +528,21 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (!IsDirty && !force)
                 MoveRaw(address, length);
             else
+            {
                 OnRebuild(address, length, force);
+
+                //Code has been moved here, because all overrides are doing the same thing.
+                _replSrc.Close();
+                _replUncompSrc.Close();
+                _replSrc = _replUncompSrc = new DataSource(address, length);
+            }
 
             _changed = false;
             //HasChanged = false;
         }
         //Overridden by parent nodes in order to rebuild children.
         //Size is the value returned by OnCalculateSize (or _calcSize)
-        //Node MUST dispose of and assign both repl sources before exiting.
+        //Node MUST dispose of and assign both repl sources before exiting. (Not exactly, see Rebuild())
         internal protected virtual void OnRebuild(VoidPtr address, int length, bool force) { MoveRaw(address, length); }
 
         //Shouldn't this move compressed data? YES!

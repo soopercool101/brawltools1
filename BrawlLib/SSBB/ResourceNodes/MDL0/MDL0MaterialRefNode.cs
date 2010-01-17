@@ -17,7 +17,9 @@ namespace BrawlLib.SSBB.ResourceNodes
     {
         internal MDL0Data7Part3* Header { get { return (MDL0Data7Part3*)_origSource.Address; } }
 
-        internal int _unk1;
+        internal string _secondaryTexture;
+
+        //internal int _unk1;
         internal int _unk2;
         internal int _unk3;
         internal int _unk4;
@@ -30,8 +32,10 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal int _unk11;
         internal float _float;
 
+        //[Category("Texture Reference")]
+        //public int Unknown1 { get { return _unk1; } set { _unk1 = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
-        public int Unknown1 { get { return _unk1; } set { _unk1 = value; SignalPropertyChange(); } }
+        public string DecalTexture { get { return _secondaryTexture; } set { _secondaryTexture = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
         public int Unknown2 { get { return _unk2; } set { _unk2 = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
@@ -59,27 +63,33 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            _unk1 = Header->_unk1;
-            _unk2 = Header->_unk2;
-            _unk3 = Header->_unk3;
-            _unk4 = Header->_unk4;
-            _unk5 = Header->_unk5;
-            _layerId1 = Header->_layerId1;
-            _layerId2 = Header->_layerId2;
-            _unk8 = Header->_unk8;
-            _unk9 = Header->_unk9;
-            _float = Header->_float;
-            _unk10 = Header->_unk10;
-            _unk11 = Header->_unk11;
+            MDL0Data7Part3* header = Header;
 
-            if ((_name == null) && (Header->_stringOffset != 0))
-                _name = Header->ResourceString;
+            _secondaryTexture = header->SecondaryTexture;
+
+            //_unk1 = Header->_unk1;
+            _unk2 = header->_unk2;
+            _unk3 = header->_unk3;
+            _unk4 = header->_unk4;
+            _unk5 = header->_unk5;
+            _layerId1 = header->_layerId1;
+            _layerId2 = header->_layerId2;
+            _unk8 = header->_unk8;
+            _unk9 = header->_unk9;
+            _float = header->_float;
+            _unk10 = header->_unk10;
+            _unk11 = header->_unk11;
+
+            if ((_name == null) && (header->_stringOffset != 0))
+                _name = header->ResourceString;
             return false;
         }
 
         internal unsafe void GetStrings(StringTable table)
         {
             table.Add(Name);
+            if (!String.IsNullOrEmpty(_secondaryTexture))
+                table.Add(_secondaryTexture);
         }
 
         protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)
@@ -87,7 +97,12 @@ namespace BrawlLib.SSBB.ResourceNodes
             MDL0Data7Part3* header = (MDL0Data7Part3*)dataAddress;
             header->ResourceStringAddress = stringTable[Name] + 4;
 
-            header->_unk1 = _unk1;
+            if (!String.IsNullOrEmpty(_secondaryTexture))
+                header->SecondaryTextureAddress = stringTable[_secondaryTexture] + 4;
+            else
+                header->_secondaryOffset = 0;
+
+            //header->_unk1 = _unk1;
             header->_unk2 = _unk2;
             header->_unk3 = _unk3;
             header->_unk4 = _unk4;

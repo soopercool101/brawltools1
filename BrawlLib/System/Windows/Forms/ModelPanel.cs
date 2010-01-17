@@ -41,39 +41,43 @@ namespace System.Windows.Forms
         private Matrix43 _viewMatrix = Matrix43.Identity;
         //private Matrix _vMatrix = Matrix.Identity;
 
+        internal Vector3 _defaultTranslate;
+
         public event GLRenderEventHandler PreRender, PostRender;
 
         private List<ResourceNode> _resourceList = new List<ResourceNode>();
 
         private Matrix43 _transform = Matrix43.Identity;
 
-        private MDL0Node _model;
-        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MDL0Node TargetModel
-        {
-            get { return _model; }
-            set
-            {
-                if (_model == value)
-                    return;
+        //private MDL0Node _model;
+        //[Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        //public MDL0Node TargetModel
+        //{
+        //    get { return _model; }
+        //    set
+        //    {
+        //        if (_model == value)
+        //            return;
 
-                if (_model != null)
-                    _model.Unbind(_context);
+        //        if (_model != null)
+        //            _model.Unbind(_context);
 
-                if (_context != null)
-                    _context.Unbind();
+        //        if (_context != null)
+        //            _context.Unbind();
 
-                _resourceList.Clear();
-                if ((_model = value) != null)
-                {
-                    _resourceList.Add(_model);
-                    if (_context != null)
-                        _context._states["_Node_Refs"] = _resourceList;
-                }
+        //        _resourceList.Clear();
+        //        if ((_model = value) != null)
+        //        {
+        //            _resourceList.Add(_model);
+        //            if (_context != null)
+        //                _context._states["_Node_Refs"] = _resourceList;
+        //        }
 
-                ResetCamera();
-            }
-        }
+        //        ResetCamera();
+        //    }
+        //}
+
+        private List<IRenderedObject> _renderList = new List<IRenderedObject>();
 
         public override Color BackColor
         {
@@ -97,6 +101,7 @@ namespace System.Windows.Forms
         public ModelPanel()
         {
             ColorChanged += OnBackColorChanged;
+            _camera = new GLCamera();
         }
 
         private void OnBackColorChanged(Color c) { this.BackColor = c; }
@@ -119,29 +124,82 @@ namespace System.Windows.Forms
 
         public void ResetCamera()
         {
-            _viewPoint = new Vector3(0.0f, _yInit * _transFactor, _zoomInit * _zoomFactor);
-            _viewRot = new Vector3();
-
-            CalcMatrices();
+            _camera.Reset();
+            _camera.Translate(_defaultTranslate._x, _defaultTranslate._y, _defaultTranslate._z);
 
             Invalidate();
+        }
+
+        public void ClearAll()
+        {
+            ClearTargets();
+            ClearReferences();
+
+            _context.Unbind();
+            _context._states["_Node_Refs"] = _resourceList;
+        }
+
+        public void AddTarget(IRenderedObject target)
+        {
+            if (_renderList.Contains(target))
+                return;
+
+            _renderList.Add(target);
+
+            if (target is ResourceNode)
+                _resourceList.Add(target as ResourceNode);
+
+            _context.Capture();
+            target.Attach(_context);
+
+            Invalidate();
+        }
+        public void RemoveTarget(IRenderedObject target)
+        {
+            if (!_renderList.Contains(target))
+                return;
+
+            _context.Capture();
+            target.Detach(_context);
+
+            if (target is ResourceNode)
+                RemoveReference(target as ResourceNode);
+
+            _renderList.Remove(target);
+        }
+        public void ClearTargets()
+        {
+            foreach (IRenderedObject o in _renderList)
+                o.Detach(_context);
+            _renderList.Clear();
         }
 
         public void AddReference(ResourceNode node)
         {
-            if (!_resourceList.Contains(node))
-                _resourceList.Add(node);
-            if (_model != null)
-                _model.ResetTextures();
-            Invalidate();
+            if (_resourceList.Contains(node))
+                return;
+
+            _resourceList.Add(node);
+            RefreshReferences();
         }
         public void RemoveReference(ResourceNode node)
         {
-            if (_resourceList.Contains(node))
-                _resourceList.Remove(node);
-            if (_model != null)
-                _model.ResetTextures();
-            Invalidate();
+            if (!_resourceList.Contains(node))
+                return;
+
+            _resourceList.Remove(node);
+            RefreshReferences();
+        }
+        public void ClearReferences()
+        {
+            _resourceList.Clear();
+            RefreshReferences();
+        }
+        private void RefreshReferences()
+        {
+            _context.Capture();
+            foreach (IRenderedObject o in _renderList)
+                o.Refesh(_context);
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)
@@ -290,36 +348,13 @@ namespace System.Windows.Forms
 
         private void Translate(float x, float y, float z)
         {
-            _viewPoint = _transform.Multiply(new Vector3(x, y, z));
-
-            CalcMatrices();
+            _camera.Translate(x, y, z);
             this.Invalidate();
         }
         private void Rotate(float x, float y)
         {
-            _viewRot._x = Math.Max(Math.Min(89.0f, _viewRot._x + x), -89.0f);
-            _viewRot._y += y;
-
-            CalcMatrices();
+            _camera.Pivot(_viewDistance, x, y);
             this.Invalidate();
-        }
-
-        private void CalcMatrices()
-        {
-            _transform = Matrix43.TransformationMatrix(new Vector3(1.0f), _viewRot, _viewPoint);
-
-            _eyePoint = _transform.Multiply(new Vector3(0.0f, 0.0f, _viewDistance));
-        }
-
-        private int _updateCounter = 0;
-        public void BeginUpdate()
-        {
-            _updateCounter++;
-        }
-        public void EndUpdate()
-        {
-            if ((_updateCounter = Math.Max(_updateCounter - 1, 0)) == 0)
-                Invalidate();
         }
 
         protected internal unsafe override void OnInit()
@@ -370,28 +405,20 @@ namespace System.Windows.Forms
             //Set client states
             _context._states["_Node_Refs"] = _resourceList;
 
-            OnResized();
+            //OnResized();
         }
 
         protected internal override void OnRender()
         {
-            if (_updateCounter > 0)
-                return;
-
             _context.glClear(GLClearMask.ColorBuffer | GLClearMask.DepthBuffer);
 
-
-            if (_model != null)
+            if (_renderList.Count > 0)
             {
-                _context.glMatrixMode(GLMatrixMode.ModelView);
-                _context.glLoadIdentity();
-
-                _context.gluLookAt(_eyePoint._x, _eyePoint._y, _eyePoint._z, _viewPoint._x, _viewPoint._y, _viewPoint._z, 0.0, 1.0, 0.0);
-
                 if (PreRender != null)
                     PreRender(this, _context);
 
-                _model.Render(_context);
+                foreach (IRenderedObject o in _renderList)
+                    o.Render(_context);
 
                 if (PostRender != null)
                     PostRender(this, _context);

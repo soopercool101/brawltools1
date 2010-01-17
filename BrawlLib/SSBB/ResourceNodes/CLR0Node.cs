@@ -104,10 +104,6 @@ namespace BrawlLib.SSBB.ResourceNodes
 
                 n._changed = false;
             }
-
-            _replSrc.Close();
-            _replUncompSrc.Close();
-            _replSrc = _replUncompSrc = new DataSource(address, length);
         }
 
         protected override void OnPopulate()

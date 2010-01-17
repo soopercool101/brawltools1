@@ -62,12 +62,14 @@
     <Compile Include="Modeling\Primitive.cs" />
     <Compile Include="Modeling\TextureRef.cs" />
     <Compile Include="OpenGL\Enums.cs" />
+    <Compile Include="OpenGL\GLCamera.cs" />
     <Compile Include="OpenGL\GLContext.cs" />
     <Compile Include="OpenGL\GLDisplayList.cs" />
     <Compile Include="OpenGL\GLPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="OpenGL\GLTexture.cs" />
+    <Compile Include="OpenGL\IRenderedObject.cs" />
     <Compile Include="Platform\Win32.DirectSound.cs" />
     <Compile Include="Platform\Win32.DirectSoundBuffer.cs" />
     <Compile Include="Platform\Win32.OpenGL.cs" />
@@ -75,6 +77,8 @@
     <Compile Include="SSBB\ExportFilters.cs" />
     <Compile Include="SSBB\LabelBuilder.cs" />
     <Compile Include="SSBB\NodeComparer.cs" />
+    <Compile Include="SSBB\ResourceNodes\CollisionNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\EFLSNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0BoneNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0ColorNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0DefNode.cs" />
@@ -111,6 +115,7 @@
     <Compile Include="SSBB\ResourceNodes\RSTMNode.cs" />
     <Compile Include="SSBB\ResourceNodes\RWSD\RWSDSoundNode.cs" />
     <Compile Include="SSBB\StringTable.cs" />
+    <Compile Include="SSBB\Types\CollisionDef.cs" />
     <Compile Include="SSBB\Types\EFLS.cs" />
     <Compile Include="SSBB\Types\RBNK.cs" />
     <Compile Include="SSBB\Types\REFF.cs" />
@@ -132,6 +137,7 @@
     <Compile Include="System\Matrix.cs" />
     <Compile Include="System\Matrix43.cs" />
     <Compile Include="System\Matrix43StringConverter.cs" />
+    <Compile Include="System\Matrix4d.cs" />
     <Compile Include="System\StringExtension.cs" />
     <Compile Include="System\UnsafeBuffer.cs" />
     <Compile Include="System\Vector2.cs" />
@@ -156,6 +162,7 @@
     <Compile Include="System\Reflection\MemberInfoExtension.cs" />
     <Compile Include="System\Reflection\MethodInfoExtension.cs" />
     <Compile Include="System\ByteExtension.cs" />
+    <Compile Include="System\Vector4.cs" />
     <Compile Include="System\Windows\Forms\AnimEditControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -170,6 +177,12 @@
     </Compile>
     <Compile Include="System\Windows\Forms\CLRControl.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\CollisionEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="System\Windows\Forms\CollisionForm.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="System\Windows\Forms\CustomTrackBar.cs">
       <SubType>Component</SubType>
@@ -325,6 +338,12 @@
     <EmbeddedResource Include="System\Windows\Forms\CLRControl.resx">
       <DependentUpon>CLRControl.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\CollisionEditor.resx">
+      <DependentUpon>CollisionEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\CollisionForm.resx">
+      <DependentUpon>CollisionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\GoodColorControl.resx">
       <DependentUpon>GoodColorControl.cs</DependentUpon>

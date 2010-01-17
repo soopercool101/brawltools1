@@ -111,6 +111,24 @@ namespace System
             }
             return nv;
         }
+        public static Vector3 operator *(Matrix m, Vector3 v)
+        {
+            Vector3 nv;
+            float* p = (float*)&m;
+            nv._x = (p[0] * v._x) + (p[4] * v._y) + (p[8] * v._z) + p[12];
+            nv._y = (p[1] * v._x) + (p[5] * v._y) + (p[9] * v._z) + p[13];
+            nv._z = (p[2] * v._x) + (p[6] * v._y) + (p[10] * v._z) + p[14];
+            return nv;
+        }
+        public static Vector4 operator *(Matrix m, Vector4 v)
+        {
+            Vector4 nv;
+            float* dPtr = (float*)&nv;
+            float* p0 = (float*)&m, p1 = p0 + 4, p2 = p0 + 8, p3 = p0 + 12;
+            for (int i = 0; i < 4; i++)
+                dPtr[i] = (p0[i] * v.x) + (p1[i] * v.y) + (p2[i] * v.z) + (p3[i] * v.w);
+            return nv;
+        }
 
         internal void Multiply(float p)
         {
@@ -277,6 +295,44 @@ namespace System
             dPtr[11] = sPtr[14];
 
             return m1;
+        }
+
+        public static Matrix ProjectionMatrix(float fovY, float aspect, float nearZ, float farZ)
+        {
+            Matrix m;
+
+            float* p = (float*)&m;
+
+            float cotan = (float)(1.0 / Math.Tan(fovY / 2 * Math.PI / 180.0));
+
+            p[0] = cotan / aspect;
+            p[5] = cotan;
+            p[10] = (farZ + nearZ) / (nearZ - farZ);
+            p[11] = -1.0f;
+            p[14] = (2.0f * farZ * nearZ) / (nearZ - farZ);
+
+            p[1] = p[2] = p[3] = p[4] = p[6] = p[7] = p[8] = p[9] = p[12] = p[13] = p[15] = 0.0f;
+
+            return m;
+        }
+        public static Matrix ReverseProjectionMatrix(float fovY, float aspect, float nearZ, float farZ)
+        {
+            Matrix m;
+
+            float* p = (float*)&m;
+
+            float cotan = (float)(1.0 / Math.Tan(fovY / 2 * Math.PI / 180.0));
+            float val = (2.0f * farZ * nearZ) / (nearZ - farZ);
+
+            p[0] = aspect / cotan;
+            p[5] = 1.0f / cotan;
+            p[11] = 1.0f / val;
+            p[14] = -1.0f;
+            p[15] = (farZ + nearZ) / (nearZ - farZ) / val;
+
+            p[1] = p[2] = p[3] = p[4] = p[6] = p[7] = p[8] = p[9] = p[10] = p[12] = p[13] = 0.0f;
+
+            return m;
         }
 
         public static Matrix TransformMatrix(Vector3 scale, Vector3 rotate, Vector3 translate)

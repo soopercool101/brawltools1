@@ -79,19 +79,19 @@ namespace BrawlLib.OpenGL
 
         internal override void glAccum(GLAccumOp op, float value) { wGL.glAccum(op, value); }
 
-        private delegate void ActiveTextureDelegate(GLMultiTextureTarget texture);
-        private ActiveTextureDelegate _pActiveTexture;
-        internal override void glActiveTexture(GLMultiTextureTarget texture)
-        {
-            if (_pActiveTexture == null)
-            {
-                VoidPtr ptr = wGL.wglGetProcAddress("glActiveTexture");
-                if (ptr == null)
-                    ptr = wGL.wglGetProcAddress("glActiveTextureARB");
-                _pActiveTexture = (ActiveTextureDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(ActiveTextureDelegate));
-            }
-            _pActiveTexture(texture);
-        }
+        //private delegate void ActiveTextureDelegate(GLMultiTextureTarget texture);
+        //private ActiveTextureDelegate _pActiveTexture;
+        //internal override void glActiveTexture(GLMultiTextureTarget texture)
+        //{
+        //    if (_pActiveTexture == null)
+        //    {
+        //        VoidPtr ptr = wGL.wglGetProcAddress("glActiveTexture");
+        //        if (ptr == null)
+        //            ptr = wGL.wglGetProcAddress("glActiveTextureARB");
+        //        _pActiveTexture = (ActiveTextureDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(ActiveTextureDelegate));
+        //    }
+        //    _pActiveTexture(texture);
+        //}
         internal override void glAlphaFunc(GLAlphaFunc func, float refValue) { wGL.glAlphaFunc(func, refValue); }
         internal override bool glAreTexturesResident(int num, uint* textures, bool* residences) { return wGL.glAreTexturesResident(num, textures, residences); }
         internal override void glArrayElement(int index) { wGL.glArrayElement(index); }
@@ -899,10 +899,7 @@ namespace BrawlLib.OpenGL
             throw new NotImplementedException();
         }
 
-        internal override void glReadPixels(int x, int y, int width, int height, uint format, uint type, out void* pixels)
-        {
-            throw new NotImplementedException();
-        }
+        internal override void glReadPixels(int x, int y, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels) { wGL.glReadPixels(x, y, width, height, format, type, pixels); }
 
         internal override void glRect(double x1, double y1, double x2, double y2)
         {
@@ -1115,6 +1112,7 @@ namespace BrawlLib.OpenGL
         internal override void gluQuadricDrawStyle(int quad, GLUQuadricDrawStyle draw) { wGL.gluQuadricDrawStyle(quad, draw); }
 
         internal override void gluLookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ) { wGL.gluLookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ); }
+        internal override void gluUnProject(double winX, double winY, double winZ, double* model, double* proj, int* view, double* objX, double* objY, double* objZ) { wGL.gluUnProject(winX, winY, winZ, model, proj, view, objX, objY, objZ); }
 
     }
 }

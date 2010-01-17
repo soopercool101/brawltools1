@@ -23,7 +23,12 @@ namespace BrawlLib.Modeling
         private GLContext _context;
 
         public TextureRef() { }
-        public TextureRef(string name) { Name = name; }
+        public TextureRef(string name) 
+        {
+            Name = name;
+            if (Name == "TShadow1")
+                Enabled = false;
+        }
 
         public override string ToString() { return Name; }
 
@@ -31,6 +36,7 @@ namespace BrawlLib.Modeling
         {
             if (_context == null)
                 _context = ctx;
+
 
             if (Texture != null)
                 Texture.Bind();
@@ -75,10 +81,17 @@ namespace BrawlLib.Modeling
             if (_context._states.ContainsKey("_Node_Refs"))
             {
                 List<ResourceNode> nodes = _context._states["_Node_Refs"] as List<ResourceNode>;
-                foreach (ResourceNode node in nodes)
+                List<ResourceNode> searched = new List<ResourceNode>(nodes.Count);
+
+                foreach (ResourceNode n in nodes)
                 {
+                    ResourceNode node = n.RootNode;
+                    if (searched.Contains(node))
+                        continue;
+                    searched.Add(node);
+
                     //Search node itself first
-                    if ((tNode = node.RootNode.FindChild("Textures(NW4R)/" + Name, true) as TEX0Node) != null)
+                    if ((tNode = node.FindChild("Textures(NW4R)/" + Name, true) as TEX0Node) != null)
                     {
                         Source = tNode;
                         bmp = tNode.GetImage(0);
@@ -86,7 +99,7 @@ namespace BrawlLib.Modeling
                     else
                     {
                         //Then search node directory
-                        string path = node.RootNode._origPath;
+                        string path = node._origPath;
                         DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(path));
                         foreach (FileInfo file in dir.GetFiles(Name + ".*"))
                         {
@@ -107,6 +120,7 @@ namespace BrawlLib.Modeling
                     if (bmp != null)
                         break;
                 }
+                searched.Clear();
 
                 if (bmp != null)
                 {
@@ -134,7 +148,10 @@ namespace BrawlLib.Modeling
                             for (int i = 0; i < size; i++)
                                 *dPtr++ = (ABGRPixel)(*sPtr++);
 
-                            _context.gluBuild2DMipmaps(GLTextureTarget.Texture2D, GLInternalPixelFormat._4, w, h, GLPixelDataFormat.RGBA, GLPixelDataType.UNSIGNED_BYTE, buffer.Address);
+                            int res = _context.gluBuild2DMipmaps(GLTextureTarget.Texture2D, GLInternalPixelFormat._4, w, h, GLPixelDataFormat.RGBA, GLPixelDataType.UNSIGNED_BYTE, buffer.Address);
+                            if (res != 0)
+                            {
+                            }
                         }
                     }
                     finally

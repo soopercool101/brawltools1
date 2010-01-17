@@ -15,15 +15,9 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal CHR0* Header { get { return (CHR0*)WorkingUncompressed.Address; } }
         public override ResourceType ResourceType { get { return ResourceType.CHR0; } }
 
-        internal int _layer = 0;
-        [Category("Character Animation")]
-        public int Layer
-        {
-            get { return _layer; }
-            set { _layer = value; SignalPropertyChange(); }
-        }
-
         internal int _numFrames = 1;
+        internal int _unk1, _unk2, _unk3;
+
         [Category("Character Animation")]
         public int FrameCount
         {
@@ -40,6 +34,13 @@ namespace BrawlLib.SSBB.ResourceNodes
                 SignalPropertyChange();
             }
         }
+
+        [Category("Character Animation")]
+        public int Unknown1 { get { return _unk1; } set { _unk1 = value; SignalPropertyChange(); } }
+        [Category("Character Animation")]
+        public int Unknown2 { get { return _unk2; } set { _unk2 = value; SignalPropertyChange(); } }
+        [Category("Character Animation")]
+        public int Unknown3 { get { return _unk3; } set { _unk3 = value; SignalPropertyChange(); } }
 
         public CHR0EntryNode CreateEntry()
         {
@@ -70,8 +71,10 @@ namespace BrawlLib.SSBB.ResourceNodes
             if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
-            _layer = Header->_layer;
             _numFrames = Header->_numFrames;
+            _unk1 = Header->_unk1;
+            _unk2 = Header->_unk2;
+            _unk3 = Header->_unk3;
 
             return Header->Group->_numEntries > 0;
         }
@@ -101,7 +104,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected internal override void OnRebuild(VoidPtr address, int length, bool force)
         {
             CHR0* header = (CHR0*)address;
-            *header = new CHR0(length, _numFrames, Children.Count, _layer);
+            *header = new CHR0(length, _numFrames, Children.Count, _unk1, _unk2, _unk3);
 
             ResourceGroup* group = header->Group;
             *group = new ResourceGroup(Children.Count);
@@ -126,10 +129,6 @@ namespace BrawlLib.SSBB.ResourceNodes
                 entryAddress += n._entryLen;
                 dataAddress += n._dataLen;
             }
-
-            _replSrc.Close();
-            _replUncompSrc.Close();
-            _replSrc = _replUncompSrc = new DataSource(address, length);
         }
 
         protected internal override void PostProcess(VoidPtr bresAddress, VoidPtr dataAddress, int dataLength, StringTable stringTable)
@@ -232,10 +231,6 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected internal override void OnRebuild(VoidPtr address, int length, bool force)
         {
             AnimationConverter.EncodeKeyframes(_keyframes, address, _dataAddr);
-
-            _replSrc.Close();
-            _replUncompSrc.Close();
-            _replSrc = _replUncompSrc = new DataSource(address, length);
         }
 
         protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)

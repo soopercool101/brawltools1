@@ -647,7 +647,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern void glReadBuffer(uint mode);
         [DllImport("opengl32.dll")]
-        public static extern void glReadPixels(int x, int y, int width, int height, uint format, uint type, out void* pixels);
+        public static extern void glReadPixels(int x, int y, int width, int height, GLPixelDataFormat format, GLPixelDataType type, void* pixels);
 
         #region glRect
 
@@ -915,5 +915,8 @@ namespace BrawlLib.OpenGL
 
         [DllImport("Glu32.dll")]
         public static extern void gluLookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ);
+
+        [DllImport("Glu32.dll")]
+        public static extern void gluUnProject(double winX, double winY, double winZ, double* model, double* proj, int* view, double* objX, double* objY, double* objZ);
     }
 }
