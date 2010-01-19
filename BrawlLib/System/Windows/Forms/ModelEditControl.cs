@@ -139,19 +139,14 @@ namespace System.Windows.Forms
             // 
             // numFPS
             // 
-            this.numFPS.Location = new System.Drawing.Point(43, 10);
-            this.numFPS.Maximum = new decimal(new int[] {
-            60,
-            0,
-            0,
-            0});
+            this.numFPS.Location = new System.Drawing.Point(42, 10);
             this.numFPS.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
             this.numFPS.Name = "numFPS";
-            this.numFPS.Size = new System.Drawing.Size(35, 20);
+            this.numFPS.Size = new System.Drawing.Size(40, 20);
             this.numFPS.TabIndex = 5;
             this.numFPS.Value = new decimal(new int[] {
             60,
@@ -173,7 +168,7 @@ namespace System.Windows.Forms
             // 
             // chkLoop
             // 
-            this.chkLoop.Location = new System.Drawing.Point(82, 12);
+            this.chkLoop.Location = new System.Drawing.Point(85, 12);
             this.chkLoop.Name = "chkLoop";
             this.chkLoop.Size = new System.Drawing.Size(50, 17);
             this.chkLoop.TabIndex = 6;

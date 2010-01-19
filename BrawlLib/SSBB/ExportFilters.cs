@@ -47,6 +47,15 @@ namespace BrawlLib
             "Color Sequence (*.clr0)|*.clr0";
 
         public static string VIS0 =
-            "VIS0 (*.vis0)|*.vis0";
+            "Visibility Sequence (*.vis0)|*.vis0";
+
+        public static string REFF =
+            "REFF (*.reff)|*.reff";
+
+        public static string EFLS =
+            "Effect List (*.efls)|*.efls";
+
+        public static string CollisionDef =
+            "Collision Definition (*.coll)|*.coll";
     }
 }

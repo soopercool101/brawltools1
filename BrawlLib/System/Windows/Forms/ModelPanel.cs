@@ -412,8 +412,8 @@ namespace System.Windows.Forms
         {
             _context.glClear(GLClearMask.ColorBuffer | GLClearMask.DepthBuffer);
 
-            if (_renderList.Count > 0)
-            {
+            //if (_renderList.Count > 0)
+            //{
                 if (PreRender != null)
                     PreRender(this, _context);
 
@@ -422,7 +422,7 @@ namespace System.Windows.Forms
 
                 if (PostRender != null)
                     PostRender(this, _context);
-            }
+            //}
         }
     }
 }

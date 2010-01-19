@@ -164,24 +164,36 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             if (_material != null)
             {
-                ctx.glEnable(GLEnableCap.Texture2D);
-                ctx.glEnableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
-                foreach (MDL0MaterialRefNode mr in _material.Children)
+                if (_material.Children.Count == 0)
                 {
-                    //if ((mr._layerId1 == 0) || (!mr._textureReference.Enabled))
-                    //    continue;
-                    if (!mr._textureReference.Enabled)
-                        continue;
-
-                    mr.Bind(ctx);
+                    ctx.glDisable((uint)GLEnableCap.Texture2D);
                     foreach (Primitive prim in Primitives)
                     {
                         prim.PreparePointers(ctx);
-                        prim.Render(ctx, 0);
+                        prim.Render(ctx, -1);
                     }
                 }
-                ctx.glDisableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
-                ctx.glDisable((uint)GLEnableCap.Texture2D);
+                else
+                {
+                    ctx.glEnableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
+                    ctx.glEnable(GLEnableCap.Texture2D);
+                    foreach (MDL0MaterialRefNode mr in _material.Children)
+                    {
+                        //if ((mr._layerId1 == 0) || (!mr._textureReference.Enabled))
+                        //    continue;
+                        if (!mr._textureReference.Enabled)
+                            continue;
+
+                        mr.Bind(ctx);
+                        foreach (Primitive prim in Primitives)
+                        {
+                            prim.PreparePointers(ctx);
+                            prim.Render(ctx, 0);
+                        }
+                    }
+                    ctx.glDisable((uint)GLEnableCap.Texture2D);
+                    ctx.glDisableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
+                }
             }
             else
             {

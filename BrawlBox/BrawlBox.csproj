@@ -52,6 +52,7 @@
     <Compile Include="NodeWrappers\CHR0Wrapper.cs" />
     <Compile Include="NodeWrappers\CLR0Wrapper.cs" />
     <Compile Include="NodeWrappers\CollisionWrapper.cs" />
+    <Compile Include="NodeWrappers\EFLSWrapper.cs" />
     <Compile Include="NodeWrappers\GenericWrapper.cs" />
     <Compile Include="NodeWrappers\MDL0GroupWrapper.cs" />
     <Compile Include="NodeWrappers\MDL0Wrapper.cs" />
@@ -197,6 +198,21 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\T.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\EFLS.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\REFF.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CLR.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\VIS.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Coll.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

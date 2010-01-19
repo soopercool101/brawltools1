@@ -5,6 +5,7 @@ using System.Text;
 using BrawlLib.SSBB.ResourceNodes;
 using System.Windows.Forms;
 using System.ComponentModel;
+using BrawlLib;
 
 namespace BrawlBox
 {
@@ -45,6 +46,8 @@ namespace BrawlBox
             _menu.Items[7].Enabled = w.NextNode != null;
         }
         #endregion
+
+        public override string ExportFilter { get { return ExportFilters.CollisionDef; } }
 
         public CollisionWrapper() { ContextMenuStrip = _menu; }
 

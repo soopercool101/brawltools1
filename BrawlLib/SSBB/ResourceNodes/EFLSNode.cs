@@ -34,9 +34,14 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override int OnCalculateSize(bool force)
         {
-            int size = 0x20;
+            int size = 0x10;
             foreach (EFLSEntryNode e in Children)
-                size += e._name.Length + 0x11;
+            {
+                if (String.Equals(e._name, "<null>", StringComparison.OrdinalIgnoreCase))
+                    size += 0x10;
+                else
+                    size += e._name.Length + 0x11;
+            }
             return size;
         }
 
@@ -52,7 +57,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             int count = Children.Count;
 
             EFLSHeader* header = (EFLSHeader*)address;
-            *header = new EFLSHeader(count + 1, _unk1, _unk2, _unk3);
+            *header = new EFLSHeader(count, _unk1, _unk2, _unk3);
 
             EFLSEntry* entry = (EFLSEntry*)((int)header + 0x10);
             byte* dPtr = (byte*)entry + (count * 0x10);

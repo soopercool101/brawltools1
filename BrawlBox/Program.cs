@@ -37,7 +37,7 @@ namespace BrawlBox
             FullPath = Process.GetCurrentProcess().MainModule.FileName;
 
             _openDlg = new OpenFileDialog();
-            _saveDlg = new SaveFileDialog() { AddExtension = false };
+            _saveDlg = new SaveFileDialog();
             _folderDlg = new FolderBrowserDialog();
         }
 
@@ -198,7 +198,7 @@ namespace BrawlBox
         }
         public static string ApplyExtension(string path, string filter, int filterIndex)
         {
-            int index = filter.IndexOfOccurance('|', filterIndex * 2 + 1);
+            int index = filter.IndexOfOccurance('|', filterIndex * 2);
             if (index == -1)
                 return path;
 

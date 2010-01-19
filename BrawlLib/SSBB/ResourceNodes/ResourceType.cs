@@ -18,6 +18,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         MSBin = 0x0204,
         EFLS = 0x0215,
         CollisionDef = 0x0216,
+        REFF = 0x0217,
 
         TEX0 = 0x0305,
         PLT0 = 0x0306,

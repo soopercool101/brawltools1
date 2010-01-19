@@ -31,14 +31,21 @@ namespace BrawlBox
                         Resources.PLT0,
                         Resources.MDL0,
                         Resources.CHR,
-                        Resources.Unknown,
-                        Resources.Unknown,
+                        Resources.CLR,
+                        Resources.VIS,
                         Resources.RSAR,
                         Resources.RSTM,
                         Resources.S,
                         Resources.G,
                         Resources.T,
-                        Resources.B
+                        Resources.B,
+                        Resources.Unknown, //RWSD
+                        Resources.Unknown, //RBNK
+                        Resources.Unknown, //RSEQ
+                        Resources.Unknown, //Bone
+                        Resources.EFLS,
+                        Resources.Coll,
+                        Resources.REFF
                     });
                 }
                 return _imgList;

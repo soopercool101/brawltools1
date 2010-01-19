@@ -1,5 +1,5 @@
 ﻿
-BrawlLib Resource Library - Version 0.09b
+BrawlLib Resource Library - Version 0.10
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -11,6 +11,15 @@ they be held accountable for the manner in which it is used.
  ====================================
 |************ Change Log ************|
  ====================================
+
+- v0.10 - (01/18/2010)
+	. Fixed a bug that was causing decal textures to link improperly in MDL files.
+	. Added minor support for EFLS resources.
+	. Added support for stage collision files.
+	. Added editor for stage collision files.
+	. Fixed minor bug that was affecting the way non-textured polygons are rendered (alloy models).
+	. Increased maximum frame delay for animation playback.
+	. Fixed bug in OpenGL rendering dealing with depth buffer precision.
 
 - v0.09b- (01/06/2010)
 	. Added minor support for single-color CLR0 entries. Fixes many crashing problems.

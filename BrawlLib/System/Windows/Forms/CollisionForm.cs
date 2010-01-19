@@ -46,7 +46,7 @@ namespace System.Windows.Forms
         {
             _node = node;
             try { return ShowDialog(owner); }
-            finally { _node = null; }
+            finally { _node.SignalPropertyChange(); _node = null; }
         }
 
         protected override void OnShown(EventArgs e)

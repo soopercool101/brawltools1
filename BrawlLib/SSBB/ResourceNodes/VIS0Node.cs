@@ -11,6 +11,7 @@ namespace BrawlLib.SSBB.ResourceNodes
     public unsafe class VIS0Node : BRESEntryNode
     {
         internal VIS0* Header { get { return (VIS0*)WorkingUncompressed.Address; } }
+        public override ResourceType ResourceType { get { return ResourceType.VIS0; } }
 
         internal int _frameCount;
         internal int _unk1, _unk2;

@@ -78,30 +78,33 @@ namespace BrawlLib.SSBBTypes
         public bint _unk1; //0
         public bint _unk2; //0
         public bint _unk3; //0
-        public bint _unk4;
+        public bshort _unk4; //2
+        public bshort _unk5; //0
         public BVec2 _boxMin;
         public BVec2 _boxMax;
         public bshort _pointOffset;
         public bshort _pointCount;
-        public bshort _unk5; //0
-        public bshort _unk6; //-1
+        public bshort _unk6; //0
+        public bshort _unk7; //-1
         public fixed byte _modelName[32];
         public fixed byte _boneName[32];
 
-        public ColObject(int planeIndex, int planeCount, int pointOffset, int pointCount, Vector2 boxMin, Vector2 boxMax, string modelName, string boneName)
+        public ColObject(int planeIndex, int planeCount, int pointOffset, int pointCount, Vector2 boxMin, Vector2 boxMax, string modelName, string boneName,
+            int unk1, int unk2, int unk3, int unk4, int unk5, int unk6, int unk7)
         {
             _planeIndex = (short)planeIndex;
             _planeCount = (short)planeCount;
-            _unk1 = 0;
-            _unk2 = 0;
-            _unk3 = 0;
-            _unk4 = 0;
+            _unk1 = unk1;
+            _unk2 = unk2;
+            _unk3 = unk3;
+            _unk4 = (short)unk4;
+            _unk5 = (short)unk5;
             _boxMin = boxMin;
             _boxMax = boxMax;
             _pointOffset = (short)pointOffset;
             _pointCount = (short)pointCount;
-            _unk5 = 0;
-            _unk6 = 0;
+            _unk6 = (short)unk6;
+            _unk7 = (short)unk7;
 
             fixed (byte* p = _modelName)
                 SetStr(p, modelName);
@@ -203,7 +206,8 @@ namespace BrawlLib.SSBBTypes
     {
         None = 0x00,
         DropThrough = 0x01,
-        Unk1 = 0x40,
-        Unk2 = 0x80
+        Unk0 = 0x20,
+        RightLedge = 0x40,
+        NoWalljump = 0x80
     }
 }
