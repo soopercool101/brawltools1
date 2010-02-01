@@ -242,17 +242,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            if (IsBranch)
-                if (IsCompressed)
-                    _replUncompSrc.Length = CommonHeader->_size;
-                else
-                    _replSrc.Length = _replUncompSrc.Length = CommonHeader->_size;
-            else
-                if (IsCompressed)
-                    _uncompSource.Length = CommonHeader->_size;
-                else
-                    _origSource.Length = _uncompSource.Length = CommonHeader->_size;
-
+            SetSizeInternal(CommonHeader->_size);
             return false;
         }
 

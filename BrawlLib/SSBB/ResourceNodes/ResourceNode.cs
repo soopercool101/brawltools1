@@ -395,6 +395,20 @@ namespace BrawlLib.SSBB.ResourceNodes
             _changed = true;
         }
 
+        protected void SetSizeInternal(int size)
+        {
+            if (IsBranch)
+                if (IsCompressed)
+                    _replUncompSrc.Length = size;
+                else
+                    _replSrc.Length = _replUncompSrc.Length = size;
+            else
+                if (IsCompressed)
+                    _uncompSource.Length = size;
+                else
+                    _origSource.Length = _uncompSource.Length = size;
+        }
+
         //Causes a deviation in the resource tree. This node and all child nodes will be backed by a temporary file until the tree is merged.
         //Causes parent node(s) to become dirty.
         //Replace will reference the file in a new DataSource, 

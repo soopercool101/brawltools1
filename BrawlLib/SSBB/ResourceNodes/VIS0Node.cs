@@ -34,6 +34,16 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Bone Visibility")]
         public int Unknown2 { get { return _unk2; } set { _unk2 = value; SignalPropertyChange(); } }
 
+        public unsafe VIS0EntryNode CreateEntry()
+        {
+            VIS0EntryNode entry = new VIS0EntryNode();
+            entry._entryCount = -1;
+            entry.EntryCount = _frameCount + 1;
+            entry.Name = this.FindName();
+            AddChild(entry);
+            return entry;
+        }
+
         protected override bool OnInitialize()
         {
             base.OnInitialize();
@@ -46,6 +56,41 @@ namespace BrawlLib.SSBB.ResourceNodes
             _unk2 = Header->_unk2;
 
             return Header->Group->_numEntries > 0;
+        }
+
+        protected override int OnCalculateSize(bool force)
+        {
+            int size = VIS0.Size + 0x18;
+            foreach (ResourceNode e in Children)
+            {
+                size += 0x10;
+                size += e.CalculateSize(force);
+            }
+            return size;
+        }
+
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
+        {
+            int count = Children.Count;
+
+            VIS0* header = (VIS0*)address;
+            *header = new VIS0(length, _frameCount, count, _unk1, _unk2);
+
+            ResourceGroup* group = header->Group;
+            *group = new ResourceGroup(count);
+
+            ResourceEntry* entry = group->First;
+
+            VoidPtr dataAddress = group->EndAddress;
+            foreach (ResourceNode n in Children)
+            {
+                entry->_dataOffset = (int)dataAddress - (int)group;
+                entry++;
+
+                int len = n._calcSize;
+                n.Rebuild(dataAddress, len, force);
+                dataAddress += len;
+            }
         }
 
         protected override void OnPopulate()
@@ -83,13 +128,14 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
 
         internal static ResourceNode TryParse(DataSource source) { return ((VIS0*)source.Address)->_header._tag == VIS0.Tag ? new VIS0Node() : null; }
+
     }
 
     public unsafe class VIS0EntryNode : ResourceNode
     {
         internal VIS0Entry* Header { get { return (VIS0Entry*)WorkingUncompressed.Address; } }
 
-        internal byte[] _data;
+        internal byte[] _data = new byte[0];
         internal int _entryCount;
         internal VIS0Flags _flags;
 
@@ -111,11 +157,28 @@ namespace BrawlLib.SSBB.ResourceNodes
                     Array.Copy(_data, newArr, _data.Length);
                     _data = newArr;
                 }
+                SignalPropertyChange();
             }
         }
 
         [Category("VIS0 Entry")]
         public VIS0Flags Flags { get { return _flags; } set { _flags = value; SignalPropertyChange(); } }
+
+        protected override int OnCalculateSize(bool force)
+        {
+            if (_entryCount == 0)
+                return 8;
+            return _entryCount.Align(32) / 8 + 8;
+        }
+
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
+        {
+            VIS0Entry* header = (VIS0Entry*)address;
+            *header = new VIS0Entry(_flags);
+
+            if (_entryCount != 0)
+                Marshal.Copy(_data, 0, header->Data, length - 8);
+        }
 
         protected override bool OnInitialize()
         {
@@ -127,8 +190,10 @@ namespace BrawlLib.SSBB.ResourceNodes
             if ((_flags & VIS0Flags.Constant) == 0)
             {
                 _entryCount = ((VIS0Node)_parent)._frameCount + 1;
-
                 int numBytes = _entryCount.Align(32) / 8;
+
+                SetSizeInternal(numBytes + 8);
+
                 _data = new byte[numBytes];
                 Marshal.Copy(Header->Data, _data, 0, numBytes);
             }
@@ -136,6 +201,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             {
                 _entryCount = 0;
                 _data = new byte[0];
+                SetSizeInternal(8);
             }
 
             return false;
@@ -160,12 +226,14 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             _flags = VIS0Flags.Constant | (value ? VIS0Flags.Enabled : 0);
             _entryCount = 0;
+            SignalPropertyChange();
         }
         public void MakeAnimated()
         {
             _flags = VIS0Flags.None;
             _entryCount = -1;
             EntryCount = ((VIS0Node)_parent)._frameCount + 1;
+            SignalPropertyChange();
         }
 
         protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)

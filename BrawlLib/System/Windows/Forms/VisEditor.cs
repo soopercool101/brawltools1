@@ -205,12 +205,20 @@ namespace System.Windows.Forms
         {
             listBox1.BeginUpdate();
 
-            ListBox.SelectedIndexCollection col = listBox1.SelectedIndices;
+            int x;
+            int count = listBox1.SelectedIndices.Count;
+            int[] indices = new int[count];
+
+            listBox1.SelectedIndices.CopyTo(indices, 0);
             listBox1.SelectedIndices.Clear();
 
             for (int i = 0; i < listBox1.Items.Count; i++)
             {
-                if (!col.Contains(i))
+                for (x = 0; x < count; x++)
+                    if (indices[x] == i)
+                        break;
+
+                if (x >= count)
                     listBox1.SelectedIndices.Add(i);
             }
 

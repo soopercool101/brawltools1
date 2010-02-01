@@ -545,7 +545,7 @@ namespace BrawlLib.Wii.Animations
             {
                 root = _keyRoots[x];
                 for (entry = root._prev; (entry != root) && (entry._index >= index); entry = entry._prev)
-                    if (--entry._index < 0)
+                    if ((entry._index == index) || (--entry._index < 0))
                     {
                         entry = entry._next;
                         entry._prev.Remove();

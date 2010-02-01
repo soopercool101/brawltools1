@@ -1,5 +1,5 @@
 
-BrawlBox Data Viewer - Version 0.63b
+BrawlBox Data Viewer - Version 0.63c
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -19,6 +19,11 @@ http://code.google.com/p/brawltools/issues/list
  ====================================
 |************ Change Log ************|
  ====================================
+ 
+- v0.63c- (01/31/2010)
+	. Various bugfixes
+	. Added VIS editor
+	. Animation frames now interpolate properly.
  
 - v0.63b- (01/19/2010)
 	. Fixed image encoding bug related to image format on older systems.
