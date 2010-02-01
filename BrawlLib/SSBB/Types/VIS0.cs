@@ -5,6 +5,14 @@ using System.Runtime.InteropServices;
 
 namespace BrawlLib.SSBBTypes
 {
+    [Flags]
+    public enum VIS0Flags : int
+    {
+        None = 0x00,
+        Enabled = 0x01,
+        Constant = 0x02
+    }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe struct VIS0
     {
@@ -47,12 +55,5 @@ namespace BrawlLib.SSBBTypes
         }
 
         public VIS0Flags Flags { get { return (VIS0Flags)(int)_flags; } set { _flags = (int)value; } }
-    }
-
-    public enum VIS0Flags : int
-    {
-        None = 0x00,
-        Enabled = 0x01,
-        Constant = 0x02
     }
 }

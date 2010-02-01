@@ -49,7 +49,7 @@ namespace BrawlLib.Wii.Compression
         {
             switch (type)
             {
-                case CompressionType.LZ77: { LZ77.Compact(srcAddr, (uint)srcLen, outStream, null); break; }
+                case CompressionType.LZ77: { LZ77.Compact(srcAddr, srcLen, outStream, null); break; }
             }
         }
     }

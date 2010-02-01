@@ -55,8 +55,8 @@ namespace System.Windows.Forms
             {
                 if (_target.FrameCount > 0)
                 {
-                    foreach (AnimationKeyframe f in _target.Keyframes.Keyframes)
-                        listKeyframes.Items.Add(f);
+                    //foreach (AnimationKeyframe f in _target.Keyframes.Keyframes)
+                    //    listKeyframes.Items.Add(f);
 
                     _numFrames = _target.FrameCount;
 
@@ -127,7 +127,7 @@ namespace System.Windows.Forms
 
         private void UpdateBox(int index)
         {
-            if (!float.IsNaN(_target.GetKeyframe((KeyFrameMode)index, _currentPage)))
+            if (_target.GetKeyframe((KeyFrameMode)index, _currentPage) != null)
                 _boxes[index].BackColor = Color.Yellow;
             else
                 _boxes[index].BackColor = Color.White;
@@ -163,7 +163,7 @@ namespace System.Windows.Forms
                             listKeyframes.Items[kfIndex] = kf;
                     }
 
-                    _target.RemoveKeyframe((KeyFrameMode)index, _currentPage);
+                    _target.RemoveKeyframe(KeyFrameMode.ScaleX + index, _currentPage);
                     val = _target.GetAnimFrame(_currentPage)[index];
                     box.Value = val;
                 }
@@ -188,7 +188,7 @@ namespace System.Windows.Forms
                         listKeyframes.SelectedIndex = x;
                     }
 
-                    _target.SetKeyframe((KeyFrameMode)index, _currentPage, val);
+                    _target.SetKeyframe(KeyFrameMode.ScaleX + index, _currentPage, val);
                 }
 
                 _currentFrame[index] = val;

@@ -119,6 +119,7 @@
     <Compile Include="SSBB\Types\EFLS.cs" />
     <Compile Include="SSBB\Types\RBNK.cs" />
     <Compile Include="SSBB\Types\REFF.cs" />
+    <Compile Include="SSBB\Types\REL.cs" />
     <Compile Include="SSBB\Types\RSEQ.cs" />
     <Compile Include="SSBB\Types\RWSD.cs" />
     <Compile Include="System\Audio\AudioDevice.cs" />
@@ -132,6 +133,7 @@
     <Compile Include="System\Audio\wAudioDevice.cs" />
     <Compile Include="System\Audio\wAudioProvider.cs" />
     <Compile Include="System\Audio\WAV.cs" />
+    <Compile Include="System\DoubleExtension.cs" />
     <Compile Include="System\DVector3.cs" />
     <Compile Include="System\IO\FileAssociation.cs" />
     <Compile Include="System\Matrix.cs" />
@@ -249,6 +251,9 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="System\PString.cs" />
+    <Compile Include="System\Windows\Forms\VisEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Wii\Animations\AnimationCode.cs" />
     <Compile Include="Wii\Animations\AnimationConverter.cs" />
     <Compile Include="Wii\Animations\AnimationFrame.cs" />
@@ -386,6 +391,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="System\Windows\Forms\TransformEditControl.resx">
       <DependentUpon>TransformEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Windows\Forms\VisEditor.resx">
+      <DependentUpon>VisEditor.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

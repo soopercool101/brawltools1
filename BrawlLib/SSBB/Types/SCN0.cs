@@ -9,14 +9,15 @@ namespace BrawlLib.SSBBTypes
     public unsafe struct SCN0
     {
         public const uint Tag = 0x304E4353;
+        public const int Size = 0x44;
 
         public BRESCommonHeader _header;
         public bint _dataOffset;
-        public bint _part2Offset;
-        public bint _part3Offset;
-        public bint _part4Offset;
-        public bint _part5Offset;
-        public bint _part6Offset;
+        public bint _lightSetOffset;
+        public bint _ambLightOffset;
+        public bint _lightOffset;
+        public bint _fogOffset;
+        public bint _cameraOffset;
         public bint _stringOffset;
         public bint _unk1;
         public bshort _unk2;
@@ -33,11 +34,11 @@ namespace BrawlLib.SSBBTypes
 
         public ResourceGroup* Group { get { return (ResourceGroup*)(Address + _dataOffset); } }
 
-        public void* Part2 { get { return (_part2Offset != 0) ? Address + _part2Offset : null; } }
-        public void* Part3 { get { return (_part3Offset != 0) ? Address + _part3Offset : null; } }
-        public void* Part4 { get { return (_part4Offset != 0) ? Address + _part4Offset : null; } }
-        public void* Part5 { get { return (_part5Offset != 0) ? Address + _part5Offset : null; } }
-        public void* Part6 { get { return (_part6Offset != 0) ? Address + _part6Offset : null; } }
+        public SCN0LightSet* LightSets { get { return (SCN0LightSet*)(Address + _lightSetOffset); } }
+        public SCN0AmbientLight* AmbientLights { get { return (SCN0AmbientLight*)(Address + _ambLightOffset); } }
+        public SCN0Light* Lights { get { return (SCN0Light*)(Address + _lightOffset); } }
+        public SCN0Fog* Fogs { get { return (SCN0Fog*)(Address + _fogOffset); } }
+        public SCN0Camera* Cameras { get { return (SCN0Camera*)(Address + _cameraOffset); } }
 
         public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
         public VoidPtr ResourceStringAddress
@@ -73,7 +74,7 @@ namespace BrawlLib.SSBBTypes
     {
         public SCN0CommonHeader _header;
 
-        public bint _stringOffset2;
+        public bint _ambNameOffset;
         public bshort _magic; //0xFFFF
         public byte _numLights;
         public byte _unk1;
@@ -87,8 +88,8 @@ namespace BrawlLib.SSBBTypes
         public string AmbientString { get { return new String((sbyte*)AmbientStringAddress); } }
         public VoidPtr AmbientStringAddress
         {
-            get { return (VoidPtr)Address + _stringOffset2; }
-            set { _stringOffset2 = (int)value - (int)Address; }
+            get { return (VoidPtr)Address + _ambNameOffset; }
+            set { _ambNameOffset = (int)value - (int)Address; }
         }
 
         public bint* StringOffsets { get { return (bint*)(Address + 0x1C); } }
@@ -111,7 +112,7 @@ namespace BrawlLib.SSBBTypes
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct SCN0Part3
+    public unsafe struct SCN0Light
     {
         public SCN0CommonHeader _header;
 
@@ -138,7 +139,7 @@ namespace BrawlLib.SSBBTypes
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct SCN0Part4
+    public unsafe struct SCN0Fog
     {
         public SCN0CommonHeader _header;
 
@@ -155,7 +156,7 @@ namespace BrawlLib.SSBBTypes
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct SCN0Part5
+    public unsafe struct SCN0Camera
     {
         public SCN0CommonHeader _header;
 

@@ -198,20 +198,23 @@ namespace BrawlBox
         }
         public static string ApplyExtension(string path, string filter, int filterIndex)
         {
+            int tmp;
+            if ((Path.HasExtension(path)) && (!int.TryParse(Path.GetExtension(path), out tmp)))
+                return path;
+
             int index = filter.IndexOfOccurance('|', filterIndex * 2);
             if (index == -1)
                 return path;
 
             index = filter.IndexOf('.', index);
             int len = Math.Max(filter.Length, filter.IndexOfAny(new char[] { ';', '|' })) - index;
-            int tmp;
 
-            //If path has no extension apply it.
-            //If extension is numeric, apply again. This is for number-indexed resources.
-            if ((!Path.HasExtension(path)) || (int.TryParse(Path.GetExtension(path), out tmp)))
-                return path + filter.Substring(index, len);
+            string ext = filter.Substring(index, len);
 
-            return path;
+            if (ext.IndexOf('*') >= 0)
+                return path;
+
+            return path + ext;
         }
 
         internal static bool SaveAs()

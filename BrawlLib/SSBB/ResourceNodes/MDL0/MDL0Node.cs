@@ -248,6 +248,11 @@ namespace BrawlLib.SSBB.ResourceNodes
         //    int size = 0;
         //    //Definitions
 
+        //    foreach (ResourceNode node in Children)
+        //    {
+        //        size += node.CalculateSize(force);
+        //    }
+
         //    return size;
         //}
 

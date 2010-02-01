@@ -111,7 +111,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                         }
 
                     //Create entry
-                    pPlane[current._encodeIndex = iPlane++] = new ColPlane(lind, rind, llink, rlink, current._type, current._flags, current._material);
+                    pPlane[current._encodeIndex = iPlane++] = new ColPlane(lind, rind, llink, rlink, current._type, current._flags2, current._flags, current._material);
 
                     //Traverse
                     if (next != null)
@@ -209,7 +209,10 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             //CollisionPlane plane;
             for (int i = 0; i < planeCount; i++)
-                new CollisionPlane(this, pPlane++, pointOffset);
+            {
+                if (pPlane->_point1 != pPlane->_point2)
+                    new CollisionPlane(this, pPlane++, pointOffset);
+            }
         }
 
         //Calculate bounds, and reset indices
@@ -289,7 +292,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         internal CollisionLink Clone()
         {
-            return new CollisionLink(_parent, _value) { _highlight = _highlight };
+            return new CollisionLink(_parent, _value);
         }
 
         //internal CollisionLink Splinter()
@@ -348,7 +351,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                 }
             }
 
-            _value = (_value + link._value) / 2.0f;
+            //_value = (_value + link._value) / 2.0f;
 
             return true;
         }
@@ -437,60 +440,51 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal CollisionPlaneMaterial _material;
         internal CollisionPlaneFlags _flags;
         internal CollisionPlaneType _type;
+        internal CollisionPlaneFlags2 _flags2;
 
         internal bool _render = true;
 
         internal CollisionObject _parent;
 
-        public bool IsFloor 
-        { 
-            get { return (_type & CollisionPlaneType.Floor) != 0; }
+        public CollisionPlaneType Type
+        {
+            get { return _type; }
             set
-            { 
-                _type = (_type & ~CollisionPlaneType.Floor) | (value ? CollisionPlaneType.Floor : 0);
-                if ((value) && (PointLeft._x > PointRight._x))
-                    SwapLinks();
-            }
-        }
-        public bool IsCeiling
-        {
-            get { return (_type & CollisionPlaneType.Ceiling) != 0; }
-            set 
-            { 
-                _type = (_type & ~CollisionPlaneType.Ceiling) | (value ? CollisionPlaneType.Ceiling : 0);
-                if ((value) && (PointLeft._x < PointRight._x))
-                    SwapLinks();
-            }
-        }
-        public bool IsRightWall
-        {
-            get { return (_type & CollisionPlaneType.RightWall) != 0; }
-            set 
             {
-                _type = (_type & ~CollisionPlaneType.RightWall) | (value ? CollisionPlaneType.RightWall : 0);
-                if ((value) && (PointLeft._y < PointRight._y))
-                    SwapLinks();
+                switch (_type = value)
+                {
+                    case CollisionPlaneType.Floor:
+                        if (PointLeft._x > PointRight._x)
+                            SwapLinks();
+                        break;
+
+                    case CollisionPlaneType.Ceiling:
+                        if (PointLeft._x < PointRight._x)
+                            SwapLinks();
+                        break;
+
+                    case CollisionPlaneType.RightWall:
+                        if (PointLeft._y < PointRight._y)
+                            SwapLinks();
+                        break;
+
+                    case CollisionPlaneType.LeftWall:
+                        if (PointLeft._y > PointRight._y)
+                            SwapLinks();
+                        break;
+                }
             }
         }
-        public bool IsLeftWall
-        {
-            get { return (_type & CollisionPlaneType.LeftWall) != 0; }
-            set 
-            { 
-                _type = (_type & ~CollisionPlaneType.LeftWall) | (value ? CollisionPlaneType.LeftWall : 0);
-                if ((value) && (PointLeft._y > PointRight._y))
-                    SwapLinks();
-            }
-        }
+
         public bool IsType1
         {
-            get { return (_type & CollisionPlaneType.Unk1) != 0; }
-            set { _type = (_type & ~CollisionPlaneType.Unk1) | (value ? CollisionPlaneType.Unk1 : 0); }
+            get { return (_flags2 & CollisionPlaneFlags2.Unk1) != 0; }
+            set { _flags2 = (_flags2 & ~CollisionPlaneFlags2.Unk1) | (value ? CollisionPlaneFlags2.Unk1 : 0); }
         }
         public bool IsType2
         {
-            get { return (_type & CollisionPlaneType.Unk2) != 0; }
-            set { _type = (_type & ~CollisionPlaneType.Unk2) | (value ? CollisionPlaneType.Unk2 : 0); }
+            get { return (_flags2 & CollisionPlaneFlags2.Unk2) != 0; }
+            set { _flags2 = (_flags2 & ~CollisionPlaneFlags2.Unk2) | (value ? CollisionPlaneFlags2.Unk2 : 0); }
         }
         public bool IsFallThrough
         {
@@ -504,8 +498,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
         public bool IsLeftLedge
         {
-            get { return (_flags & CollisionPlaneFlags.Unk0) != 0; }
-            set { _flags = (_flags & ~CollisionPlaneFlags.Unk0) | (value ? CollisionPlaneFlags.Unk0 : 0); }
+            get { return (_flags & CollisionPlaneFlags.LeftLedge) != 0; }
+            set { _flags = (_flags & ~CollisionPlaneFlags.LeftLedge) | (value ? CollisionPlaneFlags.LeftLedge : 0); }
         }
         public bool IsNoWalljump
         {
@@ -568,6 +562,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             _material = entry->_material;
             _flags = entry->_flags;
             _type = entry->Type;
+            _flags2 = entry->Flags2;
         }
 
         public CollisionLink Split(Vector2 point)

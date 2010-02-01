@@ -55,12 +55,12 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             FrameCount++;
             foreach (CHR0EntryNode c in Children)
-                c.Keyframes.Insert(index);
+                c.Keyframes.Insert(KeyFrameMode.All, index);
         }
         public void DeleteKeyframe(int index)
         {
             foreach (CHR0EntryNode c in Children)
-                c.Keyframes.Delete(index);
+                c.Keyframes.Delete(KeyFrameMode.All, index);
             FrameCount--;
         }
 
@@ -242,39 +242,46 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal void SetSize(int count)
         {
             if (_keyframes != null)
-                Keyframes.SetSize(count);
+                Keyframes.FrameLimit = count;
 
             _numFrames = count;
             SignalPropertyChange();
         }
-        public float GetKeyframe(KeyFrameMode mode, int index) { return Keyframes.GetKeyframe(mode, index); }
+        public KeyframeEntry GetKeyframe(KeyFrameMode mode, int index) { return Keyframes.GetKeyframe(mode, index); }
         public void SetKeyframe(KeyFrameMode mode, int index, float value)
         {
-            Keyframes.SetKeyFrame(mode, index, value);
+            KeyframeEntry k = Keyframes.SetFrameValue(mode, index, value);
+            k.GenerateTangent();
+            k._prev.GenerateTangent();
+            k._next.GenerateTangent();
+
             SignalPropertyChange();
         }
         public void SetKeyframe(int index, AnimationFrame frame)
         {
             float* v = (float*)&frame;
-            for (int i = 0; i < 9; i++)
-                Keyframes.SetKeyFrame((KeyFrameMode)i, index, v[i]);
-            SignalPropertyChange();
+            for (int i = 0x10; i < 0x19; i++)
+                SetKeyframe((KeyFrameMode)i, index, *v++);
         }
         public void RemoveKeyframe(KeyFrameMode mode, int index)
         {
-            Keyframes.RemoveKeyframe(mode, index);
-            SignalPropertyChange();
+            KeyframeEntry k = Keyframes.Remove(mode, index);
+            if (k != null)
+            {
+                k._prev.GenerateTangent();
+                k._next.GenerateTangent();
+                SignalPropertyChange();
+            }
         }
         public void RemoveKeyframe(int index)
         {
-            for (int i = 0; i < 9; i++)
-                Keyframes.RemoveKeyframe((KeyFrameMode)i, index);
-            SignalPropertyChange();
+            for (int i = 0x10; i < 0x19; i++)
+                RemoveKeyframe((KeyFrameMode)i, index);
         }
 
         public AnimationFrame GetAnimFrame(int index)
         {
-            return Keyframes.AnimFrames[index];
+            return Keyframes.GetFullFrame(index);
         }
     }
 }

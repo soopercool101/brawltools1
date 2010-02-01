@@ -39,12 +39,12 @@ namespace BrawlLib.Wii.Compression
             GC.SuppressFinalize(this);
         }
 
-        public int Compress(VoidPtr srcAddr, uint srcLen, Stream outStream, IProgressTracker progress)
+        public int Compress(VoidPtr srcAddr, int srcLen, Stream outStream, IProgressTracker progress)
         {
             int dstLen = 4, bitCount;
             byte control;
 
-            byte* sPtr = (byte*)srcAddr, ceil = sPtr + srcLen;
+            byte* sPtr = (byte*)srcAddr;//, ceil = sPtr + srcLen;
             int matchLength, matchOffset = 0;
 
             //Initialize
@@ -59,19 +59,19 @@ namespace BrawlLib.Wii.Compression
 
             byte[] blockBuffer = new byte[17];
             int dInd;
-            uint lastUpdate = (uint)sPtr;
+            int lastUpdate = srcLen;
 
             if (progress != null)
-                progress.Begin((uint)sPtr, (uint)ceil, (uint)sPtr);
+                progress.Begin(srcLen, 0, srcLen);
 
-            while (sPtr < ceil)
+            while(srcLen > 0)
             {
                 dInd = 1;
                 //dPtr = blockBuffer + 1;
-                for (bitCount = 0, control = 0; (bitCount < 8) && (sPtr < ceil); bitCount++)
+                for (bitCount = 0, control = 0; (bitCount < 8) && (srcLen > 0); bitCount++)
                 {
                     control <<= 1;
-                    if ((matchLength = FindPattern(sPtr, (int)(ceil - sPtr), ref matchOffset)) != 0)
+                    if ((matchLength = FindPattern(sPtr, srcLen, ref matchOffset)) != 0)
                     {
                         control |= 1;
                         blockBuffer[dInd++] = (byte)(((matchLength - 3) << 4) | ((matchOffset - 1) >> 8));
@@ -79,14 +79,18 @@ namespace BrawlLib.Wii.Compression
                         //*dPtr++ = (byte)(((matchLength - 3) << 4) | ((matchOffset - 1) >> 8));
                         //*dPtr++ = (byte)(matchOffset - 1);
 
-                        Consume(sPtr, matchLength);
-                        sPtr += matchLength;
+                        //Consume(sPtr, matchLength);
+                        //sPtr += matchLength;
                     }
                     else
                     {
-                        Consume(sPtr, 1);
-                        blockBuffer[dInd++] = *sPtr++;
+                        matchLength = 1;
+                        //Consume(sPtr, 1);
+                        blockBuffer[dInd++] = *sPtr;
                     }
+                    Consume(sPtr, matchLength, srcLen);
+                    sPtr += matchLength;
+                    srcLen -= matchLength;
                 }
                 //Left-align bits
                 control <<= 8 - bitCount;
@@ -100,15 +104,15 @@ namespace BrawlLib.Wii.Compression
                 //dstLen += (int)(dPtr - blockBuffer);
 
                 if (progress != null)
-                    if (((uint)sPtr - lastUpdate) > 0x8000)
+                    if ((lastUpdate - srcLen) > 0x8000)
                     {
-                        lastUpdate = (uint)sPtr;
+                        lastUpdate = srcLen;
                         progress.Update(lastUpdate);
                     }
             }
 
-            if (progress != null)
-                progress.Update((uint)sPtr);
+            //if (progress != null)
+            //    progress.Update(srcLen);
 
             //while ((dstLen & 3) != 0)
             //{
@@ -119,6 +123,7 @@ namespace BrawlLib.Wii.Compression
 
             if (progress != null)
                 progress.Finish();
+
             return dstLen;
         }
 
@@ -154,10 +159,10 @@ namespace BrawlLib.Wii.Compression
             matchOffset = bestOffset;
             return bestLen;
         }
-        private void Consume(byte* ptr, int length)
+        private void Consume(byte* ptr, int length, int remaining)
         {
             int last, inOffset, inVal, outVal;
-            while (length-- > 0)
+            for (int i = Math.Min(length, remaining - 2); i-- > 0;)
             {
                 if (_wLength == WindowLength)
                 {
@@ -182,7 +187,7 @@ namespace BrawlLib.Wii.Compression
             }
         }
 
-        public static int Compact(VoidPtr srcAddr, uint srcLen, Stream outStream, string name)
+        public static int Compact(VoidPtr srcAddr, int srcLen, Stream outStream, string name)
         {
             using (LZ77 lz = new LZ77())
             using (ProgressWindow prog = new ProgressWindow(null, "LZ77", String.Format("Compressing {0}, please wait...", name), false))

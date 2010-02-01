@@ -12,6 +12,11 @@ they be held accountable for the manner in which it is used.
 |************ Change Log ************|
  ====================================
 
+- v0.10b- (01/19/2010)
+	. Fixed image encoding bug related to image format on older systems.
+	. Fixed rendering bug related to materials without textures.
+	. Added various features to collision editor.
+
 - v0.10 - (01/18/2010)
 	. Fixed a bug that was causing decal textures to link improperly in MDL files.
 	. Added minor support for EFLS resources.

@@ -55,16 +55,16 @@ namespace System.Windows.Forms
             g.CompositingMode = CompositingMode.SourceOver;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
             g.CompositingQuality = CompositingQuality.AssumeLinear;
-
+            
             //g.SetClip(bounds);
 
             g.FillRectangle(_brush, bounds);
-
-            g.TranslateTransform(bounds.X, bounds.Y);
-            g.ScaleTransform(scale, scale);
+            g.DrawImage(_target, bounds);
+            //g.TranslateTransform(bounds.X, bounds.Y);
+            //g.ScaleTransform(scale, scale);
 
             //g.FillRectangle(Brushes.Magenta, 0, 0, w, h);
-            g.DrawImage(_target, 0, 0);
+            //g.DrawImage(_target, 0, 0);
 
             g.Flush();
         }

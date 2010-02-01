@@ -49,23 +49,24 @@ namespace BrawlLib.SSBBTypes
         public bshort _link1;
         public bshort _link2;
         public bint _magic; //-1
-        public bshort _type;
+        public bushort _type;
         public CollisionPlaneFlags _flags;
         public CollisionPlaneMaterial _material;
 
-        public ColPlane(int pInd1, int pInd2, int pLink1, int pLink2, CollisionPlaneType type, CollisionPlaneFlags flags, CollisionPlaneMaterial material)
+        public ColPlane(int pInd1, int pInd2, int pLink1, int pLink2, CollisionPlaneType type, CollisionPlaneFlags2 flags2, CollisionPlaneFlags flags, CollisionPlaneMaterial material)
         {
             _point1 = (short)pInd1;
             _point2 = (short)pInd2;
             _link1 = (short)pLink1;
             _link2 = (short)pLink2;
             _magic = -1;
-            _type = (short)type;
+            _type = (ushort)((int)flags2 | (int)type);
             _flags = flags;
             _material = material;
         }
 
-        public CollisionPlaneType Type { get { return (CollisionPlaneType)(short)_type; } set { _type = (short)value; } }
+        public CollisionPlaneType Type { get { return (CollisionPlaneType)(_type & 0xF); } set { _type = (ushort)(_type & 0xFFF0 | (int)value); } }
+        public CollisionPlaneFlags2 Flags2 { get { return (CollisionPlaneFlags2)(_type & 0xFFF0); } set { _type = (ushort)(_type & 0x000F | (int)value); } }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -189,14 +190,19 @@ namespace BrawlLib.SSBBTypes
         Footstep14 = 0x17,
     }
 
-    [Flags]
-    public enum CollisionPlaneType : short
+    public enum CollisionPlaneType
     {
         None = 0x0000,
         Floor = 0x0001,
         Ceiling = 0x0002,
         RightWall = 0x0004,
-        LeftWall = 0x0008,
+        LeftWall = 0x0008
+    }
+
+    [Flags]
+    public enum CollisionPlaneFlags2
+    {
+        None = 0x0000,
         Unk1 = 0x0010,
         Unk2 = 0x0020
     }
@@ -206,7 +212,7 @@ namespace BrawlLib.SSBBTypes
     {
         None = 0x00,
         DropThrough = 0x01,
-        Unk0 = 0x20,
+        LeftLedge = 0x20,
         RightLedge = 0x40,
         NoWalljump = 0x80
     }

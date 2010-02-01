@@ -323,10 +323,10 @@ namespace BrawlLib.Imaging
                 return mc.Quantize(colors, progress);
         }
 
-        private const int A_SCALE = 8;
-        public const int R_SCALE = 13;
-        public const int G_SCALE = 24;
-        public const int B_SCALE = 26;
+        private const int R_SCALE = 13;
+        private const int G_SCALE = 24;
+        private const int B_SCALE = 26;
+        private const int A_SCALE = 28;
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct ColorEntry
@@ -596,12 +596,6 @@ namespace BrawlLib.Imaging
                     //    }
                     //}
 
-                    if ((ape > maxC) && (pMin[3] < pMax[3]))
-                    {
-                        outBox = boxes;
-                        maxC = ape;
-                        axis = 3;
-                    }
 
                     if (((lBias * rpe) > maxC) && (pMin[2] < pMax[2]))
                     {
@@ -622,6 +616,12 @@ namespace BrawlLib.Imaging
                         outBox = boxes;
                         maxC = bpe;
                         axis = 0;
+                    }
+                    if ((ape > maxC) && (pMin[3] < pMax[3]))
+                    {
+                        outBox = boxes;
+                        maxC = ape;
+                        axis = 3;
                     }
                 }
                 return outBox;

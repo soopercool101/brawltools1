@@ -189,7 +189,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.OnInitialize();
 
-            if (Data->_stringOffset2 != 0)
+            if (Data->_ambNameOffset != 0)
                 _ambientLight = Data->AmbientString;
 
             bint* strings = Data->StringOffsets;
@@ -219,7 +219,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (_ambientLight != null)
                 header->AmbientStringAddress = stringTable[_ambientLight] + 4;
             else
-                header->_stringOffset2 = 0;
+                header->_ambNameOffset = 0;
 
             int i;
             bint* strings = header->StringOffsets;
@@ -254,7 +254,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     public unsafe class SCN0LightNode : SCN0EntryNode
     {
-        internal SCN0Part3* Data { get { return (SCN0Part3*)WorkingUncompressed.Address; } }
+        internal SCN0Light* Data { get { return (SCN0Light*)WorkingUncompressed.Address; } }
 
         [Category("Light")]
         public int Unknown1 { get { return Data->_unk1; } }
@@ -296,7 +296,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     public unsafe class SCN0FogNode : SCN0EntryNode
     {
-        internal SCN0Part4* Data { get { return (SCN0Part4*)WorkingUncompressed.Address; } }
+        internal SCN0Fog* Data { get { return (SCN0Fog*)WorkingUncompressed.Address; } }
 
         [Category("Fog")]
         public int Unknown1 { get { return Data->_unk1; } }
@@ -319,7 +319,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
     public unsafe class SCN0CameraNode : SCN0EntryNode
     {
-        internal SCN0Part5* Data { get { return (SCN0Part5*)WorkingUncompressed.Address; } }
+        internal SCN0Camera* Data { get { return (SCN0Camera*)WorkingUncompressed.Address; } }
 
         [Category("Camera")]
         public int Unknown1 { get { return Data->_unk1; } }

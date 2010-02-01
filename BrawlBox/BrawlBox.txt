@@ -1,5 +1,5 @@
 
-BrawlBox Data Viewer - Version 0.63
+BrawlBox Data Viewer - Version 0.63b
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -19,6 +19,12 @@ http://code.google.com/p/brawltools/issues/list
  ====================================
 |************ Change Log ************|
  ====================================
+ 
+- v0.63b- (01/19/2010)
+	. Fixed image encoding bug related to image format on older systems.
+	. Fixed save dialog extension bug. Also, numbered extensions will now have real extension added.
+	. Fixed rendering bug related to materials without textures.
+	. Added various features to collision editor.
  
 - v0.63 - (01/18/2010)
 	. Fixed a bug that was causing decal textures to link improperly in MDL files.

@@ -39,6 +39,7 @@ namespace BrawlBox
             soundPackControl1.lstSets.SmallImageList = ResourceTree.Images;
             audioPlaybackPanel1.Dock = DockStyle.Fill;
             clrControl.Dock = DockStyle.Fill;
+            visEditor.Dock = DockStyle.Fill;
         }
 
         public void Reset()
@@ -99,6 +100,7 @@ namespace BrawlBox
             msBinEditor1.CurrentNode = null;
             soundPackControl1.TargetNode = null;
             clrControl.ColorSource = null;
+            visEditor.TargetNode = null;
 
             Control newControl = null;
 
@@ -137,6 +139,11 @@ namespace BrawlBox
                 {
                     clrControl.ColorSource = node as IColorSource;
                     newControl = clrControl;
+                }
+                else if (node is VIS0EntryNode)
+                {
+                    visEditor.TargetNode = node as VIS0EntryNode;
+                    newControl = visEditor;
                 }
 
                 if ((editToolStripMenuItem.DropDown = w.ContextMenuStrip) != null)

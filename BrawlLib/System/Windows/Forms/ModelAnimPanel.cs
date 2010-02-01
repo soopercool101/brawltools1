@@ -723,15 +723,15 @@ namespace System.Windows.Forms
                 CHR0EntryNode entry;
                 if ((_selectedAnim != null) && (_animFrame > 0) && ((entry = _selectedAnim.FindChild(bone.Name, false) as CHR0EntryNode) != null))
                 {
-                    float val = entry.GetKeyframe((KeyFrameMode)index, _animFrame - 1);
-                    if (float.IsNaN(val))
+                    KeyframeEntry e = entry.Keyframes.GetKeyframe((KeyFrameMode)index + 0x10, _animFrame - 1);
+                    if (e == null)
                     {
-                        box.Value = entry.GetAnimFrame(_animFrame - 1)[index];
+                        box.Value = entry.Keyframes[KeyFrameMode.ScaleX + index, _animFrame - 1];
                         box.BackColor = Color.White;
                     }
                     else
                     {
-                        box.Value = val;
+                        box.Value = e._value;
                         box.BackColor = Color.Yellow;
                     }
                 }
@@ -776,20 +776,20 @@ namespace System.Windows.Forms
                             float* p = (float*)&state;
                             for (int i = 0; i < 3; i++)
                                 if (p[i] != 1.0f)
-                                    entry.SetKeyframe((KeyFrameMode)i, 0, p[i]);
+                                    entry.SetKeyframe(KeyFrameMode.ScaleX + i, 0, p[i]);
                             for (int i = 3; i < 9; i++)
                                 if (p[i] != 0.0f)
-                                    entry.SetKeyframe((KeyFrameMode)i, 0, p[i]);
+                                    entry.SetKeyframe(KeyFrameMode.ScaleX + i, 0, p[i]);
 
-                            entry.SetKeyframe((KeyFrameMode)index, _animFrame - 1, box.Value);
+                            entry.SetKeyframe(KeyFrameMode.ScaleX + index, _animFrame - 1, box.Value);
                         }
                     }
                     else //Set existing 
                     {
                         if (float.IsNaN(box.Value))
-                            entry.RemoveKeyframe((KeyFrameMode)index, _animFrame - 1);
+                            entry.RemoveKeyframe(KeyFrameMode.ScaleX + index, _animFrame - 1);
                         else
-                            entry.SetKeyframe((KeyFrameMode)index, _animFrame - 1, box.Value);
+                            entry.SetKeyframe(KeyFrameMode.ScaleX + index, _animFrame - 1, box.Value);
                     }
                 }
                 else
@@ -1071,8 +1071,8 @@ namespace System.Windows.Forms
             {
                 if (group.FindChild(entry._name, true) == null)
                     badNodes.Add(entry);
-                else
-                    entry.Keyframes.Clean();
+                //else
+                //    entry.Keyframes.Clean();
             }
 
             foreach (CHR0EntryNode n in badNodes)

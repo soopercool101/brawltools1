@@ -158,11 +158,11 @@ namespace System.Windows.Forms
             else
                 _source = (Bitmap)Bitmap.FromFile(path);
 
-            if (_source.PixelFormat != PixelFormat.Format32bppArgb)
-                using (Bitmap bmp = _source)
-                    _source = bmp.Clone(new Rectangle(0, 0, bmp.Width, bmp.Height), PixelFormat.Format32bppArgb);
+            //if (_source.PixelFormat != PixelFormat.Format32bppArgb)
+            //    using (Bitmap bmp = _source)
+            //        _source = bmp.Clone(new Rectangle(0, 0, bmp.Width, bmp.Height), PixelFormat.Format32bppArgb);
 
-            _source.SetResolution(96.0f, 96.0f);
+            //_source.SetResolution(96.0f, 96.0f);
             _preview = new Bitmap(_source.Width, _source.Height, PixelFormat.Format32bppArgb);
 
             txtPath.Text = path;

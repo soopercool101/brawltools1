@@ -39,7 +39,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             else if (typeof(T) == typeof(PLT0Node))
                 groupName = "Palettes(NW4R)";
             else if (typeof(T) == typeof(MDL0Node))
-                groupName = "Models(NW4R)";
+                groupName = "3DModels(NW4R)";
             else if (typeof(T) == typeof(CHR0Node))
                 groupName = "AnmChr(NW4R)";
             else if (typeof(T) == typeof(CLR0Node))

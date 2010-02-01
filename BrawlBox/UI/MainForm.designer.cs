@@ -57,6 +57,7 @@ namespace BrawlBox
             this.msBinEditor1 = new System.Windows.Forms.MSBinEditor();
             this.animEditControl = new System.Windows.Forms.AnimEditControl();
             this.previewPanel1 = new System.Windows.Forms.GoodPictureBox();
+            this.visEditor = new System.Windows.Forms.VisEditor();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -252,6 +253,7 @@ namespace BrawlBox
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.Controls.Add(this.visEditor);
             this.splitContainer2.Panel2.Controls.Add(this.clrControl);
             this.splitContainer2.Panel2.Controls.Add(this.audioPlaybackPanel1);
             this.splitContainer2.Panel2.Controls.Add(this.soundPackControl1);
@@ -274,7 +276,7 @@ namespace BrawlBox
             // 
             // clrControl
             // 
-            this.clrControl.Location = new System.Drawing.Point(256, 110);
+            this.clrControl.Location = new System.Drawing.Point(199, 110);
             this.clrControl.Name = "clrControl";
             this.clrControl.Size = new System.Drawing.Size(98, 47);
             this.clrControl.TabIndex = 5;
@@ -320,6 +322,14 @@ namespace BrawlBox
             this.previewPanel1.Picture = null;
             this.previewPanel1.Size = new System.Drawing.Size(98, 86);
             this.previewPanel1.TabIndex = 0;
+            // 
+            // visEditor
+            // 
+            this.visEditor.Location = new System.Drawing.Point(306, 101);
+            this.visEditor.Name = "visEditor";
+            this.visEditor.Size = new System.Drawing.Size(78, 87);
+            this.visEditor.TabIndex = 6;
+            this.visEditor.Visible = false;
             // 
             // MainForm
             // 
@@ -372,6 +382,7 @@ namespace BrawlBox
         private SoundPackControl soundPackControl1;
         private AudioPlaybackPanel audioPlaybackPanel1;
         private CLRControl clrControl;
+        private VisEditor visEditor;
     }
 }
 

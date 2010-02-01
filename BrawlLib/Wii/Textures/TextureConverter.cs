@@ -157,6 +157,8 @@ namespace BrawlLib.Wii.Textures
             int bw = BlockWidth, bh = BlockHeight;
             //int aw = w.Align(bw), ah = h.Align(bh);
 
+            PixelFormat fmt = src.IsIndexed() ? src.PixelFormat : PixelFormat.Format32bppArgb;
+
             //int fileSize = GetMipOffset(w, h, mipLevels + 1) + 0x40;
             FileMap fileView = FileMap.FromTempFile(GetFileSize(w, h, mipLevels));
             //FileMap fileView = FileMap.FromTempFile(fileSize);
@@ -166,11 +168,11 @@ namespace BrawlLib.Wii.Textures
                 TEX0* header = (TEX0*)fileView.Address;
                 *header = new TEX0(w, h, RawFormat, mipLevels);
 
-                int sStep = bw * Image.GetPixelFormatSize(src.PixelFormat) / 8;
+                int sStep = bw * Image.GetPixelFormatSize(fmt) / 8;
                 int dStep = bw * bh * BitsPerPixel / 8;
                 VoidPtr baseAddr = header->PixelData;
 
-                using (DIB dib = DIB.FromBitmap(src, bw, bh, src.PixelFormat))
+                using (DIB dib = DIB.FromBitmap(src, bw, bh, fmt))
                     for (int i = 1; i <= mipLevels; i++)
                         EncodeLevel(header, dib, src, dStep, sStep, i);
 

@@ -351,7 +351,8 @@ namespace System.Windows.Forms
 
         private int _brushH = -1;
         private PathGradientBrush _squareBrush;
-        private Color[] _boxColors = new Color[] { Color.Black, Color.White, Color.Black, Color.Black };
+        //private GraphicsPath _squarePath;
+        private Color[] _boxColors = new Color[]{Color.Black, Color.White, Color.Black, Color.Black, Color.Black};
 
         private LinearGradientBrush _barBrush;
         private LinearGradientBrush _alphaBrush;
@@ -393,13 +394,19 @@ namespace System.Windows.Forms
             }
 
             Rectangle r = pnlColorBox.ClientRectangle;
-            _squareBrush = new PathGradientBrush(new Point[] { 
-                new Point(r.Right, r.Y),
-                new Point(r.Right, r.Bottom),
-                new Point(r.X,r.Bottom),
-                new Point(r.X, r.Y)});
 
-            r = pnlColorBar.ClientRectangle;
+            //_squarePath = new GraphicsPath();
+            //_squarePath.AddRectangle(r);
+            //_squareBrush = new PathGradientBrush(_squarePath);
+
+            _squareBrush = new PathGradientBrush(new Point[] { 
+                new Point(r.Width, 0),
+                new Point(r.Width, r.Height),
+                new Point(0, r.Height),
+                new Point(0,0),
+                new Point(r.Width, 0)});
+            _squareBrush.CenterPoint = new PointF(r.Width / 2, r.Height / 2);
+
             float p = r.Height / 6.0f / r.Height;
             _barBrush = new LinearGradientBrush(new Rectangle(0, 0, r.Width, r.Height), Color.Red, Color.Red, LinearGradientMode.Vertical);
 
@@ -504,13 +511,14 @@ namespace System.Windows.Forms
             //Update brush if color changed
             if (_brushH != _hsv.H)
             {
-                _boxColors[0] = (Color)(new HSVPixel(_hsv.H, 100, 100));
+                _boxColors[0] = _boxColors[4] = (Color)(new HSVPixel(_hsv.H, 100, 100));
                 _squareBrush.SurroundColors = _boxColors;
                 _squareBrush.CenterColor = (Color)(new HSVPixel(_hsv.H, 50, 50));
                 _brushH = _hsv.H;
             }
 
             //Draw square
+            //g.FillPath(_squareBrush, _squarePath);
             g.FillRectangle(_squareBrush, pnlColorBox.ClientRectangle);
 
             //Draw indicator
