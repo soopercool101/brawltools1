@@ -1,5 +1,5 @@
 ﻿
-BrawlLib Resource Library - Version 0.10c
+BrawlLib Resource Library - Version 0.10d
 Copyright © 2009 - Bryan Moulton
 
 This program is provided as-is without any warranty, implied or otherwise.
@@ -12,6 +12,10 @@ they be held accountable for the manner in which it is used.
 |************ Change Log ************|
  ====================================
 
+- v0.10d- (02/08/2010)
+	. Fixed animation encoder bug.
+	. Fixed bug dealing with single CLR entries saving improperly.
+	
 - v0.10c- (01/31/2010)
 	. Various bugfixes
 	. Added VIS editor

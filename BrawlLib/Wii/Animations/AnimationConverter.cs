@@ -256,7 +256,7 @@ namespace BrawlLib.Wii.Animations
                     else
                     {
                         KeyframeEntry e1 = roots[0], e2 = roots[1], e3 = roots[2];
-                        for (int i = count[0]; i >= 0; i++)
+                        for (int i = count[0]; i-- > 0; )
                         {
                             e1 = e1._next; e2 = e2._next; e3 = e3._next;
                             if ((e1._index != e2._index) || (e1._index != e3._index) ||
@@ -331,7 +331,6 @@ namespace BrawlLib.Wii.Animations
                         continue;
 
                 SpanStep:
-                    entry = roots[i]._next;
                     if (span > spanEval)
                     {
                         step = range / span;
@@ -355,7 +354,7 @@ namespace BrawlLib.Wii.Animations
                         }
                         else
                         {
-                            for (entry = roots[i]; entry._index != -1; entry = entry._next)
+                            for (entry = roots[i]._next; entry._index != -1; entry = entry._next)
                             {
                                 val = entry._value;
                                 distance = ((val - basev) / step) + 0.5f;

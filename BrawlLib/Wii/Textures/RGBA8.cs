@@ -19,11 +19,25 @@ namespace BrawlLib.Wii.Textures
 
         protected override void DecodeBlock(VoidPtr blockAddr, ARGBPixel* dPtr, int width)
         {
-            RGBA8Pixel* sPtr = (RGBA8Pixel*)blockAddr;
-            //ARGBPixel* dPtr = (ARGBPixel*)destAddr;
-            for (int y = 0; y < BlockHeight; y++, dPtr += width)
-                for (int x = 0; x < BlockWidth; sPtr = sPtr->Increase() )
-                    dPtr[x++] = (ARGBPixel)(*sPtr);
+            byte* s1 = (byte*)blockAddr;
+            byte* s2 = s1 + 32;
+            byte* d2 = (byte*)dPtr;
+            for (int y = 0; y < 4; y++, d2 += (width - 4) << 2)
+            {
+                for (int x = 0; x < 4; x++, d2 += 4)
+                {
+                    d2[3] = *s1++;
+                    d2[2] = *s1++;
+                    d2[1] = *s2++;
+                    d2[0] = *s2++;
+                }
+            }
+
+            //RGBA8Pixel* sPtr = (RGBA8Pixel*)blockAddr;
+            ////ARGBPixel* dPtr = (ARGBPixel*)destAddr;
+            //for (int y = 0; y < 4; y++, dPtr += width)
+            //    for (int x = 0; x < 4; sPtr = (RGBA8Pixel*)((int)sPtr + 2) )
+            //        dPtr[x++] = (ARGBPixel)(*sPtr);
         }
 
         protected override void EncodeBlock(ARGBPixel* sPtr, VoidPtr blockAddr, int width)

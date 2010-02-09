@@ -60,18 +60,19 @@ namespace BrawlLib.Wii.Compression
             byte[] blockBuffer = new byte[17];
             int dInd;
             int lastUpdate = srcLen;
+            int remaining = srcLen;
 
             if (progress != null)
-                progress.Begin(srcLen, 0, srcLen);
+                progress.Begin(0, remaining, 0);
 
-            while(srcLen > 0)
+            while(remaining > 0)
             {
                 dInd = 1;
                 //dPtr = blockBuffer + 1;
-                for (bitCount = 0, control = 0; (bitCount < 8) && (srcLen > 0); bitCount++)
+                for (bitCount = 0, control = 0; (bitCount < 8) && (remaining > 0); bitCount++)
                 {
                     control <<= 1;
-                    if ((matchLength = FindPattern(sPtr, srcLen, ref matchOffset)) != 0)
+                    if ((matchLength = FindPattern(sPtr, remaining, ref matchOffset)) != 0)
                     {
                         control |= 1;
                         blockBuffer[dInd++] = (byte)(((matchLength - 3) << 4) | ((matchOffset - 1) >> 8));
@@ -88,9 +89,9 @@ namespace BrawlLib.Wii.Compression
                         //Consume(sPtr, 1);
                         blockBuffer[dInd++] = *sPtr;
                     }
-                    Consume(sPtr, matchLength, srcLen);
+                    Consume(sPtr, matchLength, remaining);
                     sPtr += matchLength;
-                    srcLen -= matchLength;
+                    remaining -= matchLength;
                 }
                 //Left-align bits
                 control <<= 8 - bitCount;
@@ -104,10 +105,10 @@ namespace BrawlLib.Wii.Compression
                 //dstLen += (int)(dPtr - blockBuffer);
 
                 if (progress != null)
-                    if ((lastUpdate - srcLen) > 0x8000)
+                    if ((lastUpdate - remaining) > 0x4000)
                     {
-                        lastUpdate = srcLen;
-                        progress.Update(lastUpdate);
+                        lastUpdate = remaining;
+                        progress.Update(srcLen - remaining);
                     }
             }
 

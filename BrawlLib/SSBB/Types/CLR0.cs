@@ -49,11 +49,14 @@ namespace BrawlLib.SSBBTypes
     [Flags]
     public enum CLR0EntryFlags : int
     {
-        Flag1 = 0x0001,
-        IsSolid1 = 0x0002,
-        Flag2 = 0x0100,
-        IsSolid2 = 0x0200,
-        IsSolid = 0x0202
+        Flag1 = 0x00000001,
+        Flag2 = 0x00000100,
+        Flag3 = 0x00004000,
+        Flag4 = 0x00100000,
+        IsSolid1 = 0x00000002,
+        IsSolid2 = 0x00000200,
+        IsSolid3 = 0x00008000,
+        IsSolid = 0x00008202
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -66,12 +69,19 @@ namespace BrawlLib.SSBBTypes
         public ABGRPixel _colorMask; //Used as a mask for source color before applying frames
         public bint _data; //Could be offset or color! Offset from itself
 
-        public CLR0Entry(CLR0EntryFlags flags, ABGRPixel mask, int data)
+        public CLR0Entry(CLR0EntryFlags flags, ABGRPixel mask, int offset)
         {
             _stringOffset = 0;
             _flags = (int)flags;
             _colorMask = mask;
-            _data = data;
+            _data = offset;
+        }
+        public CLR0Entry(CLR0EntryFlags flags, ABGRPixel mask, ABGRPixel color)
+        {
+            _stringOffset = 0;
+            _flags = (int)flags;
+            _colorMask = mask;
+            _data._data = *(int*)&color;
         }
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }

@@ -91,11 +91,11 @@ namespace BrawlLib.SSBB.ResourceNodes
                 entry->_dataOffset = (int)pEntry - (int)group;
 
                 if (n._numEntries == 0)
-                    *(ABGRPixel*)&data = (ABGRPixel)n._solidColor;
+                    *pEntry = new CLR0Entry(n._flags, (ABGRPixel)n._colorMask, (ABGRPixel)n._solidColor);
+                    //*(RGBAPixel*)&data = (RGBAPixel)n._solidColor;
                 else
-                    data = (int)pData - ((int)pEntry + 12);
-
-                *pEntry = new CLR0Entry(n._flags, (ABGRPixel)n._colorMask, data);
+                    *pEntry = new CLR0Entry(n._flags, (ABGRPixel)n._colorMask, (int)pData - ((int)pEntry + 12));
+                    //data = (int)pData - ((int)pEntry + 12);
 
                 entry++;
                 pEntry++;
