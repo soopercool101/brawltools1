@@ -6,12 +6,12 @@ namespace BrawlLib
 {
     public unsafe class StringTable
     {
-        SortedList<string, VoidPtr> _table = new SortedList<string, VoidPtr>(StringComparer.Ordinal);
+        SortedList<string, IntPtr> _table = new SortedList<string, IntPtr>(StringComparer.Ordinal);
 
         public void Add(string s)
         {
             if ((!String.IsNullOrEmpty(s)) && (!_table.ContainsKey(s)))
-                _table.Add(s, 0);
+                _table.Add(s, IntPtr.Zero);
         }
 
         public int GetTotalSize()
@@ -32,7 +32,7 @@ namespace BrawlLib
             for (int i = 0; i < _table.Count; i++)
             {
                 string s = _table.Keys[i];
-                _table[s] = entry;
+                _table[s] = (IntPtr)entry;
                 entry->Value = s;
                 entry = entry->Next;
             }

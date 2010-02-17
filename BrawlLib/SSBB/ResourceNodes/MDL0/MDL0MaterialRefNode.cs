@@ -13,13 +13,10 @@ using BrawlLib.Modeling;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    public unsafe class MDL0MaterialRefNode : ResourceNode
+    public unsafe class MDL0MaterialRefNode : MDL0EntryNode
     {
-        internal MDL0Data7Part3* Header { get { return (MDL0Data7Part3*)_origSource.Address; } }
+        internal MDL0MatLayer* Header { get { return (MDL0MatLayer*)_origSource.Address; } }
 
-        internal string _secondaryTexture;
-
-        //internal int _unk1;
         internal int _unk2;
         internal int _unk3;
         internal int _unk4;
@@ -32,10 +29,87 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal int _unk11;
         internal float _float;
 
+        #region Texture linkage
+        internal MDL0TextureNode _texture;
+        [Browsable(false)]
+        public MDL0TextureNode TextureNode
+        {
+            get { return _texture; }
+            set
+            {
+                if (_texture == value)
+                    return;
+                if (_texture != null)
+                    _texture._texRefs.Remove(this);
+                if ((_texture = value) != null)
+                {
+                    _texture._texRefs.Add(this);
+                    Name = _texture._name;
+                }
+                Model.SignalPropertyChange();
+            }
+        }
+        public string Texture
+        {
+            get { return _texture == null ? null : _texture._name; }
+            set
+            {
+                if (String.IsNullOrEmpty(value))
+                    TextureNode = null;
+                else
+                {
+                    MDL0TextureNode node = Model.FindChild(String.Format("Textures/{0}", value), false) as MDL0TextureNode;
+                    if (node != null)
+                        TextureNode = node;
+                }
+            }
+        }
+        #endregion
+
+        #region Decal linkage
+        internal MDL0TextureNode _decal;
+        [Browsable(false)]
+        public MDL0TextureNode DecalNode
+        {
+            get { return _decal; }
+            set
+            {
+                if (_decal == value)
+                    return;
+                if (_decal != null)
+                    _decal._decRefs.Remove(this);
+                if ((_decal = value) != null)
+                    _decal._decRefs.Add(this);
+                Model.SignalPropertyChange();
+            }
+        }
+        public string Decal
+        {
+            get { return _decal == null ? null : _decal._name; }
+            set
+            {
+                if (String.IsNullOrEmpty(value))
+                    DecalNode = null;
+                else
+                {
+                    MDL0TextureNode node = Model.FindChild(String.Format("Textures/{0}", value), false) as MDL0TextureNode;
+                    if (node != null)
+                        DecalNode = node;
+                }
+            }
+        }
+        #endregion
+
+        public override string Name
+        {
+            get { return _texture != null ? _texture.Name : base.Name; }
+            set { base.Name = value; }
+        }
+
         //[Category("Texture Reference")]
         //public int Unknown1 { get { return _unk1; } set { _unk1 = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
-        public string DecalTexture { get { return _secondaryTexture; } set { _secondaryTexture = value; SignalPropertyChange(); } }
+        public string DecalTexture { get { return _decal == null ? null : _decal._name; } }//set { _secondaryTexture = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
         public int Unknown2 { get { return _unk2; } set { _unk2 = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
@@ -59,15 +133,11 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Texture Reference")]
         public int Unknown11 { get { return _unk11; } set { _unk11 = value; SignalPropertyChange(); } }
 
-        internal TextureRef _textureReference;
 
         protected override bool OnInitialize()
         {
-            MDL0Data7Part3* header = Header;
+            MDL0MatLayer* header = Header;
 
-            _secondaryTexture = header->SecondaryTexture;
-
-            //_unk1 = Header->_unk1;
             _unk2 = header->_unk2;
             _unk3 = header->_unk3;
             _unk4 = header->_unk4;
@@ -85,20 +155,20 @@ namespace BrawlLib.SSBB.ResourceNodes
             return false;
         }
 
-        internal unsafe void GetStrings(StringTable table)
+        internal override void GetStrings(StringTable table)
         {
             table.Add(Name);
-            if (!String.IsNullOrEmpty(_secondaryTexture))
-                table.Add(_secondaryTexture);
+            //if (!String.IsNullOrEmpty(_secondaryTexture))
+            //    table.Add(_secondaryTexture);
         }
 
-        protected internal virtual void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
         {
-            MDL0Data7Part3* header = (MDL0Data7Part3*)dataAddress;
+            MDL0MatLayer* header = (MDL0MatLayer*)dataAddress;
             header->ResourceStringAddress = stringTable[Name] + 4;
 
-            if (!String.IsNullOrEmpty(_secondaryTexture))
-                header->SecondaryTextureAddress = stringTable[_secondaryTexture] + 4;
+            if (_decal != null)
+                header->SecondaryTextureAddress = stringTable[_decal.Name] + 4;
             else
                 header->_secondaryOffset = 0;
 
@@ -116,17 +186,16 @@ namespace BrawlLib.SSBB.ResourceNodes
             header->_float = _float;
         }
 
-
-        internal void Bind(GLContext ctx)
+        internal override void Bind(GLContext ctx)
         {
-            if (_textureReference != null)
-                _textureReference.Prepare(ctx);
+            if (_texture != null)
+                _texture.Prepare(ctx);
         }
 
-        internal void Unbind(GLContext ctx)
+        internal override void Unbind(GLContext ctx)
         {
-            if (_textureReference != null)
-                _textureReference.Unbind();
+            if (_texture != null)
+                _texture.Unbind(ctx);
         }
     }
 }

@@ -60,7 +60,8 @@
     <Compile Include="Modeling\IMatrixProvider.cs" />
     <Compile Include="Modeling\NodeRef.cs" />
     <Compile Include="Modeling\Primitive.cs" />
-    <Compile Include="Modeling\TextureRef.cs" />
+    <None Include="Modeling\TextureRef.cs" />
+    <Compile Include="Modeling\Wavefront.cs" />
     <Compile Include="OpenGL\Enums.cs" />
     <Compile Include="OpenGL\GLCamera.cs" />
     <Compile Include="OpenGL\GLContext.cs" />
@@ -83,7 +84,7 @@
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0ColorNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0DefNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0GroupNode.cs" />
-    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0MaterialExtNode.cs" />
+    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0ShaderNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0MaterialNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0MaterialRefNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0Node.cs" />
@@ -314,6 +315,9 @@
     <Compile Include="Wii\Models\Enum.cs" />
     <Compile Include="Wii\Models\bMatrix43.cs" />
     <Compile Include="Wii\Models\ModelConverter.cs" />
+    <Compile Include="Wii\Models\ModelDecoder.cs" />
+    <Compile Include="Wii\Models\ModelEncoder.cs" />
+    <Compile Include="Wii\Models\ModelLinker.cs" />
     <Compile Include="Wii\Models\Struct.cs" />
     <Compile Include="Wii\MSBinDecoder.cs" />
     <Compile Include="Wii\Textures\CI4.cs" />

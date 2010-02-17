@@ -53,7 +53,7 @@ namespace BrawlLib.SSBBTypes
 
         public uint _tag;
         public bint _size;
-        public bint _numResources;
+        public bint _version;
         public bint _bresOffset;
 
         BRESCommonHeader* Address { get { fixed (BRESCommonHeader* ptr = &this) return ptr; } }
@@ -89,7 +89,7 @@ namespace BrawlLib.SSBBTypes
         public bint _length;
         //public sbyte _data;
 
-        private VoidPtr Address { get { fixed (void* p = &this)return p; } }
+        private void* Address { get { fixed (void* p = &this)return p; } }
         public sbyte* Data { get { return (sbyte*)Address + 4; } }
 
         public int Length { get { return _length; } }
@@ -114,7 +114,7 @@ namespace BrawlLib.SSBBTypes
                     ptr[i++] = 0;
             }
         }
-        public BRESString* Next { get { return (BRESString*)(Address + (_length + 5).Align(4)); } }
+        public BRESString* Next { get { return (BRESString*)((byte*)Address + (_length + 5).Align(4)); } }
         public BRESString* End { get { BRESString* p = (BRESString*)Address; while (p->_length != 0) p = p->Next; return p; } }
     }
 

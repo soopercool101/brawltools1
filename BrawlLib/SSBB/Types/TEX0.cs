@@ -46,7 +46,7 @@ namespace BrawlLib.SSBBTypes
         {
             _header._tag = Tag;
             _header._size = TextureConverter.Get(format).GetMipOffset(width, height, mipLevels + 1) + Size;
-            _header._numResources = 1;
+            _header._version = 1;
             _header._bresOffset = 0;
 
             _headerLen = Size;

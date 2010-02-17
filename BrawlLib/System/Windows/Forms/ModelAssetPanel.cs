@@ -347,9 +347,9 @@ namespace System.Windows.Forms
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public MDL0PolygonNode SelectedPolygon { get { return _selectedPolygon; } }
 
-        private TextureRef _selectedTexture;
+        private MDL0TextureNode _selectedTexture;
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public TextureRef SelectedTexture { get { return _selectedTexture; } }
+        public MDL0TextureNode SelectedTexture { get { return _selectedTexture; } }
 
         public event EventHandler SelectedPolygonChanged;
         public event EventHandler SelectedBoneChanged;
@@ -390,8 +390,9 @@ namespace System.Windows.Forms
                     foreach (MDL0BoneNode bone in n.Children)
                         WrapBone(bone);
 
-                foreach (TextureRef tref in model._texRefs)
-                    lstTextures.Items.Add(tref, tref.Enabled);
+                if ((n = model.FindChild("Textures", false)) != null)
+                    foreach (MDL0TextureNode tref in n.Children)
+                        lstTextures.Items.Add(tref, tref.Enabled);
             }
 
             lstTextures.EndUpdate();
@@ -481,7 +482,7 @@ namespace System.Windows.Forms
             if (_selectedTexture != null)
                 _selectedTexture.Selected = false;
 
-            if ((_targetObject = _selectedTexture = lstTextures.SelectedItem as TextureRef) != null)
+            if ((_targetObject = _selectedTexture = lstTextures.SelectedItem as MDL0TextureNode) != null)
             {
                 _selectedTexture.Selected = true;
             }
@@ -598,7 +599,7 @@ namespace System.Windows.Forms
 
         private void lstTextures_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            TextureRef tref = lstTextures.Items[e.Index] as TextureRef;
+            MDL0TextureNode tref = lstTextures.Items[e.Index] as MDL0TextureNode;
 
             tref.Enabled = e.NewValue == CheckState.Checked;
 

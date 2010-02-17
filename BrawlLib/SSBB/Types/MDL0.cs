@@ -7,67 +7,106 @@ using BrawlLib.Wii.Models;
 namespace BrawlLib.SSBBTypes
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct MDL0
+    public unsafe struct MDL0Header
     {
         public const uint Size = 16;
         public const uint Tag = 0x304C444D;
 
-        public BRESCommonHeader _entry;
+        public BRESCommonHeader _header;
 
-        public buint _infoOffset;
-        public buint _boneOffset;
-        public buint _vertexDataOffset;
-        public buint _normalDataOffset;
+        //public buint _infoOffset;
+        //public buint _boneOffset;
+        //public buint _vertexDataOffset;
+        //public buint _normalDataOffset;
 
-        public buint _colorDataOffset;
-        public buint _uvDataOffset;
-        public buint _data7Offset;
-        public buint _data8Offset;
-        public buint _polygonOffset;
-        public buint _data10Offset;
-        public buint _data11Offset;
+        //public buint _colorDataOffset;
+        //public buint _uvDataOffset;
+        //public buint _materialOffset;
+        //public buint _shaderOffset;
+        //public buint _polygonOffset;
+        //public buint _textureOffset;
+        //public buint _decalOffset;
 
-        public bint _stringOffset;
+        //public bint _stringOffset;
 
-        public MDL0Part2 _modelDef;
+        //public MDL0Props _modelDef;
 
-        internal VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-        public buint* Offsets { get { return (buint*)(Address + 0x10); } }
-
-        public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
-        public VoidPtr ResourceStringAddress
+        public MDL0Header(int length, int version)
         {
-            get { return (VoidPtr)this.Address + _stringOffset; }
-            set { _stringOffset = (int)value - (int)Address; }
+            _header._tag = Tag;
+            _header._size = length;
+            _header._version = version;
+            _header._bresOffset = 0;
+        }
+
+        internal byte* Address { get { fixed (void* ptr = &this)return (byte*)ptr; } }
+
+        public bint* Offsets { get { return (bint*)(Address + 0x10); } }
+
+        public int StringOffset
+        {
+            get
+            {
+                switch (_header._version)
+                {
+                    case 0x09:
+                        return *(bint*)(Address + 0x3C);
+                    default:
+                        return 0;
+                }
+            }
+            set
+            {
+                switch (_header._version)
+                {
+                    case 0x09:
+                        *(bint*)(Address + 0x3C) = value;
+                        break;
+                }
+            }
+        }
+
+        public MDL0Props* Properties
+        {
+            get
+            {
+                switch (_header._version)
+                {
+                    case 0x09:
+                        return (MDL0Props*)(Address + 0x40);
+                    default:
+                        return null;
+                }
+            }
         }
 
         //public string Name { get { return new String((sbyte*)Address + _stringOffset); } }
-        public ResourceGroup* GetEntry(int index) 
-        {
-            uint offset = Offsets[index];
-            if (offset == 0)
-                return null;
-            return (ResourceGroup*)(Address + offset);
-        }
+        //public ResourceGroup* GetEntry(int index) 
+        //{
+        //    uint offset = Offsets[index];
+        //    if (offset == 0)
+        //        return null;
+        //    return (ResourceGroup*)(Address + offset);
+        //}
 
-        public ResourceGroup* InfoGroup { get { return _infoOffset == 0 ? null : (ResourceGroup*)(Address + _infoOffset); } }
-        public ResourceGroup* BoneGroup { get { return _boneOffset == 0 ? null : (ResourceGroup*)(Address + _boneOffset); } }
-        public ResourceGroup* VertexGroup { get { return _vertexDataOffset == 0 ? null : (ResourceGroup*)(Address + _vertexDataOffset); } }
-        public ResourceGroup* NormalGroup { get { return _normalDataOffset == 0 ? null : (ResourceGroup*)(Address + _normalDataOffset); } }
-        public ResourceGroup* ColorGroup { get { return _colorDataOffset == 0 ? null : (ResourceGroup*)(Address + _colorDataOffset); } }
-        public ResourceGroup* UVGroup { get { return _uvDataOffset == 0 ? null :  (ResourceGroup*)(Address + _uvDataOffset); } }
-        public ResourceGroup* Material1Group { get { return _data7Offset == 0 ? null : (ResourceGroup*)(Address + _data7Offset); } }
-        public ResourceGroup* Material2Group { get { return _data8Offset == 0 ? null : (ResourceGroup*)(Address + _data8Offset); } }
-        public ResourceGroup* PolygonGroup { get { return _polygonOffset == 0 ? null : (ResourceGroup*)(Address + _polygonOffset); } }
-        public ResourceGroup* Data10Group { get { return _data10Offset == 0 ? null : (ResourceGroup*)(Address + _data10Offset); } }
-        public ResourceGroup* Data11Group { get { return _data11Offset == 0 ? null : (ResourceGroup*)(Address + _data11Offset); } }
+        //public ResourceGroup* InfoGroup { get { return _infoOffset == 0 ? null : (ResourceGroup*)(Address + _infoOffset); } }
+        //public ResourceGroup* BoneGroup { get { return _boneOffset == 0 ? null : (ResourceGroup*)(Address + _boneOffset); } }
+        //public ResourceGroup* VertexGroup { get { return _vertexDataOffset == 0 ? null : (ResourceGroup*)(Address + _vertexDataOffset); } }
+        //public ResourceGroup* NormalGroup { get { return _normalDataOffset == 0 ? null : (ResourceGroup*)(Address + _normalDataOffset); } }
+        //public ResourceGroup* ColorGroup { get { return _colorDataOffset == 0 ? null : (ResourceGroup*)(Address + _colorDataOffset); } }
+        //public ResourceGroup* UVGroup { get { return _uvDataOffset == 0 ? null :  (ResourceGroup*)(Address + _uvDataOffset); } }
+        //public ResourceGroup* Material1Group { get { return _materialOffset == 0 ? null : (ResourceGroup*)(Address + _materialOffset); } }
+        //public ResourceGroup* Material2Group { get { return _shaderOffset == 0 ? null : (ResourceGroup*)(Address + _shaderOffset); } }
+        //public ResourceGroup* PolygonGroup { get { return _polygonOffset == 0 ? null : (ResourceGroup*)(Address + _polygonOffset); } }
+        //public ResourceGroup* Data10Group { get { return _textureOffset == 0 ? null : (ResourceGroup*)(Address + _textureOffset); } }
+        //public ResourceGroup* Data11Group { get { return _decalOffset == 0 ? null : (ResourceGroup*)(Address + _decalOffset); } }
 
         //public MDL0Part2* Part2 { get { return (MDL0Part2*)Address + 0x40; } }
     }
 
     //Immediately after header, separate entity
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct MDL0Part2
+    public unsafe struct MDL0Props
     {
         public const uint Size = 0x40;
 
@@ -79,28 +118,54 @@ namespace BrawlLib.SSBBTypes
         public bint _numFaces; //Length/offset?
         public bint _unk3; //0x00
         public bint _numNodes;
-        public bshort _version; //0x0101
-        public bshort _unk4; //0x00
+        public bshort _unk4; //0x0101
+        public bshort _unk5; //0x00
         public buint _dataOffset; //0x40
         public BVec3 _minExtents;
         public BVec3 _maxExtents;
 
+        public MDL0Props(int vertices, int faces, int nodes, int unk1, int unk2, int unk3, int unk4, int unk5, Vector3 min, Vector3 max)
+        {
+            _headerLen = 0x40;
+            _mdl0Offset = 0;
+            _unk1 = unk1;
+            _unk2 = unk2;
+            _numVertices = vertices;
+            _numFaces = faces;
+            _unk3 = unk3;
+            _numNodes = nodes;
+            _unk4 = (short)unk4;
+            _unk5 = (short)unk5;
+            _dataOffset = 0x40;
+            _minExtents = min;
+            _maxExtents = max;
+        }
+
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
 
-        public MDL0* MDL0 { get { return (MDL0*)(Address + _mdl0Offset); } }
+        public MDL0Header* MDL0 { get { return (MDL0Header*)(Address + _mdl0Offset); } }
 
-        public MDL0IndexTable* IndexTable { get { return (MDL0IndexTable*)((VoidPtr)Address + _dataOffset); } }
+        public MDL0NodeTable* IndexTable { get { return (MDL0NodeTable*)((VoidPtr)Address + _dataOffset); } }
     }
 
-    //Follows part 2. List of ids? Node related?
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct MDL0IndexTable
+    public unsafe struct MDL0CommonHeader
+    {
+        public bint _size;
+        public bint _mdlOffset;
+
+        internal void* Address { get { fixed (void* p = &this)return p; } }
+        public MDL0Header* MDL0Header { get { return (MDL0Header*)((byte*)Address + _mdlOffset); } }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct MDL0NodeTable
     {
         public bint _numEntries;
 
-        private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
+        private void* Address { get { fixed (void* ptr = &this)return ptr; } }
 
-        public bint* First { get { return (bint*)(Address + 4); } }
+        public bint* First { get { return (bint*)Address + 1; } }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -153,11 +218,11 @@ namespace BrawlLib.SSBBTypes
     {
         public const uint Size = 0x04;
 
-        public bushort _id;
-        public bushort _unk;
+        public bushort _boneIndex;
+        public bushort _parentNodeIndex;
 
-        public ushort Id { get { return _id; } set { _id = value; } }
-        public ushort Unknown { get { return _unk; } set { _unk = value; } }
+        public ushort Id { get { return _boneIndex; } set { _boneIndex = value; } }
+        public ushort Unknown { get { return _parentNodeIndex; } set { _parentNodeIndex = value; } }
 
         public override string ToString()
         {
@@ -273,6 +338,18 @@ namespace BrawlLib.SSBBTypes
         {
             return string.Format("Type5 ({0},{1})", Id, Index);
         }
+    }
+
+    [Flags]
+    public enum BoneFlags : uint
+    {
+        NoTransform = 0x0001,
+        FixedTranslation = 0x0002,
+        FixedRotation = 0x0004,
+        FixedScale = 0x0008,
+        Unk1 = 0x0010,
+        Unk2 = 0x0100,
+        HasGeometry = 0x0200
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -454,7 +531,7 @@ namespace BrawlLib.SSBBTypes
         public byte _flag8;
         public bint _unk3;
         public bint _unk4; //0xFFFFFFFF
-        public bint _data8Offset;
+        public bint _shaderOffset;
         public bint _numTextures;
         public bint _part3Offset;
         public bint _part4Offset;
@@ -463,8 +540,7 @@ namespace BrawlLib.SSBBTypes
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
 
-        public MDL0Data8* Part2 { get { return (_data8Offset != 0) ? (MDL0Data8*)(Address + _data8Offset) : null; } }
-        public MDL0Data7Part3* Part3 { get { return (_part3Offset != 0) ? (MDL0Data7Part3*)(Address + _part3Offset) : null; } }
+        public MDL0MatLayer* Part3 { get { return (_part3Offset != 0) ? (MDL0MatLayer*)(Address + _part3Offset) : null; } }
         public MDL0Data7Part4* Part4 { get { return (_part4Offset != 0) ? (MDL0Data7Part4*)(Address + _part4Offset) : null; } }
         public void* Part5 { get { return (_part5Offset != 0) ? Address + _part5Offset : null; } }
 
@@ -477,7 +553,7 @@ namespace BrawlLib.SSBBTypes
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct MDL0Data7Part3
+    public unsafe struct MDL0MatLayer
     {
         public const int Size = 52;
 
@@ -543,7 +619,7 @@ namespace BrawlLib.SSBBTypes
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct MDL0Data8
+    public unsafe struct MDL0Shader
     {
         public bint _dataLength;
         public bint _mdl0Offset;
@@ -585,20 +661,20 @@ namespace BrawlLib.SSBBTypes
         public bint _part1Offset;
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
-        public MDL0* Parent { get { return (MDL0*)(Address + _mdl0Offset); } }
+        public MDL0Header* Parent { get { return (MDL0Header*)(Address + _mdl0Offset); } }
 
-        public MDL0VertexData* VertexData { get { return (MDL0VertexData*)Parent->VertexGroup->First[_vertexId].DataAddress; } }
-        public MDL0NormalData* NormalData { get { return (MDL0NormalData*)Parent->NormalGroup->First[_normalId].DataAddress; } }
+        //public MDL0VertexData* VertexData { get { return (MDL0VertexData*)Parent->VertexGroup->First[_vertexId].DataAddress; } }
+        //public MDL0NormalData* NormalData { get { return (MDL0NormalData*)Parent->NormalGroup->First[_normalId].DataAddress; } }
         //public MDL0ColorData* ColorData1 { get { return (MDL0ColorData*)Parent->ColorGroup->First[_colorId1].DataAddress; } }
         //public MDL0ColorData* ColorData2 { get { return (MDL0ColorData*)Parent->ColorGroup->First[_colorId2].DataAddress; } }
-        public MDL0UVData* GetUVData(int index)
-        {
-            fixed (short* p = _uids)
-            {
-                bshort* ptr = (bshort*)p;
-                return ptr[index] == -1 ? null : (MDL0UVData*)Parent->UVGroup->First[ptr[index]].DataAddress;
-            }
-        }
+        //public MDL0UVData* GetUVData(int index)
+        //{
+        //    fixed (short* p = _uids)
+        //    {
+        //        bshort* ptr = (bshort*)p;
+        //        return ptr[index] == -1 ? null : (MDL0UVData*)Parent->UVGroup->First[ptr[index]].DataAddress;
+        //    }
+        //}
 
         public bshort* ColorIds { get { return (bshort*)(Address + 0x4C); } }
         public bshort* UVIds { get { return (bshort*)(Address + 0x50); } }
@@ -658,6 +734,31 @@ namespace BrawlLib.SSBBTypes
     {
         private buint _data1;
         private buint _data2;
+
+        //Data1
+        //0000 0000 0000 0000 0000 0000 0000 0001     - Vertex/Normal matrix index
+        //0000 0000 0000 0000 0000 0000 0000 0010     - Texture Matrix 0
+        //0000 0000 0000 0000 0000 0000 0000 0100     - Texture Matrix 1
+        //0000 0000 0000 0000 0000 0000 0000 1000     - Texture Matrix 2
+        //0000 0000 0000 0000 0000 0000 0001 0000     - Texture Matrix 3
+        //0000 0000 0000 0000 0000 0000 0010 0000     - Texture Matrix 4
+        //0000 0000 0000 0000 0000 0000 0100 0000     - Texture Matrix 5
+        //0000 0000 0000 0000 0000 0000 1000 0000     - Texture Matrix 6
+        //0000 0000 0000 0000 0000 0001 0000 0000     - Texture Matrix 7
+        //0000 0000 0000 0000 0000 0110 0000 0000     - Vertex format
+        //0000 0000 0000 0000 0001 1000 0000 0000     - Normal format
+        //0000 0000 0000 0000 0110 0000 0000 0000     - Color0 format
+        //0000 0000 0000 0001 1000 0000 0000 0000     - Color1 format
+
+        //Data2
+        //0000 0000 0000 0000 0000 0000 0000 0011     - Tex0 format
+        //0000 0000 0000 0000 0000 0000 0000 1100     - Tex1 format
+        //0000 0000 0000 0000 0000 0000 0011 0000     - Tex2 format
+        //0000 0000 0000 0000 0000 0000 1100 0000     - Tex3 format
+        //0000 0000 0000 0000 0000 0011 0000 0000     - Tex4 format
+        //0000 0000 0000 0000 0000 1100 0000 0000     - Tex5 format
+        //0000 0000 0000 0000 0011 0000 0000 0000     - Tex6 format
+        //0000 0000 0000 0000 1100 0000 0000 0000     - Tex7 format
 
         public bool HasVertexData { get { return (_data1 & 0x400) != 0; } }
         public int VertexEntryLength { get { return (HasVertexData) ? (((_data1 & 0x200) != 0) ? 2 : 1) : 0; } }

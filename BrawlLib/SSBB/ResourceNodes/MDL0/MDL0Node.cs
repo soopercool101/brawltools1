@@ -15,223 +15,147 @@ namespace BrawlLib.SSBB.ResourceNodes
 {
     public unsafe class MDL0Node : BRESEntryNode, IRenderedObject
     {
-        internal MDL0* Header { get { return (MDL0*)WorkingUncompressed.Address; } }
+        internal MDL0Header* Header { get { return (MDL0Header*)WorkingUncompressed.Address; } }
 
         public override ResourceType ResourceType { get { return ResourceType.MDL0; } }
 
         public override int DataAlign { get { return 0x20; } }
 
-        private int _unk1, _unk2, _unk3, _unk4, _version;
-        private int _numVertices, _numFaces, _numNodes;
-        private Vector3 _min, _max;
+        //Changing the version will change the conversion. Should we rebuild all on a version change?
+        internal int _version;
+        internal int _unk1, _unk2, _unk3, _unk4, _unk5;
+        internal int _numVertices, _numFaces, _numNodes;
+        internal Vector3 _min, _max;
+
+        //internal int _tableOffset, _groupOffset, _texTableOffset, _dataOffset;
+        //internal ResourceNode[] _boneCache;
+        private ModelLinker _linker;
+        internal bool _hasTree, _hasMix, _hasOpa, _hasXlu;
 
         [Category("MDL0 Def")]
-        public int Unknown1 { get { return _unk1; } set { _unk1 = value; } }
+        public int Unknown1 { get { return _unk1; } }
         [Category("MDL0 Def")]
-        public int Unknown2 { get { return _unk2; } set { _unk2 = value; } }
+        public int Unknown2 { get { return _unk2; }}
         [Category("MDL0 Def")]
-        public int NumVertices { get { return _numVertices; } set { _numVertices = value; } }
+        public int NumVertices { get { return _numVertices; } }
         [Category("MDL0 Def")]
-        public int NumFaces { get { return _numFaces; } set { _numFaces = value; } }
+        public int NumFaces { get { return _numFaces; } }
         [Category("MDL0 Def")]
-        public int Unknown3 { get { return _unk3; } set { _unk3 = value; } }
+        public int Unknown3 { get { return _unk3; } }
         [Category("MDL0 Def")]
-        public int NumNodes { get { return _numNodes; } set { _numNodes = value; } }
+        public int NumNodes { get { return _numNodes; } }
         [Category("MDL0 Def")]
-        public int Version { get { return _version; } set { _version = value; } }
+        public int Unknown4 { get { return _unk4; } }
         [Category("MDL0 Def")]
-        public int Unknown4 { get { return _unk4; } set { _unk4 = value; } }
+        public int Unknown5 { get { return _unk5; } }
         [Category("MDL0 Def")]
-        public BVec3 BoxMin { get { return _min; } set { _min = value; } }
+        public Vector3 BoxMin { get { return _min; } }
         [Category("MDL0 Def")]
-        public BVec3 BoxMax { get { return _max; } set { _max = value; } }
+        public Vector3 BoxMax { get { return _max; } }
 
         //internal List<ResourceNode> _bones;
         //private List<MDL0PolygonNode> _polygons;
-        public T FindResource<T>(int index) where T : ResourceNode
+        //public T FindResource<T>(int index) where T : ResourceNode
+        //{
+        //    ResourceNode group = null;
+        //    if (typeof(T) == typeof(MDL0PolygonNode))
+        //        group = FindChild("Polygons", false) as ResourceNode;
+        //    else if (typeof(T) == typeof(MDL0VertexNode))
+        //        group = FindChild("Vertices", false) as ResourceNode;
+        //    else if (typeof(T) == typeof(MDL0NormalNode))
+        //        group = FindChild("Normals", false) as ResourceNode;
+        //    else if (typeof(T) == typeof(MDL0UVNode))
+        //        group = FindChild("UV Points", false) as ResourceNode;
+        //    else if (typeof(T) == typeof(MDL0ColorNode))
+        //        group = FindChild("Colors", false) as ResourceNode;
+        //    else if (typeof(T) == typeof(MDL0BoneNode))
+        //    {
+        //        int count = -1;
+        //        if ((group = FindChild("Bones", false) as MDL0GroupNode) != null)
+        //            return FindBone(group, index, ref count) as T;
+        //    }
+
+        //    if (group == null)
+        //        return null;
+
+        //    if (group.Children.Count <= index)
+        //        return null;
+
+        //    return group.Children[index] as T;
+        //}
+        //private ResourceNode FindBone(ResourceNode node, int index, ref int count)
+        //{
+        //    if (count++ >= index)
+        //        return node;
+
+        //    foreach (ResourceNode n in node.Children)
+        //        if ((node = FindBone(n, index, ref count)) != null)
+        //            return node;
+
+        //    return null;
+        //}
+
+        protected override int OnCalculateSize(bool force)
         {
-            ResourceNode group = null;
-            if (typeof(T) == typeof(MDL0PolygonNode))
-                group = FindChild("Polygons", false) as ResourceNode;
-            else if (typeof(T) == typeof(MDL0VertexNode))
-                group = FindChild("Vertices", false) as ResourceNode;
-            else if (typeof(T) == typeof(MDL0NormalNode))
-                group = FindChild("Normals", false) as ResourceNode;
-            else if (typeof(T) == typeof(MDL0UVNode))
-                group = FindChild("UV Points", false) as ResourceNode;
-            else if (typeof(T) == typeof(MDL0ColorNode))
-                group = FindChild("Colors", false) as ResourceNode;
-            else if (typeof(T) == typeof(MDL0BoneNode))
-            {
-                int count = -1;
-                if ((group = FindChild("Bones", false) as MDL0GroupNode) != null)
-                    return FindBone(group, index, ref count) as T;
-            }
-
-            if (group == null)
-                return null;
-
-            if (group.Children.Count <= index)
-                return null;
-
-            return group.Children[index] as T;
+            _linker = ModelLinker.Prepare(this);
+            return ModelEncoder.CalcSize(_linker, force);
         }
-        private ResourceNode FindBone(ResourceNode node, int index, ref int count)
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
         {
-            if (count++ >= index)
-                return node;
-
-            foreach (ResourceNode n in node.Children)
-                if ((node = FindBone(n, index, ref count)) != null)
-                    return node;
-
-            return null;
+            ModelEncoder.Build(_linker, (MDL0Header*)address, length, force);
+            _linker = null;
+            //ModelEncoder.Build(this, (MDL0Header*)address, length, force);
         }
 
         protected override bool OnInitialize()
         {
             base.OnInitialize();
 
-            if ((_name == null) && (Header->_stringOffset != 0))
-                _name = Header->ResourceString;
+            MDL0Header* header = Header;
+            int offset;
 
-            _unk1 = Header->_modelDef._unk1;
-            _unk2 = Header->_modelDef._unk2;
-            _numVertices = Header->_modelDef._numVertices;
-            _numFaces = Header->_modelDef._numFaces;
-            _unk3 = Header->_modelDef._unk3;
-            _numNodes = Header->_modelDef._numNodes;
-            _version = Header->_modelDef._version;
-            _unk4 = Header->_modelDef._unk4;
-            _min = Header->_modelDef._minExtents;
-            _max = Header->_modelDef._maxExtents;
+            if ((_name == null) && ((offset = header->StringOffset)!= 0))
+                _name = new String((sbyte*)header + offset);
+
+            MDL0Props* props = header->Properties;
+
+            _version = header->_header._version;
+            _unk1 = props->_unk1;
+            _unk2 = props->_unk2;
+            _numVertices = props->_numVertices;
+            _numFaces = props->_numFaces;
+            _unk3 = props->_unk3;
+            _numNodes = props->_numNodes;
+            _unk4 = props->_unk4;
+            _unk5 = props->_unk5;
+            _min = props->_minExtents;
+            _max = props->_maxExtents;
 
             return true;
         }
 
-        private List<IMatrixProvider> _nodes = new List<IMatrixProvider>();
-        internal List<ResourceNode> _bones = new List<ResourceNode>();
-        internal List<TextureRef> _texRefs = new List<TextureRef>();
-
         protected override void OnPopulate()
         {
-            ResourceGroup* group;
-            for (int i = 0; i < 11; i++)
-                if ((group = Header->GetEntry(i)) != null)
-                    new MDL0GroupNode().Initialize(this, new DataSource(group, 0), i);
-
-            MDL0GroupNode bNode = FindChild("Bones", false) as MDL0GroupNode;
-            MDL0GroupNode pNode = FindChild("Polygons", false) as MDL0GroupNode;
-            MDL0GroupNode mNode = FindChild("Materials1", false) as MDL0GroupNode;
-            MDL0GroupNode t1Node = FindChild("Textures1", false) as MDL0GroupNode;
-            MDL0GroupNode t2Node = FindChild("Textures2", false) as MDL0GroupNode;
-            MDL0DefNode nodeMix = FindChild("Definitions/NodeMix", false) as MDL0DefNode;
-            MDL0DefNode drawOpa = FindChild("Definitions/DrawOpa", false) as MDL0DefNode;
-            MDL0DefNode drawXlu = FindChild("Definitions/DrawXlu", false) as MDL0DefNode;
-
-            //IMatrixProvider[] nodeCache = new IMatrixProvider[NumNodes];
-            _nodes = new List<IMatrixProvider>(new IMatrixProvider[NumNodes]);
-
-            //Pull out bones
-            //foreach (MDL0BoneNode bone in _boneCache)
-            //    nodeCache[bone.NodeId] = bone;
-            if (bNode != null)
-            {
-                _bones = bNode.Children;
-                foreach (MDL0BoneNode b in bNode._nodeCache)
-                    _nodes[b.NodeId] = new NodeRef(b);
-
-                //Pull out node groups
-                if (nodeMix != null)
-                    foreach (object o in nodeMix.Items)
-                        if (o is MDL0Node3Class)
-                        {
-                            MDL0Node3Class d = o as MDL0Node3Class;
-                            NodeRef nref = new NodeRef();
-
-                            foreach (MDL0NodeType3Entry e in d._entries)
-                                nref._entries.Add(new NodeWeight(_nodes[e._id], e._value));
-
-                            _nodes[d._id] = nref;
-                        }
-
-                //Attach opaque textures
-                if (drawOpa != null)
-                {
-                    foreach (object o in drawOpa.Items)
-                        if (o is MDL0NodeType4)
-                        {
-                            MDL0NodeType4 d = (MDL0NodeType4)o;
-                            MDL0PolygonNode poly = pNode.Children[d._polygonIndex] as MDL0PolygonNode;
-                            poly._material = mNode.Children[d._materialIndex] as MDL0MaterialNode;
-                        }
-                }
-
-                //Attach transparent textures
-                //Parse entry 4?
-                if (drawXlu != null)
-                {
-                    foreach (object o in drawXlu.Items)
-                        if (o is MDL0NodeType4)
-                        {
-                            MDL0NodeType4 d = (MDL0NodeType4)o;
-                            MDL0PolygonNode poly = pNode.Children[d._polygonIndex] as MDL0PolygonNode;
-                            poly._material = mNode.Children[d._materialIndex] as MDL0MaterialNode;
-                        }
-                }
-
-                bNode._nodeCache = null;
-            }
-
-
-            //Link polygons to nodes
-            if (pNode != null)
-                foreach (MDL0PolygonNode n in pNode.Children)
-                    if (n.NodeId >= 0)
-                        n._singleBind = _nodes[n.NodeId];
-
-            //Get texture references and attach them to texture nodes
-            if (t1Node != null)
-                foreach (MDL0TextureNode t in t1Node.Children)
-                    _texRefs.Add(t._textureReference = new TextureRef(t.Name));
-            if (t2Node != null)
-                foreach (MDL0TextureNode t in t2Node.Children)
-                {
-                    TextureRef tref = null;
-                    foreach (TextureRef tr in _texRefs)
-                        if (tr.Name == t.Name)
-                        { tref = tr; break; }
-                    if (tref == null)
-                        _texRefs.Add(tref = new TextureRef(t.Name));
-                    t._textureReference = tref;
-                }
-
-            //Attach material refs to texture refs
-            if (mNode != null)
-                foreach (MDL0MaterialNode mat in mNode.Children)
-                    foreach (MDL0MaterialRefNode mref in mat.Children)
-                        foreach (TextureRef tref in _texRefs)
-                            if (tref.Name == mref.Name)
-                            {
-                                mref._textureReference = tref;
-                                break;
-                            }
-
-            //Attach texture nodes to materials
-
-
-            //Clear caches
-            //_boneCache.Clear();
-
+            ModelDecoder.Decode(this);
         }
+
+        //internal List<NodeRef> _nodeGroups = new List<NodeRef>();
+        internal IMatrixProvider[] _nodes;
+        //internal List<ResourceNode> _bones = new List<ResourceNode>();
+        //internal List<TextureRef> _texRefs = new List<TextureRef>();
 
         internal override void GetStrings(StringTable table)
         {
             table.Add(Name);
             foreach (MDL0GroupNode n in Children)
                 n.GetStrings(table);
-        }
 
+            if (_hasTree) table.Add("NodeTree");
+            if (_hasMix) table.Add("NodeMix");
+            if (_hasOpa) table.Add("DrawOpa");
+            if (_hasXlu) table.Add("DrawXlu");
+        }
+    
         public override unsafe void Export(string outPath)
         {
             if (outPath.EndsWith(".dae"))
@@ -260,13 +184,53 @@ namespace BrawlLib.SSBB.ResourceNodes
         {
             base.PostProcess(bresAddress, dataAddress, dataLength, stringTable);
 
-            MDL0* header = (MDL0*)dataAddress;
-            header->ResourceStringAddress = stringTable[Name] + 4;
+            MDL0Header* header = (MDL0Header*)dataAddress;
+            ResourceGroup* pGroup, sGroup;
+            ResourceEntry* pEntry, sEntry;
+            bint* offsets = header->Offsets;
+            int index, sIndex;
 
+            //Model name
+            header->StringOffset = (stringTable[Name] + 4) - (byte*)header;
+
+            //Post-process groups, using linker lists
+            List<MDLResourceType> gList = ModelLinker.IndexBank[_version];
             foreach (MDL0GroupNode node in Children)
             {
-                VoidPtr addr = dataAddress + header->Offsets[node._index];
-                node.PostProcess(addr, stringTable);
+                MDLResourceType type = (MDLResourceType)Enum.Parse(typeof(MDLResourceType), node.Name);
+                if (((index = gList.IndexOf(type)) >= 0) && (type != MDLResourceType.Shaders))
+                    node.PostProcess(dataAddress + offsets[index], stringTable);
+            }
+
+            //Post-process definitions
+            index = gList.IndexOf(MDLResourceType.Defs);
+            pGroup = (ResourceGroup*)(dataAddress + offsets[index]);
+            pGroup->_first = new ResourceEntry(0xFFFF, 0, 0, 0);
+            pEntry = &pGroup->_first + 1;
+            index = 1;
+            if (_hasTree)
+                ResourceEntry.Build(pGroup, index++, (byte*)pGroup + (pEntry++)->_dataOffset, (BRESString*)stringTable["NodeTree"]);
+            if (_hasMix)
+                ResourceEntry.Build(pGroup, index++, (byte*)pGroup + (pEntry++)->_dataOffset, (BRESString*)stringTable["NodeMix"]);
+            if (_hasOpa)
+                ResourceEntry.Build(pGroup, index++, (byte*)pGroup + (pEntry++)->_dataOffset, (BRESString*)stringTable["DrawOpa"]);
+            if (_hasXlu)
+                ResourceEntry.Build(pGroup, index++, (byte*)pGroup + (pEntry++)->_dataOffset, (BRESString*)stringTable["DrawXlu"]);
+
+            //Link shader names using material list
+            index = offsets[gList.IndexOf(MDLResourceType.Materials)];
+            sIndex = offsets[gList.IndexOf(MDLResourceType.Shaders)];
+            if ((index > 0) && (sIndex > 0))
+            {
+                pGroup = (ResourceGroup*)(dataAddress + index);
+                sGroup = (ResourceGroup*)(dataAddress + sIndex);
+                pEntry = &pGroup->_first + 1;
+                sEntry = &sGroup->_first + 1;
+
+                sGroup->_first = new ResourceEntry(0xFFFF, 0, 0, 0);
+                index = pGroup->_numEntries;
+                for (int i = 1; i <= index; i++)
+                    ResourceEntry.Build(sGroup, i, (byte*)sGroup + (sEntry++)->_dataOffset, (BRESString*)((byte*)pGroup + (pEntry++)->_stringOffset - 4));
             }
         }
 
@@ -294,8 +258,10 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         public void Refesh(GLContext context)
         {
-            foreach (TextureRef tref in _texRefs)
-                tref.Reload();
+            ResourceNode n = FindChild("Textures", false);
+            if (n != null)
+                foreach (MDL0TextureNode t in n.Children)
+                    t.Reload();
         }
 
         public void Render(GLContext ctx)
@@ -342,9 +308,9 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
 
             //Transform nodes
-            foreach (NodeRef nr in _nodes)
+            foreach (IMatrixProvider nr in _nodes)
                 nr.CalcBase();
-            foreach (NodeRef nr in _nodes)
+            foreach (IMatrixProvider nr in _nodes)
                 nr.CalcWeighted();
 
             //Weight vertices
@@ -355,6 +321,6 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         #endregion
 
-        internal static ResourceNode TryParse(DataSource source) { return ((MDL0*)source.Address)->_entry._tag == MDL0.Tag ? new MDL0Node() : null; }
+        internal static ResourceNode TryParse(DataSource source) { return ((MDL0Header*)source.Address)->_header._tag == MDL0Header.Tag ? new MDL0Node() : null; }
     }
 }

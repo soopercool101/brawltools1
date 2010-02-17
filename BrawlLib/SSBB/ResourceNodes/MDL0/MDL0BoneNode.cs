@@ -19,7 +19,10 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal MDL0Bone* Header { get { return (MDL0Bone*)WorkingUncompressed.Address; } }
         public override ResourceType ResourceType { get { return ResourceType.MDL0Bone; } }
 
-        protected override int DataLength { get { return Header->_headerLen; } }
+        //protected override int DataLength { get { return Header->_headerLen; } }
+
+        internal BoneFlags _flags;
+        internal List<MDL0PolygonNode> _polygons = new List<MDL0PolygonNode>();
 
         internal FrameState _bindState;
         internal Matrix _bindMatrix, _inverseBindMatrix;
@@ -30,24 +33,29 @@ namespace BrawlLib.SSBB.ResourceNodes
         private Vector3 _bMin, _bMax;
         private Matrix43 _transform, _transformInvert;
 
-        [Category("Bone")]
+        internal int _nodeIndex;
+
+        [Browsable(false)]
         public Matrix FrameMatrix { get { return _frameMatrix; } }
-        [Category("Bone")]
+        [Browsable(false)]
         public Matrix InverseBindMatrix { get { return _inverseBindMatrix; } }
 
-        [Category("Bone")]
-        public int HeaderLen { get { return Header->_headerLen; } }
-        [Category("Bone")]
-        public int MDL0Offset { get { return Header->_mdl0Offset; } }
-        [Category("Bone")]
-        public int StringOffset { get { return Header->_stringOffset; } }
+        //[Category("Bone")]
+        //public int HeaderLen { get { return Header->_headerLen; } }
+        //[Category("Bone")]
+        //public int MDL0Offset { get { return Header->_mdl0Offset; } }
+        //[Category("Bone")]
+        //public int StringOffset { get { return Header->_stringOffset; } }
+
+        //public List<MDL0PolygonNode> Polygons { get { return _polygons; } }
+
         [Category("Bone")]
         public int BoneIndex { get { return Header->_index; } }
 
         [Category("Bone")]
         public int NodeId { get { return Header->_nodeId; } }
         [Category("Bone")]
-        public uint Flags { get { return Header->_flags; } }
+        public BoneFlags Flags { get { return _flags; } }
         [Category("Bone")]
         public uint Pad1 { get { return Header->_pad1; } }
         [Category("Bone")]
@@ -64,14 +72,14 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Bone"), TypeConverter(typeof(Vector3StringConverter))]
         public Vector3 BoxMax { get { return _bMax; } set { _bMax = value; SignalPropertyChange(); } }
 
-        [Category("Bone")]
-        public int ParentOffset { get { return Header->_parentOffset / 0xD0; } }
-        [Category("Bone")]
-        public int FirstChildOffset { get { return Header->_firstChildOffset / 0xD0; } }
-        [Category("Bone")]
-        public int NextOffset { get { return Header->_nextOffset / 0xD0; } }
-        [Category("Bone")]
-        public int PrevOffset { get { return Header->_prevOffset / 0xD0; } }
+        //[Category("Bone")]
+        //public int ParentOffset { get { return Header->_parentOffset / 0xD0; } }
+        //[Category("Bone")]
+        //public int FirstChildOffset { get { return Header->_firstChildOffset / 0xD0; } }
+        //[Category("Bone")]
+        //public int NextOffset { get { return Header->_nextOffset / 0xD0; } }
+        //[Category("Bone")]
+        //public int PrevOffset { get { return Header->_prevOffset / 0xD0; } }
         [Category("Bone")]
         public int Part2Offset { get { return Header->_part2Offset; } }
 
@@ -91,21 +99,26 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            base.OnInitialize();
+            MDL0Bone* header = Header;
 
-            if ((_name == null) && (Header->_stringOffset != 0))
-                _name = Header->ResourceString;
+            //SetSizeInternal(header->_headerLen);
 
-            _bindState = _frameState = new FrameState(Header->_scale, Header->_rotation, Header->_translation);
-            _bindMatrix = _frameMatrix = Header->_transform;
-            _inverseBindMatrix = Header->_transformInv;
+            if ((_name == null) && (header->_stringOffset != 0))
+                _name = header->ResourceString;
 
-            _bMin = Header->_boxMin;
-            _bMax = Header->_boxMax;
+            _flags = (BoneFlags)(uint)header->_flags;
+            _nodeIndex = header->_nodeId;
 
-            if (Header->_part2Offset != 0)
+            _bindState = _frameState = new FrameState(header->_scale, header->_rotation, header->_translation);
+            _bindMatrix = _frameMatrix = header->_transform;
+            _inverseBindMatrix = header->_transformInv;
+
+            _bMin = header->_boxMin;
+            _bMax = header->_boxMax;
+
+            if (header->_part2Offset != 0)
             {
-                MDL0Data7Part4* part4 = Header->Part2;
+                MDL0Data7Part4* part4 = header->Part2;
                 if (part4 != null)
                 {
                     ResourceGroup* group = part4->Group;
@@ -116,6 +129,62 @@ namespace BrawlLib.SSBB.ResourceNodes
                 }
             }
             return false;
+        }
+
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
+        {
+            MDL0Bone* header = (MDL0Bone*)address;
+            MDL0BoneNode bone;
+            int index = 0, offset;
+
+            header->_headerLen = length;
+            header->_index = _entryIndex;
+            header->_nodeId = _nodeIndex;
+            header->_flags = (uint)_flags;
+            header->_pad1 = 0;
+            header->_pad2 = 0;
+            header->_scale = _bindState._scale;
+            header->_rotation = _bindState._rotate;
+            header->_translation = _bindState._translate;
+            header->_boxMin = _bMin;
+            header->_boxMax = _bMax;
+
+            header->_part2Offset = 0;
+            header->_transform = _bindMatrix;
+            header->_transformInv = _inverseBindMatrix;
+
+            //Set first child
+            if (_children.Count > 0)
+                header->_firstChildOffset = length;
+            else
+                header->_firstChildOffset = 0;
+
+            if (_parent != null)
+            {
+                index = _parent._children.IndexOf(this);
+
+                //Parent
+                if (_parent is MDL0BoneNode)
+                    header->_parentOffset = (int)_parent.WorkingUncompressed.Address - (int)address;
+                else
+                    header->_parentOffset = 0;
+
+                //Prev
+                if (index == 0)
+                    header->_prevOffset = 0;
+                else
+                {
+                    //Link to prev
+                    bone = _parent._children[index - 1] as MDL0BoneNode;
+                    offset = (int)bone.Header - (int)address;
+                    header->_prevOffset = offset;
+                    bone.Header->_nextOffset = -offset;
+                }
+
+                //Next
+                if (index == (_parent._children.Count - 1))
+                    header->_nextOffset = 0;
+            }
         }
 
         protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
@@ -162,6 +231,9 @@ namespace BrawlLib.SSBB.ResourceNodes
             foreach (MDL0BoneNode bone in Children)
                 bone.RecalcBindState();
         }
+
+        public void CalcBase() { }
+        public void CalcWeighted() { }
 
         #region Rendering
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using BrawlLib.SSBB.ResourceNodes;
 
 namespace BrawlLib.Modeling
 {
@@ -40,10 +41,10 @@ namespace BrawlLib.Modeling
 
     public struct NodeWeight
     {
-        public IMatrixProvider Node;
+        public MDL0BoneNode Node;
         public float Weight;
 
-        public NodeWeight(IMatrixProvider node) { Node = node; Weight = 1.0f; }
-        public NodeWeight(IMatrixProvider node, float weight) { Node = node; Weight = weight; }
+        public NodeWeight(IMatrixProvider node) { Node = node as MDL0BoneNode; Weight = 1.0f; }
+        public NodeWeight(IMatrixProvider node, float weight) { Node = node as MDL0BoneNode; Weight = weight; }
     }
 }

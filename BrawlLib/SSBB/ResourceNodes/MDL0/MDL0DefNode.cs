@@ -12,7 +12,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal List<object> _items = new List<object>();
 
         int _len;
-        protected override int DataLength { get { return _len; } }
+        //protected override int DataLength { get { return _len; } }
 
         [Category("MDL0 Nodes")]
         public List<object> Items { get { return _items; } set { _items = value; } }
@@ -25,7 +25,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                 _items.Add(n);
 
             _len = addr - WorkingUncompressed.Address;
-            base.OnInitialize();
+            //base.OnInitialize();
 
             return false;
         }

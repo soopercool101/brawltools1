@@ -9,5 +9,7 @@ namespace BrawlLib.Modeling
     {
         Matrix FrameMatrix { get; }
         Matrix InverseBindMatrix { get; }
+        void CalcBase();
+        void CalcWeighted();
     }
 }

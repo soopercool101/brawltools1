@@ -2,13 +2,16 @@
 using System.ComponentModel;
 using BrawlLib.SSBBTypes;
 using BrawlLib.Wii.Models;
+using System.Collections.Generic;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
     public unsafe class MDL0NormalNode : MDL0EntryNode
     {
         internal MDL0NormalData* Header { get { return (MDL0NormalData*)WorkingUncompressed.Address; } }
-        protected override int DataLength { get { return Header->_dataLen; } }
+        //protected override int DataLength { get { return Header->_dataLen; } }
+
+        internal List<MDL0PolygonNode> _polygons = new List<MDL0PolygonNode>();
 
         [Category("Normal Data")]
         public int TotalLen { get { return Header->_dataLen; } }
@@ -40,7 +43,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            base.OnInitialize();
+            //base.OnInitialize();
 
             if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;

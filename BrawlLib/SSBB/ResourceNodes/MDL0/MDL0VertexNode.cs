@@ -3,13 +3,16 @@ using BrawlLib.SSBBTypes;
 using System.ComponentModel;
 using BrawlLib.Modeling;
 using BrawlLib.Wii.Models;
+using System.Collections.Generic;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
     public unsafe class MDL0VertexNode : MDL0EntryNode
     {
         internal MDL0VertexData* Header { get { return (MDL0VertexData*)WorkingUncompressed.Address; } }
-        protected override int DataLength { get { return Header->_dataLen; } }
+        //protected override int DataLength { get { return Header->_dataLen; } }
+
+        internal List<MDL0PolygonNode> _polygons = new List<MDL0PolygonNode>();
 
         [Category("Vertex Data")]
         public int TotalLen { get { return Header->_dataLen; } }
@@ -49,13 +52,24 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            base.OnInitialize();
+            //base.OnInitialize();
 
             if ((_name == null) && (Header->_stringOffset != 0))
                 _name = Header->ResourceString;
 
             return false;
         }
+
+        public override unsafe void Export(string outPath)
+        {
+            if(outPath.EndsWith(".obj"))
+            {
+                Wavefront.Serialize(outPath, this);
+            }
+            else
+            base.Export(outPath);
+        }
+
         protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
         {
             MDL0UVData* header = (MDL0UVData*)dataAddress;

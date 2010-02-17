@@ -14,31 +14,66 @@ namespace BrawlLib.SSBB.ResourceNodes
     public unsafe class MDL0MaterialNode : MDL0EntryNode
     {
         internal MDL0Material* Header { get { return (MDL0Material*)WorkingUncompressed.Address; } }
-        protected override int DataLength { get { return Header->_dataLen; } }
 
-        //internal List<MDL0Data7Part3> _part3Entries = new List<MDL0Data7Part3>();
+        internal List<MDL0PolygonNode> _polygons = new List<MDL0PolygonNode>();
+
         internal List<string> _part4Entries = new List<string>();
 
-        private byte _numTextures;
-        private byte _numLayers;
-        private byte _flag3;
-        private byte _flag4;
-        private byte _flag5;
-        private byte _flag6;
-        private byte _flag7;
-        private byte _flag8;
-        private int _type;
+        internal byte _numTextures;
+        internal byte _numLayers;
+        internal int _unk1, _unk6, _unk3, _unk4;
+        internal byte _flag3;
+        internal byte _flag4;
+        internal byte _flag5;
+        internal byte _flag6;
+        internal byte _flag7;
+        internal byte _flag8;
+        internal int _type;
 
-        [Category("Material")]
-        public int TotalLen { get { return Header->_dataLen; } }
-        [Category("Material")]
-        public int MDL0Offset { get { return Header->_mdl0Offset; } }
-        [Category("Material")]
-        public int StringOffset { get { return Header->_stringOffset; } }
+        #region Shader linkage
+        internal MDL0ShaderNode _shader;
+        [Browsable(false)]
+        public MDL0ShaderNode ShaderNode
+        {
+            get { return _shader; }
+            set
+            {
+                if (_shader == value)
+                    return;
+                if (_shader != null)
+                    _shader._materials.Remove(this);
+                if ((_shader = value) != null)
+                    _shader._materials.Add(this);
+                Model.SignalPropertyChange();
+            }
+        }
+        public string Shader
+        {
+            get { return _shader == null ? null : _shader._name; }
+            set
+            {
+                if (String.IsNullOrEmpty(value))
+                    ShaderNode = null;
+                else
+                {
+                    MDL0ShaderNode node = Model.FindChild(String.Format("Shaders/{0}", value), false) as MDL0ShaderNode;
+                    if (node != null)
+                        ShaderNode = node;
+                }
+            }
+        }
+        #endregion
+
+        //[Category("Material")]
+        //public int TotalLen { get { return Header->_dataLen; } }
+        //[Category("Material")]
+        //public int MDL0Offset { get { return Header->_mdl0Offset; } }
+        //[Category("Material")]
+        //public int StringOffset { get { return Header->_stringOffset; } }
         [Category("Material")]
         public int ID { get { return Header->_index; } }
         [Category("Material")]
-        public int Unknown1 { get { return Header->_unk1; } }
+        public string Unknown1 { get { return _unk1.ToString("X"); } }
         [Category("Material")]
         public byte Textures { get { return _numTextures; } set { _numTextures = value; SignalPropertyChange(); } }
         [Category("Material")]
@@ -59,12 +94,12 @@ namespace BrawlLib.SSBB.ResourceNodes
         public byte Flag8 { get { return _flag8; } set { _flag8 = value; SignalPropertyChange(); } }
 
         [Category("Material")]
-        public int Unknown3 { get { return Header->_unk3; } }
+        public int Unknown3 { get { return _unk3; } }
         [Category("Material")]
-        public int Unknown4 { get { return Header->_unk4; } }
+        public int Unknown4 { get { return _unk4; } }
 
         [Category("Material")]
-        public int Data8Offset { get { return Header->_data8Offset; } }
+        public int ShaderOffset { get { return Header->_shaderOffset; } }
 
         [Category("Material")]
         public int NumTextures { get { return Header->_numTextures; } }
@@ -76,7 +111,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         public int Part5Offset { get { return Header->_part5Offset; } }
 
         [Category("Material")]
-        public int Unknown6 { get { return Header->_unk6; } }
+        public int Unknown6 { get { return _unk6; } }
 
         //[Category("Material Part3")]
         //public List<MDL0Data7Part3> Part3Entries { get { return _part3Entries; } }
@@ -85,22 +120,27 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override bool OnInitialize()
         {
-            base.OnInitialize();
+            MDL0Material* header = Header;
 
-            _numTextures = Header->_flag1;
-            _numLayers = Header->_numLayers;
-            _flag3 = Header->_flag3;
-            _flag4 = Header->_flag4;
-            _flag5 = Header->_flag5;
-            _flag6 = Header->_flag6;
-            _flag7 = Header->_flag7;
-            _flag8 = Header->_flag8;
-            _type = Header->_type;
+            if ((_name == null) && (header->_stringOffset != 0))
+                _name = header->ResourceString;
 
-            if ((_name == null) && (Header->_stringOffset != 0))
-                _name = Header->ResourceString;
+            _numTextures = header->_flag1;
+            _numLayers = header->_numLayers;
+            _unk1 = header->_unk1;
+            _unk3 = header->_unk3;
+            _unk4 = header->_unk4;
+            _unk6 = header->_unk6;
+            _flag3 = header->_flag3;
+            _flag4 = header->_flag4;
+            _flag5 = header->_flag5;
+            _flag6 = header->_flag6;
+            _flag7 = header->_flag7;
+            _flag8 = header->_flag8;
+            _type = header->_type;
 
-            MDL0Data7Part4* part4 = Header->Part4;
+
+            MDL0Data7Part4* part4 = header->Part4;
             if (part4 != null)
             {
                 ResourceGroup* group = part4->Group;
@@ -108,14 +148,14 @@ namespace BrawlLib.SSBB.ResourceNodes
                     _part4Entries.Add(group->First[i].GetName());
             }
 
-            return Header->_numTextures != 0;
+            return header->_numTextures != 0;
         }
 
         protected override void OnPopulate()
         {
-            MDL0Data7Part3* part3 = Header->Part3;
+            MDL0MatLayer* part3 = Header->Part3;
             for (int i = 0; i < Header->_numTextures; i++)
-                new MDL0MaterialRefNode().Initialize(this, part3++, MDL0Data7Part3.Size);
+                new MDL0MaterialRefNode().Initialize(this, part3++, MDL0MatLayer.Size);
         }
 
         internal override void GetStrings(StringTable table)
@@ -164,7 +204,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                 }
             }
 
-            MDL0Data7Part3* part3 = header->Part3;
+            MDL0MatLayer* part3 = header->Part3;
             foreach (MDL0MaterialRefNode n in Children)
                 n.PostProcess(part3++, stringTable);
         }

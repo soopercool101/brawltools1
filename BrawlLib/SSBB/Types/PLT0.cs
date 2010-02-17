@@ -40,7 +40,7 @@ namespace BrawlLib.SSBBTypes
         {
             _bresEntry._tag = Tag;
             _bresEntry._size = (length * 2) + Size;
-            _bresEntry._numResources = 1;
+            _bresEntry._version = 1;
             _bresEntry._bresOffset = 0;
 
             _headerLen = 0x40;

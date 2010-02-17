@@ -54,5 +54,22 @@ namespace System
             for (int i = 0; i < len; i++)
                 *s++ = *p++;
         }
+
+        internal static unsafe bool Equals(sbyte* pStr, string str)
+        {
+            int c1, c2;
+            fixed (char* p = str)
+            {
+                char* pStr2 = p;
+                do
+                {
+                    c1 = *pStr++;
+                    c2 = *pStr2++;
+                    if (c1 != c2)
+                        return false;
+                } while ((c1 != 0) && (c2 != 0));
+                return true;
+            }
+        }
     }
 }

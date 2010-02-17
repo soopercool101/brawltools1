@@ -14,109 +14,6 @@ namespace BrawlLib.Wii.Models
 {
     public static unsafe class ModelConverter
     {
-        //public static Model Extract(MDL0Node node)
-        //{
-        //    ResourceNode n;
-        //    Model m = new Model();
-
-        //    //Cache nodes
-        //    object[] nodeCache = new object[node.NumNodes];
-
-        //    //Extract bones
-        //    if ((n = node.FindChild("Bones", false)) != null)
-        //        foreach (MDL0BoneNode bone in n.Children)
-        //            m._bones.Add(ParseBone(bone, nodeCache));
-
-        //    //Extract polygons
-        //    //if ((n = node.FindChild("Polygons", false)) != null)
-        //    //    foreach (MDL0PolygonNode poly in n.Children)
-        //    //        m._polygons.Add(ParsePolygon(poly));
-
-
-
-        //    return m;
-        //}
-        //private static BoneNode ParseBone(MDL0BoneNode node, object[] cache)
-        //{
-        //    BoneNode bone = new BoneNode();
-        //    bone._name = node._name;
-        //    bone.BaseTransform = new FrameState(node.Scale, node.Rotation, node.Translation);
-
-        //    cache[node.NodeId] = bone;
-
-        //    foreach (MDL0BoneNode n in node.Children)
-        //        bone._children.Add(ParseBone(n, cache));
-
-        //    return bone;
-        //}
-        //private static Polygon ParsePolygon(MDL0PolygonNode poly)
-        //{
-        //    Polygon p = new Polygon();
-        //    p._name = poly.Name;
-
-        //    //Extract raw data
-        //    MDL0VertexNode vNode = poly.GetVertexNode();
-        //    if(vNode != null)
-        //        p._vertices = vNode.GetVertices();
-
-        //    MDL0Polygon* polygon = poly.Header;
-        //    VoidPtr address = polygon->PrimitiveData;
-        //    ModelEntrySize e = new ModelEntrySize(polygon->_flags);
-
-        //    p._vertices = ExtractVertices(polygon->VertexData);
-        //    if (polygon->_normalId != -1)
-        //        p._normals = ExtractNormals(polygon->NormalData);
-        //    if (polygon->_colorId1 != -1)
-        //        p._colors1 = ExtractColors(polygon->ColorData1);
-        //    if (polygon->_colorId2 != -1)
-        //        p._colors2 = ExtractColors(polygon->ColorData2);
-
-        //    MDL0UVData* uvPtr;
-        //    for (int i = 0; (i < 8) && ((uvPtr = polygon->GetUVData(i)) != null); i++)
-        //        p._uvData[i] = ExtractUVs(uvPtr);
-
-        //    int nodeIndex = 0;
-        //    ushort[] nodeBuffer = new ushort[16];
-        //    while ((prim = ExtractPrimitive(ref address, e, p, nodeBuffer, ref nodeIndex)) != null)
-        //        p._primitives.Add(prim);
-
-        //    return p;
-        //}
-
-        //public static GLPolygon ExtractPolygon(GLModel model, MDL0Polygon* polygon)
-        //{
-        //    GLPolygon p = new GLPolygon();
-        //    GLPrimitive prim;
-        //    p._name = polygon->ResourceString;
-        //    p._model = model;
-        //    p._index = polygon->_index;
-        //    //p._nodeIndex = polygon->_nodeId;
-        //    if (polygon->_nodeId != -1)
-        //        p._node = model._nodes[polygon->_nodeId];
-
-        //    VoidPtr address = polygon->PrimitiveData;
-        //    ModelEntrySize e = new ModelEntrySize(polygon->_flags);
-
-        //    p._vertices = ExtractVertices(polygon->VertexData);
-        //    if(polygon->_normalId != -1)
-        //        p._normals = ExtractNormals(polygon->NormalData);
-        //    if (polygon->_colorId1 != -1)
-        //        p._colors1 = ExtractColors(polygon->ColorData1);
-        //    if (polygon->_colorId2 != -1)
-        //        p._colors2 = ExtractColors(polygon->ColorData2);
-
-        //    MDL0UVData* uvPtr;
-        //    for(int i = 0 ; (i < 8) && ((uvPtr = polygon->GetUVData(i)) != null) ; i++)
-        //        p._uvData[i] = ExtractUVs(uvPtr);
-
-        //    int nodeIndex = 0;
-        //    ushort[] nodeBuffer = new ushort[16];
-        //    while((prim = ExtractPrimitive(ref address, e, p, nodeBuffer,ref nodeIndex)) != null)
-        //        p._primitives.Add(prim);
-
-        //    return p;
-        //}
-
         public static List<Primitive> ExtractPrimitives(MDL0Polygon* polygon)
         {
             List<Primitive> list = new List<Primitive>();
@@ -287,7 +184,7 @@ namespace BrawlLib.Wii.Models
 
             Primitive primitive = new Primitive();
             primitive._type = type;
-            ;
+            
 
             int entries = primitive._elementCount = header->Entries;
             int stride = entryInfo._totalLen;

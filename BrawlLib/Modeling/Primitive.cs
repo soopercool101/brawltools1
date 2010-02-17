@@ -57,7 +57,7 @@ namespace BrawlLib.Modeling
             ctx.glDrawArrays(_type, 0, _elementCount);
         }
 
-        internal unsafe void Precalc(MDL0PolygonNode parent, List<IMatrixProvider> nodes)
+        internal unsafe void Precalc(MDL0PolygonNode parent, IMatrixProvider[] nodes)
         {
             //If already calculated, and no weights, skip?
             if ((_precVertices != null) && (_weightIndices == null))

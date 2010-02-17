@@ -35,7 +35,7 @@ namespace BrawlLib.SSBBTypes
         {
             _header._tag = Tag;
             _header._size = size;
-            _header._numResources = 4; //what is it? version?
+            _header._version = 4; //what is it? version?
             _header._bresOffset = 0;
 
             _dataOffset = Size;
