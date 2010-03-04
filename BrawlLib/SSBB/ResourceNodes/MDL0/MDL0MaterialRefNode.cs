@@ -150,25 +150,38 @@ namespace BrawlLib.SSBB.ResourceNodes
             _unk10 = header->_unk10;
             _unk11 = header->_unk11;
 
-            if ((_name == null) && (header->_stringOffset != 0))
+            if (header->_stringOffset != 0)
+            {
                 _name = header->ResourceString;
+                _texture = Model.FindOrCreateTexture(_name);
+                if (_texture != null)
+                    _texture._texRefs.Add(this);
+            }
+            if (header->_secondaryOffset != 0)
+            {
+                string name = header->SecondaryTexture;
+                _decal = Model.FindOrCreateTexture(name);
+                if (_decal != null)
+                    _decal._decRefs.Add(this);
+            }
+
             return false;
         }
 
-        internal override void GetStrings(StringTable table)
-        {
-            table.Add(Name);
-            //if (!String.IsNullOrEmpty(_secondaryTexture))
-            //    table.Add(_secondaryTexture);
-        }
+        //internal override void GetStrings(StringTable table)
+        //{
+        //    table.Add(Name);
+        //    if (_decal != null)
+        //        table.Add(_decal.Name);
+        //}
 
-        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        protected internal override void PostProcess(VoidPtr mdlAddress, VoidPtr dataAddress, StringTable stringTable)
         {
             MDL0MatLayer* header = (MDL0MatLayer*)dataAddress;
-            header->ResourceStringAddress = stringTable[Name] + 4;
+            header->_stringOffset = (int)stringTable[Name] + 4 - (int)dataAddress;
 
             if (_decal != null)
-                header->SecondaryTextureAddress = stringTable[_decal.Name] + 4;
+                header->_secondaryOffset = (int)stringTable[_decal.Name] + 4 - (int)dataAddress;
             else
                 header->_secondaryOffset = 0;
 

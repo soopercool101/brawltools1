@@ -386,13 +386,15 @@ namespace BrawlLib.SSBB.ResourceNodes
                 _changed = true;
             }
         }
-        public virtual void AddChild(ResourceNode child)
+        public virtual void AddChild(ResourceNode child) { AddChild(child, true); }
+        public virtual void AddChild(ResourceNode child, bool change)
         {
             Children.Add(child);
             child._parent = this;
             if (ChildAdded != null)
                 ChildAdded(this, child);
-            _changed = true;
+            if (change)
+                _changed = true;
         }
 
         protected void SetSizeInternal(int size)
@@ -560,7 +562,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal protected virtual void OnRebuild(VoidPtr address, int length, bool force) { MoveRaw(address, length); }
 
         //Shouldn't this move compressed data? YES!
-        internal void MoveRaw(VoidPtr address, int length)
+        internal virtual void MoveRaw(VoidPtr address, int length)
         {
             Memory.Move(address, WorkingSource.Address, (uint)length);
             DataSource newsrc = new DataSource(address, length);
@@ -756,25 +758,42 @@ namespace BrawlLib.SSBB.ResourceNodes
                 n.EnumTypeInternal(list, type);
         }
 
-        public unsafe string FindName()
+        public unsafe string FindName(string name)
         {
-            int index = 0;
-            string name = "NewNode00";
-            fixed (char* cPtr = name)
+            int index = -1;
+
+            if (string.IsNullOrEmpty(name))
+                name = "NewNode";
+
+            int len = name.Length;
+            sbyte* charList = stackalloc sbyte[len + 3];
+            PString pStr = charList;
+
+            for (int i = 0; i < len; i++)
+                charList[i] = (sbyte)name[i];
+
+        Top:
+
+            if (index < 0)
+                charList[len] = 0;
+            else
             {
-            Top:
-                index++;
-                cPtr[7] = (char)((index / 10) | 0x30);
-                cPtr[8] = (char)((index % 10) | 0x30);
-
-                foreach (ResourceNode node in Children)
+                charList[len] = (sbyte)((index % 10) | 0x30);
+                if (index < 10)
+                    charList[len + 1] = 0;
+                else
                 {
-                    if (node.Name == name)
-                        goto Top;
+                    charList[len + 1] = (sbyte)((index / 10) | 0x30);
+                    charList[len + 2] = 0;
                 }
-
-                return new String(cPtr);
             }
+
+            index++;
+            foreach (ResourceNode node in Children)
+                if (pStr == name)
+                    goto Top;
+
+            return new String(charList);
         }
 
         public ResourceNode FindEmbeddedIndex(int index)

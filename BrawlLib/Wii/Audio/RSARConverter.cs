@@ -33,16 +33,17 @@ namespace BrawlLib.Wii.Audio
         internal static int EncodeSYMBBlock(SYMBHeader* header, RSAREntryList entries)
         {
             int count = entries._count;
-            int baseAddr = (int)header + 8, dataAddr, len;
+            VoidPtr baseAddr = (VoidPtr)header + 8, dataAddr;
+            int len;
             bint* strEntry = (bint*)(baseAddr + 0x18);
-            PString pStr = (int)strEntry + (count << 2);
+            PString pStr = (byte*)strEntry + (count << 2);
 
             //Strings
             header->_stringOffset = 0x14;
             strEntry[-1] = entries._strings.Count;
             foreach (string s in entries._strings)
             {
-                *strEntry++ = pStr - baseAddr;
+                *strEntry++ = (int)(pStr - baseAddr);
                 pStr.Write(s, 0, s.Length + 1);
                 pStr += s.Length + 1;
             }
@@ -50,27 +51,26 @@ namespace BrawlLib.Wii.Audio
             dataAddr = pStr;
 
             //Sounds
-            header->_maskOffset1 = dataAddr - baseAddr;
+            header->_maskOffset1 = (int)(dataAddr - baseAddr);
             dataAddr += EncodeMaskGroup((SYMBMaskHeader*)dataAddr, entries._sounds);
 
             //Types
-            header->_maskOffset2 = dataAddr - baseAddr;
+            header->_maskOffset2 = (int)(dataAddr - baseAddr);
             dataAddr += EncodeMaskGroup((SYMBMaskHeader*)dataAddr, entries._types);
 
             //Groups
-            header->_maskOffset3 = dataAddr - baseAddr;
+            header->_maskOffset3 = (int)(dataAddr - baseAddr);
             dataAddr += EncodeMaskGroup((SYMBMaskHeader*)dataAddr, entries._groups);
 
             //Banks
-            header->_maskOffset4 = dataAddr - baseAddr;
+            header->_maskOffset4 = (int)(dataAddr - baseAddr);
             dataAddr += EncodeMaskGroup((SYMBMaskHeader*)dataAddr, entries._banks);
 
-            baseAddr = dataAddr - (int)header;
-            len = baseAddr.Align(0x20);
+            len = ((int)baseAddr).Align(0x20);
 
             //Fill padding
             byte* p = (byte*)dataAddr;
-            while (baseAddr++ < len)
+            for (int i = dataAddr - header; i < len; i++)
                 *p++ = 0;
 
             //Set header

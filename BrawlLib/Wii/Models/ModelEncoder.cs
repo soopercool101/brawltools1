@@ -111,7 +111,7 @@ namespace BrawlLib.Wii.Models
                     if (m is MDL0BoneNode)
                         mixLen += 5;
                     else
-                        mixLen += ((m as NodeRef)._entries.Count * 6) + 4;
+                        mixLen += ((m as Influence)._entries.Count * 6) + 4;
                 }
             }
 
@@ -221,6 +221,9 @@ namespace BrawlLib.Wii.Models
             }
 
             //NodeMix
+            //Only weight references go here.
+            //First list bones used by weight groups, in bone order
+            //Then list weight groups that use bones. Ordered by entry count.
             if (linker.Model._hasMix)
             {
                 (pEntry++)->_dataOffset = (int)pData - (int)pGroup;
@@ -238,14 +241,14 @@ namespace BrawlLib.Wii.Models
                     }
                     else
                     {
-                        NodeRef nr = (NodeRef)o;
+                        Influence nr = (Influence)o;
                         *pData = 3;
                         *(bushort*)&pData[1] = (ushort)(index++);
                         pData[3] = (byte)nr._entries.Count;
                         pData += 4;
                         foreach (NodeWeight w in nr._entries)
                         {
-                            *(bushort*)pData = (ushort)w.Node._nodeIndex;
+                            *(bushort*)pData = (ushort)w.Bone._nodeIndex;
                             *(bfloat*)(pData + 2) = w.Weight;
                             pData += 6;
                         }

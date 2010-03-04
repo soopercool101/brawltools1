@@ -15,6 +15,7 @@ namespace BrawlLib
             "TEX0 Raw Texture (*.tex0)|*.tex0";
 
         public static string MDL0 =
+            "Collada Scene (*.dae)|*.dae|" +
             "MDL0 Raw Model (*.mdl0)|*.mdl0";
 
         public static string CHR0 =

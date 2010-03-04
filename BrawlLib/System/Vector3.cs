@@ -62,14 +62,14 @@ namespace System
         public static Vector3 Min(Vector3 v1, Vector3 v2) { return new Vector3(Math.Min(v1._x, v2._x), Math.Min(v1._y, v2._y), Math.Min(v1._z, v2._z)); }
         public static Vector3 Min(Vector3 v1, float f) { return new Vector3(Math.Min(v1._x, f), Math.Min(v1._y, f), Math.Min(v1._z, f)); }
         public void Min(Vector3 v) { _x = Math.Min(_x, v._x); _y = Math.Min(_y, v._y); _z = Math.Min(_z, v._z); }
-        public void Min(Vector3* v) { _x = Math.Min(_x, v->_x); _y = Math.Min(_y, v->_y); _z = Math.Min(_z, v->_z); }
+        public void Min(Vector3* v) { if (v->_x < _x) _x = v->_x; if (v->_y < _y) _y = v->_y; if (v->_z < _z) _z = v->_z; }
         public void Min(float f) { _x = Math.Min(_x, f); _y = Math.Min(_y, f); _z = Math.Min(_z, f); }
 
         public static Vector3 Max(Vector3 v1, Vector3 v2) { return new Vector3(Math.Max(v1._x, v2._x), Math.Max(v1._y, v2._y), Math.Max(v1._z, v2._z)); }
         public static Vector3 Max(Vector3 v1, Vector3* v2) { return new Vector3(Math.Max(v1._x, v2->_x), Math.Max(v1._y, v2->_y), Math.Max(v1._z, v2->_z)); }
         public static Vector3 Max(Vector3 v1, float f) { return new Vector3(Math.Max(v1._x, f), Math.Max(v1._y, f), Math.Max(v1._z, f)); }
         public void Max(Vector3 v) { _x = Math.Max(_x, v._x); _y = Math.Max(_y, v._y); _z = Math.Max(_z, v._z); }
-        public void Max(Vector3* v) { _x = Math.Max(_x, v->_x); _y = Math.Max(_y, v->_y); _z = Math.Max(_z, v->_z); }
+        public void Max(Vector3* v) { if (v->_x > _x) _x = v->_x; if (v->_y > _y) _y = v->_y; if (v->_z > _z) _z = v->_z; }
         public void Max(float f) { _x = Math.Max(_x, f); _y = Math.Max(_y, f); _z = Math.Max(_z, f); }
 
         public float DistanceTo(Vector3 v) { Vector3 v1 = this - v; return Vector3.Dot(v1, v1); }

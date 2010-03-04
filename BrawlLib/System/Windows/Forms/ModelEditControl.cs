@@ -644,7 +644,7 @@ namespace System.Windows.Forms
                 float e = 30.0f;
 
                 context.glDisable((uint)GLEnableCap.Lighting);
-                context.glDisable((uint)GLEnableCap.DepthTest);
+                context.glEnable(GLEnableCap.DepthTest);
                 context.glPolygonMode(GLFace.Front, GLPolygonMode.Fill);
                 context.glPolygonMode(GLFace.Back, GLPolygonMode.Line);
 

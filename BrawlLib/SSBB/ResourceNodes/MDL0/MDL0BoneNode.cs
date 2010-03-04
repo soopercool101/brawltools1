@@ -9,6 +9,7 @@ using BrawlLib.Modeling;
 using BrawlLib.OpenGL;
 using System.Drawing;
 using BrawlLib.Wii.Animations;
+using BrawlLib.Wii.Compression;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -103,6 +104,19 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             //SetSizeInternal(header->_headerLen);
 
+            //Assign parent node based on offset. Will scatter after all bones are processed
+            int offset = header->_parentOffset;
+            if (offset < 0)
+            {
+                MDL0Bone* pHeader = (MDL0Bone*)((byte*)header + offset);
+                foreach (MDL0BoneNode bone in _parent._children)
+                    if (pHeader == bone.Header)
+                    {
+                        _parent = bone;
+                        break;
+                    }
+            }
+
             if ((_name == null) && (header->_stringOffset != 0))
                 _name = header->ResourceString;
 
@@ -118,17 +132,42 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             if (header->_part2Offset != 0)
             {
-                MDL0Data7Part4* part4 = header->Part2;
-                if (part4 != null)
-                {
-                    ResourceGroup* group = part4->Group;
-                    for (int i = 0; i < group->_numEntries; i++)
-                    {
-                        _entries.Add(group->First[i].GetName());
-                    }
-                }
+                MDL0Data7Part4* part4 = (MDL0Data7Part4*)((byte*)header + header->_part2Offset);
+                ResourceGroup* group = part4->Group;
+                ResourceEntry* pEntry = &group->_first + 1;
+                int count = group->_numEntries;
+                for (int i = 0; i < count; i++)
+                    _entries.Add(new String((sbyte*)group + (pEntry++)->_stringOffset));
             }
+
             return false;
+        }
+
+        //Use MoveRaw without processing children.
+        //Prevents addresses from changing before completion.
+        //internal override void MoveRaw(VoidPtr address, int length)
+        //{
+        //    Memory.Move(address, WorkingSource.Address, (uint)length);
+        //    DataSource newsrc = new DataSource(address, length);
+        //    if (_compression == CompressionType.None)
+        //    {
+        //        _replSrc.Close();
+        //        _replUncompSrc.Close();
+        //        _replSrc = _replUncompSrc = newsrc;
+        //    }
+        //    else
+        //    {
+        //        _replSrc.Close();
+        //        _replSrc = newsrc;
+        //    }
+        //}
+
+        protected override int OnCalculateSize(bool force)
+        {
+            int len = 0xD0;
+            if (_entries.Count > 0)
+                len += 0x1C + (_entries.Count * 0x2C);
+            return len;
         }
 
         protected internal override void OnRebuild(VoidPtr address, int length, bool force)
@@ -149,9 +188,30 @@ namespace BrawlLib.SSBB.ResourceNodes
             header->_boxMin = _bMin;
             header->_boxMax = _bMax;
 
-            header->_part2Offset = 0;
             header->_transform = _bindMatrix;
             header->_transformInv = _inverseBindMatrix;
+
+            //Sub-entries
+            if (_entries.Count > 0)
+            {
+                header->_part2Offset = 0xD0;
+                *(bint*)((byte*)address + 0xD0) = 0x1C + (_entries.Count * 0x2C);
+                ResourceGroup* pGroup = (ResourceGroup*)((byte*)address + 0xD4);
+                ResourceEntry* pEntry = &pGroup->_first + 1;
+                byte* pData = (byte*)pGroup + pGroup->_totalSize;
+
+                *pGroup = new ResourceGroup(_entries.Count);
+
+                foreach (string s in _entries)
+                {
+                    (pEntry++)->_dataOffset = (int)pData - (int)pGroup;
+                    MDL0Data7Part4Entry* p = (MDL0Data7Part4Entry*)pData;
+                    *p = new MDL0Data7Part4Entry(1);
+                    pData += 0x1C;
+                }
+            }
+            else
+                header->_part2Offset = 0;
 
             //Set first child
             if (_children.Count > 0)
@@ -187,29 +247,26 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
         }
 
-        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        protected internal override void PostProcess(VoidPtr mdlAddress, VoidPtr dataAddress, StringTable stringTable)
         {
             MDL0Bone* header = (MDL0Bone*)dataAddress;
-            header->ResourceStringAddress = stringTable[Name] + 4;
+            header->_mdl0Offset = (int)mdlAddress - (int)dataAddress;
+            header->_stringOffset = ((int)stringTable[Name] + 4) - (int)dataAddress;
 
-            header->_boxMin = _bMin;
-            header->_boxMax = _bMax;
-            header->_scale = _bindState._scale;
-            header->_rotation = _bindState._rotate;
-            header->_translation = _bindState._translate;
-            header->_transform = (bMatrix43)_bindMatrix;
-            header->_transformInv = (bMatrix43)_inverseBindMatrix;
-
-            MDL0Data7Part4* part4;
-            if ((header->_part2Offset != 0) && ((part4 = header->Part2) != null))
+            //Entry strings
+            if (_entries.Count > 0)
             {
-                ResourceGroup* group = part4->Group;
-                group->_first = new ResourceEntry(0xFFFF, 0, 0, 0, 0);
-                ResourceEntry* rEntry = group->First;
+                ResourceGroup* pGroup = (ResourceGroup*)((byte*)header + header->_part2Offset + 4);
+                ResourceEntry* pEntry = &pGroup->_first;
+                int count = pGroup->_numEntries;
+                (*pEntry++) = new ResourceEntry(0xFFFF, 0, 0, 0, 0);
 
-                for (int i = 0, x = 1; i < group->_numEntries; )
+                for (int i = 0; i < count; i++)
                 {
-                    ResourceEntry.Build(group, x++, (VoidPtr)group + (rEntry++)->_dataOffset, (BRESString*)stringTable[_entries[i++]]);
+                    MDL0Data7Part4Entry* entry = (MDL0Data7Part4Entry*)((byte*)pGroup + (pEntry++)->_dataOffset);
+                    entry->_stringOffset = (int)stringTable[_entries[i]] + 4 - (int)entry;
+
+                    ResourceEntry.Build(pGroup, i + 1, entry, (BRESString*)stringTable[_entries[i]]);
                 }
             }
         }

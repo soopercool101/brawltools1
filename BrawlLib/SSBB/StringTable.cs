@@ -24,7 +24,7 @@ namespace BrawlLib
 
         public void Clear() { _table.Clear(); }
 
-        public VoidPtr this[string s] { get { return _table[s]; } }
+        public BRESString* this[string s] { get { return (BRESString*)_table[s]; } }
 
         public void WriteTable(VoidPtr address)
         {

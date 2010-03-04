@@ -5,6 +5,7 @@ using System.Text;
 using BrawlLib.SSBB.ResourceNodes;
 using System.Windows.Forms;
 using System.ComponentModel;
+using BrawlLib;
 
 namespace BrawlBox.NodeWrappers
 {
@@ -46,8 +47,7 @@ namespace BrawlBox.NodeWrappers
         }
         #endregion
 
-        //public override string ExportFilter { get { return "Collada Test (*.dae)|*.dae|Raw Model File (*.mdl0)|*.mdl0"; } }
-        public override string ExportFilter { get { return "Raw Model File (*.mdl0)|*.mdl0"; } }
+        public override string ExportFilter { get { return ExportFilters.MDL0; } }
 
         public MDL0Wrapper() { ContextMenuStrip = _menu; }
 

@@ -31,7 +31,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             return Group->_numEntries > 0;
         }
 
-        public T CreateResource<T>() where T : BRESEntryNode
+        public BRESGroupNode GetOrCreateFolder<T>() where T : BRESEntryNode
         {
             string groupName;
             if (typeof(T) == typeof(TEX0Node))
@@ -54,16 +54,21 @@ namespace BrawlLib.SSBB.ResourceNodes
             BRESGroupNode group = null;
             foreach (BRESGroupNode node in Children)
                 if (node.Name == groupName)
-                {
-                    group = node;
-                    break;
-                }
+                { group = node; break; }
 
             if (group == null)
                 AddChild(group = new BRESGroupNode(groupName));
 
+            return group;
+        }
+        public T CreateResource<T>(string name) where T : BRESEntryNode
+        {
+            BRESGroupNode group = GetOrCreateFolder<T>();
+            if (group == null)
+                return null;
+
             T n = Activator.CreateInstance<T>();
-            n.Name = group.FindName();
+            n.Name = group.FindName(name);
             group.AddChild(n);
 
             return n;

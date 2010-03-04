@@ -129,7 +129,7 @@ namespace BrawlLib.SSBBTypes
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct ResourceGroup
+    public unsafe struct ResourceGroup : IEnumerable<ResourcePair>
     {
         public bint _totalSize;
         public bint _numEntries;
@@ -145,6 +145,56 @@ namespace BrawlLib.SSBBTypes
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public ResourceEntry* First { get { return (ResourceEntry*)(Address + 0x18); } }
         public VoidPtr EndAddress { get { return Address + _totalSize; } }
+
+        public IEnumerator<ResourcePair> GetEnumerator() { return new ResourceEnumerator((ResourceGroup*)Address); }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return new ResourceEnumerator((ResourceGroup*)Address); }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct ResourcePair
+    {
+        public PString Name;
+        public VoidPtr Data;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct ResourceEnumerator : IEnumerator<ResourcePair>
+    {
+        ResourceGroup* pGroup;
+        ResourceEntry* pEntry;
+        int count, index;
+
+        public ResourceEnumerator(ResourceGroup* group)
+        {
+            pGroup = group;
+            count = pGroup->_numEntries;
+            index = 0;
+            pEntry = &pGroup->_first;
+        }
+
+        public ResourcePair Current
+        {
+            get { return new ResourcePair() { Name = (sbyte*)pGroup + pEntry->_stringOffset, Data = (byte*)pGroup + pEntry->_dataOffset }; }
+        }
+
+        public void Dispose() { }
+
+        object System.Collections.IEnumerator.Current { get { return (VoidPtr)pEntry; } }
+        public bool MoveNext()
+        {
+            if (index == count)
+                return false;
+
+            pEntry++;
+            index++;
+            return true;
+        }
+
+        public void Reset()
+        {
+            index = 0;
+            pEntry = &pGroup->_first;
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

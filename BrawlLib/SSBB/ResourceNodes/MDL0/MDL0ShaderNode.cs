@@ -17,7 +17,21 @@ namespace BrawlLib.SSBB.ResourceNodes
         protected override bool OnInitialize()
         {
             //if (_name == null)
-                _name = String.Format("Shader{0}", Index);
+            _name = String.Format("Shader{0}", Index);
+
+            //Attach to materials
+            MDL0Node model = Model;
+            byte* pHeader = (byte*)Header;
+            if ((model != null) && (model._matList != null))
+                foreach (MDL0MaterialNode mat in model._matList)
+                {
+                    MDL0Material* mHeader = mat.Header;
+                    if (((byte*)mHeader + mHeader->_shaderOffset) == pHeader)
+                    {
+                        mat._shader = this;
+                        _materials.Add(mat);
+                    }
+                }
 
             return false;
         }

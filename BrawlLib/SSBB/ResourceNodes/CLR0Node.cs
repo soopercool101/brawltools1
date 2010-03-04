@@ -51,7 +51,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             CLR0EntryNode node = new CLR0EntryNode();
             node._numEntries = -1;
             node.NumEntries = _numFrames + 1;
-            node.Name = this.FindName();
+            node.Name = this.FindName(null);
             this.AddChild(node);
             return node;
         }

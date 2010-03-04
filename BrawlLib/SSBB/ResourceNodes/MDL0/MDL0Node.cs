@@ -27,15 +27,14 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal int _numVertices, _numFaces, _numNodes;
         internal Vector3 _min, _max;
 
-        //internal int _tableOffset, _groupOffset, _texTableOffset, _dataOffset;
-        //internal ResourceNode[] _boneCache;
-        private ModelLinker _linker;
+        internal ModelLinker _linker;
+        internal AssetStorage _assets;
         internal bool _hasTree, _hasMix, _hasOpa, _hasXlu;
 
         [Category("MDL0 Def")]
         public int Unknown1 { get { return _unk1; } }
         [Category("MDL0 Def")]
-        public int Unknown2 { get { return _unk2; }}
+        public int Unknown2 { get { return _unk2; } }
         [Category("MDL0 Def")]
         public int NumVertices { get { return _numVertices; } }
         [Category("MDL0 Def")]
@@ -95,6 +94,123 @@ namespace BrawlLib.SSBB.ResourceNodes
         //    return null;
         //}
 
+        #region Immediate accessors
+        internal MDL0GroupNode _boneGroup, _matGroup, _shadGroup, _polyGroup, _texGroup;
+        internal List<ResourceNode> _boneList, _matList, _shadList, _polyList, _texList;
+        [Browsable(false)]
+        public ResourceNode BoneGroup { get { return _boneGroup; } }
+        [Browsable(false)]
+        public ResourceNode MaterialGroup { get { return _matGroup; } }
+        [Browsable(false)]
+        public ResourceNode ShaderGroup { get { return _shadGroup; } }
+        [Browsable(false)]
+        public ResourceNode PolygonGroup { get { return _polyGroup; } }
+        [Browsable(false)]
+        public ResourceNode TextureGroup { get { return _texGroup; } }
+        [Browsable(false)]
+        public List<ResourceNode> BoneList { get { return _boneList; } }
+        [Browsable(false)]
+        public List<ResourceNode> MaterialList { get { return _matList; } }
+        [Browsable(false)]
+        public List<ResourceNode> ShaderList { get { return _shadList; } }
+        [Browsable(false)]
+        public List<ResourceNode> PolygonList { get { return _polyList; } }
+        [Browsable(false)]
+        public List<ResourceNode> TextureList { get { return _texList; } }
+        #endregion
+
+        public MDL0TextureNode FindOrCreateTexture(string name)
+        {
+            //texGroup will not be null during initialization, so AddChild will not occur!
+            if (_texGroup == null)
+                AddChild(_texGroup = new MDL0GroupNode(MDLResourceType.Textures), false);
+            else
+                foreach (MDL0TextureNode n in _texGroup._children)
+                    if (n._name == name)
+                        return n;
+
+            MDL0TextureNode node = new MDL0TextureNode() { _name = name };
+            _texGroup.AddChild(node, false);
+
+            return node;
+        }
+        public override void AddChild(ResourceNode child, bool change)
+        {
+            if (child is MDL0GroupNode)
+                LinkGroup(child as MDL0GroupNode);
+            base.AddChild(child, change);
+        }
+        private void LinkGroup(MDL0GroupNode group)
+        {
+            switch (group._type)
+            {
+                case MDLResourceType.Bones: { _boneGroup = group; _boneList = group._children; break; }
+                case MDLResourceType.Materials: { _matGroup = group; _matList = group._children; break; }
+                case MDLResourceType.Shaders: { _shadGroup = group; _shadList = group._children; break; }
+                case MDLResourceType.Polygons: { _polyGroup = group; _polyList = group._children; break; }
+                case MDLResourceType.Textures: { _texGroup = group; _texList = group._children; break; }
+            }
+        }
+        private void UnlinkGroup(MDL0GroupNode group)
+        {
+            switch (group._type)
+            {
+                case MDLResourceType.Bones: { _boneGroup = null; _boneList = null; break; }
+                case MDLResourceType.Materials: { _matGroup = null; _matList = null; break; }
+                case MDLResourceType.Shaders: { _shadGroup = null; _shadList = null; break; }
+                case MDLResourceType.Polygons: { _polyGroup = null; _polyList = null; break; }
+                case MDLResourceType.Textures: { _texGroup = null; _texList = null; break; }
+            }
+        }
+        internal void InitGroups()
+        {
+            LinkGroup(new MDL0GroupNode(MDLResourceType.Bones));
+            LinkGroup(new MDL0GroupNode(MDLResourceType.Materials));
+            LinkGroup(new MDL0GroupNode(MDLResourceType.Shaders));
+            LinkGroup(new MDL0GroupNode(MDLResourceType.Polygons));
+            LinkGroup(new MDL0GroupNode(MDLResourceType.Textures));
+
+            _boneGroup._parent = this;
+            _matGroup._parent = this;
+            _shadGroup._parent = this;
+            _polyGroup._parent = this;
+            _texGroup._parent = this;
+        }
+        internal void CleanGroups()
+        {
+            if (_boneList.Count > 0)
+                _children.Add(_boneGroup);
+            else
+                UnlinkGroup(_boneGroup);
+
+            if (_matList.Count > 0)
+                _children.Add(_matGroup);
+            else
+                UnlinkGroup(_matGroup);
+
+            if (_shadList.Count > 0)
+                _children.Add(_shadGroup);
+            else
+                UnlinkGroup(_shadGroup);
+
+            if (_polyList.Count > 0)
+                _children.Add(_polyGroup);
+            else
+                UnlinkGroup(_polyGroup);
+
+            if (_texList.Count > 0)
+                _children.Add(_texGroup);
+            else
+                UnlinkGroup(_texGroup);
+        }
+
+        public override void RemoveChild(ResourceNode child)
+        {
+            if (child is MDL0GroupNode)
+                UnlinkGroup(child as MDL0GroupNode);
+            base.RemoveChild(child);
+        }
+
         protected override int OnCalculateSize(bool force)
         {
             _linker = ModelLinker.Prepare(this);
@@ -114,7 +230,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             MDL0Header* header = Header;
             int offset;
 
-            if ((_name == null) && ((offset = header->StringOffset)!= 0))
+            if ((_name == null) && ((offset = header->StringOffset) != 0))
                 _name = new String((sbyte*)header + offset);
 
             MDL0Props* props = header->Properties;
@@ -136,7 +252,55 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         protected override void OnPopulate()
         {
-            ModelDecoder.Decode(this);
+            InitGroups();
+            _linker = new ModelLinker(Header);
+            _assets = new AssetStorage(_linker);
+            try
+            {
+                _boneGroup.Parse(_linker);
+                _matGroup.Parse(_linker);
+                _shadGroup.Parse(_linker);
+                _polyGroup.Parse(_linker);
+
+                //LinkGroup(new MDL0GroupNode(MDLResourceType.Textures));
+                //if (_linker.Bones != null)
+                //{
+                //    group = new MDL0GroupNode(MDLResourceType.Bones);
+                //    group.Initialize(this, _linker.Bones, _linker.Bones->_totalSize);
+                //    LinkGroup(group);
+                //}
+                //if (_linker.Materials != null)
+                //{
+                //    group = new MDL0GroupNode(MDLResourceType.Materials);
+                //    group.Initialize(this, _linker.Materials, _linker.Materials->_totalSize);
+                //    LinkGroup(group);
+                //}
+                //if (_linker.Shaders != null)
+                //{
+                //    group = new MDL0GroupNode(MDLResourceType.Shaders);
+                //    group.Initialize(this, _linker.Shaders, _linker.Shaders->_totalSize);
+                //    LinkGroup(group);
+                //}
+                //if (_linker.Polygons != null)
+                //{
+                //    group = new MDL0GroupNode(MDLResourceType.Polygons);
+                //    group.Initialize(this, _linker.Polygons, _linker.Polygons->_totalSize);
+                //    LinkGroup(group);
+                //}
+
+                //if (_texList.Count > 0)
+                //    _children.Add(_texGroup);
+                //else
+                //    UnlinkGroup(_texGroup as MDL0GroupNode);
+
+            }
+            finally
+            {
+                _assets.Dispose();
+                _assets = null;
+                _linker = null;
+                CleanGroups();
+            }
         }
 
         //internal List<NodeRef> _nodeGroups = new List<NodeRef>();
@@ -155,16 +319,34 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (_hasOpa) table.Add("DrawOpa");
             if (_hasXlu) table.Add("DrawXlu");
         }
-    
+
         public override unsafe void Export(string outPath)
         {
             if (outPath.EndsWith(".dae"))
             {
                 //Model model = GetModel();
-                //Collada.Serialize(new object[] { model }, outPath);
+                Collada.Serialize(this, outPath);
             }
             else
                 base.Export(outPath);
+        }
+
+        public static MDL0Node FromFile(string path)
+        {
+            string ext = Path.GetExtension(path);
+
+            if (path.EndsWith(".mdl", StringComparison.OrdinalIgnoreCase))
+                return NodeFactory.FromFile(null, path) as MDL0Node;
+            if (path.EndsWith(".dae", StringComparison.OrdinalIgnoreCase))
+                return Collada.ImportModel(path);
+            //else if (string.Equals(ext, "fbx", StringComparison.OrdinalIgnoreCase))
+            //{
+            //}
+            //else if (string.Equals(ext, "blender", StringComparison.OrdinalIgnoreCase))
+            //{
+            //}
+
+            throw new NotSupportedException("The file extension specified is not of a supported model type.");
         }
 
         //protected override int OnCalculateSize(bool force)
@@ -191,7 +373,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             int index, sIndex;
 
             //Model name
-            header->StringOffset = (stringTable[Name] + 4) - (byte*)header;
+            header->StringOffset = (int)((byte*)stringTable[Name] + 4 - (byte*)header);
 
             //Post-process groups, using linker lists
             List<MDLResourceType> gList = ModelLinker.IndexBank[_version];
@@ -199,7 +381,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             {
                 MDLResourceType type = (MDLResourceType)Enum.Parse(typeof(MDLResourceType), node.Name);
                 if (((index = gList.IndexOf(type)) >= 0) && (type != MDLResourceType.Shaders))
-                    node.PostProcess(dataAddress + offsets[index], stringTable);
+                    node.PostProcess(dataAddress, dataAddress + offsets[index], stringTable);
             }
 
             //Post-process definitions
@@ -269,8 +451,6 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (!_visible)
                 return;
 
-            ResourceNode group;
-
             if (_renderPolygons)
             {
                 ctx.glEnable(GLEnableCap.Lighting);
@@ -280,8 +460,8 @@ namespace BrawlLib.SSBB.ResourceNodes
                 else
                     ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Fill);
 
-                if ((group = FindChild("Polygons", false)) != null)
-                    foreach (MDL0PolygonNode poly in group.Children)
+                if (_polyList != null)
+                    foreach (MDL0PolygonNode poly in _polyList)
                         poly.Render(ctx);
             }
 
@@ -291,8 +471,8 @@ namespace BrawlLib.SSBB.ResourceNodes
                 ctx.glDisable((uint)GLEnableCap.DepthTest);
                 ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
 
-                if ((group = FindChild("Bones", false)) != null)
-                    foreach (MDL0BoneNode bone in group.Children)
+                if (_boneList != null)
+                    foreach (MDL0BoneNode bone in _boneList)
                         bone.Render(ctx);
             }
         }
@@ -300,23 +480,24 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal void ApplyCHR(CHR0Node node, int index)
         {
             //Transform bones
-            ResourceNode group = FindChild("Bones", false);
-            if (group != null)
-            {
-                foreach (MDL0BoneNode b in group.Children)
+            if (_boneList != null)
+                foreach (MDL0BoneNode b in _boneList)
                     b.ApplyCHR0(node, index);
-            }
 
             //Transform nodes
-            foreach (IMatrixProvider nr in _nodes)
-                nr.CalcBase();
-            foreach (IMatrixProvider nr in _nodes)
-                nr.CalcWeighted();
+            //foreach (IMatrixProvider nr in _nodes)
+            //    nr.CalcBase();
+            //foreach (IMatrixProvider nr in _nodes)
+            //    nr.CalcWeighted();
+
+            if (_polyList != null)
+                foreach (MDL0PolygonNode poly in _polyList)
+                    poly.WeightVertices();
 
             //Weight vertices
-            if ((group = FindChild("Polygons", false)) != null)
-                foreach (MDL0PolygonNode poly in group.Children)
-                    poly.WeightVertices(_nodes);
+            //if ((group = FindChild("Polygons", false)) != null)
+            //    foreach (MDL0PolygonNode poly in group.Children)
+            //        poly.WeightVertices(_nodes);
         }
 
         #endregion

@@ -7,6 +7,7 @@ using BrawlLib.Wii.Textures;
 using BrawlLib.Imaging;
 using BrawlLib.IO;
 using System.ComponentModel;
+using System.IO;
 
 namespace System.Windows.Forms
 {
@@ -382,10 +383,10 @@ namespace System.Windows.Forms
 
             if (_parent != null)
             {
-                _original = _parent.CreateResource<TEX0Node>();
+                _original = _parent.CreateResource<TEX0Node>(Path.GetFileNameWithoutExtension(_imageSource));
                 if (_paletteData != null)
                 {
-                    _originalPalette = _parent.CreateResource<PLT0Node>();
+                    _originalPalette = _parent.CreateResource<PLT0Node>(_original.Name);
                     _originalPalette.Name = _original.Name;
                     _originalPalette.ReplaceRaw(_paletteData);
                 }
@@ -413,7 +414,7 @@ namespace System.Windows.Forms
                     else
                     {
                         _parent = _original.Parent.Parent as BRESNode;
-                        _originalPalette = _parent.CreateResource<PLT0Node>();
+                        _originalPalette = _parent.CreateResource<PLT0Node>(_original.Name);
                         _originalPalette.Name = _original.Name;
                         _originalPalette.ReplaceRaw(_paletteData);
                     }

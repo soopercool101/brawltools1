@@ -82,7 +82,7 @@ namespace BrawlBox
 
         public ARCNode NewARC()
         {
-            ARCNode node = new ARCNode() { Name = _resource.FindName(), FileType = ARCFileType.MiscData };
+            ARCNode node = new ARCNode() { Name = _resource.FindName("NewARChive"), FileType = ARCFileType.MiscData };
             _resource.AddChild(node);
 
             BaseWrapper w = this.FindResource(node, false);

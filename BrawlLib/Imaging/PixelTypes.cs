@@ -169,7 +169,7 @@ namespace BrawlLib.Imaging
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RGBAPixel
     {
-        public byte A, B, G, R;
+        public byte R, G, B, A;
 
         public static explicit operator RGBAPixel(ARGBPixel p) { return new RGBAPixel() { A = p.A, B = p.B, G = p.G, R = p.R }; }
         public static explicit operator ARGBPixel(RGBAPixel p) { return new ARGBPixel() { A = p.A, B = p.B, G = p.G, R = p.R }; }

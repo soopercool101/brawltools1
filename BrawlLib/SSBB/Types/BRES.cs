@@ -87,7 +87,7 @@ namespace BrawlLib.SSBBTypes
     public unsafe struct BRESString
     {
         public bint _length;
-        //public sbyte _data;
+        public sbyte _data;
 
         private void* Address { get { fixed (void* p = &this)return p; } }
         public sbyte* Data { get { return (sbyte*)Address + 4; } }

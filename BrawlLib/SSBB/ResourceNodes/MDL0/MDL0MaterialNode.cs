@@ -148,7 +148,8 @@ namespace BrawlLib.SSBB.ResourceNodes
                     _part4Entries.Add(group->First[i].GetName());
             }
 
-            return header->_numTextures != 0;
+            OnPopulate();
+            return true;
         }
 
         protected override void OnPopulate()
@@ -165,8 +166,8 @@ namespace BrawlLib.SSBB.ResourceNodes
             foreach (string s in _part4Entries)
                 table.Add(s);
 
-            foreach (MDL0MaterialRefNode n in Children)
-                n.GetStrings(table);
+            //foreach (MDL0MaterialRefNode n in Children)
+            //    n.GetStrings(table);
         }
 
         //protected override int OnCalculateSize(bool force)
@@ -174,10 +175,11 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         //}
 
-        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        protected internal override void PostProcess(VoidPtr mdlAddress, VoidPtr dataAddress, StringTable stringTable)
         {
             MDL0Material* header = (MDL0Material*)dataAddress;
-            header->ResourceStringAddress = stringTable[Name] + 4;
+            header->_mdl0Offset = (int)mdlAddress - (int)dataAddress;
+            header->_stringOffset = (int)stringTable[Name] + 4 - (int)dataAddress;
 
             header->_flag1 = _numTextures;
             header->_numLayers = _numLayers;
@@ -206,7 +208,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             MDL0MatLayer* part3 = header->Part3;
             foreach (MDL0MaterialRefNode n in Children)
-                n.PostProcess(part3++, stringTable);
+                n.PostProcess(mdlAddress, part3++, stringTable);
         }
 
         internal override void Bind(GLContext ctx) { foreach (MDL0MaterialRefNode m in Children) m.Bind(ctx); }

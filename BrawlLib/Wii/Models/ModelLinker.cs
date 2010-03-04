@@ -4,6 +4,7 @@ using BrawlLib.SSBBTypes;
 using BrawlLib.SSBB.ResourceNodes;
 using System.Collections.Generic;
 using MR = BrawlLib.Wii.Models.MDLResourceType;
+using BrawlLib.Modeling;
 
 namespace BrawlLib.Wii.Models
 {
@@ -32,15 +33,30 @@ namespace BrawlLib.Wii.Models
         { 
             null,
             typeof(MDL0BoneNode),
-            typeof(MDL0VertexNode),
-            typeof(MDL0NormalNode),
-            typeof(MDL0ColorNode),
-            typeof(MDL0UVNode),
+            null,
+            null,
+            null,
+            null,
             typeof(MDL0MaterialNode),
             typeof(MDL0ShaderNode),
             typeof(MDL0PolygonNode),
             null,
             null
+        };
+
+        internal static readonly MR[] OrderBank = new MR[]
+        {
+            MR.Textures,
+            MR.Decals,
+            MR.Defs,
+            MR.Bones,
+            MR.Materials,
+            MR.Shaders,
+            MR.Polygons,
+            MR.Vertices,
+            MR.Normals,
+            MR.Colors,
+            MR.UVs
         };
 
         internal static readonly List<MR>[] IndexBank = new List<MR>[]{
@@ -79,67 +95,87 @@ namespace BrawlLib.Wii.Models
         public int _headerLen, _tableLen, _groupLen, _texLen, _dataLen;
         public int _texCount, _decCount;
         public ResourceNode[] BoneCache;
+        public Influence[] NodeCache;
 
         private ModelLinker() { }
-        public static ModelLinker Read(MDL0Node model)
+
+        public ModelLinker(MDL0Header* pModel)
         {
-            byte* header = (byte*)model.Header;
-            ModelLinker linker = new ModelLinker();
-            ResourceGroup* pGroup;
-            ResourceEntry* pEntry;
-            MDL0CommonHeader* pHeader;
-            MDL0GroupNode objGroup;
-            ResourceNode node;
+            Header = pModel;
+            Version = pModel->_header._version;
+            NodeCache = new Influence[pModel->Properties->_numNodes];
+
+            bint* offsets = (bint*)((byte*)pModel + 0x10);
+            List<MDLResourceType> iList = IndexBank[Version];
+            int groupCount = iList.Count;
             int offset;
-            List<MDLResourceType> iList = IndexBank[model._version];
-            int groupCount = iList.Count, entryCount;
-            MDLResourceType resType;
-            bint* offsets = (bint*)(header + 0x10);
-            Type objType;
 
-            int* shaderTable = stackalloc int[128];
-            for (int i = 0; i < 128; )
-                shaderTable[i++] = 0;
-
-            linker.Model = model;
-            linker.Header = (MDL0Header*)header;
-            linker.Version = model._version;
-
-            fixed (ResourceGroup** gList = &linker.Defs)
+            //Extract resource addresses
+            fixed (ResourceGroup** gList = &Defs)
                 for (int i = 0; i < groupCount; i++)
                     if ((offset = offsets[i]) != 0)
-                    {
-                        resType = iList[i];
-                        gList[(int)resType] = pGroup = (ResourceGroup*)((byte*)header + offset);
-                        if ((objType = TypeBank[(int)resType]) != null)
-                        {
-                            linker.Groups[(int)resType] = objGroup = new MDL0GroupNode() { _name = resType.ToString("G") };
-                            entryCount = pGroup->_numEntries;
-                            pEntry = &pGroup->_first + 1;
-                            for (int x = 0; x < entryCount; x++, pEntry++)
-                            {
-                                offset = pEntry->_dataOffset;
-                                pHeader = (MDL0CommonHeader*)((byte*)pGroup + offset);
-                                if (resType == MDLResourceType.Shaders)
-                                {
-                                    for (int y = 0; shaderTable[y] != offset; y++)
-                                        if (shaderTable[y] == 0)
-                                        {
-                                            shaderTable[y] = offset;
-                                            goto Create;
-                                        }
-                                    continue;
-                                }
-                            Create:
-                                node = Activator.CreateInstance(objType) as ResourceNode;
-                                node.Initialize(objGroup, pHeader, pHeader->_size);
-                            }
-                        }
-
-                    }
-
-            return linker;
+                        gList[(int)iList[i]] = (ResourceGroup*)((byte*)pModel + offset);
         }
+
+        //public static ModelLinker Read(MDL0Node model)
+        //{
+        //    byte* header = (byte*)model.Header;
+        //    ModelLinker linker = new ModelLinker();
+        //    ResourceGroup* pGroup;
+        //    ResourceEntry* pEntry;
+        //    MDL0CommonHeader* pHeader;
+        //    MDL0GroupNode objGroup;
+        //    ResourceNode node;
+        //    int offset;
+        //    List<MDLResourceType> iList = IndexBank[model._version];
+        //    int groupCount = iList.Count, entryCount;
+        //    MDLResourceType resType;
+        //    bint* offsets = (bint*)(header + 0x10);
+        //    Type objType;
+
+        //    int* shaderTable = stackalloc int[128];
+        //    for (int i = 0; i < 128; )
+        //        shaderTable[i++] = 0;
+
+        //    linker.Model = model;
+        //    linker.Header = (MDL0Header*)header;
+        //    linker.Version = model._version;
+
+        //    fixed (ResourceGroup** gList = &linker.Defs)
+        //        for (int i = 0; i < groupCount; i++)
+        //            if ((offset = offsets[i]) != 0)
+        //            {
+        //                resType = iList[i];
+        //                gList[(int)resType] = pGroup = (ResourceGroup*)((byte*)header + offset);
+        //                if ((objType = TypeBank[(int)resType]) != null)
+        //                {
+        //                    linker.Groups[(int)resType] = objGroup = new MDL0GroupNode() { _name = resType.ToString("G") };
+        //                    entryCount = pGroup->_numEntries;
+        //                    pEntry = &pGroup->_first + 1;
+        //                    for (int x = 0; x < entryCount; x++, pEntry++)
+        //                    {
+        //                        offset = pEntry->_dataOffset;
+        //                        pHeader = (MDL0CommonHeader*)((byte*)pGroup + offset);
+        //                        if (resType == MDLResourceType.Shaders)
+        //                        {
+        //                            for (int y = 0; shaderTable[y] != offset; y++)
+        //                                if (shaderTable[y] == 0)
+        //                                {
+        //                                    shaderTable[y] = offset;
+        //                                    goto Create;
+        //                                }
+        //                            continue;
+        //                        }
+        //                    Create:
+        //                        node = Activator.CreateInstance(objType) as ResourceNode;
+        //                        node.Initialize(objGroup, pHeader, pHeader->_size);
+        //                    }
+        //                }
+
+        //            }
+
+        //    return linker;
+        //}
 
         public static ModelLinker Prepare(MDL0Node model)
         {
@@ -169,18 +205,17 @@ namespace BrawlLib.Wii.Models
             MDL0GroupNode group;
             ResourceGroup* pGrp;
             ResourceEntry* pEntry;
-            //MDLResourceType resType;
             int len;
 
             fixed (ResourceGroup** pOut = &Defs)
-                for (int i = 0; i < BankLen; i++)
+                foreach(MDLResourceType resType in OrderBank)
                 {
-                    if (((group = Groups[i]) == null) || (TypeBank[i] == null))
+                    if (((group = Groups[(int)resType]) == null) || (TypeBank[(int)resType] == null))
                         continue;
 
-                    pOut[i] = pGrp = (ResourceGroup*)pGroup;
+                    pOut[(int)resType] = pGrp = (ResourceGroup*)pGroup;
                     pEntry = &pGrp->_first + 1;
-                    if (i == (int)MDLResourceType.Bones)
+                    if (resType == MDLResourceType.Bones)
                     {
                         *pGrp = new ResourceGroup(BoneCache.Length);
                         foreach (ResourceNode e in BoneCache)
@@ -192,7 +227,7 @@ namespace BrawlLib.Wii.Models
                             pData += len;
                         }
                     }
-                    else if (i == (int)MDLResourceType.Shaders)
+                    else if (resType == MDLResourceType.Shaders)
                     {
                         MDL0GroupNode mats = Groups[(int)MDLResourceType.Materials];
                         MDL0Material* mHeader;

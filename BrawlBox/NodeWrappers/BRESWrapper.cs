@@ -71,22 +71,39 @@ namespace BrawlBox
         public void ImportTexture()
         {
             string path;
-            if (Program.OpenFile(ExportFilters.TEX0, out path) == 8)
+            int index = Program.OpenFile(ExportFilters.TEX0, out path);
+            if (index == 8)
             {
-                TEX0Node node = ((BRESNode)_resource).CreateResource<TEX0Node>();
-                node.Replace(path);
+                TEX0Node node = NodeFactory.FromFile(null, path) as TEX0Node;
+                ((BRESNode)_resource).GetOrCreateFolder<TEX0Node>().AddChild(node);
+
+                BaseWrapper w = this.FindResource(node, true);
+                w.EnsureVisible();
+                w.TreeView.SelectedNode = w;
             }
-            else
-                using (TextureConverterDialog dlg = new TextureConverterDialog()) { dlg.ImageSource = path; dlg.ShowDialog(MainForm.Instance, ResourceNode as BRESNode); }
-            
+            else if (index > 0)
+                using (TextureConverterDialog dlg = new TextureConverterDialog())
+                {
+                    dlg.ImageSource = path;
+                    if (dlg.ShowDialog(MainForm.Instance, ResourceNode as BRESNode) == DialogResult.OK)
+                    {
+                        BaseWrapper w = this.FindResource(dlg.TextureNode, true);
+                        w.EnsureVisible();
+                        w.TreeView.SelectedNode = w;
+                    }
+                }
         }
         public void ImportModel()
         {
             string path;
             if (Program.OpenFile(ExportFilters.MDL0, out path) > 0)
             {
-                MDL0Node node = ((BRESNode)_resource).CreateResource<MDL0Node>();
-                node.Replace(path);
+                MDL0Node node = MDL0Node.FromFile(path);
+                ((BRESNode)_resource).GetOrCreateFolder<MDL0Node>().AddChild(node);
+
+                BaseWrapper w = this.FindResource(node, true);
+                w.EnsureVisible();
+                w.TreeView.SelectedNode = w;
             }
         }
         public void ImportChr()
@@ -94,22 +111,26 @@ namespace BrawlBox
             string path;
             if (Program.OpenFile(ExportFilters.CHR0, out path) > 0)
             {
-                CHR0Node node = ((BRESNode)_resource).CreateResource<CHR0Node>();
-                node.Replace(path);
+                CHR0Node node = NodeFactory.FromFile(null, path) as CHR0Node;
+                ((BRESNode)_resource).GetOrCreateFolder<CHR0Node>().AddChild(node);
+
+                BaseWrapper w = this.FindResource(node, true);
+                w.EnsureVisible();
+                w.TreeView.SelectedNode = w;
             }
         }
         public void NewChr()
         {
-            CHR0Node node = ((BRESNode)_resource).CreateResource<CHR0Node>();
-            BaseWrapper res = this.FindResource(node.Parent, false);
+            CHR0Node node = ((BRESNode)_resource).CreateResource<CHR0Node>("NewCHR");
+            BaseWrapper res = this.FindResource(node, true);
             res = res.FindResource(node, false);
             res.EnsureVisible();
             res.TreeView.SelectedNode = res;
         }
         public void NewModel()
         {
-            MDL0Node node = ((BRESNode)_resource).CreateResource<MDL0Node>();
-            BaseWrapper res = this.FindResource(node.Parent, false);
+            MDL0Node node = ((BRESNode)_resource).CreateResource<MDL0Node>("NewModel");
+            BaseWrapper res = this.FindResource(node, true);
             res = res.FindResource(node, false);
             res.EnsureVisible();
             res.TreeView.SelectedNode = res;

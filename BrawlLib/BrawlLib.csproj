@@ -13,6 +13,21 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PlatformTarget>x86</PlatformTarget>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,6 +38,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
@@ -32,6 +48,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -46,7 +63,8 @@
   <ItemGroup>
     <None Include="System\ComponentModel\CustomPropertyDescriptor.cs" />
     <None Include="System\ComponentModel\DelegatePropertyDescriptor.cs" />
-    <None Include="Modeling\Collada.cs" />
+    <None Include="Modeling\Bone.cs" />
+    <Compile Include="Modeling\Collada.cs" />
     <Compile Include="Imaging\CIE.cs" />
     <Compile Include="Imaging\DIB.cs" />
     <Compile Include="Imaging\IColorSource.cs" />
@@ -56,12 +74,22 @@
     <Compile Include="Imaging\PixelTypes.cs" />
     <Compile Include="Imaging\TGAImage.cs" />
     <Compile Include="Maths.cs" />
+    <Compile Include="Modeling\ColladaImporter.cs" />
+    <Compile Include="Modeling\Face.cs" />
+    <Compile Include="Modeling\FacePoint.cs" />
     <Compile Include="Modeling\FrameState.cs" />
     <Compile Include="Modeling\IMatrixProvider.cs" />
+    <Compile Include="Modeling\Material.cs" />
+    <None Include="Modeling\Model.cs" />
     <Compile Include="Modeling\NodeRef.cs" />
-    <Compile Include="Modeling\Primitive.cs" />
+    <None Include="Modeling\Polygon.cs" />
+    <None Include="Modeling\Primitive.cs" />
     <None Include="Modeling\TextureRef.cs" />
-    <Compile Include="Modeling\Wavefront.cs" />
+    <Compile Include="Modeling\PrimitiveManager.cs" />
+    <Compile Include="Modeling\Shader.cs" />
+    <Compile Include="Modeling\Vertex.cs" />
+    <Compile Include="Modeling\VertexGroup.cs" />
+    <None Include="Modeling\Wavefront.cs" />
     <Compile Include="OpenGL\Enums.cs" />
     <Compile Include="OpenGL\GLCamera.cs" />
     <Compile Include="OpenGL\GLContext.cs" />
@@ -81,18 +109,18 @@
     <Compile Include="SSBB\ResourceNodes\CollisionNode.cs" />
     <Compile Include="SSBB\ResourceNodes\EFLSNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0BoneNode.cs" />
-    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0ColorNode.cs" />
+    <None Include="SSBB\ResourceNodes\MDL0\MDL0ColorNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0DefNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0GroupNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0ShaderNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0MaterialNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0MaterialRefNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0Node.cs" />
-    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0NormalNode.cs" />
+    <None Include="SSBB\ResourceNodes\MDL0\MDL0NormalNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0PolygonNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MDL0\MDL0TextureNode.cs" />
-    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0UVNode.cs" />
-    <Compile Include="SSBB\ResourceNodes\MDL0\MDL0VertexNode.cs" />
+    <None Include="SSBB\ResourceNodes\MDL0\MDL0UVNode.cs" />
+    <None Include="SSBB\ResourceNodes\MDL0\MDL0VertexNode.cs" />
     <Compile Include="SSBB\ResourceNodes\MSBinNode.cs" />
     <Compile Include="SSBB\ResourceNodes\ResourceType.cs" />
     <Compile Include="SSBB\ResourceNodes\RSAR\FILENode.cs" />
@@ -137,6 +165,7 @@
     <Compile Include="System\DoubleExtension.cs" />
     <Compile Include="System\DVector3.cs" />
     <Compile Include="System\IO\FileAssociation.cs" />
+    <Compile Include="System\IO\XmlReader.cs" />
     <Compile Include="System\Matrix.cs" />
     <Compile Include="System\Matrix43.cs" />
     <Compile Include="System\Matrix43StringConverter.cs" />
@@ -166,6 +195,7 @@
     <Compile Include="System\Reflection\MethodInfoExtension.cs" />
     <Compile Include="System\ByteExtension.cs" />
     <Compile Include="System\Vector4.cs" />
+    <Compile Include="System\VQuant.cs" />
     <Compile Include="System\Windows\Forms\AnimEditControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -311,14 +341,23 @@
       <DependentUpon>ProgressWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Wii\Compressor.cs" />
+    <Compile Include="Wii\Graphics\CP.cs" />
+    <Compile Include="Wii\Graphics\Enum.cs" />
+    <Compile Include="Wii\Graphics\XF.cs" />
+    <Compile Include="Wii\Models\AssetStorage.cs" />
     <Compile Include="Wii\Models\Buffers.cs" />
+    <Compile Include="Wii\Models\ColorCodec.cs" />
+    <Compile Include="Wii\Models\ElementCodec.cs" />
     <Compile Include="Wii\Models\Enum.cs" />
     <Compile Include="Wii\Models\bMatrix43.cs" />
-    <Compile Include="Wii\Models\ModelConverter.cs" />
+    <None Include="Wii\Models\ModelConverter.cs" />
     <Compile Include="Wii\Models\ModelDecoder.cs" />
     <Compile Include="Wii\Models\ModelEncoder.cs" />
     <Compile Include="Wii\Models\ModelLinker.cs" />
+    <Compile Include="Wii\Models\NormalCodec.cs" />
+    <Compile Include="Wii\Models\PrimitiveCodec.cs" />
     <Compile Include="Wii\Models\Struct.cs" />
+    <Compile Include="Wii\Models\VertexCodec.cs" />
     <Compile Include="Wii\MSBinDecoder.cs" />
     <Compile Include="Wii\Textures\CI4.cs" />
     <Compile Include="Wii\Textures\CI8.cs" />
@@ -404,6 +443,23 @@
     <None Include="BrawlLib.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

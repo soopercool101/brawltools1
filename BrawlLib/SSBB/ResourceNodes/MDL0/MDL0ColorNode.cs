@@ -32,14 +32,14 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Color Data")]
         public byte EntryStride { get { return Header->_entryStride; } }
         [Category("Color Data")]
-        public byte Unknown3 { get { return Header->_unk3; } }
+        public byte Unknown3 { get { return Header->_scale; } }
         [Category("Color Data")]
-        public short NumEntries { get { return Header->_numEntries; } }
+        public int NumEntries { get { return Header->_numEntries; } }
 
-        private ARGBPixel[] _colors;
-        public ARGBPixel[] Colors
+        private RGBAPixel[] _colors;
+        public RGBAPixel[] Colors
         {
-            get { return _colors == null ? _colors = ModelConverter.ExtractColors(Header) : _colors; }
+            get { return _colors == null ? _colors = ColorCodec.Extract(Header) : _colors; }
             set { _colors = value; SignalPropertyChange(); }
         }
 
@@ -53,10 +53,35 @@ namespace BrawlLib.SSBB.ResourceNodes
             return false;
         }
 
-        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        private ColorCodec _enc;
+        protected override int OnCalculateSize(bool force)
+        {
+            _enc = ColorCodec.Evaluate(Colors);
+            return _enc._outLength.Align(0x20) + 0x20;
+        }
+
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
+        {
+            MDL0ColorData* header = (MDL0ColorData*)address;
+
+            header->_dataLen = length;
+            header->_dataOffset = 0x20;
+            header->_index = _entryIndex;
+            header->_isRGBA = _enc._hasAlpha ? 1 : 0;
+            header->_format = (int)_enc._outType;
+            header->_entryStride = (byte)_enc._outStride;
+            header->_scale = 0;
+            header->_numEntries = (ushort)Colors.Length;
+
+            _enc.Write(Colors, (byte*)header + 0x20);
+            _enc = null;
+        }
+
+        protected internal override void PostProcess(VoidPtr mdlAddress, VoidPtr dataAddress, StringTable stringTable)
         {
             MDL0ColorData* header = (MDL0ColorData*)dataAddress;
-            header->ResourceStringAddress = stringTable[Name] + 4;
+            header->_mdl0Offset = (int)mdlAddress - (int)dataAddress;
+            header->_stringOffset = (int)stringTable[Name] + 4 - (int)dataAddress;
         }
     }
 }

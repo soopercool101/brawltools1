@@ -12,13 +12,15 @@ namespace BrawlLib.Modeling
     {
         internal GLPrimitiveType _type;
 
+        internal List<Vertex> _vertices = new List<Vertex>();
+
         internal int _elementCount;
 
-        internal ushort[] _weightIndices;
-        internal ushort[] _vertexIndices;
-        internal ushort[] _normalIndices;
-        internal ushort[][] _colorIndices = new ushort[2][];
-        internal ushort[][] _uvIndices = new ushort[8][];
+        //internal ushort[] _weightIndices;
+        //internal ushort[] _vertexIndices;
+        //internal ushort[] _normalIndices;
+        //internal ushort[][] _colorIndices = new ushort[2][];
+        //internal ushort[][] _uvIndices = new ushort[8][];
 
         internal UnsafeBuffer _precVertices;
         internal UnsafeBuffer _precNormals;
@@ -60,77 +62,106 @@ namespace BrawlLib.Modeling
         internal unsafe void Precalc(MDL0PolygonNode parent, IMatrixProvider[] nodes)
         {
             //If already calculated, and no weights, skip?
-            if ((_precVertices != null) && (_weightIndices == null))
+            bool hasNodes = parent._nodeList.Count > 0;
+            if ((_precVertices != null) && hasNodes)
                 return;
 
-            //Vertices
-            Vector3[] verts = parent._vertexNode.Vertices;
+            Vector3[] verts, norms = null;
+            Vector3* vPtr = null, nPtr = null;
+            RGBAPixel[][] colors = new RGBAPixel[2][];
+            Vector2[][] uvs = new Vector2[8][];
+            uint* ptrCache = stackalloc uint[10];
+
+            //Points
+            verts = parent._vertexNode.Vertices;
             if (_precVertices == null)
                 _precVertices = new UnsafeBuffer(_elementCount * 12);
-
-            Vector3* vPtr = (Vector3*)_precVertices.Address;
-            if (_weightIndices != null)
-                for (int i = 0; i < _elementCount; i++)
-                    *vPtr++ = nodes[_weightIndices[i]].FrameMatrix.Multiply(verts[_vertexIndices[i]]);
-            else
-                for (int i = 0; i < _elementCount; i++)
-                    *vPtr++ = verts[_vertexIndices[i]];
+            vPtr = (Vector3*)_precVertices.Address;
 
             //Normals
-            if (_normalIndices != null)
+            if(parent._normalNode != null)
             {
-                Vector3[] norms = parent._normalNode.Normals;
-                if (_precNormals == null)
+                norms = parent._normalNode.Normals;
+                if(_precNormals == null)
                     _precNormals = new UnsafeBuffer(_elementCount * 12);
-                Vector3* nPtr = (Vector3*)_precNormals.Address;
-                if (_weightIndices != null)
-                    for (int i = 0; i < _elementCount; i++)
-                        *nPtr++ = nodes[_weightIndices[i]].FrameMatrix.Multiply(norms[_normalIndices[i]]);
-                else
-                    for (int i = 0; i < _elementCount; i++)
-                        *nPtr++ = norms[_normalIndices[i]];
+                nPtr = (Vector3*)_precNormals.Address;
             }
             else if (_precNormals != null)
-            { 
-                _precNormals.Dispose(); 
-                _precNormals = null; 
+            {
+                _precNormals.Dispose();
+                _precNormals = null;
             }
 
             //Colors
-            if (_colorIndices[0] != null)
+            for (int i = 0; i < 1; i++)
             {
-                ARGBPixel[] colors = parent._colorSet[0].Colors;
-                if (_precColors == null)
-                    _precColors = new UnsafeBuffer(_elementCount * 4);
-                ABGRPixel* cPtr = (ABGRPixel*)_precColors.Address;
-                for (int i = 0; i < _elementCount; i++)
-                    *cPtr++ = (ABGRPixel)colors[_colorIndices[0][i]];
-            }
-            else if (_precColors != null)
-            { 
-                _precColors.Dispose(); 
-                _precColors = null; 
+                if (parent._colorSet[i] != null)
+                {
+                    colors[i] = parent._colorSet[i].Colors;
+                    if (_precColors == null)
+                        _precColors = new UnsafeBuffer(_elementCount * 4);
+                    ptrCache[i] = (uint)_precColors.Address;
+                }
+                else if (_precColors != null)
+                {
+                    _precColors.Dispose();
+                    _precColors = null;
+                }
             }
 
-            //UV points
+            //UVs
             for (int i = 0; i < 8; i++)
             {
-                if (_uvIndices[i] != null)
+                if (parent._uvSet[i] != null)
                 {
-                    Vector2[] uvs = parent._uvSet[i].Points;
+                    uvs[i] = parent._uvSet[i].Points;
                     if (_precUVs[i] == null)
                         _precUVs[i] = new UnsafeBuffer(_elementCount * 8);
-                    Vector2* uPtr = (Vector2*)_precUVs[i].Address;
-                    for (int x = 0; x < _elementCount; x++)
-                        *uPtr++ = uvs[_uvIndices[i][x]];
+                    ptrCache[i + 2] = (uint)_precUVs[i].Address;
                 }
                 else if (_precUVs[i] != null)
-                { 
-                    _precUVs[i].Dispose(); 
-                    _precUVs[i] = null; 
+                {
+                    _precUVs[i].Dispose();
+                    _precUVs[i] = null;
                 }
             }
 
+            int count = _vertices.Count;
+            for(int x = 0 ; x < count ; x++)
+            {
+                Vertex vert = _vertices[x];
+
+                //Vertices
+                if (hasNodes)
+                    *vPtr++ = nodes[vert.Weight].FrameMatrix.Multiply(verts[vert.Position]);
+                else
+                    *vPtr++ = verts[vert.Position];
+
+                //Normals
+                if (nPtr != null)
+                {
+                    if(hasNodes) 
+                        *nPtr++ = nodes[vert.Weight].FrameMatrix.Multiply(norms[vert.Normal]);
+                    else  
+                        *nPtr++ = norms[vert.Normal];
+                }
+
+                //Colors
+                for (int i = 0; i < 1; i++)
+                {
+                    RGBAPixel* cPtr = (RGBAPixel*)ptrCache[i];
+                    if (cPtr != null)
+                        cPtr[x] = colors[i][vert.Color[i]];
+                }
+
+                //UVs
+                for (int i = 0; i < 8; i++)
+                {
+                    Vector2* uPtr = (Vector2*)ptrCache[i + 2];
+                    if (uPtr != null)
+                        uPtr[x] = uvs[i][vert.UV[i]];
+                }
+            }
         }
 
         public void Dispose()

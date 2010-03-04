@@ -80,6 +80,27 @@ namespace BrawlLib.SSBBTypes
             }
         }
 
+        public void* GetResource(MDLResourceType type, int entryId)
+        {
+            if (entryId < 0)
+                return null;
+
+            int groupId = ModelLinker.IndexBank[_header._version].IndexOf(type);
+            if (groupId < 0)
+                return null;
+
+            byte* addr;
+            fixed (void* p = &this)
+                addr = (byte*)p;
+            int offset = *((bint*)addr + 4 + groupId);
+            if (offset > 0)
+            {
+                ResourceGroup* pGroup = (ResourceGroup*)(addr + offset);
+                return (byte*)pGroup + (&pGroup->_first)[entryId + 1]._dataOffset;
+            }
+            return null;
+        }
+
         //public string Name { get { return new String((sbyte*)Address + _stringOffset); } }
         //public ResourceGroup* GetEntry(int index) 
         //{
@@ -431,11 +452,11 @@ namespace BrawlLib.SSBBTypes
         public bint _dataOffset; //0x20
         public bint _stringOffset;
         public bint _index;
-        public bint _hasbox;
+        public bint _isNBT;
         public bint _type;
         public byte _divisor;
         public byte _entryStride;
-        public bshort _numVertices;
+        public bushort _numVertices;
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public VoidPtr Data { get { return Address + _dataOffset; } }
@@ -461,8 +482,8 @@ namespace BrawlLib.SSBBTypes
         public bint _isRGBA;
         public bint _format;
         public byte _entryStride;
-        public byte _unk3;
-        public bshort _numEntries;
+        public byte _scale;
+        public bushort _numEntries;
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public VoidPtr Data { get { return Address + _dataOffset; } }
@@ -485,17 +506,14 @@ namespace BrawlLib.SSBBTypes
         public bint _dataOffset; //0x40
         public bint _stringOffset;
         public bint _index;
-        public bint _unk1;
+        public bint _isST;
         public bint _format;
         public byte _divisor;
         public byte _entryStride;
-        public bshort _numEntries;
+        public bushort _numEntries;
         public BVec2 _min;
         public BVec2 _max;
-        public bint _pad1;
-        public bint _pad2;
-        public bint _pad3;
-        public bint _pad4;
+        public int _pad1, _pad2, _pad3, _pad4;
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public BVec2* Entries { get { return (BVec2*)(Address + _dataOffset); } }
@@ -608,6 +626,17 @@ namespace BrawlLib.SSBBTypes
         public bint _unk4; //0x00
         public bint _unk5; //0x00
 
+        public MDL0Data7Part4Entry(int unk2)
+        {
+            _totalLen = 0x1C;
+            _unk1 = 0x18;
+            _unk2 = unk2;
+            _unk3 = 0;
+            _stringOffset = 0;
+            _unk4 = 0;
+            _unk5 = 0;
+        }
+
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
 
         public string ResourceString { get { return new String((sbyte*)ResourceStringAddress); } }
@@ -633,11 +662,13 @@ namespace BrawlLib.SSBBTypes
         public bint _mdl0Offset;
         public bint _nodeId; //Linkage?
 
-        public MDL0ElementFlags _flags;
+        public bint _elemFlags, _texFlags, _dataFlags;
+
+        //public MDL0ElementFlags _flags;
 
         //public bint _elementFlags; //Specifies number/size of elements (also in def block)
         //public bint _unkFlags1; //3 means extra element? (also in def block)
-        public bint _unkFlags2; //0x15 (also in def block)
+        //public bint _unkFlags2; //0x15 (also in def block)
 
         public bint _defSize; //Size of def block including padding. Always 0xE0?
         public bint _defFlags; //0x80
@@ -650,14 +681,14 @@ namespace BrawlLib.SSBBTypes
         public bint _unk3; //0
         public bint _stringOffset;
         public bint _index;
-        public bint _unk4;
+        public bint _numVertices;
         public bint _numFaces;
         public bshort _vertexId;
         public bshort _normalId;
-        fixed short _colorIds[2];
+        public fixed short _colorIds[2];
         //public bshort _colorId1;
         //public bshort _colorId2;
-        fixed short _uids[8];
+        public fixed short _uids[8];
         public bint _part1Offset;
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
@@ -675,6 +706,8 @@ namespace BrawlLib.SSBBTypes
         //        return ptr[index] == -1 ? null : (MDL0UVData*)Parent->UVGroup->First[ptr[index]].DataAddress;
         //    }
         //}
+
+        public VoidPtr DefList { get { return Address + 0x18 + _defOffset; } }
 
         public bshort* ColorIds { get { return (bshort*)(Address + 0x4C); } }
         public bshort* UVIds { get { return (bshort*)(Address + 0x50); } }
@@ -735,30 +768,6 @@ namespace BrawlLib.SSBBTypes
         private buint _data1;
         private buint _data2;
 
-        //Data1
-        //0000 0000 0000 0000 0000 0000 0000 0001     - Vertex/Normal matrix index
-        //0000 0000 0000 0000 0000 0000 0000 0010     - Texture Matrix 0
-        //0000 0000 0000 0000 0000 0000 0000 0100     - Texture Matrix 1
-        //0000 0000 0000 0000 0000 0000 0000 1000     - Texture Matrix 2
-        //0000 0000 0000 0000 0000 0000 0001 0000     - Texture Matrix 3
-        //0000 0000 0000 0000 0000 0000 0010 0000     - Texture Matrix 4
-        //0000 0000 0000 0000 0000 0000 0100 0000     - Texture Matrix 5
-        //0000 0000 0000 0000 0000 0000 1000 0000     - Texture Matrix 6
-        //0000 0000 0000 0000 0000 0001 0000 0000     - Texture Matrix 7
-        //0000 0000 0000 0000 0000 0110 0000 0000     - Vertex format
-        //0000 0000 0000 0000 0001 1000 0000 0000     - Normal format
-        //0000 0000 0000 0000 0110 0000 0000 0000     - Color0 format
-        //0000 0000 0000 0001 1000 0000 0000 0000     - Color1 format
-
-        //Data2
-        //0000 0000 0000 0000 0000 0000 0000 0011     - Tex0 format
-        //0000 0000 0000 0000 0000 0000 0000 1100     - Tex1 format
-        //0000 0000 0000 0000 0000 0000 0011 0000     - Tex2 format
-        //0000 0000 0000 0000 0000 0000 1100 0000     - Tex3 format
-        //0000 0000 0000 0000 0000 0011 0000 0000     - Tex4 format
-        //0000 0000 0000 0000 0000 1100 0000 0000     - Tex5 format
-        //0000 0000 0000 0000 0011 0000 0000 0000     - Tex6 format
-        //0000 0000 0000 0000 1100 0000 0000 0000     - Tex7 format
 
         public bool HasVertexData { get { return (_data1 & 0x400) != 0; } }
         public int VertexEntryLength { get { return (HasVertexData) ? (((_data1 & 0x200) != 0) ? 2 : 1) : 0; } }

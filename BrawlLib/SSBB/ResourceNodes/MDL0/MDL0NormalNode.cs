@@ -24,7 +24,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Normal Data")]
         public int ID { get { return Header->_index; } }
         [Category("Normal Data")]
-        public bool HasBox { get { return Header->_hasbox != 0; } }
+        public bool IsNBT { get { return Header->_isNBT != 0; } }
         [Category("Normal Data")]
         public int Format { get { return Header->_type; } }
         [Category("Normal Data")]
@@ -32,14 +32,14 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Normal Data")]
         public int EntryStride { get { return Header->_entryStride; } }
         [Category("Normal Data")]
-        public short NumEntries { get { return Header->_numVertices; } }
+        public int NumEntries { get { return Header->_numVertices; } }
 
-        private Vector3[] _normals;
-        public Vector3[] Normals
-        {
-            get { return _normals == null ? _normals = ModelConverter.ExtractNormals(Header) : _normals; }
-            set { _normals = value; SignalPropertyChange(); }
-        }
+        //private Vector3[] _normals;
+        //public Vector3[] Normals
+        //{
+        //    get { return _normals == null ? _normals = VertexCodec.Decode(Header) : _normals; }
+        //    set { _normals = value; SignalPropertyChange(); }
+        //}
 
         protected override bool OnInitialize()
         {
@@ -51,10 +51,36 @@ namespace BrawlLib.SSBB.ResourceNodes
             return false;
         }
 
-        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        private VertexCodec _enc;
+        protected override int OnCalculateSize(bool force)
+        {
+            _enc = VertexCodec.Evaluate(Normals, false);
+            return _enc._dataLen.Align(0x20) + 0x20;
+        }
+
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
+        {
+            MDL0NormalData* header = (MDL0NormalData*)address;
+
+            header->_dataLen = length;
+            header->_dataOffset = 0x20;
+            header->_index = _entryIndex;
+            header->_isNBT = 0;
+            header->_type = (int)_enc._type;
+            header->_divisor = (byte)_enc._scale;
+            header->_entryStride = (byte)_enc._dstStride;
+            header->_numVertices = (ushort)_enc._srcCount;
+
+            _enc.Write(Normals, (byte*)header + 0x20);
+            _enc.Dispose();
+            _enc = null;
+        }
+
+        protected internal override void PostProcess(VoidPtr mdlAddress, VoidPtr dataAddress, StringTable stringTable)
         {
             MDL0NormalData* header = (MDL0NormalData*)dataAddress;
-            header->ResourceStringAddress = stringTable[Name] + 4;
+            header->_mdl0Offset = (int)mdlAddress - (int)dataAddress;
+            header->_stringOffset = (int)stringTable[Name] + 4 - (int)dataAddress;
         }
     }
 }

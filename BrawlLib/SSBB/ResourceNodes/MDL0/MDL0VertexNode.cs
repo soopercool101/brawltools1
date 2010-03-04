@@ -43,12 +43,12 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Vertex Data")]
         public int Pad2 { get { return Header->_pad2; } }
 
-        private Vector3[] _vertices;
-        public Vector3[] Vertices
-        {
-            get { return _vertices == null ? _vertices = ModelConverter.ExtractVertices(Header) : _vertices; }
-            set { _vertices = value; SignalPropertyChange(); }
-        }
+        //private Vector3[] _vertices;
+        //public Vector3[] Vertices
+        //{
+        //    get { return _vertices == null ? _vertices = VertexCodec.Decode(Header) : _vertices; }
+        //    set { _vertices = value; SignalPropertyChange(); }
+        //}
 
         protected override bool OnInitialize()
         {
@@ -58,6 +58,35 @@ namespace BrawlLib.SSBB.ResourceNodes
                 _name = Header->ResourceString;
 
             return false;
+        }
+
+        private VertexCodec _enc;
+        protected override int OnCalculateSize(bool force)
+        {
+            _enc = VertexCodec.Evaluate(Vertices, true);
+            return _enc._dataLen.Align(0x20) + 0x40;
+        }
+
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
+        {
+            //Write header
+            MDL0VertexData* header = (MDL0VertexData*)address;
+            header->_dataLen = length;
+            header->_dataOffset = 0x40;
+            header->_index = _entryIndex;
+            header->_isXYZ = _enc._hasZ ? 1 : 0;
+            header->_type = (int)_enc._type;
+            header->_divisor = (byte)_enc._scale;
+            header->_entryStride = (byte)_enc._dstStride;
+            header->_numVertices = (short)_enc._srcCount;
+            header->_eMin = _enc._min;
+            header->_eMax = _enc._max;
+            header->_pad1 = header->_pad2 = 0;
+
+            //Write data
+            _enc.Write(Vertices, (byte*)address + 0x40);
+            _enc.Dispose();
+            _enc = null;
         }
 
         public override unsafe void Export(string outPath)
@@ -70,10 +99,11 @@ namespace BrawlLib.SSBB.ResourceNodes
             base.Export(outPath);
         }
 
-        protected internal override void PostProcess(VoidPtr dataAddress, StringTable stringTable)
+        protected internal override void PostProcess(VoidPtr mdlAddress, VoidPtr dataAddress, StringTable stringTable)
         {
             MDL0UVData* header = (MDL0UVData*)dataAddress;
-            header->ResourceStringAddress = stringTable[Name] + 4;
+            header->_mdl0Offset = (int)mdlAddress - (int)dataAddress;
+            header->_stringOffset = (int)stringTable[Name] + 4 - (int)dataAddress;
         }
 
         //public VertexList GetVertices() { return new VertexList() { _name = Name, _vertices = ModelConverter.ExtractVertices(Header) }; }

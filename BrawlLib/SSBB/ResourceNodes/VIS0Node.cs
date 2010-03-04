@@ -39,7 +39,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             VIS0EntryNode entry = new VIS0EntryNode();
             entry._entryCount = -1;
             entry.EntryCount = _frameCount + 1;
-            entry.Name = this.FindName();
+            entry.Name = this.FindName(null);
             AddChild(entry);
             return entry;
         }

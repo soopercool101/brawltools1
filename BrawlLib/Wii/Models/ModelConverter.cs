@@ -9,6 +9,7 @@ using BrawlLib.Imaging;
 using System.Runtime.InteropServices;
 using BrawlLib.Modeling;
 using BrawlLib.SSBB.ResourceNodes;
+using BrawlLib.Wii.Graphics;
 
 namespace BrawlLib.Wii.Models
 {
@@ -19,7 +20,8 @@ namespace BrawlLib.Wii.Models
             List<Primitive> list = new List<Primitive>();
 
             VoidPtr dataAddr = polygon->PrimitiveData;
-            ModelEntrySize e = new ModelEntrySize(polygon->_flags);
+            ElementFlags e = new ElementFlags(polygon->_elemFlags, polygon->_texFlags);
+            //ModelEntrySize e = new ModelEntrySize(polygon->_flags);
 
             int nodeIndex = 0;
             ushort[] nodeBuffer = new ushort[16];
@@ -31,128 +33,10 @@ namespace BrawlLib.Wii.Models
             return list;
         }
 
-        private static Vector2[] ExtractPoints(VoidPtr address, int count, WiiVertexComponentType type, float divisor)
-        {
-            Vector2[] points = new Vector2[count];
-
-            fixed (Vector2* p = points)
-            {
-                float* dPtr = (float*)p;
-                for (int i = 0; i < count; i++)
-                {
-                    *dPtr++ = ReadValue(ref address, type, divisor);
-                    *dPtr++ = ReadValue(ref address, type, divisor);
-                }
-            }
-            return points;
-        }
-        private static Vector3[] ExtractVertices(VoidPtr address, int count, bool isXYZ, WiiVertexComponentType type, float divisor)
-        {
-            Vector3[] verts = new Vector3[count];
-            fixed (Vector3* p = verts)
-            {
-                float* dPtr = (float*)p;
-                for (int i = 0; i < count; i++)
-                {
-                    *dPtr++ = ReadValue(ref address, type, divisor);
-                    *dPtr++ = ReadValue(ref address, type, divisor);
-                    if (isXYZ)
-                        *dPtr++ = ReadValue(ref address, type, divisor);
-                    else
-                        *dPtr++ = 0.0f;
-                }
-            }
-
-            return verts;
-        }
-        private static float ReadValue(ref VoidPtr addr, WiiVertexComponentType type, float divisor)
-        {
-            switch (type)
-            {
-                case WiiVertexComponentType.UInt8: addr += 1; return ((byte*)addr)[-1] / divisor;
-                case WiiVertexComponentType.Int8: addr += 1; return ((sbyte*)addr)[-1] / divisor;
-                case WiiVertexComponentType.UInt16: addr += 2; return ((bushort*)addr)[-1] / divisor;
-                case WiiVertexComponentType.Int16: addr += 2; return ((bshort*)addr)[-1] / divisor;
-                case WiiVertexComponentType.Float: addr += 4; return ((bfloat*)addr)[-1];
-            }
-            return 0.0f;
-        }
-
-        public static ARGBPixel[] ExtractColors(MDL0ColorData* colors)
-        {
-            int count = colors->_numEntries;
-            ARGBPixel[] c = new ARGBPixel[count];
-
-            fixed (ARGBPixel* p = c)
-            {
-                ARGBPixel* dPtr = p;
-
-                switch (colors->Type)
-                {
-                    case WiiColorComponentType.RGB565:
-                        {
-                            wRGB565Pixel* sPtr = (wRGB565Pixel*)colors->Data;
-                            for (int i = 0; i < count; i++)
-                                *dPtr++ = (ARGBPixel)(*sPtr++);
-                            break;
-                        }
-                    case WiiColorComponentType.RGB8:
-                        {
-                            wRGBPixel* sPtr = (wRGBPixel*)colors->Data;
-                            for (int i = 0; i < count; i++)
-                                *dPtr++ = (ARGBPixel)(*sPtr++);
-                            break;
-                        }
-                    case WiiColorComponentType.RGBX8:
-                        {
-                            wRGBXPixel* sPtr = (wRGBXPixel*)colors->Data;
-                            for (int i = 0; i < count; i++)
-                                *dPtr++ = (ARGBPixel)(*sPtr++);
-                            break;
-                        }
-                    case WiiColorComponentType.RGBA4:
-                        {
-                            wRGBA4Pixel* sPtr = (wRGBA4Pixel*)colors->Data;
-                            for (int i = 0; i < count; i++)
-                                *dPtr++ = (ARGBPixel)(*sPtr++);
-                            break;
-                        }
-                    case WiiColorComponentType.RGBA6:
-                        {
-                            wRGBA6Pixel* sPtr = (wRGBA6Pixel*)colors->Data;
-                            for (int i = 0; i < count; i++)
-                                *dPtr++ = (ARGBPixel)(*sPtr++);
-                            break;
-                        }
-                    case WiiColorComponentType.RGBA8:
-                        {
-                            wRGBAPixel* sPtr = (wRGBAPixel*)colors->Data;
-                            for (int i = 0; i < count; i++)
-                                *dPtr++ = (ARGBPixel)(*sPtr++);
-                            break;
-                        }
-                }
-            }
-            return c;
-        }
-
-        public static Vector3[] ExtractVertices(MDL0VertexData* vertices)
-        {
-            return ExtractVertices(vertices->Data, vertices->_numVertices, vertices->_isXYZ != 0, vertices->Type, (float)(1 << vertices->_divisor));
-        }
-        public static Vector3[] ExtractNormals(MDL0NormalData* normals)
-        {
-            return ExtractVertices(normals->Data, normals->_numVertices, true, normals->Type, (float)(1 << normals->_divisor));
-        }
-        public static Vector2[] ExtractUVs(MDL0UVData* uvs)
-        {
-            return ExtractPoints(uvs->Entries, uvs->_numEntries, uvs->Type, (float)(1 << uvs->_divisor));
-        }
-
         private delegate ushort IndexParser(VoidPtr addr);
         private static IndexParser ByteParser = x => *(byte*)x;
         private static IndexParser UShortParser = x => *(bushort*)x;
-        private static Primitive ExtractPrimitive(ref VoidPtr address, ModelEntrySize entryInfo, ushort[] nodeBuffer,ref int nodeIndex)
+        private static Primitive ExtractPrimitive(ref VoidPtr address, ElementFlags entryInfo, ushort[] nodeBuffer, ref int nodeIndex)
         {
             Top:
             PrimitiveHeader* header = (PrimitiveHeader*)address;
@@ -183,48 +67,83 @@ namespace BrawlLib.Wii.Models
             }
 
             Primitive primitive = new Primitive();
-            primitive._type = type;
+            primitive._type = GLPrimitiveType.Triangles;
             
 
             int entries = primitive._elementCount = header->Entries;
-            int stride = entryInfo._totalLen;
-            VoidPtr data = header->Data;
+            int stride = entryInfo.Stride;
+            byte* data = (byte*)header->Data;
 
-            //Weight indices
-            primitive._weightIndices = ParseWeights(data, entries, entryInfo._extraLen, stride, nodeBuffer);
-            data += entryInfo._extraLen;
+            //Pos matrices
+            if (entryInfo.PosNormMatrixIndex)
+            {
+                primitive._weightIndices = ParseWeights(data, entries, stride, nodeBuffer);
+                data += 1;
+            }
 
-            //Vertex Data
-            primitive._vertexIndices = ParseIndices(data, entries, entryInfo._vertexLen, stride);
-            data += entryInfo._vertexLen;
+            //Tex matrices
+            for (int i = 0; i < 8; i++)
+                if (entryInfo.TexMatrixIndex[i])
+                    data++;
 
-            //Normal Data
-            primitive._normalIndices = ParseIndices(data, entries, entryInfo._normalLen, stride);
-            data += entryInfo._normalLen;
+            XFDataFormat* fPtr = &entryInfo.PositionFormat;
+
+            primitive._vertexIndices = ParseElement(ref data, *fPtr++, entries, stride);
+            primitive._normalIndices = ParseElement(ref data, *fPtr++, entries, stride);
 
             //Color Data
-            for (int i = 0; i < 2; data += entryInfo._colorLen[i++])
-                primitive._colorIndices[i] = ParseIndices(data, entries, entryInfo._colorLen[i], stride);
+            for (int i = 0; i < 2; )
+                primitive._colorIndices[i++] = ParseElement(ref data, *fPtr++, entries, stride);
 
             //UV Data
-            for (int i = 0; i < 8; data += entryInfo._uvLen[i++])
-                primitive._uvIndices[i] = ParseIndices(data, entries, entryInfo._uvLen[i], stride);
+            for (int i = 0; i < 8; )
+                primitive._uvIndices[i++] = ParseElement(ref data, *fPtr++, entries, stride);
 
-            address += (entryInfo._totalLen * entries) + 3;
+            address += stride * entries + 3;
 
             return primitive;
         }
 
-        private static ushort[] ParseWeights(VoidPtr address, int elementCount, int elementLen, int stride, ushort[] nodeBuffer)
+        private static ushort[] ParseWeights(byte* pData, int elementCount, int stride, ushort[] nodeBuffer)
         {
-            if (elementLen == 0)
+            ushort[] indices = new ushort[elementCount];
+
+            for (int i = 0; i < elementCount; pData += stride )
+                indices[i++] = nodeBuffer[*pData / 3];
+
+            return indices;
+        }
+
+        private static ushort[] ParseElement(ref byte* pData, XFDataFormat fmt, int count, int stride)
+        {
+            if (fmt == XFDataFormat.None)
                 return null;
 
-            ushort[] indices = new ushort[elementCount];
-            byte* ptr = (byte*)address;
+            ushort[] indices = new ushort[count];
 
-            for (int i = 0; i < elementCount; ptr += stride )
-                indices[i++] = nodeBuffer[*ptr / 3];
+            byte* tPtr = pData;
+            if (fmt == XFDataFormat.Index8)
+            {
+                for (int i = 0; i < count; tPtr += stride)
+                    indices[i++] = *tPtr;
+                pData++;
+            }
+            else if (fmt == XFDataFormat.Index16)
+            {
+                for (int i = 0; i < count; tPtr += stride)
+                    indices[i++] = *(bushort*)tPtr;
+                pData += 2;
+            }
+
+            return indices;
+        }
+
+        private static ushort[] Parse8(byte* pData, int elements, int stride)
+        {
+            ushort[] indices = new ushort[elements];
+
+            for (int i = 0; i < elements; pData += stride)
+                indices[i++] = *pData;
 
             return indices;
         }
