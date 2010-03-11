@@ -50,17 +50,17 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         //public List<MDL0PolygonNode> Polygons { get { return _polygons; } }
 
-        [Category("Bone")]
-        public int BoneIndex { get { return Header->_index; } }
+        //[Category("Bone")]
+        //public int BoneIndex { get { return Header->_index; } }
 
-        [Category("Bone")]
-        public int NodeId { get { return Header->_nodeId; } }
+        //[Category("Bone")]
+        //public int NodeId { get { return Header->_nodeId; } }
         [Category("Bone")]
         public BoneFlags Flags { get { return _flags; } }
-        [Category("Bone")]
-        public uint Pad1 { get { return Header->_pad1; } }
-        [Category("Bone")]
-        public uint Pad2 { get { return Header->_pad2; } }
+        //[Category("Bone")]
+        //public uint Pad1 { get { return Header->_pad1; } }
+        //[Category("Bone")]
+        //public uint Pad2 { get { return Header->_pad2; } }
 
         [Category("Bone"), TypeConverter(typeof(Vector3StringConverter))]
         public Vector3 Scale { get { return _bindState._scale; } set { _bindState.Scale = value; SignalPropertyChange(); } }
@@ -81,8 +81,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         //public int NextOffset { get { return Header->_nextOffset / 0xD0; } }
         //[Category("Bone")]
         //public int PrevOffset { get { return Header->_prevOffset / 0xD0; } }
-        [Category("Bone")]
-        public int Part2Offset { get { return Header->_part2Offset; } }
+        //[Category("Bone")]
+        //public int Part2Offset { get { return Header->_part2Offset; } }
 
         [Category("Data2 Part2")]
         public List<string> Entries { get { return _entries; } }

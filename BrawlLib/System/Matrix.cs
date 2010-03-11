@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using BrawlLib.Modeling;
 
 namespace System
 {
@@ -21,6 +22,17 @@ namespace System
         {
             get { return Data[index]; }
             set { Data[index] = value; }
+        }
+
+        public Matrix Reverse()
+        {
+            Matrix m;
+            float* pOut = (float*)&m;
+            fixed (float* p = _values)
+                for (int y = 0; y < 4; y++)
+                    for (int x = 0; x < 4; x++)
+                        *pOut++ = p[(x << 2) + y];
+            return m;
         }
 
         public static Matrix ScaleMatrix(float x, float y, float z)
@@ -242,6 +254,64 @@ namespace System
                 p[2] = (var1 * cosz) + (var2 * sinz);
                 p[6] = (var1 * -sinz) + (var2 * cosz);
             }
+        }
+
+        public FrameState Derive()
+        {
+            FrameState state = new FrameState();
+
+            fixed (float* p = _values)
+            {
+                //Translation is easy!
+                state._translate = *(Vector3*)&p[12];
+
+                //Scale, use sqrt of rotation columns
+                state._scale._x = (float)Math.Round(Math.Sqrt(p[0] * p[0] + p[1] * p[1] + p[2] * p[2]), 4);
+                state._scale._y = (float)Math.Round(Math.Sqrt(p[4] * p[4] + p[5] * p[5] + p[6] * p[6]), 4);
+                state._scale._z = (float)Math.Round(Math.Sqrt(p[8] * p[8] + p[9] * p[9] + p[10] * p[10]), 4);
+
+                state._rotate._x = (float)Math.Round(Math.Atan2(p[6] / state._scale._y, p[10] / state._scale._z) / Math.PI * 180.0f, 4);
+                state._rotate._y = (float)Math.Round(-Math.Asin(p[2] / state._scale._x) / Math.PI * 180.0f, 4);
+                state._rotate._z = (float)Math.Round(Math.Atan2(p[1] / state._scale._x, p[0] / state._scale._x) / Math.PI * 180.0f, 4);
+
+                //Get rotation values using sinY. Reverse scale when needed
+                //double siny = -p[2] / state._scale._x;
+                //double cosy = 0;
+                //double sinx, cosx;
+
+                //if (siny > 0.998)
+                //{
+                //}
+                //else if (siny < 0.998)
+                //{
+                //}
+                //else
+                //{
+                //    if (siny == 0)
+                //    {
+                //    }
+
+                //    if (p[6] == 0 && p[10] != 0)
+                //    {
+                //        sinx = 0;
+                //    }
+                //    else if (p[10] == 0 && p[6] != 0)
+                //    {
+                //        cosx = 0;
+                //    }
+                //    else
+                //    {
+                //        double tanx = p[6] / p[10];
+
+                //    }
+                //}
+
+
+            }
+
+            state.CalcTransforms();
+
+            return state;
         }
 
         internal void Scale(float x, float y, float z)

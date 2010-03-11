@@ -103,20 +103,23 @@ namespace BrawlLib.SSBB.ResourceNodes
                     {
                         //Then search node directory
                         string path = node._origPath;
-                        DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(path));
-                        foreach (FileInfo file in dir.GetFiles(Name + ".*"))
+                        if (path != null)
                         {
-                            if (file.Name.EndsWith(".tga"))
+                            DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(path));
+                            foreach (FileInfo file in dir.GetFiles(Name + ".*"))
                             {
-                                Source = file.FullName;
-                                bmp = TGA.FromFile(file.FullName);
-                                break;
-                            }
-                            else if (file.Name.EndsWith(".png") || file.Name.EndsWith(".tiff") || file.Name.EndsWith(".tif"))
-                            {
-                                Source = file.FullName;
-                                bmp = (Bitmap)Bitmap.FromFile(file.FullName);
-                                break;
+                                if (file.Name.EndsWith(".tga"))
+                                {
+                                    Source = file.FullName;
+                                    bmp = TGA.FromFile(file.FullName);
+                                    break;
+                                }
+                                else if (file.Name.EndsWith(".png") || file.Name.EndsWith(".tiff") || file.Name.EndsWith(".tif"))
+                                {
+                                    Source = file.FullName;
+                                    bmp = (Bitmap)Bitmap.FromFile(file.FullName);
+                                    break;
+                                }
                             }
                         }
                     }

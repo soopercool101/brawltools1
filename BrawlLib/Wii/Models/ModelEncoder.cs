@@ -106,13 +106,13 @@ namespace BrawlLib.Wii.Models
             {
                 mixLen = 0;
 
-                foreach (IMatrixProvider m in linker.Model._nodes)
-                {
-                    if (m is MDL0BoneNode)
-                        mixLen += 5;
-                    else
-                        mixLen += ((m as Influence)._entries.Count * 6) + 4;
-                }
+                //foreach (IMatrixProvider m in linker.Model._nodes)
+                //{
+                //    if (m is MDL0BoneNode)
+                //        mixLen += 5;
+                //    else
+                //        mixLen += ((m as Influence)._entries.Count * 6) + 4;
+                //}
             }
 
             if (linker.Model._hasTree = (treeLen > 0)) groupLen += 0x10;
@@ -230,30 +230,30 @@ namespace BrawlLib.Wii.Models
                 count++;
 
                 index = 0;
-                foreach (object o in linker.Model._nodes)
-                {
-                    if (o is MDL0BoneNode)
-                    {
-                        *pData = 5;
-                        *(bushort*)(pData + 1) = (ushort)(index++);
-                        *(bushort*)(pData + 3) = (ushort)((MDL0BoneNode)o)._entryIndex;
-                        pData += 5;
-                    }
-                    else
-                    {
-                        Influence nr = (Influence)o;
-                        *pData = 3;
-                        *(bushort*)&pData[1] = (ushort)(index++);
-                        pData[3] = (byte)nr._entries.Count;
-                        pData += 4;
-                        foreach (NodeWeight w in nr._entries)
-                        {
-                            *(bushort*)pData = (ushort)w.Bone._nodeIndex;
-                            *(bfloat*)(pData + 2) = w.Weight;
-                            pData += 6;
-                        }
-                    }
-                }
+                //foreach (object o in linker.Model._nodes)
+                //{
+                //    if (o is MDL0BoneNode)
+                //    {
+                //        *pData = 5;
+                //        *(bushort*)(pData + 1) = (ushort)(index++);
+                //        *(bushort*)(pData + 3) = (ushort)((MDL0BoneNode)o)._entryIndex;
+                //        pData += 5;
+                //    }
+                //    else
+                //    {
+                //        Influence nr = (Influence)o;
+                //        *pData = 3;
+                //        *(bushort*)&pData[1] = (ushort)(index++);
+                //        pData[3] = (byte)nr._entries.Count;
+                //        pData += 4;
+                //        foreach (NodeWeight w in nr._entries)
+                //        {
+                //            *(bushort*)pData = (ushort)w.Bone._nodeIndex;
+                //            *(bfloat*)(pData + 2) = w.Weight;
+                //            pData += 6;
+                //        }
+                //    }
+                //}
                 *pData++ = 1;
             }
 

@@ -42,12 +42,13 @@ namespace BrawlLib.Modeling
 
         internal int _pointCount, _stride;
         internal UnsafeBuffer[] _faceData = new UnsafeBuffer[12];
-        bool[] _dirty = new bool[12];
+        internal bool[] _dirty = new bool[12];
 
         UnsafeBuffer _graphicsBuffer;
 
         internal NewPrimitive _faces, _lines, _points;
 
+        public PrimitiveManager() { }
         public PrimitiveManager(MDL0Polygon* polygon, AssetStorage assets, Influence[] nodes)
         {
             _pointCount = polygon->_numVertices;
@@ -177,6 +178,8 @@ namespace BrawlLib.Modeling
             else
             { _points = null; p1 = null; }
 
+
+            //Extract indices in reverse order, this way we get CCW winding.
         Top:
             switch ((GXListCommand)(*pData++))
             {
@@ -190,22 +193,36 @@ namespace BrawlLib.Modeling
                 case GXListCommand.DrawQuads:
                     count = *(bushort*)pData;
 
-                    for (int i = 0; i < count; i++)
+                    for (int i = 0; i < count; i += 4)
                     {
-                        if ((i & 3) == 2)
-                        {
-                            *p3++ = index;
-                            *p3++ = index;
-                            *p3++ = (ushort)(index++ - 1);
-                        }
-                        *p3++ = index++;
+                        *p3++ = index;
+                        *p3++ = (ushort)(index + 2);
+                        *p3++ = (ushort)(index + 1);
+                        *p3++ = index;
+                        *p3++ = (ushort)(index + 3);
+                        *p3++ = (ushort)(index + 2);
+
+                        //if ((i & 3) == 2)
+                        //{
+                        //    *p3++ = index;
+                        //    *p3++ = index;
+                        //    *p3++ = (ushort)(index++ - 1);
+                        //}
+                        //*p3++ = index++;
+                        index += 4;
                     }
                     break;
 
                 case GXListCommand.DrawTriangles:
                     count = *(bushort*)pData;
-                    for (int i = 0; i < count; i++)
-                        *p3++ = index++;
+
+                    for (int i = 0; i < count; i += 3)
+                    {
+                        *p3++ = (ushort)(index + 2);
+                        *p3++ = (ushort)(index + 1);
+                        *p3++ = index;
+                        index += 3;
+                    }
                     break;
 
                 case GXListCommand.DrawTriangleFan:
@@ -215,8 +232,8 @@ namespace BrawlLib.Modeling
                     for (int i = 2; i < count; i++)
                     {
                         *p3++ = temp;
+                        *p3++ = (ushort)(index + 1);
                         *p3++ = index++;
-                        *p3++ = index;
                     }
                     index++;
 
@@ -225,21 +242,29 @@ namespace BrawlLib.Modeling
                 case GXListCommand.DrawTriangleStrip:
                     count = *(bushort*)pData;
 
-                    temp = index;
+                    //temp = index;
                     index += 2;
                     for (int i = 2; i < count; i++)
                     {
                         if ((i & 1) == 0)
                         {
-                            *p3++ = temp++;
-                            *p3++ = temp++;
-                            *p3++ = index++;
+                            *p3++ = (ushort)(index - 2);
+                            *p3++ = index;
+                            *p3++ = (ushort)(index - 1);
+                            index++;
+                            //*p3++ = temp++;
+                            //*p3++ = temp++;
+                            //*p3++ = index++;
                         }
                         else
                         {
-                            *p3++ = temp--;
-                            *p3++ = temp++;
-                            *p3++ = index++;
+                            *p3++ = (ushort)(index - 1);
+                            *p3++ = index;
+                            *p3++ = (ushort)(index - 2);
+                            index++;
+                            //*p3++ = temp--;
+                            //*p3++ = temp++;
+                            //*p3++ = index++;
                         }
                     }
 
@@ -401,6 +426,7 @@ namespace BrawlLib.Modeling
             ctx.glDisableClientState(GLArrayType.NORMAL_ARRAY);
             ctx.glDisableClientState(GLArrayType.VERTEX_ARRAY);
             ctx.glDisableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
+            ctx.glDisable((uint)GLEnableCap.Texture2D);
         }
 
         internal void Render(GLContext ctx, int texId)

@@ -14,12 +14,12 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal MDL0Polygon* Header { get { return (MDL0Polygon*)WorkingUncompressed.Address; } }
         //protected override int DataLength { get { return Header->_totalLength; } }
 
-        [Category("Polygon Data")]
-        public int TotalLen { get { return Header->_totalLength; } }
-        [Category("Polygon Data")]
-        public int MDL0Offset { get { return Header->_mdl0Offset; } }
-        [Category("Polygon Data")]
-        public int NodeId { get { return Header->_nodeId; } }
+        //[Category("Polygon Data")]
+        //public int TotalLen { get { return Header->_totalLength; } }
+        //[Category("Polygon Data")]
+        //public int MDL0Offset { get { return Header->_mdl0Offset; } }
+        //[Category("Polygon Data")]
+        //public int NodeId { get { return Header->_nodeId; } }
 
         //[Category("Polygon Data")]
         //public MDL0ElementFlags ElementFlags { get { return Header->_flags; } }
@@ -28,35 +28,35 @@ namespace BrawlLib.SSBB.ResourceNodes
         //[Category("Polygon Data")]
         //public int UnkFlags2 { get { return Header->_unkFlags2; } }
 
-        [Category("Polygon Data")]
-        public int DefSize { get { return Header->_defSize; } }
-        [Category("Polygon Data")]
-        public int DefFlags { get { return Header->_defFlags; } }
-        [Category("Polygon Data")]
-        public int DefOffset { get { return Header->_defOffset; } }
+        //[Category("Polygon Data")]
+        //public int DefSize { get { return Header->_defSize; } }
+        //[Category("Polygon Data")]
+        //public int DefFlags { get { return Header->_defFlags; } }
+        //[Category("Polygon Data")]
+        //public int DefOffset { get { return Header->_defOffset; } }
 
-        [Category("Polygon Data")]
-        public int DataLength1 { get { return Header->_dataLen1; } }
-        [Category("Polygon Data")]
-        public int DataLength2 { get { return Header->_dataLen2; } }
-        [Category("Polygon Data")]
-        public int DataOffset { get { return Header->_dataOffset; } }
+        //[Category("Polygon Data")]
+        //public int DataLength1 { get { return Header->_dataLen1; } }
+        //[Category("Polygon Data")]
+        //public int DataLength2 { get { return Header->_dataLen2; } }
+        //[Category("Polygon Data")]
+        //public int DataOffset { get { return Header->_dataOffset; } }
 
-        [Category("Polygon Data")]
-        public int Unknown2 { get { return Header->_unk2; } }
-        [Category("Polygon Data")]
-        public int Unknown3 { get { return Header->_unk3; } }
-        [Category("Polygon Data")]
-        public int StringOffset { get { return Header->_stringOffset; } }
-        [Category("Polygon Data")]
-        public int ItemId { get { return Header->_index; } }
-        [Category("Polygon Data")]
-        public int NumVertices { get { return Header->_numVertices; } }
-        [Category("Polygon Data")]
-        public int Faces { get { return Header->_numFaces; } }
+        //[Category("Polygon Data")]
+        //public int Unknown2 { get { return Header->_unk2; } }
+        //[Category("Polygon Data")]
+        //public int Unknown3 { get { return Header->_unk3; } }
+        //[Category("Polygon Data")]
+        //public int StringOffset { get { return Header->_stringOffset; } }
+        //[Category("Polygon Data")]
+        //public int ItemId { get { return Header->_index; } }
+        //[Category("Polygon Data")]
+        //public int NumVertices { get { return Header->_numVertices; } }
+        //[Category("Polygon Data")]
+        //public int Faces { get { return Header->_numFaces; } }
 
-        [Category("Polygon Data")]
-        public int Part1Offset { get { return Header->_part1Offset; } }
+        //[Category("Polygon Data")]
+        //public int Part1Offset { get { return Header->_part1Offset; } }
 
         //#region Bone linkage
         //internal MDL0BoneNode _singleBind;
@@ -162,7 +162,10 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             //Attach node
             if (nodeId >= 0)
-                _singleBind = linker.NodeCache[nodeId].Clone();
+            {
+                _singleBind = linker.NodeCache[nodeId];
+                _singleBind._refCount++;
+            }
 
             if (header != null)
             {
@@ -223,7 +226,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (_singleBind != null)
             {
                 ctx.glPushMatrix();
-                Matrix m = _singleBind.FrameMatrix;
+                Matrix m = _singleBind._matrix;
                 ctx.glMultMatrix((float*)&m);
             }
 
@@ -302,8 +305,8 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         internal void WeightVertices()
         {
-            if (_singleBind != null)
-                _singleBind.CalcWeighted();
+            //if (_singleBind != null)
+            //    _singleBind.CalcWeighted();
 
             //if (_singleBind == null)
             _manager.Weight();

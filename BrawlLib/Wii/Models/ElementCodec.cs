@@ -558,7 +558,11 @@ namespace BrawlLib.Wii.Models
             {
                 ushort* pMap = (ushort*)RemapTable.Address;
                 for (int i = 0; i < RemapSize; i++)
-                    list.Add(new Vertex3(pVert[*pMap++], nodeTable[*pMap++].Clone()));
+                {
+                    Vertex3 v = new Vertex3(pVert[*pMap++], nodeTable[*pMap++]);
+                    v.Influence._refCount++;
+                    list.Add(v);
+                }
             }
             else
             {

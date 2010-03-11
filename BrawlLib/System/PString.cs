@@ -21,7 +21,7 @@ namespace System
         public static implicit operator VoidPtr(PString p) { return *(VoidPtr*)&p; }
         public static implicit operator PString(VoidPtr p) { return *(PString*)&p; }
 
-        public static explicit operator string(PString p) { return new String(p); }
+        public static explicit operator string(PString p) { return new String((sbyte*)p._address); }
 
         public static PString operator +(PString p, int amount)
         {
@@ -29,18 +29,91 @@ namespace System
             return p;
         }
 
-        public static bool operator ==(PString p, string s)
+        public static bool operator ==(PString p, string s) { return p.Equals(s, false); }
+        public static bool operator !=(PString p, string s) { return !p.Equals(s, false); }
+
+        public static bool operator ==(PString p, PString s) { return p.Equals(s, false); }
+        public static bool operator !=(PString p, PString s) { return !p.Equals(s, false); }
+
+        public override bool Equals(object obj)
         {
-            byte* pStr1 = p._address;
-            fixed (char* pChar = s)
+            if (obj is PString)
+                return Equals((PString)obj, false);
+            else if (obj is String)
+                return Equals((String)obj, false);
+            return false;
+        }
+        public static bool Equals(PString s1, PString s2, bool ignoreCase) { return s1.Equals(s2, ignoreCase); }
+        public static bool Equals(PString s1, String s2, bool ignoreCase) { return s1.Equals(s2, ignoreCase); }
+        public bool Equals(PString s, bool ignoreCase)
+        {
+            byte* pStr1 = _address;
+            byte* pStr2 = s._address;
+            byte b1, b2;
+
+            do
             {
-                char* pStr2 = pChar;
-                do { if (*pStr1 != *pStr2++) return false; }
-                while (*pStr1++ != 0);
+                b1 = *pStr1++;
+                b2 = *pStr2++;
+                if (b1 != b2)
+                {
+                    if (ignoreCase)
+                    {
+                        if ((b1 >= 0x41) && (b1 <= 0x5A))
+                        {
+                            if (b1 + 0x20 == b2)
+                                continue;
+                        }
+                        else if ((b1 >= 0x61) && (b1 <= 0x7A))
+                        {
+                            if (b1 - 0x20 == b2)
+                                continue;
+                        }
+                    }
+                    return false;
+                }
             }
+            while (b1 != 0);
+
             return true;
         }
-        public static bool operator !=(PString p, string s) { return !(p == s); }
+        public bool Equals(String s, bool ignoreCase)
+        {
+            byte* pStr1 = _address;
+            char* pStr2;
+            byte b1, b2;
+
+            fixed (char* pChar = s)
+            {
+                pStr2 = pChar;
+                do
+                {
+                    b1 = *pStr1++;
+                    b2 = (byte)(*pStr2++);
+                    if (b1 != b2)
+                    {
+                        if (ignoreCase)
+                        {
+                            if ((b1 >= 0x41) && (b1 <= 0x5A))
+                            {
+                                if (b1 + 0x20 == b2)
+                                    continue;
+                            }
+                            else if ((b1 >= 0x61) && (b1 <= 0x7A))
+                            {
+                                if (b1 - 0x20 == b2)
+                                    continue;
+                            }
+                        }
+                        return false;
+                    }
+                }
+                while (b1 != 0);
+            }
+
+            return true;
+        }
+        public override int GetHashCode() { return base.GetHashCode(); }
 
         public override string ToString() { return new String(this); }
 

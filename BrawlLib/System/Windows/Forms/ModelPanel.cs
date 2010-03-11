@@ -362,8 +362,8 @@ namespace System.Windows.Forms
             Vector3 v = (Vector3)BackColor;
             _context.glClearColor(v._x, v._y, v._z, 0.0f);
             _context.glClearDepth(1.0f);
-            _context.glFrontFace(GLFrontFaceDirection.CW);
-            _context.glCullFace(GLFace.Back);
+            //_context.glFrontFace(GLFrontFaceDirection.CW);
+            //_context.glCullFace(GLFace.Back);
             //_context.glEnable(GLEnableCap.CullFace);
             //_context.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Line);
 
@@ -419,6 +419,10 @@ namespace System.Windows.Forms
 
                 foreach (IRenderedObject o in _renderList)
                     o.Render(_context);
+
+#if DEBUG
+                _context.CheckErrors();
+#endif
 
                 if (PostRender != null)
                     PostRender(this, _context);

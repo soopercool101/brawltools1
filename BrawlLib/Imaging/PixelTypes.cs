@@ -169,6 +169,8 @@ namespace BrawlLib.Imaging
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RGBAPixel
     {
+        public const float ColorFactor = 1.0f / 255.0f;
+
         public byte R, G, B, A;
 
         public static explicit operator RGBAPixel(ARGBPixel p) { return new RGBAPixel() { A = p.A, B = p.B, G = p.G, R = p.R }; }

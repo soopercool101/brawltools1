@@ -6,11 +6,13 @@ using BrawlLib.SSBB.ResourceNodes;
 using BrawlLib.Modeling;
 using System.Collections.Generic;
 using BrawlLib.Imaging;
+using BrawlLib.Wii.Models;
 
 namespace BrawlLib.Modeling
 {
     public static unsafe partial class Collada
     {
+
         static XmlWriterSettings _writerSettings = new XmlWriterSettings() { Indent = true, IndentChars = "\t", NewLineChars = "\r\n", NewLineHandling = NewLineHandling.Replace };
         public static void Serialize(MDL0Node model, string outFile)
         {
@@ -424,7 +426,8 @@ namespace BrawlLib.Modeling
                 else
                     writer.WriteString(" ");
 
-                writer.WriteString(String.Format("{0} {1}", pData->_x, pData->_y));
+                //Reverse T component to a top-down form
+                writer.WriteString(String.Format("{0} {1}", pData->_x, 1.0 - pData->_y));
                 pData++;
             }
 
@@ -581,7 +584,7 @@ namespace BrawlLib.Modeling
                 //Set bind pose matrix
                 if (poly._singleBind != null)
                 {
-                    m = poly._singleBind.FrameMatrix;
+                    m = poly._singleBind._matrix;
                 }
                 else
                 {
@@ -606,7 +609,7 @@ namespace BrawlLib.Modeling
                 int index = 0;
                 if (poly._singleBind != null)
                 {
-                    foreach (NodeWeight w in poly._singleBind._entries)
+                    foreach (BoneWeight w in poly._singleBind._weights)
                     {
                         if (!boneSet.Contains(w.Bone))
                         {
@@ -620,7 +623,7 @@ namespace BrawlLib.Modeling
                 else
                 {
                     foreach (Vertex3 v in verts)
-                        foreach (NodeWeight w in v.Influence._entries)
+                        foreach (BoneWeight w in v.Influence._weights)
                         {
                             if (!boneSet.Contains(w.Bone))
                             {
@@ -767,7 +770,7 @@ namespace BrawlLib.Modeling
                 first = true;
                 if (poly._singleBind != null)
                 {
-                    int count = poly._singleBind._entries.Count;
+                    int count = poly._singleBind._weights.Length;
                     for (int i = 0; i < verts.Count; i++)
                     {
                         if (first)
@@ -785,7 +788,7 @@ namespace BrawlLib.Modeling
                             first = false;
                         else
                             writer.WriteString(" ");
-                        writer.WriteString(v.Influence._entries.Count.ToString());
+                        writer.WriteString(v.Influence._weights.Length.ToString());
                     }
                 }
                 writer.WriteEndElement(); //vcount
@@ -796,7 +799,7 @@ namespace BrawlLib.Modeling
                 {
                     for (int i = 0; i < verts.Count; i++)
                     {
-                        foreach (NodeWeight w in poly._singleBind._entries)
+                        foreach (BoneWeight w in poly._singleBind._weights)
                         {
                             if (first)
                                 first = false;
@@ -812,7 +815,7 @@ namespace BrawlLib.Modeling
                 {
                     foreach (Vertex3 v in verts)
                     {
-                        foreach (NodeWeight w in v.Influence._entries)
+                        foreach (BoneWeight w in v.Influence._weights)
                         {
                             if (first)
                                 first = false;

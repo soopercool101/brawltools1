@@ -99,11 +99,14 @@ namespace BrawlBox
             if (Program.OpenFile(ExportFilters.MDL0, out path) > 0)
             {
                 MDL0Node node = MDL0Node.FromFile(path);
-                ((BRESNode)_resource).GetOrCreateFolder<MDL0Node>().AddChild(node);
+                if (node != null)
+                {
+                    ((BRESNode)_resource).GetOrCreateFolder<MDL0Node>().AddChild(node);
 
-                BaseWrapper w = this.FindResource(node, true);
-                w.EnsureVisible();
-                w.TreeView.SelectedNode = w;
+                    BaseWrapper w = this.FindResource(node, true);
+                    w.EnsureVisible();
+                    w.TreeView.SelectedNode = w;
+                }
             }
         }
         public void ImportChr()

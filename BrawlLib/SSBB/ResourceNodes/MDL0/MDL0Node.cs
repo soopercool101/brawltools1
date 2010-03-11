@@ -257,10 +257,10 @@ namespace BrawlLib.SSBB.ResourceNodes
             _assets = new AssetStorage(_linker);
             try
             {
-                _boneGroup.Parse(_linker);
-                _matGroup.Parse(_linker);
-                _shadGroup.Parse(_linker);
-                _polyGroup.Parse(_linker);
+                _boneGroup.Parse(this);
+                _matGroup.Parse(this);
+                _shadGroup.Parse(this);
+                _polyGroup.Parse(this);
 
                 //LinkGroup(new MDL0GroupNode(MDLResourceType.Textures));
                 //if (_linker.Bones != null)
@@ -293,6 +293,10 @@ namespace BrawlLib.SSBB.ResourceNodes
                 //else
                 //    UnlinkGroup(_texGroup as MDL0GroupNode);
 
+                foreach (Influence inf in _linker.NodeCache)
+                {
+                    _influences._influences.Add(inf);
+                }
             }
             finally
             {
@@ -303,6 +307,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             }
         }
 
+        internal InfluenceManager _influences = new InfluenceManager();
         //internal List<NodeRef> _nodeGroups = new List<NodeRef>();
         internal IMatrixProvider[] _nodes;
         //internal List<ResourceNode> _bones = new List<ResourceNode>();
@@ -489,6 +494,9 @@ namespace BrawlLib.SSBB.ResourceNodes
             //    nr.CalcBase();
             //foreach (IMatrixProvider nr in _nodes)
             //    nr.CalcWeighted();
+
+            foreach (Influence inf in _influences._influences)
+                inf.CalcMatrix();
 
             if (_polyList != null)
                 foreach (MDL0PolygonNode poly in _polyList)

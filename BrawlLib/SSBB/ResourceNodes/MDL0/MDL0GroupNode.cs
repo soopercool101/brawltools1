@@ -59,8 +59,10 @@ namespace BrawlLib.SSBB.ResourceNodes
                 base.RemoveChild(child);
         }
 
-        internal void Parse(ModelLinker linker)
+        internal void Parse(MDL0Node model)
         {
+            Influence inf;
+            ModelLinker linker = model._linker;
             switch (_type)
             {
                 case MDLResourceType.Bones:
@@ -74,7 +76,9 @@ namespace BrawlLib.SSBB.ResourceNodes
                     foreach (MDL0BoneNode bone in linker.BoneCache)
                     {
                         //Add to bone cache
-                        linker.NodeCache[bone._nodeIndex] = new Influence(bone);
+                        inf = new Influence(bone);
+                        linker.NodeCache[bone._nodeIndex] = inf;
+                        model._influences._influences.Add(inf);
 
                         //Scatter. Keep the true followers! Exile the deserters!
                         if (bone._parent == this)
@@ -95,15 +99,13 @@ namespace BrawlLib.SSBB.ResourceNodes
                                 case 3:
                                     int index = *(bushort*)(pData + 1);
                                     int count = pData[3];
-                                    Influence nr = new Influence(count);
                                     MDL0NodeType3Entry* nEntry = (MDL0NodeType3Entry*)(pData + 4);
 
-                                    linker.NodeCache[index] = nr;
-                                    while (count-- > 0)
-                                    {
-                                        nr.Merge(linker.NodeCache[nEntry->_id], nEntry->_value);
-                                        nEntry++;
-                                    }
+                                    inf = new Influence(count);
+                                    for (int i = 0; i < count; i++, nEntry++)
+                                        inf._weights[i] = new BoneWeight(linker.NodeCache[nEntry->_id]._weights[0].Bone, nEntry->_value);
+
+                                    linker.NodeCache[index] = model._influences.AddOrCreate(inf);
 
                                     pData = (byte*)nEntry;
                                     goto Top;

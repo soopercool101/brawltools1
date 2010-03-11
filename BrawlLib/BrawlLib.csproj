@@ -74,6 +74,7 @@
     <Compile Include="Imaging\PixelTypes.cs" />
     <Compile Include="Imaging\TGAImage.cs" />
     <Compile Include="Maths.cs" />
+    <Compile Include="Modeling\ColladaAssetDecoder.cs" />
     <Compile Include="Modeling\ColladaImporter.cs" />
     <Compile Include="Modeling\Face.cs" />
     <Compile Include="Modeling\FacePoint.cs" />
@@ -81,7 +82,7 @@
     <Compile Include="Modeling\IMatrixProvider.cs" />
     <Compile Include="Modeling\Material.cs" />
     <None Include="Modeling\Model.cs" />
-    <Compile Include="Modeling\NodeRef.cs" />
+    <None Include="Modeling\NodeRef.cs" />
     <None Include="Modeling\Polygon.cs" />
     <None Include="Modeling\Primitive.cs" />
     <None Include="Modeling\TextureRef.cs" />
@@ -351,6 +352,7 @@
     <Compile Include="Wii\Models\Enum.cs" />
     <Compile Include="Wii\Models\bMatrix43.cs" />
     <None Include="Wii\Models\ModelConverter.cs" />
+    <Compile Include="Wii\Models\InfluenceManager.cs" />
     <Compile Include="Wii\Models\ModelDecoder.cs" />
     <Compile Include="Wii\Models\ModelEncoder.cs" />
     <Compile Include="Wii\Models\ModelLinker.cs" />
