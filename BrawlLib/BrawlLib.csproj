@@ -342,6 +342,7 @@
       <DependentUpon>ProgressWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Wii\Compressor.cs" />
+    <Compile Include="Wii\Graphics\BP.cs" />
     <Compile Include="Wii\Graphics\CP.cs" />
     <Compile Include="Wii\Graphics\Enum.cs" />
     <Compile Include="Wii\Graphics\XF.cs" />

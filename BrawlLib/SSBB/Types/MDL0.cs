@@ -537,15 +537,15 @@ namespace BrawlLib.SSBBTypes
         public bint _mdl0Offset;
         public bint _stringOffset;
         public bint _index;
-        public bint _unk1; //0x00
-        public byte _flag1;
+        public bint _unk1; //0x00 0x80000000 for XLU textures
+        public byte _flag1; //Texture count
         public byte _numLayers;
         public byte _flag3;
         public byte _flag4;
         public bint _type; //0x02
         public byte _flag5;
         public byte _flag6;
-        public byte _flag7;
+        public byte _flag7; //Texture layers
         public byte _flag8;
         public bint _unk3;
         public bint _unk4; //0xFFFFFFFF
@@ -553,8 +553,8 @@ namespace BrawlLib.SSBBTypes
         public bint _numTextures;
         public bint _part3Offset;
         public bint _part4Offset;
-        public bint _part5Offset;
-        public bint _unk6;
+        public bint _part5Offset; //Data size - 0x180
+        public bint _unk6; //0
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
 

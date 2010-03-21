@@ -270,47 +270,13 @@ namespace System
                 state._scale._y = (float)Math.Round(Math.Sqrt(p[4] * p[4] + p[5] * p[5] + p[6] * p[6]), 4);
                 state._scale._z = (float)Math.Round(Math.Sqrt(p[8] * p[8] + p[9] * p[9] + p[10] * p[10]), 4);
 
+                //There IS a better way to do this, I'm just not sure what it is...
                 state._rotate._x = (float)Math.Round(Math.Atan2(p[6] / state._scale._y, p[10] / state._scale._z) / Math.PI * 180.0f, 4);
                 state._rotate._y = (float)Math.Round(-Math.Asin(p[2] / state._scale._x) / Math.PI * 180.0f, 4);
                 state._rotate._z = (float)Math.Round(Math.Atan2(p[1] / state._scale._x, p[0] / state._scale._x) / Math.PI * 180.0f, 4);
-
-                //Get rotation values using sinY. Reverse scale when needed
-                //double siny = -p[2] / state._scale._x;
-                //double cosy = 0;
-                //double sinx, cosx;
-
-                //if (siny > 0.998)
-                //{
-                //}
-                //else if (siny < 0.998)
-                //{
-                //}
-                //else
-                //{
-                //    if (siny == 0)
-                //    {
-                //    }
-
-                //    if (p[6] == 0 && p[10] != 0)
-                //    {
-                //        sinx = 0;
-                //    }
-                //    else if (p[10] == 0 && p[6] != 0)
-                //    {
-                //        cosx = 0;
-                //    }
-                //    else
-                //    {
-                //        double tanx = p[6] / p[10];
-
-                //    }
-                //}
-
-
             }
 
             state.CalcTransforms();
-
             return state;
         }
 

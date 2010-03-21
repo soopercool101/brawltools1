@@ -8,6 +8,8 @@ using BrawlLib.OpenGL;
 using System.Drawing;
 using System.IO;
 using BrawlLib.Imaging;
+using BrawlLib.Wii.Graphics;
+using BrawlLib.Wii.Models;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
@@ -29,6 +31,18 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal byte _flag7;
         internal byte _flag8;
         internal int _type;
+
+        //In order of appearance in display list
+        internal AlphaFunction _alphaFunc = AlphaFunction.Default;
+        internal ZMode _zMode = ZMode.Default;
+        //Mask, does not allow changing the dither/update bits
+        internal BlendMode _blendMode = BlendMode.Default;
+        internal ConstantAlpha _constantAlpha = ConstantAlpha.Default;
+        //Pad 7
+        //TEV Set 1
+        //TEV Set 2
+        //Indexed texture coordinate scale?
+        //XF Texture matrix info
 
         #region Shader linkage
         internal MDL0ShaderNode _shader;
@@ -64,14 +78,64 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
         #endregion
 
+
         //[Category("Material")]
         //public int TotalLen { get { return Header->_dataLen; } }
         //[Category("Material")]
         //public int MDL0Offset { get { return Header->_mdl0Offset; } }
         //[Category("Material")]
         //public int StringOffset { get { return Header->_stringOffset; } }
-        [Category("Material")]
-        public int ID { get { return Header->_index; } }
+        //[Category("Material")]
+        //public int ID { get { return Header->_index; } }
+
+        public int Tex1Unk1 { get { return ((sbyte*)Header)[0x24C]; } }
+        public int Tex1Unk2 { get { return ((sbyte*)Header)[0x24D]; } }
+        public int Tex1Unk3 { get { return ((sbyte*)Header)[0x24E]; } }
+        public int Tex1Unk4 { get { return ((sbyte*)Header)[0x24F]; } }
+        public bMatrix43 Tex1Mtx { get { return *(bMatrix43*)((byte*)Header + 0x250); } }
+
+        public int Tex2Unk1 { get { return ((sbyte*)Header)[0x280]; } }
+        public int Tex2Unk2 { get { return ((sbyte*)Header)[0x281]; } }
+        public int Tex2Unk3 { get { return ((sbyte*)Header)[0x282]; } }
+        public int Tex2Unk4 { get { return ((sbyte*)Header)[0x283]; } }
+        public bMatrix43 Tex2Mtx { get { return *(bMatrix43*)((byte*)Header + 0x284); } }
+
+        public int Tex3Unk1 { get { return ((sbyte*)Header)[0x2B4]; } }
+        public int Tex3Unk2 { get { return ((sbyte*)Header)[0x2B5]; } }
+        public int Tex3Unk3 { get { return ((sbyte*)Header)[0x2B6]; } }
+        public int Tex3Unk4 { get { return ((sbyte*)Header)[0x2B7]; } }
+        public bMatrix43 Tex3Mtx { get { return *(bMatrix43*)((byte*)Header + 0x2B8); } }
+
+        public int Tex4Unk1 { get { return ((sbyte*)Header)[0x2E8]; } }
+        public int Tex4Unk2 { get { return ((sbyte*)Header)[0x2E9]; } }
+        public int Tex4Unk3 { get { return ((sbyte*)Header)[0x2EA]; } }
+        public int Tex4Unk4 { get { return ((sbyte*)Header)[0x2EB]; } }
+        public bMatrix43 Tex4Mtx { get { return *(bMatrix43*)((byte*)Header + 0x2EC); } }
+
+        public int Tex5Unk1 { get { return ((sbyte*)Header)[0x31C]; } }
+        public int Tex5Unk2 { get { return ((sbyte*)Header)[0x31D]; } }
+        public int Tex5Unk3 { get { return ((sbyte*)Header)[0x31E]; } }
+        public int Tex5Unk4 { get { return ((sbyte*)Header)[0x31F]; } }
+        public bMatrix43 Tex5Mtx { get { return *(bMatrix43*)((byte*)Header + 0x320); } }
+
+        public int Tex6Unk1 { get { return ((sbyte*)Header)[0x350]; } }
+        public int Tex6Unk2 { get { return ((sbyte*)Header)[0x351]; } }
+        public int Tex6Unk3 { get { return ((sbyte*)Header)[0x352]; } }
+        public int Tex6Unk4 { get { return ((sbyte*)Header)[0x353]; } }
+        public bMatrix43 Tex6Mtx { get { return *(bMatrix43*)((byte*)Header + 0x354); } }
+
+        public int Tex7Unk1 { get { return ((sbyte*)Header)[0x384]; } }
+        public int Tex7Unk2 { get { return ((sbyte*)Header)[0x385]; } }
+        public int Tex7Unk3 { get { return ((sbyte*)Header)[0x386]; } }
+        public int Tex7Unk4 { get { return ((sbyte*)Header)[0x387]; } }
+        public bMatrix43 Tex7Mtx { get { return *(bMatrix43*)((byte*)Header + 0x388); } }
+
+        public int Tex8Unk1 { get { return ((sbyte*)Header)[0x3B8]; } }
+        public int Tex8Unk2 { get { return ((sbyte*)Header)[0x3B9]; } }
+        public int Tex8Unk3 { get { return ((sbyte*)Header)[0x3BA]; } }
+        public int Tex8Unk4 { get { return ((sbyte*)Header)[0x3BB]; } }
+        public bMatrix43 Tex8Mtx { get { return *(bMatrix43*)((byte*)Header + 0x3BC); } }
+
         [Category("Material")]
         public string Unknown1 { get { return _unk1.ToString("X"); } }
         [Category("Material")]
@@ -98,17 +162,17 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Material")]
         public int Unknown4 { get { return _unk4; } }
 
-        [Category("Material")]
-        public int ShaderOffset { get { return Header->_shaderOffset; } }
+        //[Category("Material")]
+        //public int ShaderOffset { get { return Header->_shaderOffset; } }
 
-        [Category("Material")]
-        public int NumTextures { get { return Header->_numTextures; } }
-        [Category("Material")]
-        public int Part3Offset { get { return Header->_part3Offset; } }
-        [Category("Material")]
-        public int Part4Offset { get { return Header->_part4Offset; } }
-        [Category("Material")]
-        public int Part5Offset { get { return Header->_part5Offset; } }
+        //[Category("Material")]
+        //public int NumTextures { get { return Header->_numTextures; } }
+        //[Category("Material")]
+        //public int Part3Offset { get { return Header->_part3Offset; } }
+        //[Category("Material")]
+        //public int Part4Offset { get { return Header->_part4Offset; } }
+        //[Category("Material")]
+        //public int Part5Offset { get { return Header->_part5Offset; } }
 
         [Category("Material")]
         public int Unknown6 { get { return _unk6; } }

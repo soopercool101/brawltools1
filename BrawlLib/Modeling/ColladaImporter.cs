@@ -7,6 +7,7 @@ using System.IO;
 using BrawlLib.IO;
 using System.Windows.Forms;
 using BrawlLib.Wii.Models;
+using BrawlLib.Imaging;
 
 namespace BrawlLib.Modeling
 {
@@ -17,78 +18,97 @@ namespace BrawlLib.Modeling
             MDL0Node model = new MDL0Node() { _name = Path.GetFileNameWithoutExtension(filePath), _origPath = filePath };
             model.InitGroups();
 
-            DecoderShell shell = DecoderShell.Import(filePath);
-            try
-            {
-                //Extract images, removing duplicates
-                foreach (ImageEntry img in shell._images)
+            using (DecoderShell shell = DecoderShell.Import(filePath))
+                try
                 {
-                    string name;
-                    MDL0TextureNode tex = null;
-
-                    if (img._path != null)
+                    //Extract images, removing duplicates
+                    foreach (ImageEntry img in shell._images)
                     {
-                        int ind1 = img._path.LastIndexOf('/') + 1;
-                        int ind2 = img._path.LastIndexOf('.');
+                        string name;
+                        MDL0TextureNode tex = null;
 
-                        if (ind2 >= 0)
-                            name = img._path.Substring(ind1, ind2 - ind1);
-                        else
-                            name = img._path.Substring(ind1);
-                    }
-                    else
-                        name = img._name != null ? img._name : img._id;
-
-                    foreach (MDL0TextureNode t in model._texList)
-                        if (t.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                        { tex = t; break; }
-
-                    if (tex == null)
-                        tex = new MDL0TextureNode() { _name = name };
-
-                    model._texList.Add(img._node = tex);
-                }
-
-                //Extract materials
-                foreach (MaterialEntry mat in shell._materials)
-                {
-                    MDL0MaterialNode matNode = new MDL0MaterialNode();
-                    matNode._name = mat._name != null ? mat._name : mat._id;
-                    model._matList.Add(mat._node = matNode);
-
-                    //Find effect
-                    if (mat._effect != null)
-                        foreach (EffectEntry eff in shell._effects)
+                        if (img._path != null)
                         {
-                            if (eff._id == mat._effect)
-                            {
-                                //Attach textures and effects to material
-                            }
+                            int ind1 = img._path.LastIndexOf('/') + 1;
+                            int ind2 = img._path.LastIndexOf('.');
+
+                            if (ind2 >= 0)
+                                name = img._path.Substring(ind1, ind2 - ind1);
+                            else
+                                name = img._path.Substring(ind1);
                         }
-                }
+                        else
+                            name = img._name != null ? img._name : img._id;
 
-                //Extract scenes
-                foreach (SceneEntry scene in shell._scenes)
-                {
-                    foreach (NodeEntry node in scene._nodes)
-                    {
-                        EnumNode(node, model._boneGroup, scene, model, shell);
+                        foreach (MDL0TextureNode t in model._texList)
+                            if (t.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                            { tex = t; break; }
+
+                        if (tex == null)
+                            tex = new MDL0TextureNode() { _name = name };
+
+                        model._texList.Add(img._node = tex);
                     }
-                }
 
-                model.CleanGroups();
-            }
-            catch (Exception x)
-            {
-                MessageBox.Show(x.ToString());
-                model = null;
-            }
-            finally
-            {
-                //Clean up the mess we've made
-                shell = null;
-                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
-            }
+                    //Extract materials
+                    foreach (MaterialEntry mat in shell._materials)
+                    {
+                        MDL0MaterialNode matNode = new MDL0MaterialNode();
+                        matNode._name = mat._name != null ? mat._name : mat._id;
+                        model._matList.Add(mat._node = matNode);
+
+                        //Find effect
+                        if (mat._effect != null)
+                            foreach (EffectEntry eff in shell._effects)
+                            {
+                                if (eff._id == mat._effect)
+                                {
+                                    //Attach textures and effects to material
+                                    foreach (LightEffectEntry l in eff._shader._effects)
+                                    {
+                                        if (l._type == LightEffectType.diffuse && l._texture != null)
+                                        {
+                                            foreach (ImageEntry img in shell._images)
+                                                if (img._id == l._texture)
+                                                {
+                                                    MDL0MaterialRefNode mr = new MDL0MaterialRefNode();
+
+                                                    (mr._texture = img._node as MDL0TextureNode)._texRefs.Add(mr);
+                                                    mr._name = mr._texture._name;
+
+                                                    matNode._children.Add(mr);
+                                                    mr._parent = matNode;
+
+                                                    break;
+                                                }
+
+                                        }
+                                    }
+                                }
+                            }
+                    }
+
+                    //Extract scenes
+                    foreach (SceneEntry scene in shell._scenes)
+                    {
+                        foreach (NodeEntry node in scene._nodes)
+                        {
+                            EnumNode(node, model._boneGroup, scene, model, shell);
+                        }
+                    }
+
+                    model.CleanGroups();
+                }
+                catch (Exception x)
+                {
+                    MessageBox.Show(x.ToString());
+                    model = null;
+                }
+                finally
+                {
+                    //Clean up the mess we've made
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+                }
 
             return model;
         }
@@ -150,8 +170,20 @@ namespace BrawlLib.Modeling
                     MDL0PolygonNode poly = new MDL0PolygonNode() { _manager = manager };
                     poly._name = node._name != null ? node._name : node._id;
 
+                    //Attach single-bind
                     if (bone != null)
                         poly._singleBind = inf;
+
+                    //Attach material
+                    if (inst._material != null)
+                    {
+                        foreach(MaterialEntry mat in shell._materials)
+                            if (mat._id == inst._material._target)
+                            {
+                                (poly._material = (mat._node as MDL0MaterialNode))._polygons.Add(poly);
+                                break;
+                            }
+                    }
 
                     model._polyList.Add(poly);
                 }
@@ -159,10 +191,13 @@ namespace BrawlLib.Modeling
             }
         }
 
-        private class ColladaEntry
+        private class ColladaEntry : IDisposable
         {
             internal string _id, _name;
             internal ResourceNode _node;
+
+            ~ColladaEntry() { Dispose(); }
+            public virtual void Dispose() { GC.SuppressFinalize(this); }
         }
         private class ImageEntry : ColladaEntry
         {
@@ -174,6 +209,7 @@ namespace BrawlLib.Modeling
         }
         private class EffectEntry : ColladaEntry
         {
+            internal EffectShaderEntry _shader;
         }
         private class GeometryEntry : ColladaEntry
         {
@@ -185,6 +221,12 @@ namespace BrawlLib.Modeling
             internal string _verticesId;
             internal InputEntry _verticesInput;
 
+            public override void Dispose()
+            {
+                foreach (SourceEntry p in _sources)
+                    p.Dispose();
+                GC.SuppressFinalize(this);
+            }
         }
         private class SourceEntry : ColladaEntry
         {
@@ -196,6 +238,14 @@ namespace BrawlLib.Modeling
             internal string _accessorSource;
             internal int _accessorCount;
             internal int _accessorStride;
+
+            public override void Dispose()
+            {
+                if (_arrayData is UnsafeBuffer)
+                    ((UnsafeBuffer)_arrayData).Dispose();
+                _arrayData = null;
+                GC.SuppressFinalize(this);
+            }
         }
         private class InputEntry : ColladaEntry
         {
@@ -236,6 +286,13 @@ namespace BrawlLib.Modeling
             internal List<InputEntry> _weightInputs = new List<InputEntry>();
             internal int _weightCount;
             internal int[][] _weights;
+
+            public override void Dispose()
+            {
+                foreach (SourceEntry src in _sources)
+                    src.Dispose();
+                GC.SuppressFinalize(this);
+            }
         }
         private class SceneEntry : ColladaEntry
         {
@@ -275,6 +332,39 @@ namespace BrawlLib.Modeling
             internal string _inputSemantic;
             internal int _inputSet;
         }
+        private class EffectShaderEntry : ColladaEntry
+        {
+            internal ShaderType _type;
+
+            internal float _shininess, _reflectivity, _transparency;
+
+            internal List<LightEffectEntry> _effects = new List<LightEffectEntry>();
+        }
+        private class LightEffectEntry : ColladaEntry
+        {
+            internal LightEffectType _type;
+            internal RGBAPixel _color;
+
+            internal string _texture;
+            internal string _texCoord;
+        }
+        private enum ShaderType
+        {
+            None,
+            phong,
+            lambert,
+            blinn
+        }
+        private enum LightEffectType
+        {
+            None,
+            ambient,
+            diffuse,
+            emission,
+            reflective,
+            specular,
+            transparent
+        }
         private enum PrimitiveType
         {
             None,
@@ -311,7 +401,7 @@ namespace BrawlLib.Modeling
             JOINT
         }
 
-        private class DecoderShell
+        private class DecoderShell : IDisposable
         {
             internal List<ImageEntry> _images = new List<ImageEntry>();
             internal List<MaterialEntry> _materials = new List<MaterialEntry>();
@@ -326,6 +416,14 @@ namespace BrawlLib.Modeling
                 using (FileMap map = FileMap.FromFile(path))
                 using (XmlReader reader = new XmlReader(map.Address, map.Length))
                     return new DecoderShell(reader);
+            }
+            ~DecoderShell() { Dispose(); }
+            public void Dispose()
+            {
+                foreach (GeometryEntry geo in _geometry)
+                {
+
+                }
             }
 
             private DecoderShell(XmlReader reader)
@@ -456,24 +554,134 @@ namespace BrawlLib.Modeling
             }
             private void ParseLibEffects()
             {
-                EffectEntry eff;
                 while (_reader.BeginElement())
                 {
                     if (_reader.Name.Equals("effect", true))
-                    {
-                        eff = new EffectEntry();
-                        while (_reader.ReadAttribute())
-                        {
-                            if (_reader.Name.Equals("id", true))
-                                eff._id = (string)_reader.Value;
-                            else if (_reader.Name.Equals("name", true))
-                                eff._name = (string)_reader.Value;
-                        }
-
-                        _effects.Add(eff);
-                    }
+                        _effects.Add(ParseEffect());
                     _reader.EndElement();
                 }
+            }
+            private EffectEntry ParseEffect()
+            {
+                EffectEntry eff = new EffectEntry();
+
+                while (_reader.ReadAttribute())
+                {
+                    if (_reader.Name.Equals("id", true))
+                        eff._id = (string)_reader.Value;
+                    else if (_reader.Name.Equals("name", true))
+                        eff._name = (string)_reader.Value;
+                }
+
+                while (_reader.BeginElement())
+                {
+                    //Only common is supported
+                    if (_reader.Name.Equals("profile_COMMON", true))
+                        while (_reader.BeginElement())
+                        {
+                            if (_reader.Name.Equals("technique", true))
+                            {
+                                while (_reader.BeginElement())
+                                {
+                                    if (_reader.Name.Equals("phong", true))
+                                        eff._shader = ParseShader(ShaderType.phong);
+                                    else if (_reader.Name.Equals("lambert", true))
+                                        eff._shader = ParseShader(ShaderType.lambert);
+                                    else if (_reader.Name.Equals("blinn", true))
+                                        eff._shader = ParseShader(ShaderType.blinn);
+
+                                    _reader.EndElement();
+                                }
+                            }
+                            _reader.EndElement();
+                        }
+
+                    _reader.EndElement();
+                }
+
+
+
+                return eff;
+            }
+            private EffectShaderEntry ParseShader(ShaderType type)
+            {
+                EffectShaderEntry s = new EffectShaderEntry();
+                s._type = type;
+                float v;
+
+                while (_reader.BeginElement())
+                {
+                    if (_reader.Name.Equals("ambient", true))
+                        s._effects.Add(ParseLightEffect(LightEffectType.ambient));
+                    else if (_reader.Name.Equals("diffuse", true))
+                        s._effects.Add(ParseLightEffect(LightEffectType.diffuse));
+                    else if (_reader.Name.Equals("emission", true))
+                        s._effects.Add(ParseLightEffect(LightEffectType.emission));
+                    else if (_reader.Name.Equals("reflective", true))
+                        s._effects.Add(ParseLightEffect(LightEffectType.reflective));
+                    else if (_reader.Name.Equals("specular", true))
+                        s._effects.Add(ParseLightEffect(LightEffectType.specular));
+                    else if (_reader.Name.Equals("transparent", true))
+                        s._effects.Add(ParseLightEffect(LightEffectType.transparent));
+
+                    else if (_reader.Name.Equals("shininess", true))
+                    {
+                        while (_reader.BeginElement())
+                        {
+                            if (_reader.Name.Equals("float", true))
+                                if (_reader.ReadValue(&v))
+                                    s._shininess = v;
+                            _reader.EndElement();
+                        }
+                    }
+                    else if (_reader.Name.Equals("reflectivity", true))
+                    {
+                        while (_reader.BeginElement())
+                        {
+                            if (_reader.Name.Equals("float", true))
+                                if (_reader.ReadValue(&v))
+                                    s._reflectivity = v;
+                            _reader.EndElement();
+                        }
+                    }
+                    else if (_reader.Name.Equals("transparency", true))
+                    {
+                        while (_reader.BeginElement())
+                        {
+                            if (_reader.Name.Equals("float", true))
+                                if (_reader.ReadValue(&v))
+                                    s._transparency = v;
+                            _reader.EndElement();
+                        }
+                    }
+
+                    _reader.EndElement();
+                }
+
+                return s;
+            }
+            private LightEffectEntry ParseLightEffect(LightEffectType type)
+            {
+                LightEffectEntry eff = new LightEffectEntry();
+                eff._type = type;
+
+                while (_reader.BeginElement())
+                {
+                    if (_reader.Name.Equals("color", true))
+                        eff._color = ParseColor();
+                    else if (_reader.Name.Equals("texture", true))
+                    {
+                        while (_reader.ReadAttribute())
+                            if (_reader.Name.Equals("texture", true))
+                                eff._texture = (string)_reader.Value;
+                            else if (_reader.Name.Equals("texcoord", true))
+                                eff._texCoord = (string)_reader.Value;
+                    }
+
+                    _reader.EndElement();
+                }
+
+                return eff;
             }
             private void ParseLibGeometry()
             {
@@ -771,8 +979,6 @@ namespace BrawlLib.Modeling
             private SkinEntry ParseSkin(string id)
             {
                 SkinEntry skin = new SkinEntry();
-                Matrix m;
-                float* pM = (float*)&m;
                 skin._id = id;
 
                 while (_reader.ReadAttribute())
@@ -782,12 +988,7 @@ namespace BrawlLib.Modeling
                 while (_reader.BeginElement())
                 {
                     if (_reader.Name.Equals("bind_shape_matrix", false))
-                    {
-                        for (int y = 0; y < 4; y++)
-                            for (int x = 0; x < 4; x++)
-                                _reader.ReadValue(&pM[x * 4 + y]);
-                        skin._bindMatrix = m;
-                    }
+                        skin._bindMatrix = ParseMatrix();
                     else if (_reader.Name.Equals("source", false))
                         skin._sources.Add(ParseSource());
                     else if (_reader.Name.Equals("joints", false))
@@ -870,8 +1071,6 @@ namespace BrawlLib.Modeling
             private NodeEntry ParseNode()
             {
                 NodeEntry node = new NodeEntry();
-                Matrix m;
-                float* pM = (float*)&m;
 
                 while (_reader.ReadAttribute())
                     if (_reader.Name.Equals("id", true))
@@ -884,12 +1083,7 @@ namespace BrawlLib.Modeling
                 while (_reader.BeginElement())
                 {
                     if (_reader.Name.Equals("matrix", true))
-                    {
-                        for (int y = 0; y < 4; y++)
-                            for (int x = 0; x < 4; x++)
-                                _reader.ReadValue(&pM[x * 4 + y]);
-                        node._transform = m.Derive();
-                    }
+                        node._transform = ParseMatrix().Derive();
                     else if (_reader.Name.Equals("node", true))
                         node._children.Add(ParseNode());
                     else if (_reader.Name.Equals("instance_controller", true))
@@ -964,6 +1158,30 @@ namespace BrawlLib.Modeling
                         v._inputSet = int.Parse((string)_reader.Value);
 
                 return v;
+            }
+
+            private Matrix ParseMatrix()
+            {
+                Matrix m;
+                float* pM = (float*)&m;
+                for (int y = 0; y < 4; y++)
+                    for (int x = 0; x < 4; x++)
+                        _reader.ReadValue(&pM[x * 4 + y]);
+                return m;
+            }
+            private RGBAPixel ParseColor()
+            {
+                float f;
+                RGBAPixel c;
+                byte* p = (byte*)&c;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (!_reader.ReadValue(&f))
+                        p[i] = 255;
+                    else
+                        p[i] = (byte)(f * 255.0f + 0.5f);
+                }
+                return c;
             }
         }
     }

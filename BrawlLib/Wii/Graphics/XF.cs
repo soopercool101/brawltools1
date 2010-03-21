@@ -11,6 +11,10 @@ namespace BrawlLib.Wii.Graphics
         public bushort _address;
     }
 
+    //TexMtxInfo
+    //0000 0000 0000 0001   Unk
+    //0000 0000 0000 0010   Projection
+
     public enum XFMemoryAddr : ushort
     {
         Size = 0x8000,
