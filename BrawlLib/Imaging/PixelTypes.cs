@@ -175,6 +175,11 @@ namespace BrawlLib.Imaging
 
         public static explicit operator RGBAPixel(ARGBPixel p) { return new RGBAPixel() { A = p.A, B = p.B, G = p.G, R = p.R }; }
         public static explicit operator ARGBPixel(RGBAPixel p) { return new ARGBPixel() { A = p.A, B = p.B, G = p.G, R = p.R }; }
+
+        public override string ToString()
+        {
+            return String.Format("R:{0:X2} G:{1:X2} B:{2:X2} A:{3:X2}", R, G, B, A);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

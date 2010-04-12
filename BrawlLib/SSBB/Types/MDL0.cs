@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using BrawlLib.Wii.Models;
+using BrawlLib.Wii.Graphics;
 
 namespace BrawlLib.SSBBTypes
 {
@@ -539,10 +540,10 @@ namespace BrawlLib.SSBBTypes
         public bint _index;
         public bint _unk1; //0x00 0x80000000 for XLU textures
         public byte _flag1; //Texture count
-        public byte _numLayers;
-        public byte _flag3;
+        public byte _numLayers; //Not exactly
+        public byte _flag3; //Repeated on shader
         public byte _flag4;
-        public bint _type; //0x02
+        public bint _type; //0x02, XLU = 0
         public byte _flag5;
         public byte _flag6;
         public byte _flag7; //Texture layers
@@ -553,14 +554,14 @@ namespace BrawlLib.SSBBTypes
         public bint _numTextures;
         public bint _part3Offset;
         public bint _part4Offset;
-        public bint _part5Offset; //Data size - 0x180
+        public bint _dlOffset; //Offset to display list(s)
         public bint _unk6; //0
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
 
         public MDL0MatLayer* Part3 { get { return (_part3Offset != 0) ? (MDL0MatLayer*)(Address + _part3Offset) : null; } }
         public MDL0Data7Part4* Part4 { get { return (_part4Offset != 0) ? (MDL0Data7Part4*)(Address + _part4Offset) : null; } }
-        public void* Part5 { get { return (_part5Offset != 0) ? Address + _part5Offset : null; } }
+        public MatModeBlock* DisplayLists { get { return (MatModeBlock*)(Address + _dlOffset); } }
 
         public string ResourceString { get { return new String((sbyte*)this.ResourceStringAddress); } }
         public VoidPtr ResourceStringAddress
@@ -568,6 +569,131 @@ namespace BrawlLib.SSBBTypes
             get { return (VoidPtr)this.Address + _stringOffset; }
             set { _stringOffset = (int)value - (int)Address; }
         }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct MatModeBlock
+    {
+        public const int Size = 32;
+        public static readonly MatModeBlock Default = new MatModeBlock()
+        {
+            _alphafuncCmd = 0xF361,
+            AlphaFunction = AlphaFunction.Default,
+            _zmodeCmd = 0x4061,
+            ZMode = ZMode.Default,
+            _maskCmd = 0xFE61,
+            _mask1 = 0xFF,
+            _mask2 = 0xE3,
+            _blendmodeCmd = 0x4161,
+            BlendMode = BlendMode.Default,
+            _constAlphaCmd = 0x4261,
+            ConstantAlpha = ConstantAlpha.Default
+        };
+
+        private ushort _alphafuncCmd;
+        public AlphaFunction AlphaFunction;
+        private ushort _zmodeCmd;
+        public ZMode ZMode;
+        private ushort _maskCmd;
+        private byte _mask0, _mask1, _mask2;
+        private ushort _blendmodeCmd;
+        public BlendMode BlendMode;
+        private ushort _constAlphaCmd;
+        public ConstantAlpha ConstantAlpha;
+        private fixed byte _pad[7];
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct MatTevResetBlock
+    {
+        public const int Size = 64;
+        public static readonly MatTevResetBlock Default = new MatTevResetBlock()
+        {
+            _tr1LCmd = 0xE261,
+            _tr1HCmd0 = 0xE361,
+            _tr1HCmd1 = 0xE361,
+            _tr1HCmd2 = 0xE361,
+            _tr2LCmd = 0xE461,
+            _tr2HCmd0 = 0xE561,
+            _tr2HCmd1 = 0xE561,
+            _tr2HCmd2 = 0xE561,
+            _tr3LCmd = 0xE661,
+            _tr3HCmd0 = 0xE761,
+            _tr3HCmd1 = 0xE761,
+            _tr3HCmd2 = 0xE761
+        };
+
+        private ushort _tr1LCmd;
+        public ColorReg TevReg1Lo;
+        private ushort _tr1HCmd0;
+        public ColorReg TevReg1Hi0;
+        private ushort _tr1HCmd1;
+        public ColorReg TevReg1Hi1;
+        private ushort _tr1HCmd2;
+        public ColorReg TevReg1Hi2;
+
+        private ushort _tr2LCmd;
+        public ColorReg TevReg2Lo;
+        private ushort _tr2HCmd0;
+        public ColorReg TevReg2Hi0;
+        private ushort _tr2HCmd1;
+        public ColorReg TevReg2Hi1;
+        private ushort _tr2HCmd2;
+        public ColorReg TevReg2Hi2;
+
+        private ushort _tr3LCmd;
+        public ColorReg TevReg3Lo;
+        private ushort _tr3HCmd0;
+        public ColorReg TevReg3Hi0;
+        private ushort _tr3HCmd1;
+        public ColorReg TevReg3Hi1;
+        private ushort _tr3HCmd2;
+        public ColorReg TevReg3Hi2;
+
+        private fixed byte _pad[4];
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct MatTevBlock
+    {
+        public const int Size = 64;
+        public static readonly MatTevBlock Default = new MatTevBlock()
+        {
+            _tr0LoCmd = 0xE061,
+            TevReg0Lo = ColorReg.Default,
+            _tr0HiCmd = 0xE161,
+            TevReg0Hi = ColorReg.Default,
+            _tr1LoCmd = 0xE261,
+            TevReg1Lo = ColorReg.Default,
+            _tr1HiCmd = 0xE361,
+            TevReg1Hi = ColorReg.Default,
+            _tr2LoCmd = 0xE461,
+            TevReg2Lo = ColorReg.Default,
+            _tr2HiCmd = 0xE561,
+            TevReg2Hi = ColorReg.Default,
+            _tr3LoCmd = 0xE661,
+            TevReg3Lo = ColorReg.Default,
+            _tr3HiCmd = 0xE761,
+            TevReg3Hi = ColorReg.Default,
+        };
+
+        private ushort _tr0LoCmd;
+        public ColorReg TevReg0Lo;
+        private ushort _tr0HiCmd;
+        public ColorReg TevReg0Hi;
+        private ushort _tr1LoCmd;
+        public ColorReg TevReg1Lo;
+        private ushort _tr1HiCmd;
+        public ColorReg TevReg1Hi;
+        private ushort _tr2LoCmd;
+        public ColorReg TevReg2Lo;
+        private ushort _tr2HiCmd;
+        public ColorReg TevReg2Hi;
+        private ushort _tr3LoCmd;
+        public ColorReg TevReg3Lo;
+        private ushort _tr3HiCmd;
+        public ColorReg TevReg3Hi;
+        private fixed byte _pad[24];
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -653,6 +779,12 @@ namespace BrawlLib.SSBBTypes
         public bint _dataLength;
         public bint _mdl0Offset;
         public bint _index;
+        public byte _flag; //Same as material
+        public byte _res0, _res1, _res2; //ALways 0. Reserved?
+        public sbyte _ref0, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+        public int _pad0, _pad1; //Always 0
+
+        //Display list
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -810,8 +942,8 @@ namespace BrawlLib.SSBBTypes
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct MDL0TextureEntry
     {
-        public bint _x;
-        public bint _y;
+        public bint _x; //Material offset
+        public bint _y; //Reference offset
 
         public override string ToString()
         {

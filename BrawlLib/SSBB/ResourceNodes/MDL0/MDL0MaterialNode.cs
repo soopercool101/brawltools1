@@ -78,6 +78,45 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
         #endregion
 
+        [Category("Alpha Function")]
+        public int Ref0 { get { return _alphaFunc.ref0; } }
+        [Category("Alpha Function")]
+        public AlphaCompare Comp0 { get { return _alphaFunc.Comp0; } }
+        [Category("Alpha Function")]
+        public AlphaOp Logic { get { return _alphaFunc.Logic; } }
+        [Category("Alpha Function")]
+        public int Ref1 { get { return _alphaFunc.ref1; } }
+        [Category("Alpha Function")]
+        public AlphaCompare Comp1 { get { return _alphaFunc.Comp1; } }
+
+        [Category("Z Mode")]
+        public bool EnableDepthTest { get { return _zMode.EnableDepthTest; } }
+        [Category("Z Mode")]
+        public bool EnableDepthUpdate { get { return _zMode.EnableDepthUpdate; } }
+        [Category("Z Mode")]
+        public GXCompare DepthFunction { get { return _zMode.DepthFunction; } }
+
+        [Category("Blend Mode")]
+        public bool EnableBlend { get { return _blendMode.EnableBlend; } }
+        [Category("Blend Mode")]
+        public bool EnableBlendLogic { get { return _blendMode.EnableLogicOp; } }
+        //These are disabled via mask
+        //[Category("Blend Mode")]
+        //public bool EnableDither { get { return _blendMode.EnableDither; } }
+        //[Category("Blend Mode")]
+        //public bool EnableColorUpdate { get { return _blendMode.EnableColorUpdate; } }
+        //[Category("Blend Mode")]
+        //public bool EnableAlphaUpdate { get { return _blendMode.EnableAlphaUpdate; } }
+
+        [Category("Blend Mode")]
+        public BlendFactor SrcFactor { get { return _blendMode.SrcFactor; } }
+        [Category("Blend Mode")]
+        public GXLogicOp BlendLogicOp { get { return _blendMode.LogicOp; } }
+        [Category("Blend Mode")]
+        public BlendFactor DstFactor { get { return _blendMode.DstFactor; } }
+
+        [Category("Blend Mode")]
+        public bool Subtract { get { return _blendMode.Subtract; } }
 
         //[Category("Material")]
         //public int TotalLen { get { return Header->_dataLen; } }
@@ -88,53 +127,116 @@ namespace BrawlLib.SSBB.ResourceNodes
         //[Category("Material")]
         //public int ID { get { return Header->_index; } }
 
-        public int Tex1Unk1 { get { return ((sbyte*)Header)[0x24C]; } }
-        public int Tex1Unk2 { get { return ((sbyte*)Header)[0x24D]; } }
-        public int Tex1Unk3 { get { return ((sbyte*)Header)[0x24E]; } }
-        public int Tex1Unk4 { get { return ((sbyte*)Header)[0x24F]; } }
-        public bMatrix43 Tex1Mtx { get { return *(bMatrix43*)((byte*)Header + 0x250); } }
+        //Usage flags? Each set of 4 bits represents one texture layer. They are either on or off (0/F).
+        public int UnkFlags1 { get { return ((bint*)Header)[105]; } }
+        public int UnkFlags2 { get { return ((bint*)Header)[106]; } }
 
-        public int Tex2Unk1 { get { return ((sbyte*)Header)[0x280]; } }
-        public int Tex2Unk2 { get { return ((sbyte*)Header)[0x281]; } }
-        public int Tex2Unk3 { get { return ((sbyte*)Header)[0x282]; } }
-        public int Tex2Unk4 { get { return ((sbyte*)Header)[0x283]; } }
-        public bMatrix43 Tex2Mtx { get { return *(bMatrix43*)((byte*)Header + 0x284); } }
+        //public float Tex1X { get { return ((bfloat*)Header)[107]; } }
+        //public float Tex1Y { get { return ((bfloat*)Header)[108]; } }
+        //public float Tex1Z { get { return ((bfloat*)Header)[109]; } }
+        //public float Tex1A { get { return ((bfloat*)Header)[110]; } }
+        //public float Tex1B { get { return ((bfloat*)Header)[111]; } }
 
-        public int Tex3Unk1 { get { return ((sbyte*)Header)[0x2B4]; } }
-        public int Tex3Unk2 { get { return ((sbyte*)Header)[0x2B5]; } }
-        public int Tex3Unk3 { get { return ((sbyte*)Header)[0x2B6]; } }
-        public int Tex3Unk4 { get { return ((sbyte*)Header)[0x2B7]; } }
-        public bMatrix43 Tex3Mtx { get { return *(bMatrix43*)((byte*)Header + 0x2B8); } }
+        //public float Tex2X { get { return ((bfloat*)Header)[112]; } }
+        //public float Tex2Y { get { return ((bfloat*)Header)[113]; } }
+        //public float Tex2Z { get { return ((bfloat*)Header)[114]; } }
+        //public float Tex2A { get { return ((bfloat*)Header)[115]; } }
+        //public float Tex2B { get { return ((bfloat*)Header)[116]; } }
 
-        public int Tex4Unk1 { get { return ((sbyte*)Header)[0x2E8]; } }
-        public int Tex4Unk2 { get { return ((sbyte*)Header)[0x2E9]; } }
-        public int Tex4Unk3 { get { return ((sbyte*)Header)[0x2EA]; } }
-        public int Tex4Unk4 { get { return ((sbyte*)Header)[0x2EB]; } }
-        public bMatrix43 Tex4Mtx { get { return *(bMatrix43*)((byte*)Header + 0x2EC); } }
+        //public float Tex3X { get { return ((bfloat*)Header)[117]; } }
+        //public float Tex3Y { get { return ((bfloat*)Header)[118]; } }
+        //public float Tex3Z { get { return ((bfloat*)Header)[119]; } }
+        //public float Tex3A { get { return ((bfloat*)Header)[120]; } }
+        //public float Tex3B { get { return ((bfloat*)Header)[121]; } }
 
-        public int Tex5Unk1 { get { return ((sbyte*)Header)[0x31C]; } }
-        public int Tex5Unk2 { get { return ((sbyte*)Header)[0x31D]; } }
-        public int Tex5Unk3 { get { return ((sbyte*)Header)[0x31E]; } }
-        public int Tex5Unk4 { get { return ((sbyte*)Header)[0x31F]; } }
-        public bMatrix43 Tex5Mtx { get { return *(bMatrix43*)((byte*)Header + 0x320); } }
+        //public float Tex4X { get { return ((bfloat*)Header)[122]; } }
+        //public float Tex4Y { get { return ((bfloat*)Header)[123]; } }
+        //public float Tex4Z { get { return ((bfloat*)Header)[124]; } }
+        //public float Tex4A { get { return ((bfloat*)Header)[125]; } }
+        //public float Tex4B { get { return ((bfloat*)Header)[126]; } }
 
-        public int Tex6Unk1 { get { return ((sbyte*)Header)[0x350]; } }
-        public int Tex6Unk2 { get { return ((sbyte*)Header)[0x351]; } }
-        public int Tex6Unk3 { get { return ((sbyte*)Header)[0x352]; } }
-        public int Tex6Unk4 { get { return ((sbyte*)Header)[0x353]; } }
-        public bMatrix43 Tex6Mtx { get { return *(bMatrix43*)((byte*)Header + 0x354); } }
+        //public float Tex5X { get { return ((bfloat*)Header)[127]; } }
+        //public float Tex5Y { get { return ((bfloat*)Header)[128]; } }
+        //public float Tex5Z { get { return ((bfloat*)Header)[129]; } }
+        //public float Tex5A { get { return ((bfloat*)Header)[130]; } }
+        //public float Tex5B { get { return ((bfloat*)Header)[131]; } }
 
-        public int Tex7Unk1 { get { return ((sbyte*)Header)[0x384]; } }
-        public int Tex7Unk2 { get { return ((sbyte*)Header)[0x385]; } }
-        public int Tex7Unk3 { get { return ((sbyte*)Header)[0x386]; } }
-        public int Tex7Unk4 { get { return ((sbyte*)Header)[0x387]; } }
-        public bMatrix43 Tex7Mtx { get { return *(bMatrix43*)((byte*)Header + 0x388); } }
+        //public float Tex6X { get { return ((bfloat*)Header)[132]; } }
+        //public float Tex6Y { get { return ((bfloat*)Header)[133]; } }
+        //public float Tex6Z { get { return ((bfloat*)Header)[134]; } }
+        //public float Tex6A { get { return ((bfloat*)Header)[135]; } }
+        //public float Tex6B { get { return ((bfloat*)Header)[136]; } }
 
-        public int Tex8Unk1 { get { return ((sbyte*)Header)[0x3B8]; } }
-        public int Tex8Unk2 { get { return ((sbyte*)Header)[0x3B9]; } }
-        public int Tex8Unk3 { get { return ((sbyte*)Header)[0x3BA]; } }
-        public int Tex8Unk4 { get { return ((sbyte*)Header)[0x3BB]; } }
-        public bMatrix43 Tex8Mtx { get { return *(bMatrix43*)((byte*)Header + 0x3BC); } }
+        //public float Tex7X { get { return ((bfloat*)Header)[137]; } }
+        //public float Tex7Y { get { return ((bfloat*)Header)[138]; } }
+        //public float Tex7Z { get { return ((bfloat*)Header)[139]; } }
+        //public float Tex7A { get { return ((bfloat*)Header)[140]; } }
+        //public float Tex7B { get { return ((bfloat*)Header)[141]; } }
+
+        //public float Tex8X { get { return ((bfloat*)Header)[142]; } }
+        //public float Tex8Y { get { return ((bfloat*)Header)[143]; } }
+        //public float Tex8Z { get { return ((bfloat*)Header)[144]; } }
+        //public float Tex8A { get { return ((bfloat*)Header)[145]; } }
+        //public float Tex8B { get { return ((bfloat*)Header)[146]; } }
+
+        //public int Tex1Unk1 { get { return ((sbyte*)Header)[0x24C]; } }
+        //public int Tex1Unk2 { get { return ((sbyte*)Header)[0x24D]; } }
+        //public int Tex1Unk3 { get { return ((sbyte*)Header)[0x24E]; } }
+        //public int Tex1Unk4 { get { return ((sbyte*)Header)[0x24F]; } }
+        //public bMatrix43 Tex1Mtx { get { return *(bMatrix43*)((byte*)Header + 0x250); } }
+
+        //public int Tex2Unk1 { get { return ((sbyte*)Header)[0x280]; } }
+        //public int Tex2Unk2 { get { return ((sbyte*)Header)[0x281]; } }
+        //public int Tex2Unk3 { get { return ((sbyte*)Header)[0x282]; } }
+        //public int Tex2Unk4 { get { return ((sbyte*)Header)[0x283]; } }
+        //public bMatrix43 Tex2Mtx { get { return *(bMatrix43*)((byte*)Header + 0x284); } }
+
+        //public int Tex3Unk1 { get { return ((sbyte*)Header)[0x2B4]; } }
+        //public int Tex3Unk2 { get { return ((sbyte*)Header)[0x2B5]; } }
+        //public int Tex3Unk3 { get { return ((sbyte*)Header)[0x2B6]; } }
+        //public int Tex3Unk4 { get { return ((sbyte*)Header)[0x2B7]; } }
+        //public bMatrix43 Tex3Mtx { get { return *(bMatrix43*)((byte*)Header + 0x2B8); } }
+
+        //public int Tex4Unk1 { get { return ((sbyte*)Header)[0x2E8]; } }
+        //public int Tex4Unk2 { get { return ((sbyte*)Header)[0x2E9]; } }
+        //public int Tex4Unk3 { get { return ((sbyte*)Header)[0x2EA]; } }
+        //public int Tex4Unk4 { get { return ((sbyte*)Header)[0x2EB]; } }
+        //public bMatrix43 Tex4Mtx { get { return *(bMatrix43*)((byte*)Header + 0x2EC); } }
+
+        //public int Tex5Unk1 { get { return ((sbyte*)Header)[0x31C]; } }
+        //public int Tex5Unk2 { get { return ((sbyte*)Header)[0x31D]; } }
+        //public int Tex5Unk3 { get { return ((sbyte*)Header)[0x31E]; } }
+        //public int Tex5Unk4 { get { return ((sbyte*)Header)[0x31F]; } }
+        //public bMatrix43 Tex5Mtx { get { return *(bMatrix43*)((byte*)Header + 0x320); } }
+
+        //public int Tex6Unk1 { get { return ((sbyte*)Header)[0x350]; } }
+        //public int Tex6Unk2 { get { return ((sbyte*)Header)[0x351]; } }
+        //public int Tex6Unk3 { get { return ((sbyte*)Header)[0x352]; } }
+        //public int Tex6Unk4 { get { return ((sbyte*)Header)[0x353]; } }
+        //public bMatrix43 Tex6Mtx { get { return *(bMatrix43*)((byte*)Header + 0x354); } }
+
+        //public int Tex7Unk1 { get { return ((sbyte*)Header)[0x384]; } }
+        //public int Tex7Unk2 { get { return ((sbyte*)Header)[0x385]; } }
+        //public int Tex7Unk3 { get { return ((sbyte*)Header)[0x386]; } }
+        //public int Tex7Unk4 { get { return ((sbyte*)Header)[0x387]; } }
+        //public bMatrix43 Tex7Mtx { get { return *(bMatrix43*)((byte*)Header + 0x388); } }
+
+        //public int Tex8Unk1 { get { return ((sbyte*)Header)[0x3B8]; } }
+        //public int Tex8Unk2 { get { return ((sbyte*)Header)[0x3B9]; } }
+        //public int Tex8Unk3 { get { return ((sbyte*)Header)[0x3BA]; } }
+        //public int Tex8Unk4 { get { return ((sbyte*)Header)[0x3BB]; } }
+        //public bMatrix43 Tex8Mtx { get { return *(bMatrix43*)((byte*)Header + 0x3BC); } }
+
+        public RGBAPixel Col00 { get { return ((RGBAPixel*)Header)[0xFB]; } }
+        public RGBAPixel Col01 { get { return ((RGBAPixel*)Header)[0xFC]; } }
+        public RGBAPixel Col02 { get { return ((RGBAPixel*)Header)[0xFD]; } }
+        public RGBAPixel Col03 { get { return ((RGBAPixel*)Header)[0xFE]; } }
+        public RGBAPixel Col04 { get { return ((RGBAPixel*)Header)[0xFF]; } }
+        public RGBAPixel Col10 { get { return ((RGBAPixel*)Header)[0x100]; } }
+        public RGBAPixel Col11 { get { return ((RGBAPixel*)Header)[0x101]; } }
+        public RGBAPixel Col12 { get { return ((RGBAPixel*)Header)[0x102]; } }
+        public RGBAPixel Col13 { get { return ((RGBAPixel*)Header)[0x103]; } }
+        public RGBAPixel Col14 { get { return ((RGBAPixel*)Header)[0x104]; } }
 
         [Category("Material")]
         public string Unknown1 { get { return _unk1.ToString("X"); } }
@@ -203,6 +305,11 @@ namespace BrawlLib.SSBB.ResourceNodes
             _flag8 = header->_flag8;
             _type = header->_type;
 
+            MatModeBlock* mode = header->DisplayLists;
+            _alphaFunc = mode->AlphaFunction;
+            _zMode = mode->ZMode;
+            _blendMode = mode->BlendMode;
+            _constantAlpha = mode->ConstantAlpha;
 
             MDL0Data7Part4* part4 = header->Part4;
             if (part4 != null)
@@ -212,6 +319,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                     _part4Entries.Add(group->First[i].GetName());
             }
 
+            _children = new List<ResourceNode>();
             OnPopulate();
             return true;
         }

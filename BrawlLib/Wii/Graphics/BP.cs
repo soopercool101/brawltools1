@@ -94,6 +94,18 @@ namespace BrawlLib.Wii.Graphics
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct ColorReg
+    {
+        public static readonly ColorReg Default = new ColorReg() { _dat0 = 0x80 };
+
+        private byte _dat0, _dat1, _dat2;
+
+        public short A { get { return (short)(((short)(_dat1 << 13) >> 5) | _dat2); } set { _dat1 = (byte)((_dat1 & 0xF8) | ((value >> 8) & 0x7)); _dat2 = (byte)(value & 0xFF); } }
+        public short B { get { return (short)(((short)(_dat0 << 9) >> 5) | (_dat1 >> 4)); } set { _dat0 = (byte)((_dat0 & 0x80) | ((value >> 4) & 0x7F)); _dat1 = (byte)((_dat1 & 0xF) | (value << 4)); } }
+        public bool Type { get { return (_dat0 & 0x80) != 0; } set { _dat0 = (byte)((_dat0 & 0x7F) | (value ? 0x80 : 0)); } }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct ConstantAlpha
     {
         public static readonly ConstantAlpha Default = new ConstantAlpha();

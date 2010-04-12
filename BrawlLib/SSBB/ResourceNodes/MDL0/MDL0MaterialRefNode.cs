@@ -115,9 +115,9 @@ namespace BrawlLib.SSBB.ResourceNodes
         [Category("Texture Reference")]
         public int Unknown3 { get { return _unk3; } set { _unk3 = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
-        public int Unknown4 { get { return _unk4; } set { _unk4 = value; SignalPropertyChange(); } }
+        public int Index1 { get { return _unk4; } set { _unk4 = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
-        public int Unknown5 { get { return _unk5; } set { _unk5 = value; SignalPropertyChange(); } }
+        public int Index2 { get { return _unk5; } set { _unk5 = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
         public int LayerId1 { get { return _layerId1; } set { _layerId1 = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
