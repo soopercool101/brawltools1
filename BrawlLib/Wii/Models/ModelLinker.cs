@@ -24,7 +24,7 @@ namespace BrawlLib.Wii.Models
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe class ModelLinker
+    public unsafe class ModelLinker// : IDisposable
     {
         #region Linker lists
         internal const int BankLen = 11;
@@ -93,9 +93,14 @@ namespace BrawlLib.Wii.Models
 
         public MDL0Node Model;
         public int _headerLen, _tableLen, _groupLen, _texLen, _dataLen;
-        public int _texCount, _decCount;
+        public int _texCount, _decCount, _nodeCount;
         public ResourceNode[] BoneCache;
-        public Influence[] NodeCache;
+        public IMatrixNode[] NodeCache;
+
+        public List<VertexCodec> _vertices;
+        public List<VertexCodec> _normals;
+        public List<ColorCodec> _colors;
+        public List<VertexCodec> _uvs;
 
         private ModelLinker() { }
 
@@ -103,7 +108,7 @@ namespace BrawlLib.Wii.Models
         {
             Header = pModel;
             Version = pModel->_header._version;
-            NodeCache = new Influence[pModel->Properties->_numNodes];
+            NodeCache = new IMatrixNode[pModel->Properties->_numNodes];
 
             bint* offsets = (bint*)((byte*)pModel + 0x10);
             List<MDLResourceType> iList = IndexBank[Version];
@@ -116,66 +121,39 @@ namespace BrawlLib.Wii.Models
                     if ((offset = offsets[i]) != 0)
                         gList[(int)iList[i]] = (ResourceGroup*)((byte*)pModel + offset);
         }
-
-        //public static ModelLinker Read(MDL0Node model)
+        //~ModelLinker()
         //{
-        //    byte* header = (byte*)model.Header;
-        //    ModelLinker linker = new ModelLinker();
-        //    ResourceGroup* pGroup;
-        //    ResourceEntry* pEntry;
-        //    MDL0CommonHeader* pHeader;
-        //    MDL0GroupNode objGroup;
-        //    ResourceNode node;
-        //    int offset;
-        //    List<MDLResourceType> iList = IndexBank[model._version];
-        //    int groupCount = iList.Count, entryCount;
-        //    MDLResourceType resType;
-        //    bint* offsets = (bint*)(header + 0x10);
-        //    Type objType;
-
-        //    int* shaderTable = stackalloc int[128];
-        //    for (int i = 0; i < 128; )
-        //        shaderTable[i++] = 0;
-
-        //    linker.Model = model;
-        //    linker.Header = (MDL0Header*)header;
-        //    linker.Version = model._version;
-
-        //    fixed (ResourceGroup** gList = &linker.Defs)
-        //        for (int i = 0; i < groupCount; i++)
-        //            if ((offset = offsets[i]) != 0)
-        //            {
-        //                resType = iList[i];
-        //                gList[(int)resType] = pGroup = (ResourceGroup*)((byte*)header + offset);
-        //                if ((objType = TypeBank[(int)resType]) != null)
-        //                {
-        //                    linker.Groups[(int)resType] = objGroup = new MDL0GroupNode() { _name = resType.ToString("G") };
-        //                    entryCount = pGroup->_numEntries;
-        //                    pEntry = &pGroup->_first + 1;
-        //                    for (int x = 0; x < entryCount; x++, pEntry++)
-        //                    {
-        //                        offset = pEntry->_dataOffset;
-        //                        pHeader = (MDL0CommonHeader*)((byte*)pGroup + offset);
-        //                        if (resType == MDLResourceType.Shaders)
-        //                        {
-        //                            for (int y = 0; shaderTable[y] != offset; y++)
-        //                                if (shaderTable[y] == 0)
-        //                                {
-        //                                    shaderTable[y] = offset;
-        //                                    goto Create;
-        //                                }
-        //                            continue;
-        //                        }
-        //                    Create:
-        //                        node = Activator.CreateInstance(objType) as ResourceNode;
-        //                        node.Initialize(objGroup, pHeader, pHeader->_size);
-        //                    }
-        //                }
-
-        //            }
-
-        //    return linker;
+        //    Dispose();
         //}
+        //public void Dispose()
+        //{
+        //    if (_vertices != null)
+        //    {
+        //        foreach (VertexCodec c in _vertices)
+        //            c.Dispose();
+        //        _vertices = null;
+        //    }
+        //    if (_normals != null)
+        //    {
+        //        foreach (VertexCodec c in _normals)
+        //            c.Dispose();
+        //        _normals = null;
+        //    }
+        //    if (_colors != null)
+        //    {
+        //        //foreach (ColorCodec c in _colors)
+        //        //    c.Dispose();
+        //        _colors = null;
+        //    }
+        //    if (_uvs != null)
+        //    {
+        //        foreach (VertexCodec c in _uvs)
+        //            c.Dispose();
+        //        _uvs = null;
+        //    }
+        //    GC.SuppressFinalize(this);
+        //}
+
 
         public static ModelLinker Prepare(MDL0Node model)
         {
@@ -191,8 +169,12 @@ namespace BrawlLib.Wii.Models
             foreach (MDL0GroupNode group in model.Children)
             {
                 resType = (MDLResourceType)Enum.Parse(typeof(MDLResourceType), group.Name);
+
+                //Get flattened bone list and assign it to bone cache
                 if (resType == MDLResourceType.Bones)
                     linker.BoneCache = group.FindChildrenByType(null, ResourceType.MDL0Bone);
+
+                //If version contains resource type, add it to group list
                 if ((index = iList.IndexOf(resType)) >= 0)
                     linker.Groups[(int)resType] = group;
             }
@@ -220,7 +202,7 @@ namespace BrawlLib.Wii.Models
                         *pGrp = new ResourceGroup(BoneCache.Length);
                         foreach (ResourceNode e in BoneCache)
                         {
-                            (pEntry++)->_dataOffset = (int)pData - (int)pGroup;
+                            (pEntry++)->_dataOffset = (int)(pData - pGroup);
 
                             len = e._calcSize;
                             e.Rebuild(pData, len, true);
@@ -254,7 +236,7 @@ namespace BrawlLib.Wii.Models
                         *pGrp = new ResourceGroup(group._children.Count);
                         foreach (ResourceNode e in group._children)
                         {
-                            (pEntry++)->_dataOffset = (int)pData - (int)pGroup;
+                            (pEntry++)->_dataOffset = (int)(pData - pGroup);
 
                             len = e._calcSize;
                             e.Rebuild(pData, len, force);

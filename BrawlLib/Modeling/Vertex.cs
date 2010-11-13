@@ -11,28 +11,43 @@ namespace BrawlLib.Modeling
     {
         public Vector3 Position;
         public Vector3 WeightedPosition;
-        public Influence Influence;
-        //public Matrix Matrix;
+        internal IMatrixNode _influence;
+
+        public IMatrixNode Influence
+        {
+            get { return _influence; }
+            set
+            {
+                if (_influence == value)
+                    return;
+
+                if (_influence != null)
+                    _influence.ReferenceCount--;
+
+                if ((_influence = value) != null)
+                    _influence.ReferenceCount++;
+            }
+        }
 
         public Vertex3(Vector3 position)
         {
             Position = position;
         }
-        public Vertex3(Vector3 position, Influence influence)
+        public Vertex3(Vector3 position, IMatrixNode influence)
         {
             Position = position;
             Influence = influence;
         }
 
+        //Pre-multiply vertex using influence.
+        //Influences must have already been calculated.
         public void Weight()
         {
-            if (Influence != null)
-            {
-                //Influence.CalcMatrix();
-                WeightedPosition = Influence._matrix.Multiply(Position);
-            }
-            else
-                WeightedPosition = Position;
+            WeightedPosition = (_influence != null) ? _influence.Matrix.Multiply(Position) : Position;
+            //if (_influence != null)
+            //    WeightedPosition = _influence._matrix.Multiply(Position);
+            //else
+            //    WeightedPosition = Position;
         }
 
         public bool Equals(Vertex3 v)
@@ -40,7 +55,7 @@ namespace BrawlLib.Modeling
             if (object.ReferenceEquals(this, v))
                 return true;
 
-            return (Position == v.Position) && (Influence == v.Influence);
+            return (Position == v.Position) && (_influence == v._influence);
         }
     }
 }

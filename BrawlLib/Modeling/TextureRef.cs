@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using BrawlLib.OpenGL;
 using System.Drawing;
 using BrawlLib.SSBB.ResourceNodes;
@@ -21,6 +19,12 @@ namespace BrawlLib.Modeling
         public object Source;
 
         private GLContext _context;
+
+        internal List<MDL0MaterialRefNode> _texRefs = new List<MDL0MaterialRefNode>();
+        internal List<MDL0MaterialRefNode> _decRefs = new List<MDL0MaterialRefNode>();
+
+        public bool IsTexture { get { return _texRefs.Count > 0; } }
+        public bool IsDecal { get { return _decRefs.Count > 0; } }
 
         public TextureRef() { }
         public TextureRef(string name) 
@@ -100,20 +104,23 @@ namespace BrawlLib.Modeling
                     {
                         //Then search node directory
                         string path = node._origPath;
-                        DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(path));
-                        foreach (FileInfo file in dir.GetFiles(Name + ".*"))
+                        if (path != null)
                         {
-                            if (file.Name.EndsWith(".tga"))
+                            DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(path));
+                            foreach (FileInfo file in dir.GetFiles(Name + ".*"))
                             {
-                                Source = file.FullName;
-                                bmp = TGA.FromFile(file.FullName);
-                                break;
-                            }
-                            else if (file.Name.EndsWith(".png") || file.Name.EndsWith(".tiff") || file.Name.EndsWith(".tif"))
-                            {
-                                Source = file.FullName;
-                                bmp = (Bitmap)Bitmap.FromFile(file.FullName);
-                                break;
+                                if (file.Name.EndsWith(".tga"))
+                                {
+                                    Source = file.FullName;
+                                    bmp = TGA.FromFile(file.FullName);
+                                    break;
+                                }
+                                else if (file.Name.EndsWith(".png") || file.Name.EndsWith(".tiff") || file.Name.EndsWith(".tif"))
+                                {
+                                    Source = file.FullName;
+                                    bmp = (Bitmap)Bitmap.FromFile(file.FullName);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -161,6 +168,11 @@ namespace BrawlLib.Modeling
                     }
                 }
             }
+        }
+
+        public static int Compare(TextureRef t1, TextureRef t2)
+        {
+            return String.Compare(t1.Name, t2.Name, false);
         }
 
         internal void Bind(GLContext ctx)

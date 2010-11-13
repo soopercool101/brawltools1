@@ -34,17 +34,19 @@ namespace System.Windows.Forms
         private ToolStripMenuItem sizeToolStripMenuItem;
         private ToolStripMenuItem resetToolStripMenuItem;
         private ToolStripMenuItem exportToolStripMenuItem;
+        private IContainer components;
         private Panel pnlPolygons;
 
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.pnlPolygons = new System.Windows.Forms.Panel();
             this.lstPolygons = new System.Windows.Forms.CheckedListBox();
             this.chkAllPoly = new System.Windows.Forms.CheckBox();
             this.btnPolygons = new System.Windows.Forms.Button();
             this.pnlTextures = new System.Windows.Forms.Panel();
             this.lstTextures = new System.Windows.Forms.CheckedListBox();
-            this.ctxTextures = new System.Windows.Forms.ContextMenuStrip();
+            this.ctxTextures = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.sourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
@@ -341,7 +343,7 @@ namespace System.Windows.Forms
 
         private MDL0BoneNode _selectedBone;
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MDL0BoneNode SelectedBone { get { return _selectedBone; } }
+        public MDL0BoneNode SelectedBone { get { return _selectedBone; } set { lstBones.SelectedItem = value; } }
 
         private MDL0PolygonNode _selectedPolygon;
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]

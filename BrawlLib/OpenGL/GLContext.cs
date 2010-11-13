@@ -95,6 +95,75 @@ namespace BrawlLib.OpenGL
             glEnd();
         }
 
+        public void DrawRing(float radius)
+        {
+            glPushMatrix();
+            glScale(radius, radius, radius);
+            GetRingList().Call();
+            glPopMatrix();
+        }
+        public GLDisplayList GetRingList() {return FindOrCreate<GLDisplayList>("Ring", CreateRing); }
+        private static GLDisplayList CreateRing(GLContext ctx)
+        {
+            GLDisplayList list = new GLDisplayList(ctx);
+            list.Begin();
+
+            ctx.glBegin(GLPrimitiveType.LineLoop);
+
+            float angle = 0.0f;
+            for (int i = 0; i < 360; i++, angle = i * Maths._deg2radf)
+                ctx.glVertex(Math.Cos(angle), Math.Sin(angle));
+
+            ctx.glEnd();
+
+            list.End();
+            return list;
+        }
+
+        public GLDisplayList GetCircleList() { return FindOrCreate<GLDisplayList>("Circle", CreateCircle); }
+        private static GLDisplayList CreateCircle(GLContext ctx)
+        {
+            GLDisplayList list = new GLDisplayList(ctx);
+            list.Begin();
+
+            ctx.glBegin(GLPrimitiveType.TriangleFan);
+
+            ctx.glVertex(0.0f, 0.0f, 0.0f);
+
+            float angle = 0.0f;
+            for (int i = 0; i < 361; i++, angle = i * Maths._deg2radf)
+                ctx.glVertex(Math.Cos(angle), Math.Sin(angle));
+
+            ctx.glEnd();
+
+            list.End();
+            return list;
+        }
+
+        public void DrawSphere(float radius)
+        {
+            glPushMatrix();
+            glScale(radius, radius, radius);
+            GetSphereList().Call();
+            glPopMatrix();
+        }
+        public GLDisplayList GetSphereList() { return FindOrCreate<GLDisplayList>("Sphere", CreateSphere); }
+        private static GLDisplayList CreateSphere(GLContext ctx)
+        {
+            int quad = ctx.gluNewQuadric();
+            ctx.gluQuadricDrawStyle(quad, GLUQuadricDrawStyle.GLU_FILL);
+            ctx.gluQuadricOrientation(quad, GLUQuadricOrientation.Outside);
+
+            GLDisplayList dl = new GLDisplayList(ctx);
+
+            dl.Begin();
+            ctx.gluSphere(quad, 1.0f, 40, 40);
+            dl.End();
+
+            ctx.gluDeleteQuadric(quad);
+
+            return dl;
+        }
 
         internal abstract void glAccum(GLAccumOp op, float value);
         //internal abstract void glActiveTexture(GLMultiTextureTarget texture);
@@ -644,6 +713,7 @@ namespace BrawlLib.OpenGL
         internal abstract void gluSphere(int quad, double radius, int slices, int stacks);
 
         internal abstract void gluQuadricDrawStyle(int quad, GLUQuadricDrawStyle draw);
+        internal abstract void gluQuadricOrientation(int quad, GLUQuadricOrientation orientation);
         internal abstract void gluLookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ);
         internal abstract void gluUnProject(double winX, double winY, double winZ, double* model, double* proj, int* view, double* objX, double* objY, double* objZ);
     }

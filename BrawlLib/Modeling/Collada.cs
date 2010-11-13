@@ -76,18 +76,18 @@ namespace BrawlLib.Modeling
 
         private static void WriteImages(MDL0Node model, string path, XmlWriter writer)
         {
-            if (model._texList == null)
+            if (model._textures == null)
                 return;
 
             writer.WriteStartElement("library_images");
 
-            foreach (MDL0TextureNode tex in model._texList)
+            foreach (TextureRef tex in model._textures._textures)
             {
                 writer.WriteStartElement("image");
                 writer.WriteAttributeString("id", tex.Name);
                 writer.WriteStartElement("init_from");
 
-                string outPath = String.Format("{0}/{1}.png", path.Replace('\\','/'), tex.Name);
+                string outPath = String.Format("{0}/{1}.png", path.Replace('\\', '/'), tex.Name);
 
                 //Export image and set full path. Or, cheat...
                 writer.WriteString(String.Format("file://{0}", outPath));
@@ -144,7 +144,7 @@ namespace BrawlLib.Modeling
                     if (mr._texture != null)
                     {
                         writer.WriteStartElement("texture");
-                        writer.WriteAttributeString("texture", mr._texture._name);
+                        writer.WriteAttributeString("texture", mr._texture.Name);
                         writer.WriteAttributeString("texcoord", "TEXCOORD0");
                         writer.WriteEndElement(); //texture
                     }
@@ -564,6 +564,7 @@ namespace BrawlLib.Modeling
 
             writer.WriteStartElement("library_controllers");
 
+            MDL0BoneNode bone;
             List<MDL0BoneNode> boneSet = new List<MDL0BoneNode>();
             List<float> weightSet = new List<float>();
             Matrix m;
@@ -584,7 +585,7 @@ namespace BrawlLib.Modeling
                 //Set bind pose matrix
                 if (poly._singleBind != null)
                 {
-                    m = poly._singleBind._matrix;
+                    m = poly._singleBind.Matrix;
                 }
                 else
                 {
@@ -609,7 +610,7 @@ namespace BrawlLib.Modeling
                 int index = 0;
                 if (poly._singleBind != null)
                 {
-                    foreach (BoneWeight w in poly._singleBind._weights)
+                    foreach (BoneWeight w in poly._singleBind.Weights)
                     {
                         if (!boneSet.Contains(w.Bone))
                         {
@@ -623,7 +624,7 @@ namespace BrawlLib.Modeling
                 else
                 {
                     foreach (Vertex3 v in verts)
-                        foreach (BoneWeight w in v.Influence._weights)
+                        foreach (BoneWeight w in v._influence.Weights)
                         {
                             if (!boneSet.Contains(w.Bone))
                             {
@@ -770,7 +771,7 @@ namespace BrawlLib.Modeling
                 first = true;
                 if (poly._singleBind != null)
                 {
-                    int count = poly._singleBind._weights.Length;
+                    int count = poly._singleBind.Weights.Length;
                     for (int i = 0; i < verts.Count; i++)
                     {
                         if (first)
@@ -788,7 +789,7 @@ namespace BrawlLib.Modeling
                             first = false;
                         else
                             writer.WriteString(" ");
-                        writer.WriteString(v.Influence._weights.Length.ToString());
+                        writer.WriteString(v._influence.Weights.Length.ToString());
                     }
                 }
                 writer.WriteEndElement(); //vcount
@@ -799,7 +800,7 @@ namespace BrawlLib.Modeling
                 {
                     for (int i = 0; i < verts.Count; i++)
                     {
-                        foreach (BoneWeight w in poly._singleBind._weights)
+                        foreach (BoneWeight w in poly._singleBind.Weights)
                         {
                             if (first)
                                 first = false;
@@ -815,7 +816,7 @@ namespace BrawlLib.Modeling
                 {
                     foreach (Vertex3 v in verts)
                     {
-                        foreach (BoneWeight w in v.Influence._weights)
+                        foreach (BoneWeight w in v._influence.Weights)
                         {
                             if (first)
                                 first = false;
@@ -895,32 +896,32 @@ namespace BrawlLib.Modeling
             //}
             //else
             //{
-                writer.WriteStartElement("instance_controller");
-                writer.WriteAttributeString("url", String.Format("#{0}_Controller", poly.Name));
+            writer.WriteStartElement("instance_controller");
+            writer.WriteAttributeString("url", String.Format("#{0}_Controller", poly.Name));
             //}
 
-                if (poly._material != null)
+            if (poly._material != null)
+            {
+                writer.WriteStartElement("bind_material");
+                writer.WriteStartElement("technique_common");
+                writer.WriteStartElement("instance_material");
+                writer.WriteAttributeString("symbol", poly._material.Name);
+                writer.WriteAttributeString("target", "#" + poly._material.Name);
+
+                foreach (MDL0MaterialRefNode mr in poly._material._children)
                 {
-                    writer.WriteStartElement("bind_material");
-                    writer.WriteStartElement("technique_common");
-                    writer.WriteStartElement("instance_material");
-                    writer.WriteAttributeString("symbol", poly._material.Name);
-                    writer.WriteAttributeString("target", "#" + poly._material.Name);
-
-                    foreach (MDL0MaterialRefNode mr in poly._material._children)
-                    {
-                        writer.WriteStartElement("bind_vertex_input");
-                        writer.WriteAttributeString("semantic", "TEXCOORD0"); //Replace with true set id
-                        writer.WriteAttributeString("input_semantic", "TEXCOORD");
-                        writer.WriteAttributeString("input_set", "0"); //Replace with true set id
-                        writer.WriteEndElement(); //bind_vertex_input
-                        break;
-                    }
-
-                    writer.WriteEndElement(); //instance_material
-                    writer.WriteEndElement(); //technique_common
-                    writer.WriteEndElement(); //bind_material
+                    writer.WriteStartElement("bind_vertex_input");
+                    writer.WriteAttributeString("semantic", "TEXCOORD0"); //Replace with true set id
+                    writer.WriteAttributeString("input_semantic", "TEXCOORD");
+                    writer.WriteAttributeString("input_set", "0"); //Replace with true set id
+                    writer.WriteEndElement(); //bind_vertex_input
+                    break;
                 }
+
+                writer.WriteEndElement(); //instance_material
+                writer.WriteEndElement(); //technique_common
+                writer.WriteEndElement(); //bind_material
+            }
 
             writer.WriteEndElement(); //instance_geometry
             writer.WriteEndElement(); //node

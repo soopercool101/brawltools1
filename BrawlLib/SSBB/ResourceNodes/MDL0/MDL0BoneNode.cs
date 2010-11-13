@@ -13,7 +13,7 @@ using BrawlLib.Wii.Compression;
 
 namespace BrawlLib.SSBB.ResourceNodes
 {
-    public unsafe class MDL0BoneNode : MDL0EntryNode, IMatrixProvider
+    public unsafe class MDL0BoneNode : MDL0EntryNode, IMatrixNode
     {
         private List<string> _entries = new List<string>();
 
@@ -29,17 +29,28 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal Matrix _bindMatrix, _inverseBindMatrix;
 
         internal FrameState _frameState;
-        internal Matrix _frameMatrix;
+        internal Matrix _frameMatrix, _inverseFrameMatrix;
 
         private Vector3 _bMin, _bMax;
         private Matrix43 _transform, _transformInvert;
 
-        internal int _nodeIndex;
+        internal int _nodeIndex, _weightCount, _refCount;
 
         [Browsable(false)]
-        public Matrix FrameMatrix { get { return _frameMatrix; } }
+        public Matrix Matrix { get { return _frameMatrix; } }
         [Browsable(false)]
         public Matrix InverseBindMatrix { get { return _inverseBindMatrix; } }
+
+        [Browsable(false)]
+        public int NodeIndex { get { return _nodeIndex; } }
+        [Browsable(false)]
+        public int ReferenceCount { get { return _refCount; } set { _refCount = value; } }
+        [Browsable(false)]
+        public bool IsPrimaryNode { get { return true; } }
+
+        private BoneWeight[] _weightRef;
+        [Browsable(false)]
+        public BoneWeight[] Weights { get { return _weightRef == null ? _weightRef = new BoneWeight[] { new BoneWeight(this, 1.0f) } : _weightRef; } }
 
         //[Category("Bone")]
         //public int HeaderLen { get { return Header->_headerLen; } }
@@ -98,27 +109,32 @@ namespace BrawlLib.SSBB.ResourceNodes
                 table.Add(s);
         }
 
+        //Initialize should only be called from parent group during parse.
+        //Bones need not be imported/exported anyways
         protected override bool OnInitialize()
         {
             MDL0Bone* header = Header;
 
             //SetSizeInternal(header->_headerLen);
 
-            //Assign parent node based on offset. Will scatter after all bones are processed
-            int offset = header->_parentOffset;
-            if (offset < 0)
-            {
-                MDL0Bone* pHeader = (MDL0Bone*)((byte*)header + offset);
-                foreach (MDL0BoneNode bone in _parent._children)
-                    if (pHeader == bone.Header)
-                    {
-                        _parent = bone;
-                        break;
-                    }
-            }
+            ////Assign true parent using parent header offset
+            //int offset = header->_parentOffset;
+            ////Offsets are always < 0, because parent entries are listed before children
+            //if (offset < 0)
+            //{
+            //    //Get address of parent header
+            //    MDL0Bone* pHeader = (MDL0Bone*)((byte*)header + offset);
+            //    //Search bone list for matching header
+            //    foreach (MDL0BoneNode bone in _parent._children)
+            //        if (pHeader == bone.Header)
+            //        { _parent = bone; break; } //Assign parent and break
+            //}
 
+            //Conditional name assignment
             if ((_name == null) && (header->_stringOffset != 0))
                 _name = header->ResourceString;
+
+            //Assign fields
 
             _flags = (BoneFlags)(uint)header->_flags;
             _nodeIndex = header->_nodeId;
@@ -140,6 +156,8 @@ namespace BrawlLib.SSBB.ResourceNodes
                     _entries.Add(new String((sbyte*)group + (pEntry++)->_stringOffset));
             }
 
+            //We don't want to process children because not all have been parsed yet.
+            //Child assigning will be handled by the parent group.
             return false;
         }
 
@@ -288,6 +306,22 @@ namespace BrawlLib.SSBB.ResourceNodes
             foreach (MDL0BoneNode bone in Children)
                 bone.RecalcBindState();
         }
+        internal void RecalcFrameState()
+        {
+            if (_parent is MDL0BoneNode)
+            {
+                _frameMatrix = ((MDL0BoneNode)_parent)._frameMatrix * _frameState._transform;
+                _inverseFrameMatrix = _frameState._iTransform * ((MDL0BoneNode)_parent)._inverseFrameMatrix;
+            }
+            else
+            {
+                _frameMatrix = _frameState._transform;
+                _inverseFrameMatrix = _frameState._iTransform;
+            }
+
+            foreach (MDL0BoneNode bone in Children)
+                bone.RecalcFrameState();
+        }
 
         public void CalcBase() { }
         public void CalcWeighted() { }
@@ -300,71 +334,71 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal Color _boneColor = Color.Transparent;
         internal Color _nodeColor = Color.Transparent;
 
-        const float _nodeRadius = 0.15f;
+        public const float _nodeRadius = 0.20f;
         const float _nodeAdj = 0.10f;
 
-        private static readonly Vector3[] _nodeVertices = new Vector3[] { 
-            new Vector3(-_nodeRadius, 0.0f, 0.0f),
+        //private static readonly Vector3[] _nodeVertices = new Vector3[] { 
+        //    new Vector3(-_nodeRadius, 0.0f, 0.0f),
 
-            new Vector3(-_nodeAdj, 0.0f, -_nodeAdj),
-            new Vector3(-_nodeAdj, _nodeAdj, 0.0f),
-            new Vector3(-_nodeAdj, 0.0f, _nodeAdj),
-            new Vector3(-_nodeAdj, -_nodeAdj, 0.0f),
-            new Vector3(-_nodeAdj, 0.0f, -_nodeAdj),
+        //    new Vector3(-_nodeAdj, 0.0f, -_nodeAdj),
+        //    new Vector3(-_nodeAdj, _nodeAdj, 0.0f),
+        //    new Vector3(-_nodeAdj, 0.0f, _nodeAdj),
+        //    new Vector3(-_nodeAdj, -_nodeAdj, 0.0f),
+        //    new Vector3(-_nodeAdj, 0.0f, -_nodeAdj),
             
-            //new Vector3(0.0f, 0.0f, -_nodeRadius),
-            //new Vector3(0.0f, -_nodeRadius, 0.0f),
-            //new Vector3(0.0f, 0.0f, _nodeRadius),
-            //new Vector3(0.0f, _nodeRadius, 0.0f),
-            //new Vector3(0.0f, 0.0f, -_nodeRadius),
+        //    //new Vector3(0.0f, 0.0f, -_nodeRadius),
+        //    //new Vector3(0.0f, -_nodeRadius, 0.0f),
+        //    //new Vector3(0.0f, 0.0f, _nodeRadius),
+        //    //new Vector3(0.0f, _nodeRadius, 0.0f),
+        //    //new Vector3(0.0f, 0.0f, -_nodeRadius),
 
             
-            new Vector3(_nodeRadius, 0.0f, 0.0f),
+        //    new Vector3(_nodeRadius, 0.0f, 0.0f),
 
-            new Vector3(_nodeAdj, 0.0f, -_nodeAdj),
-            new Vector3(_nodeAdj, _nodeAdj, 0.0f),
-            new Vector3(_nodeAdj, 0.0f, _nodeAdj),
-            new Vector3(_nodeAdj, -_nodeAdj, 0.0f),
-            new Vector3(_nodeAdj, 0.0f, -_nodeAdj),
+        //    new Vector3(_nodeAdj, 0.0f, -_nodeAdj),
+        //    new Vector3(_nodeAdj, _nodeAdj, 0.0f),
+        //    new Vector3(_nodeAdj, 0.0f, _nodeAdj),
+        //    new Vector3(_nodeAdj, -_nodeAdj, 0.0f),
+        //    new Vector3(_nodeAdj, 0.0f, -_nodeAdj),
             
-            new Vector3(0.0f, _nodeRadius, 0.0f),
+        //    new Vector3(0.0f, _nodeRadius, 0.0f),
 
-            new Vector3(0.0f, _nodeAdj, -_nodeAdj),
-            new Vector3(_nodeAdj, _nodeAdj, 0.0f),
-            new Vector3(0.0f, _nodeAdj, _nodeAdj),
-            new Vector3(-_nodeAdj, _nodeAdj, 0.0f),
-            new Vector3(0.0f, _nodeAdj, -_nodeAdj),
+        //    new Vector3(0.0f, _nodeAdj, -_nodeAdj),
+        //    new Vector3(_nodeAdj, _nodeAdj, 0.0f),
+        //    new Vector3(0.0f, _nodeAdj, _nodeAdj),
+        //    new Vector3(-_nodeAdj, _nodeAdj, 0.0f),
+        //    new Vector3(0.0f, _nodeAdj, -_nodeAdj),
             
-            //new Vector3(-_nodeRadius, 0.0f, 0.0f),
-            //new Vector3(0.0f, 0.0f, _nodeRadius),
-            //new Vector3(_nodeRadius, 0.0f, 0.0f),
-            //new Vector3(0.0f,0.0f,-_nodeRadius),
-            //new Vector3(-_nodeRadius, 0.0f, 0.0f),
+        //    //new Vector3(-_nodeRadius, 0.0f, 0.0f),
+        //    //new Vector3(0.0f, 0.0f, _nodeRadius),
+        //    //new Vector3(_nodeRadius, 0.0f, 0.0f),
+        //    //new Vector3(0.0f,0.0f,-_nodeRadius),
+        //    //new Vector3(-_nodeRadius, 0.0f, 0.0f),
             
-            new Vector3(0.0f, -_nodeRadius, 0.0f),
+        //    new Vector3(0.0f, -_nodeRadius, 0.0f),
 
-            new Vector3(0.0f, -_nodeAdj, -_nodeAdj),
-            new Vector3(_nodeAdj, -_nodeAdj, 0.0f),
-            new Vector3(0.0f, -_nodeAdj, _nodeAdj),
-            new Vector3(-_nodeAdj, -_nodeAdj, 0.0f),
-            new Vector3(0.0f, _nodeAdj, -_nodeAdj),
+        //    new Vector3(0.0f, -_nodeAdj, -_nodeAdj),
+        //    new Vector3(_nodeAdj, -_nodeAdj, 0.0f),
+        //    new Vector3(0.0f, -_nodeAdj, _nodeAdj),
+        //    new Vector3(-_nodeAdj, -_nodeAdj, 0.0f),
+        //    new Vector3(0.0f, _nodeAdj, -_nodeAdj),
             
-            new Vector3(0.0f, 0.0f, -_nodeRadius),
+        //    new Vector3(0.0f, 0.0f, -_nodeRadius),
 
-            new Vector3(0.0f, _nodeAdj, -_nodeAdj),
-            new Vector3(-_nodeAdj, 0.0f, -_nodeAdj),
-            new Vector3(0.0f, -_nodeAdj, -_nodeAdj),
-            new Vector3(_nodeAdj, 0.0f, -_nodeAdj),
-            new Vector3(0.0f, _nodeAdj, -_nodeAdj),
+        //    new Vector3(0.0f, _nodeAdj, -_nodeAdj),
+        //    new Vector3(-_nodeAdj, 0.0f, -_nodeAdj),
+        //    new Vector3(0.0f, -_nodeAdj, -_nodeAdj),
+        //    new Vector3(_nodeAdj, 0.0f, -_nodeAdj),
+        //    new Vector3(0.0f, _nodeAdj, -_nodeAdj),
             
-            new Vector3(0.0f, 0.0f, _nodeRadius),
+        //    new Vector3(0.0f, 0.0f, _nodeRadius),
 
-            new Vector3(0.0f, _nodeAdj, _nodeAdj),
-            new Vector3(-_nodeAdj, 0.0f, _nodeAdj),
-            new Vector3(0.0f, -_nodeAdj, _nodeAdj),
-            new Vector3(_nodeAdj, 0.0f, _nodeAdj),
-            new Vector3(0.0f, _nodeAdj, _nodeAdj)
-        };
+        //    new Vector3(0.0f, _nodeAdj, _nodeAdj),
+        //    new Vector3(-_nodeAdj, 0.0f, _nodeAdj),
+        //    new Vector3(0.0f, -_nodeAdj, _nodeAdj),
+        //    new Vector3(_nodeAdj, 0.0f, _nodeAdj),
+        //    new Vector3(0.0f, _nodeAdj, _nodeAdj)
+        //};
 
         public bool _render = true;
         internal unsafe void Render(GLContext ctx)
@@ -388,18 +422,20 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             ctx.glPushMatrix();
 
-            fixed (Matrix* m = &_frameState._transform)
-                ctx.glMultMatrix((float*)m);
-
+            ctx.glTranslate(v._x, v._y, v._z);
 
             //Render node
-            GLDisplayList ndl = ctx.FindOrCreate<GLDisplayList>("NodeOrb", CreateNodeOrb);
+            GLDisplayList ndl = ctx.FindOrCreate<GLDisplayList>("BoneNodeOrb", CreateNodeOrb);
             if (_nodeColor != Color.Transparent)
                 ctx.glColor(_nodeColor.R, _nodeColor.G, _nodeColor.B, _nodeColor.A);
             else
                 ctx.glColor(DefaultNodeColor.R, DefaultNodeColor.G, DefaultNodeColor.B, DefaultNodeColor.A);
             ndl.Call();
             DrawNodeOrients(ctx);
+
+            ctx.glTranslate(-v._x, -v._y, -v._z);
+            fixed (Matrix* m = &_frameState._transform)
+                ctx.glMultMatrix((float*)m);
 
             //Render children
             foreach (MDL0BoneNode n in Children)
@@ -419,39 +455,98 @@ namespace BrawlLib.SSBB.ResourceNodes
             else //Set to neutral pose
                 _frameState = _bindState;
 
-            if (_parent is MDL0BoneNode)
-                _frameMatrix = ((MDL0BoneNode)_parent)._frameMatrix * _frameState._transform;
-            else
-                _frameMatrix = _frameState._transform;
-
             foreach (MDL0BoneNode b in Children)
                 b.ApplyCHR0(node, index);
         }
 
-        private static GLDisplayList CreateNodeOrb(GLContext ctx)
+        public static GLDisplayList CreateNodeOrb(GLContext ctx)
         {
-            GLDisplayList list = new GLDisplayList(ctx);
+            GLDisplayList circle = ctx.GetRingList();
+            GLDisplayList orb = new GLDisplayList(ctx);
 
-            list.Begin();
-            DrawNodeOrb(ctx);
-            list.End();
+            orb.Begin();
+            ctx.glPushMatrix();
+            ctx.glScale(_nodeRadius, _nodeRadius, _nodeRadius);
 
-            return list;
+            circle.Call();
+            ctx.glRotate(90.0f, 0.0f, 1.0f, 0.0f);
+            circle.Call();
+            ctx.glRotate(90.0f, 1.0f, 0.0f, 0.0f);
+            circle.Call();
+
+            ctx.glPopMatrix();
+            orb.End();
+            return orb;
+            
+            //GLDisplayList ndl = ctx.FindOrCreate<GLDisplayList>("OrbOrients", CreateOrbOrients);
+            //GLDisplayList orb = new GLDisplayList(ctx);
+
+            //int quad = ctx.gluNewQuadric();
+            //ctx.gluQuadricDrawStyle(quad, GLUQuadricDrawStyle.GLU_FILL);
+            //ctx.gluQuadricOrientation(quad, GLUQuadricOrientation.Outside);
+
+            //orb.Begin();
+
+            //ctx.gluSphere(quad, _nodeRadius, 20, 20);
+            //ndl.Call();
+
+            //orb.End();
+
+            //ctx.gluDeleteQuadric(quad);
+
+            //return orb;
         }
-        private static void DrawNodeOrb(GLContext ctx)
-        {
-            fixed (Vector3* p = _nodeVertices)
-            {
-                Vector3* vp = p;
-                for (int x = 0; x < 6; x++)
-                {
-                    ctx.glBegin(GLPrimitiveType.TriangleFan);
-                    for (int i = 0; i < 6; i++)
-                        ctx.glVertex3v((float*)vp++);
-                    ctx.glEnd();
-                }
-            }
-        }
+        //public static GLDisplayList CreateOrbOrients(GLContext ctx)
+        //{
+        //    GLDisplayList circle = ctx.FindOrCreate<GLDisplayList>("Circle", CreateCircle);
+        //    GLDisplayList list = new GLDisplayList(ctx);
+
+        //    Matrix roty = Matrix.RotationMatrix(0.0f, 90.0f, 0.0f);
+        //    Matrix rotx = Matrix.RotationMatrix(90.0f, 0.0f, 0.0f);
+
+        //    list.Begin();
+
+        //    ctx.glPushMatrix();
+
+        //    ctx.glColor(0.0f, 0.0f, 1.0f, 1.0f);
+        //    circle.Call();
+        //    ctx.glMultMatrix((float*)&roty);
+        //    ctx.glColor(1.0f, 0.0f, 0.0f, 1.0f);
+        //    circle.Call();
+        //    ctx.glMultMatrix((float*)&rotx);
+        //    ctx.glColor(0.0f, 1.0f, 0.0f, 1.0f);
+        //    circle.Call();
+
+        //    ctx.glPopMatrix();
+
+        //    list.End();
+
+        //    return list;
+        //}
+        //private static GLDisplayList CreateNodeOrb(GLContext ctx)
+        //{
+        //    GLDisplayList list = new GLDisplayList(ctx);
+
+        //    list.Begin();
+        //    DrawNodeOrb(ctx);
+        //    list.End();
+
+        //    return list;
+        //}
+        //private static void DrawNodeOrb(GLContext ctx)
+        //{
+        //    fixed (Vector3* p = _nodeVertices)
+        //    {
+        //        Vector3* vp = p;
+        //        for (int x = 0; x < 6; x++)
+        //        {
+        //            ctx.glBegin(GLPrimitiveType.TriangleFan);
+        //            for (int i = 0; i < 6; i++)
+        //                ctx.glVertex3v((float*)vp++);
+        //            ctx.glEnd();
+        //        }
+        //    }
+        //}
         private static void DrawNodeOrients(GLContext ctx)
         {
             ctx.glBegin(GLPrimitiveType.Lines);

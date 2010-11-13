@@ -26,11 +26,11 @@ namespace System.Windows.Forms
         private Label label6;
         private NumericInputBox numScaleX;
         private Label label7;
-        private NumericInputBox numRotZ;
+        internal NumericInputBox numRotZ;
         private Label label8;
-        private NumericInputBox numRotY;
+        internal NumericInputBox numRotY;
         private Label label9;
-        private NumericInputBox numRotX;
+        internal NumericInputBox numRotX;
         private Label label10;
         private NumericInputBox numTransZ;
         private Label label11;
@@ -579,7 +579,7 @@ namespace System.Windows.Forms
 
         private ResourceNode _externalNode;
         private ListViewGroup _CHRGroup = new ListViewGroup("Character Animations");
-        private NumericInputBox[] _transBoxes = new NumericInputBox[9];
+        internal NumericInputBox[] _transBoxes = new NumericInputBox[9];
         private AnimationFrame _tempFrame = AnimationFrame.Neutral;
 
         public event EventHandler RenderStateChanged;
@@ -748,7 +748,7 @@ namespace System.Windows.Forms
                 box.BackColor = Color.White;
             }
         }
-        private unsafe void BoxChanged(object sender, EventArgs e)
+        internal unsafe void BoxChanged(object sender, EventArgs e)
         {
             if (_transformObject == null)
                 return;

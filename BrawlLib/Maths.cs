@@ -3,11 +3,76 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace BrawlLib
+namespace System
 {
     public static unsafe class Maths
     {
-        private static double _double2fixmagic = 68719476736.0f * 1.5f;
+        private const double _double2fixmagic = 68719476736.0f * 1.5f;
+        public const double _rad2deg = 180.0 / Math.PI;
+        public const double _deg2rad = Math.PI / 180.0;
+        public const float _rad2degf = (float)_rad2deg;
+        public const float _deg2radf = (float)_deg2rad;
+        public const float _halfPif = (float)(Math.PI / 2.0);
+        public const float _pif = (float)Math.PI;
+
+        public static bool LineSphereIntersect(Vector3 start, Vector3 end, Vector3 center, float radius, out Vector3 result)
+        {
+            Vector3 diff = end - start;
+            float a = diff.Dot();
+
+            if (a > 0.0f)
+            {
+                float b = 2 * diff.Dot(start - center);
+                float c = (center.Dot() + start.Dot()) - (2 * center.Dot(start)) - (radius * radius);
+
+                float magnitude = (b * b) - (4 * a * c);
+
+                if (magnitude >= 0.0f)
+                {
+                    magnitude = (float)Math.Sqrt(magnitude);
+                    a *= 2;
+
+                    float scale = (-b + magnitude) / a;
+                    float dist2 = (-b - magnitude) / a;
+
+                    if (dist2 < scale)
+                        scale = dist2;
+
+                    result = start + (diff * scale);
+                    return true;
+                }
+            }
+
+            result = new Vector3();
+            return false;
+        }
+
+        public static bool LinePlaneIntersect(Vector3 lineStart, Vector3 lineEnd, Vector3 planePoint, Vector3 planeNormal, out Vector3 result)
+        {
+            Vector3 diff = lineEnd - lineStart;
+            float scale = -planeNormal.Dot(lineStart - planePoint) / planeNormal.Dot(diff);
+
+            if (float.IsNaN(scale) || scale < 0.0f || scale > 1.0f)
+            {
+                result = new Vector3();
+                return false;
+            }
+
+            result = lineStart + (diff * scale);
+            return true;
+        }
+
+        public static Vector3 PointAtLineDistance(Vector3 start, Vector3 end, float distance)
+        {
+            Vector3 diff = end - start;
+            return start + (diff * (distance / diff.TrueDistance()));
+        }
+
+        public static Vector3 PointLineIntersect(Vector3 start, Vector3 end, Vector3 point)
+        {
+            Vector3 diff = end - start;
+            return start + (diff * (diff.Dot(point - start) / diff.Dot()));
+        }
 
         public static void FFloor3(float* v)
         {

@@ -790,26 +790,25 @@ namespace BrawlLib.SSBBTypes
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct MDL0Polygon
     {
+        public const uint Size = 0x64;
+
         public bint _totalLength;
         public bint _mdl0Offset;
-        public bint _nodeId; //Linkage?
+        public bint _nodeId; //Single-bind node
 
-        public bint _elemFlags, _texFlags, _dataFlags;
+        public CPVertexFormat _vertexFormat;
+        public XFVertexSpecs _vertexSpecs;
 
-        //public MDL0ElementFlags _flags;
+        //public bint _elemFlags, _texFlags, _dataFlags;
 
-        //public bint _elementFlags; //Specifies number/size of elements (also in def block)
-        //public bint _unkFlags1; //3 means extra element? (also in def block)
-        //public bint _unkFlags2; //0x15 (also in def block)
-
-        public bint _defSize; //Size of def block including padding. Always 0xE0?
+        public bint _defSize; //Size of def block including padding? Always 0xE0?
         public bint _defFlags; //0x80
         public bint _defOffset; //Relative to defSize field
 
         public bint _dataLen1;
         public bint _dataLen2; //Same as previous
         public bint _dataOffset; //Relative to dataLen1
-        public bint _unk2; //0x2E00 flags?
+        public XFArrayFlags _arrayFlags; //Used to enable element arrays?
         public bint _unk3; //0
         public bint _stringOffset;
         public bint _index;
@@ -821,7 +820,7 @@ namespace BrawlLib.SSBBTypes
         //public bshort _colorId1;
         //public bshort _colorId2;
         public fixed short _uids[8];
-        public bint _part1Offset;
+        public bint _nodeTableOffset; //Always 0x64?
 
         private VoidPtr Address { get { fixed (void* ptr = &this)return ptr; } }
         public MDL0Header* Parent { get { return (MDL0Header*)(Address + _mdl0Offset); } }
@@ -844,7 +843,7 @@ namespace BrawlLib.SSBBTypes
         public bshort* ColorIds { get { return (bshort*)(Address + 0x4C); } }
         public bshort* UVIds { get { return (bshort*)(Address + 0x50); } }
 
-        public bushort* WeightIndices { get { return (bushort*)(Address + _part1Offset); } }
+        public bushort* WeightIndices { get { return (bushort*)(Address + _nodeTableOffset); } }
 
         public VoidPtr PrimitiveData { get { return Address + 0x24 + _dataOffset; } }
 

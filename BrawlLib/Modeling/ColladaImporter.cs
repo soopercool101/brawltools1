@@ -25,7 +25,7 @@ namespace BrawlLib.Modeling
                     foreach (ImageEntry img in shell._images)
                     {
                         string name;
-                        MDL0TextureNode tex = null;
+                        TextureRef tex;
 
                         if (img._path != null)
                         {
@@ -40,14 +40,8 @@ namespace BrawlLib.Modeling
                         else
                             name = img._name != null ? img._name : img._id;
 
-                        foreach (MDL0TextureNode t in model._texList)
-                            if (t.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                            { tex = t; break; }
-
-                        if (tex == null)
-                            tex = new MDL0TextureNode() { _name = name };
-
-                        model._texList.Add(img._node = tex);
+                        tex = model._textures.FindOrCreate(name);
+                        img._node = tex;
                     }
 
                     //Extract materials
@@ -55,7 +49,8 @@ namespace BrawlLib.Modeling
                     {
                         MDL0MaterialNode matNode = new MDL0MaterialNode();
                         matNode._name = mat._name != null ? mat._name : mat._id;
-                        model._matList.Add(mat._node = matNode);
+                        mat._node = matNode;
+                        model._matList.Add(matNode);
 
                         //Find effect
                         if (mat._effect != null)
@@ -73,8 +68,8 @@ namespace BrawlLib.Modeling
                                                 {
                                                     MDL0MaterialRefNode mr = new MDL0MaterialRefNode();
 
-                                                    (mr._texture = img._node as MDL0TextureNode)._texRefs.Add(mr);
-                                                    mr._name = mr._texture._name;
+                                                    (mr._texture = img._node as TextureRef)._texRefs.Add(mr);
+                                                    mr._name = mr._texture.Name;
 
                                                     matNode._children.Add(mr);
                                                     mr._parent = matNode;
@@ -194,7 +189,7 @@ namespace BrawlLib.Modeling
         private class ColladaEntry : IDisposable
         {
             internal string _id, _name;
-            internal ResourceNode _node;
+            internal object _node;
 
             ~ColladaEntry() { Dispose(); }
             public virtual void Dispose() { GC.SuppressFinalize(this); }

@@ -35,6 +35,12 @@ namespace System
             return m;
         }
 
+        public Vector3 GetPoint()
+        {
+            fixed (float* p = _values)
+                return new Vector3(p[12], p[13], p[14]);
+        }
+
         public static Matrix ScaleMatrix(float x, float y, float z)
         {
             Matrix m = new Matrix();
@@ -54,28 +60,28 @@ namespace System
             p[14] = z;
             return m;
         }
+        public static Matrix RotationMatrix(Vector3 angles) { return RotationMatrix(angles._x, angles._y, angles._z); }
         public static Matrix RotationMatrix(float x, float y, float z)
         {
-            float cosx = (float)Math.Cos(x / 180.0f * Math.PI);
-            float sinx = (float)Math.Sin(x / 180.0f * Math.PI);
-            float cosy = (float)Math.Cos(y / 180.0f * Math.PI);
-            float siny = (float)Math.Sin(y / 180.0f * Math.PI);
-            float cosz = (float)Math.Cos(z / 180.0f * Math.PI);
-            float sinz = (float)Math.Sin(z / 180.0f * Math.PI);
+            float cosx = (float)Math.Cos(x * Maths._deg2radf);
+            float sinx = (float)Math.Sin(x * Maths._deg2radf);
+            float cosy = (float)Math.Cos(y * Maths._deg2radf);
+            float siny = (float)Math.Sin(y * Maths._deg2radf);
+            float cosz = (float)Math.Cos(z * Maths._deg2radf);
+            float sinz = (float)Math.Sin(z * Maths._deg2radf);
 
             Matrix m = Identity;
             float* p = (float*)&m;
 
             m[0] = cosy * cosz;
-            m[4] = cosy * sinz;
-            m[8] = -siny;
-            m[1] = (sinx * siny * cosz - cosx * sinz);
-            m[5] = (sinx * siny * sinz + cosx * cosz);
-            m[9] = sinx * cosy;
-            m[2] = (cosx * siny * cosz + sinx * sinz);
-            m[6] = (cosx * siny * sinz - sinx * cosz);
+            m[1] = sinz * cosy;
+            m[2] = -siny;
+            m[4] = (sinx * cosz * siny - cosx * sinz);
+            m[5] = (sinx * sinz * siny + cosz * cosx);
+            m[6] = sinx * cosy;
+            m[8] = (sinx * sinz + cosx * cosz * siny);
+            m[9] = (cosx * sinz * siny - sinx * cosz);
             m[10] = cosx * cosy;
-            p[15] = 1.0f;
 
             return m;
         }
@@ -185,6 +191,13 @@ namespace System
                 *p++ *= f;
             return m;
         }
+        public static Matrix operator -(Matrix m)
+        {
+            float* p = (float*)&m;
+            int i = 0;
+            while (i++ < 16) *p = -*p++;
+            return m;
+        }
 
         public override string ToString()
         {
@@ -256,6 +269,61 @@ namespace System
             }
         }
 
+        public Matrix GetRotationMatrix()
+        {
+            Matrix m = Identity;
+            float* p = (float*)&m;
+            fixed (float* src = _values)
+            {
+                m[0] = src[0];
+                m[1] = src[1];
+                m[2] = src[2];
+                m[4] = src[4];
+                m[5] = src[5];
+                m[6] = src[6];
+                m[8] = src[8];
+                m[9] = src[9];
+                m[10] = src[10];
+            }
+            return m;
+        }
+
+        //Derive Euler angles from matrix, simply by reversing the transformation process.
+        //Vulnerable to gimbal lock, quaternions may be a better solution
+        public Vector3 GetAngles()
+        {
+            float x, y, z, c;
+            fixed (float* p = _values)
+            {
+                y = (float)Math.Asin(-p[2]);
+                if ((Maths._halfPif - (float)Math.Abs(y)) < 0.0001f)
+                {
+                    //Gimbal lock, occurs when the y rotation falls on pi/2 or -pi/2
+                    z = 0.0f;
+                    if (y > 0)
+                        x = (float)Math.Atan2(p[4], p[8]);
+                    else
+                        x = (float)Math.Atan2(p[4], -p[8]);
+                }
+                else
+                {
+                    c = (float)Math.Cos(y);
+                    x = (float)Math.Atan2(p[6] / c, p[10] / c);
+                    z = (float)Math.Atan2(p[1] / c, p[0] / c);
+
+                    //180 z/x inverts y, use second option
+                    if (Maths._pif - Math.Abs(z) < 0.05f)
+                    {
+                        y = Maths._pif - y;
+                        c = (float)Math.Cos(y);
+                        x = (float)Math.Atan2(p[6] / c, p[10] / c);
+                        z = (float)Math.Atan2(p[1] / c, p[0] / c);
+                    }
+                }
+            }
+            return new Vector3(x, y, z) * Maths._rad2degf;
+        }
+
         public FrameState Derive()
         {
             FrameState state = new FrameState();
@@ -270,10 +338,7 @@ namespace System
                 state._scale._y = (float)Math.Round(Math.Sqrt(p[4] * p[4] + p[5] * p[5] + p[6] * p[6]), 4);
                 state._scale._z = (float)Math.Round(Math.Sqrt(p[8] * p[8] + p[9] * p[9] + p[10] * p[10]), 4);
 
-                //There IS a better way to do this, I'm just not sure what it is...
-                state._rotate._x = (float)Math.Round(Math.Atan2(p[6] / state._scale._y, p[10] / state._scale._z) / Math.PI * 180.0f, 4);
-                state._rotate._y = (float)Math.Round(-Math.Asin(p[2] / state._scale._x) / Math.PI * 180.0f, 4);
-                state._rotate._z = (float)Math.Round(Math.Atan2(p[1] / state._scale._x, p[0] / state._scale._x) / Math.PI * 180.0f, 4);
+                state._rotate = GetAngles();
             }
 
             state.CalcTransforms();
@@ -376,12 +441,12 @@ namespace System
             Matrix m;
             float* d = (float*)&m;
 
-            float cosx = (float)Math.Cos(rotate._x / 180.0f * Math.PI);
-            float sinx = (float)Math.Sin(rotate._x / 180.0f * Math.PI);
-            float cosy = (float)Math.Cos(rotate._y / 180.0f * Math.PI);
-            float siny = (float)Math.Sin(rotate._y / 180.0f * Math.PI);
-            float cosz = (float)Math.Cos(rotate._z / 180.0f * Math.PI);
-            float sinz = (float)Math.Sin(rotate._z / 180.0f * Math.PI);
+            float cosx = (float)Math.Cos(rotate._x * Maths._deg2radf);
+            float sinx = (float)Math.Sin(rotate._x * Maths._deg2radf);
+            float cosy = (float)Math.Cos(rotate._y * Maths._deg2radf);
+            float siny = (float)Math.Sin(rotate._y * Maths._deg2radf);
+            float cosz = (float)Math.Cos(rotate._z * Maths._deg2radf);
+            float sinz = (float)Math.Sin(rotate._z * Maths._deg2radf);
 
             d[0] = scale._x * cosy * cosz;
             d[1] = scale._x * sinz * cosy;
@@ -405,12 +470,12 @@ namespace System
 
         public static Matrix ReverseTransformMatrix(Vector3 scale, Vector3 rotation, Vector3 translation)
         {
-            float cosx = (float)Math.Cos(rotation._x / 180.0 * Math.PI);
-            float sinx = (float)Math.Sin(rotation._x / 180.0 * Math.PI);
-            float cosy = (float)Math.Cos(rotation._y / 180.0 * Math.PI);
-            float siny = (float)Math.Sin(rotation._y / 180.0 * Math.PI);
-            float cosz = (float)Math.Cos(rotation._z / 180.0 * Math.PI);
-            float sinz = (float)Math.Sin(rotation._z / 180.0 * Math.PI);
+            float cosx = (float)Math.Cos(rotation._x * Maths._deg2radf);
+            float sinx = (float)Math.Sin(rotation._x * Maths._deg2radf);
+            float cosy = (float)Math.Cos(rotation._y * Maths._deg2radf);
+            float siny = (float)Math.Sin(rotation._y * Maths._deg2radf);
+            float cosz = (float)Math.Cos(rotation._z * Maths._deg2radf);
+            float sinz = (float)Math.Sin(rotation._z * Maths._deg2radf);
 
             scale._x = 1 / scale._x;
             scale._y = 1 / scale._y;
@@ -443,6 +508,41 @@ namespace System
             p[14] = (translation._x * p[2]) + (translation._y * p[6]) + (translation._z * p[10]);
             p[15] = 1.0f;
 
+            return m;
+        }
+
+        public static Matrix AxisAngleMatrix(Vector3 point1, Vector3 point2)
+        {
+            Matrix m = Matrix.Identity;
+            //Equal points will cause a corrupt matrix
+            if (point1 != point2)
+            {
+                float* pOut = (float*)&m;
+
+                point1 = point1.Normalize();
+                point2 = point2.Normalize();
+
+                Vector3 vSin = point1.Cross(point2);
+                Vector3 axis = vSin.Normalize();
+
+                float cos = point1.Dot(point2);
+                Vector3 vt = axis * (1.0f - cos);
+
+                pOut[0] = vt._x * axis._x + cos;
+                pOut[5] = vt._y * axis._y + cos;
+                pOut[10] = vt._z * axis._z + cos;
+
+                vt._x *= axis._y;
+                vt._z *= axis._x;
+                vt._y *= axis._z;
+
+                pOut[1] = vt._x + vSin._z;
+                pOut[2] = vt._z - vSin._y;
+                pOut[4] = vt._x - vSin._z;
+                pOut[6] = vt._y + vSin._x;
+                pOut[8] = vt._z + vSin._y;
+                pOut[9] = vt._y - vSin._x;
+            }
             return m;
         }
     }

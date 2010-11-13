@@ -9,56 +9,67 @@ namespace BrawlLib.Wii.Models
 {
     public unsafe class VertexCodec : IDisposable
     {
+        private const float _maxError = 0.0005f;
+
         public Vector3 _min, _max;
         public bool _hasZ;
         public WiiVertexComponentType _type;
 
         public int _srcElements, _srcCount;
-        public int _dstElements, _dstStride;
+        public int _dstElements, _dstCount, _dstStride;
 
         public int _scale;
         public int _dataLen;
 
-        public UnsafeBuffer _newVertices;
-        public UnsafeBuffer _remapTable;
+        private Remapper _remap;
+
+        private GCHandle _handle;
+        private float* _pData;
 
         private VertexCodec() { }
         ~VertexCodec() { Dispose(); }
         public void Dispose()
         {
-            if (_newVertices != null)
-            {
-                _newVertices.Dispose();
-                _newVertices = null;
-            }
-            if (_remapTable != null)
-            {
-                _remapTable.Dispose();
-                _remapTable = null;
-            }
-            GC.SuppressFinalize(this);
+            if (_handle.IsAllocated)
+                _handle.Free();
+            _pData = null;
         }
 
-        private const float _maxError = 0.0005f;
 
-        public static VertexCodec Evaluate(Vector3[] vertices, bool removeZ)
+        public VertexCodec(Vector3[] vertices, bool removeZ)
         {
-            VertexCodec enc = new VertexCodec();
-            fixed (Vector3* p = vertices)
-                enc.Evaluate((float*)p, 3, vertices.Length, removeZ);
-            return enc;
+            _srcCount = vertices.Length;
+            _srcElements = 3;
+            _handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
+            _pData = (float*)_handle.AddrOfPinnedObject();
+            Evaluate(removeZ);
         }
-        public static VertexCodec Evaluate(Vector2[] points)
+        public VertexCodec(Vector2[] vertices)
         {
-            VertexCodec enc = new VertexCodec();
-            fixed (Vector2* p = points)
-                enc.Evaluate((float*)p, 2, points.Length, false);
-            return enc;
+            _srcCount = vertices.Length;
+            _srcElements = 2;
+            _handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
+            _pData = (float*)_handle.AddrOfPinnedObject();
+            Evaluate(false);
+        }
+        public VertexCodec(Vector3* sPtr, int count, bool removeZ)
+        {
+            _srcCount = count;
+            _srcElements = 3;
+            _pData = (float*)sPtr;
+            Evaluate(removeZ);
+        }
+        public VertexCodec(Vector2* sPtr, int count)
+        {
+            _srcCount = count;
+            _srcElements = 2;
+            _pData = (float*)sPtr;
+            Evaluate(false);
         }
 
-        private void Evaluate(float* sPtr, int elements, int count, bool removeZ)
+        private void Evaluate(bool removeZ)
         {
-            float* fPtr, fCeil = sPtr + (elements * count);
+            float* fPtr;
             int bestScale = 0;
             bool sign;
 
@@ -67,16 +78,37 @@ namespace BrawlLib.Wii.Models
             float vMin = float.MaxValue, vMax = float.MinValue, vDist;
             float val;
 
+            //Currently, remapping provides to benefit for vertices/normals
+            //Maybe when merging is supported this will change
+
+            _remap = new Remapper();
+            //if (elements == 3)
+            //    _remap.Remap<Vector3>(new MemoryList<Vector3>(sPtr, count), null);
+            if (_srcElements == 2)
+                _remap.Remap<Vector2>(new MemoryList<Vector2>(_pData, _srcCount), null);
+
+            int[] imp = null;
+            int impLen = _srcCount;
+
+            //Remapping is useless if there is no savings
+            if (_remap._impTable != null && _remap._impTable.Length < _srcCount)
+            {
+                imp = _remap._impTable;
+                impLen = imp.Length;
+            }
+
             _min = new Vector3(float.MaxValue);
             _max = new Vector3(float.MinValue);
-            _srcElements = elements;
-            _srcCount = count;
+            _dstCount = impLen;
             _type = 0;
 
             //Get extents
-            fPtr = sPtr;
-            for (int i = 0; i < count; i++)
-                for (int x = 0; x < elements; x++)
+            fPtr = _pData;
+            for (int i = 0; i < impLen; i++)
+            {
+                if (imp != null)
+                    fPtr = &_pData[imp[i] * _srcElements];
+                for (int x = 0; x < _srcElements; x++)
                 {
                     val = *fPtr++;
                     if (val < pMin[x]) pMin[x] = val;
@@ -84,13 +116,14 @@ namespace BrawlLib.Wii.Models
                     if (val < vMin) vMin = val;
                     if (val > vMax) vMax = val;
                 }
+            }
 
             _min = min;
             _max = max;
-            if (removeZ && (elements == 3) && (min._z == 0) && (max._z == 0))
+            if (removeZ && (_srcElements == 3) && (min._z == 0) && (max._z == 0))
                 _dstElements = 2;
             else
-                _dstElements = elements;
+                _dstElements = _srcElements;
 
             _hasZ = _dstElements > 2;
 
@@ -122,24 +155,52 @@ namespace BrawlLib.Wii.Models
                 while ((divisor < 32) && ((scale = VQuant.QuantTable[divisor]) <= maxVal))
                 {
                     float worstError = float.MinValue;
-                    for (fPtr = sPtr; fPtr < fCeil; )
+
+                    fPtr = _pData;
+                    for (int y = 0; y < impLen; y++)
                     {
-                        if ((val = *fPtr++) == 0)
-                            continue;
+                        if (imp != null)
+                            fPtr = &_pData[imp[i] * _srcElements];
+                        for (int z = 0; z < _srcElements; z++)
+                        {
+                            if ((val = *fPtr++) == 0)
+                                continue;
 
-                        val *= scale;
-                        if (val > rMax) val = rMax;
-                        else if (val < rMin) val = rMin;
+                            val *= scale;
+                            if (val > rMax) val = rMax;
+                            else if (val < rMin) val = rMin;
 
-                        int step = (int)((val * scale) + (val > 0 ? 0.5f : -0.5f));
-                        float error = Math.Abs((step / scale) - val);
+                            int step = (int)((val * scale) + (val > 0 ? 0.5f : -0.5f));
+                            float error = Math.Abs((step / scale) - val);
 
-                        if (error > worstError)
-                            worstError = error;
+                            if (error > worstError)
+                                worstError = error;
 
-                        if (error > bestError)
-                            break;
+                            if (error > bestError)
+                                goto Check;
+                        }
                     }
+
+                    //for (fPtr = sPtr; fPtr < fCeil; )
+                //{
+                //    if ((val = *fPtr++) == 0)
+                //        continue;
+
+                    //    val *= scale;
+                //    if (val > rMax) val = rMax;
+                //    else if (val < rMin) val = rMin;
+
+                    //    int step = (int)((val * scale) + (val > 0 ? 0.5f : -0.5f));
+                //    float error = Math.Abs((step / scale) - val);
+
+                    //    if (error > worstError)
+                //        worstError = error;
+
+                    //    if (error > bestError)
+                //        break;
+                //}
+
+                Check:
 
                     if (worstError < bestError)
                     {
@@ -165,7 +226,7 @@ namespace BrawlLib.Wii.Models
 
             _scale = bestScale;
             _dstStride = _dstElements << ((int)_type >> 1);
-            _dataLen = count * _dstStride;
+            _dataLen = _dstCount * _dstStride;
         }
 
         private delegate void VertEncoder(float value, ref byte* pOut);
@@ -187,45 +248,94 @@ namespace BrawlLib.Wii.Models
             pOut += 4;
         };
 
-        public void Write(Vector2[] vertices, byte* pOut)
+        public void Write(byte* pOut)
         {
-            fixed (Vector2* p = vertices)
-                Write((float*)p, pOut);
-        }
-        public void Write(Vector3[] vertices, byte* pOut)
-        {
-            fixed (Vector3* p = vertices)
-                Write((float*)p, pOut);
-        }
-        public void Write(float* pIn, byte* pOut)
-        {
-            byte* pCeil = pOut + _dataLen.Align(0x20);
-            float scale = VQuant.QuantTable[_scale];
-            VertEncoder enc;
-            switch (_type)
+            try
             {
-                case WiiVertexComponentType.Int8:
-                case WiiVertexComponentType.UInt8:
-                    enc = _byteEncoder;
-                    break;
-                case WiiVertexComponentType.Int16:
-                case WiiVertexComponentType.UInt16:
-                    enc = _shortEncoder;
-                    break;
-                default:
-                    enc = _floatEncoder;
-                    break;
+                int[] imp = _remap._impTable;
+                float scale = VQuant.QuantTable[_scale];
+                VertEncoder enc;
+                switch (_type)
+                {
+                    case WiiVertexComponentType.Int8:
+                    case WiiVertexComponentType.UInt8:
+                        enc = _byteEncoder;
+                        break;
+                    case WiiVertexComponentType.Int16:
+                    case WiiVertexComponentType.UInt16:
+                        enc = _shortEncoder;
+                        break;
+                    default:
+                        enc = _floatEncoder;
+                        break;
+                }
+
+                //Copy elements using encoder
+                float* pTemp = _pData;
+                for (int i = 0; i < _dstCount; i++)
+                {
+                    if (imp != null)
+                        pTemp = &_pData[imp[i] * _srcElements];
+                    for (int x = 0; x < _srcElements; x++, pTemp++)
+                        if (x < _dstElements)
+                            enc(*pTemp * scale, ref pOut);
+                }
+
+                //Zero remaining
+                for (int i = _dataLen; (i & 0x1F) != 0; i++)
+                    *pOut++ = 0;
             }
-
-            for (int i = 0; i < _srcCount; i++)
-                for (int x = 0; x < _srcElements; x++, pIn++)
-                    if (x < _dstElements)
-                        enc(*pIn * scale, ref pOut);
-
-            //Zero remaining
-            while (pOut < pCeil)
-                *pOut++ = 0;
+            finally
+            {
+                Dispose();
+            }
         }
+        //public void Write(Vector2[] vertices, byte* pOut)
+        //{
+        //    fixed (Vector2* p = vertices)
+        //        Write((float*)p, pOut);
+        //}
+        //public void Write(Vector3[] vertices, byte* pOut)
+        //{
+        //    fixed (Vector3* p = vertices)
+        //        Write((float*)p, pOut);
+        //}
+        //public void Write(float* pIn, byte* pOut)
+        //{
+        //    int[] imp = _remap._impTable;
+        //    byte* pCeil = pOut + _dataLen.Align(0x20);
+        //    float scale = VQuant.QuantTable[_scale];
+        //    VertEncoder enc;
+        //    switch (_type)
+        //    {
+        //        case WiiVertexComponentType.Int8:
+        //        case WiiVertexComponentType.UInt8:
+        //            enc = _byteEncoder;
+        //            break;
+        //        case WiiVertexComponentType.Int16:
+        //        case WiiVertexComponentType.UInt16:
+        //            enc = _shortEncoder;
+        //            break;
+        //        default:
+        //            enc = _floatEncoder;
+        //            break;
+        //    }
+
+        //    //Copy elements using encoder
+        //    float* pTemp = pIn;
+        //    for (int i = 0; i < _dstCount; i++)
+        //    {
+        //        if (imp != null)
+        //            pTemp = &pIn[imp[i] * _srcElements];
+        //        for (int x = 0; x < _srcElements; x++, pTemp++)
+        //            if (x < _dstElements)
+        //                enc(*pTemp * scale, ref pOut);
+        //    }
+
+        //    //Zero remaining
+        //    while (pOut < pCeil)
+        //        *pOut++ = 0;
+        //}
 
         #region Decoding
 
@@ -276,30 +386,6 @@ namespace BrawlLib.Wii.Models
 
             return buffer;
         }
-
-        //private delegate float VertexDecoder(ref byte* sPtr);
-        //private static VertexDecoder _u8Decode = (ref byte* sPtr) => { return *sPtr++; };
-        //private static VertexDecoder _s8Decode = (ref byte* sPtr) => { return *(sbyte*)(sPtr++); };
-        //private static VertexDecoder _u16Decode = (ref byte* sPtr) => { bushort* p = (bushort*)sPtr; sPtr += 2; return *p; };
-        //private static VertexDecoder _s16Decode = (ref byte* sPtr) => { bshort* p = (bshort*)sPtr; sPtr += 2; return *p; };
-        //private static VertexDecoder _fDecode = (ref byte* sPtr) => { bfloat* p = (bfloat*)sPtr; sPtr += 4; return *p; };
-
-        //private static void Extract(byte* sPtr, float* dPtr, int count, int sElem, int dElem, WiiVertexComponentType type, float scale)
-        //{
-        //    VertexDecoder decoder;
-        //    switch (type)
-        //    {
-        //        case WiiVertexComponentType.UInt8: decoder = _u8Decode; break;
-        //        case WiiVertexComponentType.Int8: decoder = _s8Decode; break;
-        //        case WiiVertexComponentType.UInt16: decoder = _u16Decode; break;
-        //        case WiiVertexComponentType.Int16: decoder = _s16Decode; break;
-        //        default: decoder = _fDecode; break;
-        //    }
-
-        //    for (int i = 0; i < count; i++)
-        //        for (int x = 0; x < dElem; x++)
-        //            *dPtr++ = (x < sElem) ? decoder(ref sPtr) * scale : 0.0f;
-        //}
 
         #endregion
     }

@@ -266,6 +266,7 @@ namespace BrawlLib.Wii.Models
             int grp0, grp1, grp2;
             int format;
 
+            //Create remap table for vertex weights
             RemapTable = new UnsafeBuffer(polygon->_numVertices * 4);
             RemapSize = 0;
             Stride = 0;
@@ -284,7 +285,10 @@ namespace BrawlLib.Wii.Models
             //grp1 |= (ulong)(*(buint*)(pData + 46)) << 32;
 
 
-            //Build extract script
+            //Build extract script.
+            //What we're doing is assigning extract commands for elements in the polygon, in true order.
+            //This allows us to process the polygon blindly, assuming that the definition is accurate.
+            //Theoretically, this should offer a significant speed bonus.
             fixed (int* pDefData = Defs)
             fixed (byte* pComData = Commands)
             {
@@ -412,15 +416,23 @@ namespace BrawlLib.Wii.Models
             }
         }
 
+        //Set node ID/Index using specified command block
         public void SetNode(ref byte* pIn)
         {
+            //Get node ID
             ushort node = *(bushort*)pIn;
+            //Get cache index.
+            //Wii memory assigns data using offsets of 4-byte values.
+            //In this case, each matrix takes up 12 floats (4 bytes each)
             int index = (*(bushort*)(pIn + 2) & 0xFFF) / 12;
+            //Assign node ID to cache, using index
             fixed (ushort* n = Nodes)
                 n[index] = node;
+            //Increment pointer
             pIn += 4;
         }
 
+        //Decode a single primitive using command list
         public void Run(ref byte* pIn, byte** pAssets, byte** pOut, int count)
         {
             int weight = 0;
@@ -447,7 +459,7 @@ namespace BrawlLib.Wii.Models
                     o = (DecodeOp)(*p++);
                     switch (o)
                     {
-
+                            //Process weight using cache
                         case DecodeOp.PosWeight:
                             weight = pNode[*pIn++ / 3];
                             goto Top;
@@ -481,7 +493,7 @@ namespace BrawlLib.Wii.Models
                             else
                                 index = *pIn++;
 
-                            if (pDef->Type == 0) //Vertices?
+                            if (pDef->Type == 0) //Special processing for vertices
                             {
                                 //Match weight and index with remap table
                                 int mapEntry = (weight << 16) | index;
@@ -505,12 +517,15 @@ namespace BrawlLib.Wii.Models
                                 //Copy data from buffer
                                 outSize = pDef->Output;
 
+                                //Input data from asset cache
                                 tIn = pAssets[pDef->Type] + (index * outSize);
                                 tOut = pOut[pDef->Type];
 
+                                //Copy data to output
                                 while (outSize-- > 0)
                                     *tOut++ = *tIn++;
 
+                                //Increment element output pointer
                                 pOut[pDef->Type] = tOut;
                             }
 
@@ -549,7 +564,7 @@ namespace BrawlLib.Wii.Models
             ElementIndexed
         }
 
-        internal unsafe List<Vertex3> Finish(Vector3* pVert, Influence[] nodeTable)
+        internal unsafe List<Vertex3> Finish(Vector3* pVert, IMatrixNode[] nodeTable)
         {
             //Create vertex list from remap table
             List<Vertex3> list = new List<Vertex3>(RemapSize);
@@ -559,18 +574,21 @@ namespace BrawlLib.Wii.Models
                 ushort* pMap = (ushort*)RemapTable.Address;
                 for (int i = 0; i < RemapSize; i++)
                 {
+                    //Create new vertex, assigning the value + influence from the remap table
                     Vertex3 v = new Vertex3(pVert[*pMap++], nodeTable[*pMap++]);
-                    v.Influence._refCount++;
+                    //Add vertex to list
                     list.Add(v);
                 }
             }
             else
             {
+                //Add vertex to list using raw value.
                 int* pMap = (int*)RemapTable.Address;
                 for (int i = 0; i < RemapSize; i++)
                     list.Add(new Vertex3(pVert[*pMap++]));
             }
 
+            //Clean up
             RemapTable.Dispose();
             RemapTable = null;
 

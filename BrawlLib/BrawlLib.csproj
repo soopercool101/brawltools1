@@ -39,16 +39,19 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -85,9 +88,10 @@
     <None Include="Modeling\NodeRef.cs" />
     <None Include="Modeling\Polygon.cs" />
     <None Include="Modeling\Primitive.cs" />
-    <None Include="Modeling\TextureRef.cs" />
+    <Compile Include="Modeling\TextureRef.cs" />
     <Compile Include="Modeling\PrimitiveManager.cs" />
     <Compile Include="Modeling\Shader.cs" />
+    <Compile Include="Modeling\TextureManager.cs" />
     <Compile Include="Modeling\Vertex.cs" />
     <Compile Include="Modeling\VertexGroup.cs" />
     <None Include="Modeling\Wavefront.cs" />
@@ -171,6 +175,8 @@
     <Compile Include="System\Matrix43.cs" />
     <Compile Include="System\Matrix43StringConverter.cs" />
     <Compile Include="System\Matrix4d.cs" />
+    <Compile Include="System\MemoryList.cs" />
+    <Compile Include="System\Remapper.cs" />
     <Compile Include="System\StringExtension.cs" />
     <Compile Include="System\UnsafeBuffer.cs" />
     <Compile Include="System\Vector2.cs" />
@@ -347,19 +353,15 @@
     <Compile Include="Wii\Graphics\Enum.cs" />
     <Compile Include="Wii\Graphics\XF.cs" />
     <Compile Include="Wii\Models\AssetStorage.cs" />
-    <Compile Include="Wii\Models\Buffers.cs" />
     <Compile Include="Wii\Models\ColorCodec.cs" />
     <Compile Include="Wii\Models\ElementCodec.cs" />
     <Compile Include="Wii\Models\Enum.cs" />
     <Compile Include="Wii\Models\bMatrix43.cs" />
     <None Include="Wii\Models\ModelConverter.cs" />
     <Compile Include="Wii\Models\InfluenceManager.cs" />
-    <Compile Include="Wii\Models\ModelDecoder.cs" />
     <Compile Include="Wii\Models\ModelEncoder.cs" />
     <Compile Include="Wii\Models\ModelLinker.cs" />
     <Compile Include="Wii\Models\NormalCodec.cs" />
-    <Compile Include="Wii\Models\PrimitiveCodec.cs" />
-    <Compile Include="Wii\Models\Struct.cs" />
     <Compile Include="Wii\Models\VertexCodec.cs" />
     <Compile Include="Wii\MSBinDecoder.cs" />
     <Compile Include="Wii\Textures\CI4.cs" />
@@ -465,6 +467,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

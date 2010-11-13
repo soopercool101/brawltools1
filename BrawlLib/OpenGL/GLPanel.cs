@@ -181,6 +181,34 @@ namespace BrawlLib.OpenGL
             return new Vector3(point._x + lenX, point._y + lenY, z);
         }
 
+        //Projects a ray at 'screenPoint' through sphere at 'center' with 'radius'.
+        //If point does not intersect
+        public Vector3 ProjectCameraSphere(Vector2 screenPoint, Vector3 center, float radius, bool clamp)
+        {
+            if (_camera == null)
+                return new Vector3();
+
+            Vector3 point;
+
+            //Get ray points
+            Vector4 v = new Vector4(2 * screenPoint._x / Width - 1, 2 * (Height - screenPoint._y) / Height - 1, -1.0f, 1.0f);
+            Vector3 ray1 = (Vector3)(_camera._matrixInverse * _projectionInverse * v);
+            v.z = 1.0f;
+            Vector3 ray2 = (Vector3)(_camera._matrixInverse * _projectionInverse * v);
+
+            if (!Maths.LineSphereIntersect(ray1, ray2, center, radius, out point))
+            {
+                //If no intersect is found, project the ray through the plane perpendicular to the camera.
+                Maths.LinePlaneIntersect(ray1, ray2, center, _camera.GetPoint().Normalize(center), out point);
+
+                //Clamp the point to edge of the sphere
+                if (clamp)
+                    point = Maths.PointAtLineDistance(center, point, radius);
+            }
+
+            return point;
+        }
+
 
         protected void CalculateProjection()
         {

@@ -11,6 +11,13 @@ namespace System.Windows.Forms
 {
     public class ModelEditControl : UserControl
     {
+        private const float _orbRadius = 1.0f;
+        private const float _circRadius = 1.2f;
+        private const float _axisSnapRange = 7.0f;
+        private const float _selectRange = 0.03f; //Selection error range for orb and circ
+        private const float _selectOrbScale = _selectRange / _orbRadius;
+        private const float _circOrbScale = _circRadius / _orbRadius;
+
         #region Designer
 
         private ModelPanel modelPanel1;
@@ -285,6 +292,10 @@ namespace System.Windows.Forms
             this.modelPanel1.TranslationScale = 0.05F;
             this.modelPanel1.ZoomScale = 2.5F;
             this.modelPanel1.PreRender += new System.Windows.Forms.GLRenderEventHandler(this.modelPanel1_PreRender);
+            this.modelPanel1.PostRender += new System.Windows.Forms.GLRenderEventHandler(this.modelPanel1_PostRender);
+            this.modelPanel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.modelPanel1_MouseDown);
+            this.modelPanel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.modelPanel1_MouseMove);
+            this.modelPanel1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.modelPanel1_MouseUp);
             // 
             // pnlOptions
             // 
@@ -295,10 +306,10 @@ namespace System.Windows.Forms
             this.pnlOptions.Size = new System.Drawing.Size(446, 19);
             this.pnlOptions.TabIndex = 10;
             this.pnlOptions.Visible = false;
-            this.pnlOptions.ClearColorChanged += new System.EventHandler(this.pnlOptions_ClearColorChanged);
             this.pnlOptions.RenderStateChanged += new System.EventHandler(this.RenderStateChanged);
-            this.pnlOptions.FloorRenderChanged += new System.EventHandler(this.pnlOptions_FloorRenderChanged);
+            this.pnlOptions.ClearColorChanged += new System.EventHandler(this.pnlOptions_ClearColorChanged);
             this.pnlOptions.CamResetClicked += new System.EventHandler(this.pnlOptions_CamResetClicked);
+            this.pnlOptions.FloorRenderChanged += new System.EventHandler(this.pnlOptions_FloorRenderChanged);
             // 
             // pnlAssets
             // 
@@ -308,8 +319,8 @@ namespace System.Windows.Forms
             this.pnlAssets.Size = new System.Drawing.Size(101, 546);
             this.pnlAssets.TabIndex = 4;
             this.pnlAssets.Visible = false;
-            this.pnlAssets.RenderStateChanged += new System.EventHandler(this.RenderStateChanged);
             this.pnlAssets.SelectedBoneChanged += new System.EventHandler(this.pnlAssets_SelectedBoneChanged);
+            this.pnlAssets.RenderStateChanged += new System.EventHandler(this.RenderStateChanged);
             // 
             // pnlAnim
             // 
@@ -320,11 +331,11 @@ namespace System.Windows.Forms
             this.pnlAnim.Size = new System.Drawing.Size(173, 546);
             this.pnlAnim.TabIndex = 12;
             this.pnlAnim.Visible = false;
-            this.pnlAnim.ReferenceLoaded += new System.Windows.Forms.ModelAnimPanel.ReferenceEventHandler(this.pnlAnim_ReferenceLoaded);
             this.pnlAnim.RenderStateChanged += new System.EventHandler(this.RenderStateChanged);
-            this.pnlAnim.ReferenceClosed += new System.Windows.Forms.ModelAnimPanel.ReferenceEventHandler(this.pnlAnim_ReferenceClosed);
-            this.pnlAnim.SelectedAnimationChanged += new System.EventHandler(this.pnlAnim_SelectedAnimationChanged);
             this.pnlAnim.AnimStateChanged += new System.EventHandler(this.pnlAnim_AnimStateChanged);
+            this.pnlAnim.SelectedAnimationChanged += new System.EventHandler(this.pnlAnim_SelectedAnimationChanged);
+            this.pnlAnim.ReferenceLoaded += new System.Windows.Forms.ModelAnimPanel.ReferenceEventHandler(this.pnlAnim_ReferenceLoaded);
+            this.pnlAnim.ReferenceClosed += new System.Windows.Forms.ModelAnimPanel.ReferenceEventHandler(this.pnlAnim_ReferenceClosed);
             // 
             // ModelEditControl
             // 
@@ -353,10 +364,12 @@ namespace System.Windows.Forms
         private int _animFrame, _maxFrame;
         private bool _updating, _loop;
         //private ResourceNode _externalNode;
-        private object _transformObject;
         //private ListViewGroup _CHRGroup = new ListViewGroup("Character Animations");
         private CHR0Node _selectedAnim;
-        //private NumericInputBox[] _transBoxes = new NumericInputBox[9];
+
+        private bool _rotating;
+        private Vector3 _lastPoint, _oldAngles;
+        private bool _snapX, _snapY, _snapZ, _snapCirc;
 
         private MDL0Node _targetModel;
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -430,6 +443,20 @@ namespace System.Windows.Forms
                         return true;
                     }
                     return false;
+                }
+                else if (key == Keys.Escape)
+                {
+                    if (_rotating)
+                    {
+                        //Undo rotation, make sure to reset keyframes
+                        _rotating = false;
+                        pnlAnim.numRotX.Value = _oldAngles._x;
+                        pnlAnim.numRotY.Value = _oldAngles._y;
+                        pnlAnim.numRotZ.Value = _oldAngles._z;
+                        pnlAnim.BoxChanged(pnlAnim.numRotX, null);
+                        pnlAnim.BoxChanged(pnlAnim.numRotY, null);
+                        pnlAnim.BoxChanged(pnlAnim.numRotZ, null);
+                    }
                 }
             }
             return base.ProcessKeyPreview(ref m);
@@ -666,5 +693,313 @@ namespace System.Windows.Forms
                 context.glEnd();
             }
         }
+
+        private unsafe void modelPanel1_PostRender(object sender, GLContext context)
+        {
+            context.glClear(GLClearMask.DepthBuffer);
+            context.glEnable(GLEnableCap.DepthTest);
+
+            if (pnlAssets.SelectedBone != null)
+            {
+                context.glDisable((uint)GLEnableCap.Lighting);
+
+                //Render rotation orb
+                MDL0BoneNode bone = pnlAssets.SelectedBone;
+                GLDisplayList circle = context.GetRingList();
+                GLDisplayList sphere = context.GetCircleList();
+                Matrix m;
+
+                //Prepare camera-facing matrix
+                Vector3 center = bone._frameMatrix.GetPoint();
+                Vector3 cam = modelPanel1._camera.GetPoint();
+                float radius = center.TrueDistance(cam) / _orbRadius * 0.1f;
+
+                m = Matrix.TransformMatrix(new Vector3(radius), center.LookatAngles(cam) * Maths._rad2degf, center);
+                context.glPushMatrix();
+                context.glMultMatrix((float*)&m);
+
+                //Orb
+                context.glColor(0.7f, 0.7f, 0.7f, 0.15f);
+                sphere.Call();
+
+                context.glDisable((uint)GLEnableCap.DepthTest);
+
+                //Container
+                context.glColor(0.4f, 0.4f, 0.4f, 1.0f);
+                circle.Call();
+
+                //Circ
+                if (_snapCirc) context.glColor(1.0f, 1.0f, 0.0f, 1.0f);
+                else context.glColor(1.0f, 0.8f, 0.5f, 1.0f);
+                context.glScale(_circOrbScale, _circOrbScale, _circOrbScale);
+                circle.Call();
+
+                //Pop
+                context.glPopMatrix();
+
+                context.glEnable(GLEnableCap.DepthTest);
+
+                //Enter local space
+                m = Matrix.TransformMatrix(new Vector3(radius), bone._frameMatrix.GetAngles(), center);
+                context.glPushMatrix();
+                context.glMultMatrix((float*)&m);
+
+                //Z
+                if (_snapZ) context.glColor(1.0f, 1.0f, 0.0f, 1.0f);
+                else context.glColor(0.0f, 0.0f, 1.0f, 1.0f);
+                circle.Call();
+
+                context.glRotate(90.0f, 0.0f, 1.0f, 0.0f);
+
+                //X
+                if (_snapX) context.glColor(1.0f, 1.0f, 0.0f, 1.0f);
+                else context.glColor(1.0f, 0.0f, 0.0f, 1.0f);
+                circle.Call();
+
+                context.glRotate(90.0f, 1.0f, 0.0f, 0.0f);
+
+                //Y
+                if (_snapY) context.glColor(1.0f, 1.0f, 0.0f, 1.0f);
+                else context.glColor(0.0f, 1.0f, 0.0f, 1.0f);
+                circle.Call();
+
+                //Pop
+                context.glPopMatrix();
+
+                //Clear depth buffer for next operation
+                context.glClear(GLClearMask.DepthBuffer);
+            }
+
+            //Render invisible depth orbs
+            context.glColorMask(false, false, false, false);
+
+            if (_targetModel != null && _targetModel._boneList != null)
+            {
+                GLDisplayList list = context.GetSphereList();
+                foreach (MDL0BoneNode bone in _targetModel._boneList)
+                    RenderOrbRecursive(bone, context, list);
+            }
+
+            context.glColorMask(true, true, true, true);
+        }
+
+        private unsafe void RenderOrbRecursive(MDL0BoneNode bone, GLContext ctx, GLDisplayList list)
+        {
+            Matrix m = Matrix.TransformMatrix(new Vector3(MDL0BoneNode._nodeRadius), new Vector3(), bone._frameMatrix.GetPoint());
+            ctx.glPushMatrix();
+            ctx.glMultMatrix((float*)&m);
+
+            list.Call();
+            ctx.glPopMatrix();
+
+            foreach (MDL0BoneNode b in bone.Children)
+                RenderOrbRecursive(b, ctx, list);
+        }
+
+        private void modelPanel1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != Forms.MouseButtons.Left)
+                return;
+
+            //Reset snap flags
+            _snapX = _snapY = _snapZ = _snapCirc = false;
+
+            MDL0BoneNode bone = pnlAssets.SelectedBone;
+
+            //Re-target selected bone
+            if (bone != null)
+            {
+                //Try to re-target selected node
+                Vector3 center = bone._frameMatrix.GetPoint();
+
+                //Standard radius scaling snippet. This is used for orb scaling depending on camera distance.
+                float radius = center.TrueDistance(modelPanel1._camera.GetPoint()) / _orbRadius * 0.1f;
+
+                //Get point projected onto our orb.
+                Vector3 point = modelPanel1.ProjectCameraSphere(new Vector2(e.X, e.Y), center, radius, false);
+
+                //Check distances
+                float distance = point.TrueDistance(center);
+
+
+                if (Math.Abs(distance - radius) < (radius * _selectOrbScale)) //Point lies within orb radius
+                {
+                    //Determine axis snapping
+                    Vector3 angles = (bone._inverseFrameMatrix * point).GetAngles() * Maths._rad2degf;
+                    angles._x = (float)Math.Abs(angles._x);
+                    angles._y = (float)Math.Abs(angles._y);
+                    angles._z = (float)Math.Abs(angles._z);
+
+                    if (Math.Abs(angles._y - 90.0f) <= _axisSnapRange)
+                        _snapX = true;
+                    else if (angles._x >= (180 - _axisSnapRange) || angles._x <= _axisSnapRange)
+                        _snapY = true;
+                    else if (angles._y >= (180 - _axisSnapRange) || angles._y <= _axisSnapRange)
+                        _snapZ = true;
+                }
+                else if (Math.Abs(distance - (radius * _circOrbScale)) < (radius * _selectOrbScale)) //Point lies on circ line
+                    _snapCirc = true;
+                else
+                {
+                    //Orb selection missed. Assign bone and move to next step.
+                    pnlAssets.SelectedBone = bone = null;
+                    goto Next;
+                }
+
+                //Bone re-targeted. Get angles and local point (aligned to snapping plane).
+                if (GetOrbPoint(new Vector2(e.X, e.Y), out point))
+                {
+                    _rotating = true;
+                    _oldAngles = bone._frameState._rotate;
+                    _lastPoint = bone._inverseFrameMatrix * point;
+                }
+
+                //Ensure a redraw so the snapping indicators are correct
+                modelPanel1.Invalidate();
+            }
+
+        Next:
+
+            //Try selecting new bone
+            if (bone == null)
+            {
+                float depth = modelPanel1.GetDepth(e.X, e.Y);
+                if ((depth < 1.0f) && (_targetModel != null) && (_targetModel._boneList != null))
+                {
+                    Vector3 point = modelPanel1.UnProject(e.X, e.Y, depth);
+
+                    //Find orb near chosen point
+                    foreach (MDL0BoneNode b in _targetModel._boneList)
+                        if (CompareDistanceRecursive(b, point, ref bone))
+                            break;
+
+                    //Assign new bone
+                    if (bone != null)
+                        pnlAssets.SelectedBone = bone;
+
+                    //No need to redraw.
+                }
+            }
+        }
+        private void modelPanel1_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == Forms.MouseButtons.Left)
+                _rotating = false;
+        }
+        private unsafe void modelPanel1_MouseMove(object sender, MouseEventArgs e)
+        {
+            MDL0BoneNode bone = pnlAssets.SelectedBone;
+            if (_rotating && bone != null)
+            {
+                Vector3 point;
+                if (GetOrbPoint(new Vector2(e.X, e.Y), out point))
+                {
+                    //Convert to local point
+                    Vector3 lPoint = bone._inverseFrameMatrix * point;
+
+                    //Check for change in selection.
+                    if (_lastPoint != lPoint)
+                    {
+                        //Get matrix with new rotation applied
+                        Matrix m = bone._frameState._transform * Matrix.AxisAngleMatrix(_lastPoint, lPoint);
+
+                        //Derive angles from matrices, get difference
+                        Vector3 angles = m.GetAngles() - bone._frameState._transform.GetAngles();
+
+                        //Truncate (allows winding)
+                        if (angles._x > 180.0f) angles._x -= 360.0f;
+                        if (angles._y > 180.0f) angles._y -= 360.0f;
+                        if (angles._z > 180.0f) angles._z -= 360.0f;
+                        if (angles._x < -180.0f) angles._x += 360.0f;
+                        if (angles._y < -180.0f) angles._y += 360.0f;
+                        if (angles._z < -180.0f) angles._z += 360.0f;
+
+                        //Apply difference to axes that have changed (pnlAnim should handle this so keyframes are created)
+                        if (angles._x != 0.0f) ApplyAngle(0, angles._x);
+                        if (angles._y != 0.0f) ApplyAngle(1, angles._y);
+                        if (angles._z != 0.0f) ApplyAngle(2, angles._z);
+
+                        //Find new local mouse-point (should be the same)
+                        //_lastPoint = bone._inverseFrameMatrix * point;
+
+                        //Redraw (taken care of by pnlAnim)
+                        //modelPanel1.Invalidate();
+                    }
+                }
+            }
+        }
+
+        //Updates specified angle by applying an offset.
+        //Allows pnlAnim to handle the changes so keyframes are updated.
+        private unsafe void ApplyAngle(int index, float offset)
+        {
+            NumericInputBox box = pnlAnim._transBoxes[index + 3];
+            box.Value = (float)Math.Round(box._value + offset, 3);
+            pnlAnim.BoxChanged(box, null);
+        }
+
+        //Gets world-point of specified mouse point projected onto the selected bone's local space.
+        //Intersects the projected ray with the appropriate plane using the snap flags.
+        private bool GetOrbPoint(Vector2 mousePoint, out Vector3 point)
+        {
+            MDL0BoneNode bone = pnlAssets.SelectedBone;
+            if (bone == null)
+            {
+                point = new Vector3();
+                return false;
+            }
+
+            Vector3 lineStart = modelPanel1.UnProject(mousePoint._x, mousePoint._y, 0.0f);
+            Vector3 lineEnd = modelPanel1.UnProject(mousePoint._x, mousePoint._y, 1.0f);
+            Vector3 center = bone._frameMatrix.GetPoint();
+            Vector3 camera = modelPanel1._camera.GetPoint();
+            Vector3 normal;
+            float radius = center.TrueDistance(camera) / _orbRadius * 0.1f;
+
+            if (_snapX)
+                normal = (bone._frameMatrix * new Vector3(1.0f, 0.0f, 0.0f)).Normalize(center);
+            else if (_snapY)
+                normal = (bone._frameMatrix * new Vector3(0.0f, 1.0f, 0.0f)).Normalize(center);
+            else if (_snapZ)
+                normal = (bone._frameMatrix * new Vector3(0.0f, 0.0f, 1.0f)).Normalize(center);
+            else if (_snapCirc)
+            {
+                radius *= _circOrbScale;
+                normal = camera.Normalize(center);
+            }
+            else if (Maths.LineSphereIntersect(lineStart, lineEnd, center, radius, out point))
+                return true;
+            else
+                normal = camera.Normalize(center);
+
+            if (Maths.LinePlaneIntersect(lineStart, lineEnd, center, normal, out point))
+            {
+                point = Maths.PointAtLineDistance(center, point, radius);
+                return true;
+            }
+
+            point = new Vector3();
+            return false;
+        }
+
+        private bool CompareDistanceRecursive(MDL0BoneNode bone, Vector3 point, ref MDL0BoneNode match)
+        {
+            Vector3 center = bone._frameMatrix.GetPoint();
+            float dist = center.TrueDistance(point);
+
+            if (Math.Abs(dist - MDL0BoneNode._nodeRadius) < 0.01)
+            {
+                match = bone;
+                return true;
+            }
+
+            foreach (MDL0BoneNode b in bone.Children)
+                if (CompareDistanceRecursive(b, point, ref match))
+                    return true;
+
+            return false;
+        }
+
+
     }
 }

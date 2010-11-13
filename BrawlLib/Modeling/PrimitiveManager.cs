@@ -36,7 +36,7 @@ namespace BrawlLib.Modeling
         }
     }
 
-    unsafe class PrimitiveManager
+    unsafe class PrimitiveManager : IDisposable
     {
         public List<Vertex3> _vertices;
 
@@ -48,15 +48,32 @@ namespace BrawlLib.Modeling
 
         internal NewPrimitive _faces, _lines, _points;
 
-        public PrimitiveManager() { }
-        public PrimitiveManager(MDL0Polygon* polygon, AssetStorage assets, Influence[] nodes)
+        public Vector3[] RawPoints
         {
-            _pointCount = polygon->_numVertices;
+            get
+            {
+                int i = 0;
+                Vector3[] arr = new Vector3[_vertices.Count];
+                foreach (Vertex3 v in _vertices)
+                    arr[i++] = v.Position;
+                return arr;
+            }
+        }
 
-            //Grab asset lists
+        public PrimitiveManager() { }
+        public PrimitiveManager(MDL0Polygon* polygon, AssetStorage assets, IMatrixNode[] nodes)
+        {
             byte*[] pAssetList = new byte*[12];
             byte*[] pOutList = new byte*[12];
             int id;
+
+            //This relies on the header being accurate!
+            _pointCount = polygon->_numVertices;
+
+            //Grab asset lists in sequential order.
+            //This involves checking IDs and creating buffers for the pre-processed data.
+            //Also gets data addresses from pre-decoded assets so they can be parsed further
+            //All buffers are stored in the _faceData array
 
             if ((id = polygon->_vertexId) >= 0)
             {
@@ -89,14 +106,25 @@ namespace BrawlLib.Modeling
             //Compile decode script
             ElementDescriptor desc = new ElementDescriptor(polygon);
 
-            //Extract primitives
+            //Extract primitives, using our descriptor and asset lists
             fixed (byte** pOut = pOutList)
             fixed (byte** pAssets = pAssetList)
                 ExtractPrimitives((byte*)polygon->PrimitiveData, ref desc, pOut, pAssets);
 
-            //Compile vertex list using nodes
+            //Compile vertex list using influences from node cache
             _vertices = desc.Finish((Vector3*)pAssetList[0], nodes);
         }
+        ~PrimitiveManager() { Dispose(); }
+        public void Dispose()
+        {
+            for (int i = 0; i < 12; i++)
+                if (_faceData[i] != null)
+                { _faceData[i].Dispose(); _faceData[i] = null; }
+
+            if (_graphicsBuffer != null)
+            { _graphicsBuffer.Dispose(); _graphicsBuffer = null; }
+        }
+
 
         internal void ExtractPrimitives(byte* pData, ref ElementDescriptor desc, byte** pOut, byte** pAssets)
         {
@@ -108,14 +136,16 @@ namespace BrawlLib.Modeling
             int d3 = 0, d2 = 0, d1 = 0;
             ushort* p3, p2, p1;
 
-            //Get counts for each primitive type, and decode faces
+            //Get counts for each primitive type, and assign face points
         CountTop:
             switch ((GXListCommand)(*pTemp++))
             {
+                //Fill weight cache
                 case GXListCommand.LoadIndexA:
                     desc.SetNode(ref pTemp);
                     goto CountTop;
 
+                //Texture matrices? Not sure what to do here...
                 case GXListCommand.LoadIndexB:
                 case GXListCommand.LoadIndexC:
                 case GXListCommand.LoadIndexD:
@@ -163,6 +193,7 @@ namespace BrawlLib.Modeling
             goto CountTop;
 
         Next:
+            //Create primitives
             if (d3 > 0)
             { _faces = new NewPrimitive(d3, GLPrimitiveType.Triangles); p3 = (ushort*)_faces._indices.Address; }
             else
@@ -366,12 +397,14 @@ namespace BrawlLib.Modeling
             CalcStride();
             int bufferSize = _stride * _pointCount;
 
+            //Dispose of buffer if size doesn't match
             if ((_graphicsBuffer != null) && (_graphicsBuffer.Length != bufferSize))
             {
                 _graphicsBuffer.Dispose();
                 _graphicsBuffer = null;
             }
 
+            //Create data buffer
             if (_graphicsBuffer == null)
             {
                 _graphicsBuffer = new UnsafeBuffer(bufferSize);
@@ -382,6 +415,7 @@ namespace BrawlLib.Modeling
             byte* pData = (byte*)_graphicsBuffer.Address;
             for (int i = 0; i < 12; i++)
             {
+                //Write stream if dirty
                 if (_dirty[i])
                     UpdateStream(i);
 
@@ -408,10 +442,12 @@ namespace BrawlLib.Modeling
                         pData += 4;
                         break;
 
+                    //How to handle second color?
                     case 3:
                         pData += 4;
                         break;
 
+                    //How to handle tex coords?
                     default:
                         pData += 8;
                         break;

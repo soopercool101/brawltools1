@@ -28,6 +28,12 @@ namespace BrawlLib.OpenGL
         GLU_SILHOUETTE = 100013
     }
 
+    public enum GLUQuadricOrientation : uint
+    {
+        Outside = 100020,
+        Inside = 100021
+    }
+
     public enum GLListMode : uint
     {
         COMPILE = 0x1300,

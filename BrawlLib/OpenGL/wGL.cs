@@ -11,11 +11,11 @@ namespace BrawlLib.OpenGL
         //Platform  
         [DllImport("opengl32.dll")]
         public static extern bool wglCopyContext(VoidPtr hglrcSrc, VoidPtr hglrcDst, uint mask);
-        [DllImport("opengl32.dll", SetLastError=true)]
+        [DllImport("opengl32.dll", SetLastError = true)]
         public static extern VoidPtr wglCreateContext(VoidPtr hdc);
         [DllImport("opengl32.dll")]
         public static extern VoidPtr wglCreateLayerContext(VoidPtr hdc, int layerPlane);
-        [DllImport("opengl32.dll", SetLastError=true)]
+        [DllImport("opengl32.dll", SetLastError = true)]
         public static extern bool wglDeleteContext(VoidPtr hglrc);
         [DllImport("opengl32.dll")]
         public static extern bool wglDescribeLayerPlane(VoidPtr hdc, int iPixelFormat, int iLayerPlane, uint nBytes, VoidPtr layerPlaneDescriptor);
@@ -31,7 +31,7 @@ namespace BrawlLib.OpenGL
         public static extern int wglGetLayerPaletteEntries(VoidPtr hdc, int iLayerPlane, int iStart, int cEntries, VoidPtr colorRefArray);
         [DllImport("opengl32.dll")]
         public static extern int wglGetPixelFormat(VoidPtr hdc);
-        [DllImport("opengl32.dll", EntryPoint="wglGetProcAddress", CharSet= CharSet.Ansi)]
+        [DllImport("opengl32.dll", EntryPoint = "wglGetProcAddress", CharSet = CharSet.Ansi)]
         public static extern VoidPtr wglGetProcAddress(string lpszProc);
         [DllImport("opengl32.dll", SetLastError = true)]
         public static extern bool wglMakeCurrent(VoidPtr hdc, VoidPtr hglrc);
@@ -56,7 +56,7 @@ namespace BrawlLib.OpenGL
         [DllImport("opengl32.dll")]
         public static extern bool wglUseFontOutlinesW(VoidPtr hdc, ulong first, ulong count, ulong listBase, float deviation, float extrusion, int format, VoidPtr glyphMetricsFloatArr);
 
-        [DllImport("gdi32.dll", SetLastError=true)]
+        [DllImport("gdi32.dll", SetLastError = true)]
         public static extern int ChoosePixelFormat(VoidPtr hdc, PixelFormatDescriptor* pfd);
         [DllImport("gdi32.dll", SetLastError = true)]
         public static extern int DescribePixelFormat(VoidPtr hdc, int iPixelFormat, ushort nBytes, PixelFormatDescriptor* pfd);
@@ -912,6 +912,9 @@ namespace BrawlLib.OpenGL
 
         [DllImport("Glu32.dll")]
         public static extern void gluQuadricDrawStyle(int quad, GLUQuadricDrawStyle draw);
+
+        [DllImport("Glu32.dll")]
+        public static extern void gluQuadricOrientation(int quad, GLUQuadricOrientation orientation);
 
         [DllImport("Glu32.dll")]
         public static extern void gluLookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ);

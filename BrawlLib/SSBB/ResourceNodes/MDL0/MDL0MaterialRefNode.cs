@@ -30,9 +30,9 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal float _float;
 
         #region Texture linkage
-        internal MDL0TextureNode _texture;
+        internal TextureRef _texture;
         [Browsable(false)]
-        public MDL0TextureNode TextureNode
+        public TextureRef TextureNode
         {
             get { return _texture; }
             set
@@ -44,32 +44,22 @@ namespace BrawlLib.SSBB.ResourceNodes
                 if ((_texture = value) != null)
                 {
                     _texture._texRefs.Add(this);
-                    Name = _texture._name;
+                    Name = _texture.Name;
                 }
                 Model.SignalPropertyChange();
             }
         }
         public string Texture
         {
-            get { return _texture == null ? null : _texture._name; }
-            set
-            {
-                if (String.IsNullOrEmpty(value))
-                    TextureNode = null;
-                else
-                {
-                    MDL0TextureNode node = Model.FindChild(String.Format("Textures/{0}", value), false) as MDL0TextureNode;
-                    if (node != null)
-                        TextureNode = node;
-                }
-            }
+            get { return _texture == null ? null : _texture.Name; }
+            set { TextureNode = String.IsNullOrEmpty(value) ? null : Model._textures.FindOrCreate(value); }
         }
         #endregion
 
         #region Decal linkage
-        internal MDL0TextureNode _decal;
+        internal TextureRef _decal;
         [Browsable(false)]
-        public MDL0TextureNode DecalNode
+        public TextureRef DecalNode
         {
             get { return _decal; }
             set
@@ -85,18 +75,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
         public string Decal
         {
-            get { return _decal == null ? null : _decal._name; }
-            set
-            {
-                if (String.IsNullOrEmpty(value))
-                    DecalNode = null;
-                else
-                {
-                    MDL0TextureNode node = Model.FindChild(String.Format("Textures/{0}", value), false) as MDL0TextureNode;
-                    if (node != null)
-                        DecalNode = node;
-                }
-            }
+            get { return _decal == null ? null : _decal.Name; }
+            set { DecalNode = String.IsNullOrEmpty(value) ? null : Model._textures.FindOrCreate(value); }
         }
         #endregion
 
@@ -109,7 +89,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         //[Category("Texture Reference")]
         //public int Unknown1 { get { return _unk1; } set { _unk1 = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
-        public string DecalTexture { get { return _decal == null ? null : _decal._name; } }//set { _secondaryTexture = value; SignalPropertyChange(); } }
+        public string DecalTexture { get { return _decal == null ? null : _decal.Name; } }//set { _secondaryTexture = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
         public int Unknown2 { get { return _unk2; } set { _unk2 = value; SignalPropertyChange(); } }
         [Category("Texture Reference")]
@@ -153,27 +133,25 @@ namespace BrawlLib.SSBB.ResourceNodes
             if (header->_stringOffset != 0)
             {
                 _name = header->ResourceString;
-                _texture = Model.FindOrCreateTexture(_name);
-                if (_texture != null)
-                    _texture._texRefs.Add(this);
+                _texture = Model._textures.FindOrCreate(_name);
+                _texture._texRefs.Add(this);
             }
             if (header->_secondaryOffset != 0)
             {
                 string name = header->SecondaryTexture;
-                _decal = Model.FindOrCreateTexture(name);
-                if (_decal != null)
-                    _decal._decRefs.Add(this);
+                _decal = Model._textures.FindOrCreate(name);
+                _decal._decRefs.Add(this);
             }
 
             return false;
         }
 
-        //internal override void GetStrings(StringTable table)
-        //{
-        //    table.Add(Name);
-        //    if (_decal != null)
-        //        table.Add(_decal.Name);
-        //}
+        internal override void GetStrings(StringTable table)
+        {
+            table.Add(Name);
+            if (_decal != null)
+                table.Add(_decal.Name);
+        }
 
         protected internal override void PostProcess(VoidPtr mdlAddress, VoidPtr dataAddress, StringTable stringTable)
         {
@@ -208,7 +186,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         internal override void Unbind(GLContext ctx)
         {
             if (_texture != null)
-                _texture.Unbind(ctx);
+                _texture.Unbind();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace System
 {
-    [StructLayout( LayoutKind.Sequential, Pack=1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct Vector3
     {
         public float _x;
@@ -55,6 +55,7 @@ namespace System
         public static float Dot(Vector3 v1, Vector3 v2) { return (v1._x * v2._x) + (v1._y * v2._y) + (v1._z * v2._z); }
         public float Dot(Vector3 v) { return (_x * v._x) + (_y * v._y) + (_z * v._z); }
         public float Dot(Vector3* v) { return (_x * v->_x) + (_y * v->_y) + (_z * v->_z); }
+        public float Dot() { return (_x * _x) + (_y * _y) + (_z * _z); }
 
         public static Vector3 Clamp(Vector3 v1, float min, float max) { v1.Clamp(min, max); return v1; }
         public void Clamp(float min, float max) { this.Max(min); this.Min(max); }
@@ -72,9 +73,11 @@ namespace System
         public void Max(Vector3* v) { if (v->_x > _x) _x = v->_x; if (v->_y > _y) _y = v->_y; if (v->_z > _z) _z = v->_z; }
         public void Max(float f) { _x = Math.Max(_x, f); _y = Math.Max(_y, f); _z = Math.Max(_z, f); }
 
-        public float DistanceTo(Vector3 v) { Vector3 v1 = this - v; return Vector3.Dot(v1, v1); }
+        public float DistanceTo(Vector3 v) { return (v - this).Dot(); }
         public static Vector3 Lerp(Vector3 v1, Vector3 v2, float median) { return (v1 * (1.0f - median)) + (v2 * median); }
         public static Vector3 Floor(Vector3 v) { return new Vector3((int)v._x, (int)v._y, (int)v._z); }
+
+        public Vector3 Cross(Vector3 v) { return new Vector3(_y * v._z - v._y * _z, _z * v._x - v._z * _x, _x * v._y - v._x * _y); }
 
         public static Vector3 Truncate(Vector3 v)
         {
@@ -84,10 +87,7 @@ namespace System
                 v._z > 0.0f ? (float)Math.Floor(v._z) : (float)Math.Ceiling(v._z));
         }
 
-        public override string ToString()
-        {
-            return String.Format("({0},{1},{2})", _x, _y, _z);
-        }
+        public override string ToString() { return String.Format("({0},{1},{2})", _x, _y, _z); }
 
         public bool Contained(Vector3 start, Vector3 end, float expansion) { return Contained(this, start, end, expansion); }
         public static unsafe bool Contained(Vector3 point, Vector3 start, Vector3 end, float expansion)
@@ -117,26 +117,35 @@ namespace System
             return new Vector3(tanY * a + ray1._x, -tanX * a + ray1._y, z);
         }
 
-        public float TrueDistance(Vector3 p)
+        public float TrueDistance(Vector3 p) { return (float)Math.Sqrt((p - this).Dot()); }
+        public float TrueDistance() { return (float)Math.Sqrt(Dot()); }
+
+        public Vector3 Normalize() { return this / TrueDistance(); }
+        public Vector3 Normalize(Vector3 origin) { return (this - origin).Normalize(); }
+
+        public Vector3 GetAngles() { return new Vector3((float)Math.Atan2(_y, -_z), (float)Math.Atan2(-_z, _x), (float)Math.Atan2(_y, _x)); }
+        public Vector3 GetAngles(Vector3 origin) { return (this - origin).GetAngles(); }
+
+        public Vector3 LookatAngles() { return new Vector3((float)Math.Atan2(_y, Math.Sqrt(_x * _x + _z * _z)), (float)Math.Atan2(-_x, -_z), 0.0f); }
+        public Vector3 LookatAngles(Vector3 origin) { return (this - origin).LookatAngles(); }
+
+        public float AngleX() { return (float)Math.Atan2(_y, -_z); }
+        public float AngleY() { return (float)Math.Atan2(-_z, _x); }
+        public float AngleZ() { return (float)Math.Atan2(_y, _x); }
+
+        public override int GetHashCode()
         {
-            float lenX = Math.Abs(p._x - _x);
-            float lenY = Math.Abs(p._y - _y);
-            float lenZ = Math.Abs(p._z - _z);
-            float h;
-
-            if (lenX == 0.0f)
-                h = lenY;
-            else if (lenY == 0.0f)
-                h = lenX;
-            else
-                h = (float)(lenX / Math.Cos(Math.Atan(lenY / lenX)));
-
-            if (lenZ == 0.0f)
-                return h;
-            else if (h == 0.0f)
-                return lenZ;
-            else
-                return (float)(h / Math.Cos(Math.Atan(lenZ / h)));
+            fixed (Vector3* p = &this)
+            {
+                int* p2 = (int*)p;
+                return p2[0] ^ p2[1] ^ p2[2];
+            }
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is Vector3)
+                return this == (Vector3)obj;
+            return false;
         }
     }
 }

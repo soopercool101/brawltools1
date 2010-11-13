@@ -90,16 +90,16 @@ namespace BrawlLib.SSBB.ResourceNodes
         public AlphaCompare Comp1 { get { return _alphaFunc.Comp1; } }
 
         [Category("Z Mode")]
-        public bool EnableDepthTest { get { return _zMode.EnableDepthTest; } }
+        public bool EnableDepthTest { get { return _zMode.EnableDepthTest; } set { _zMode.EnableDepthTest = value; SignalPropertyChange(); } }
         [Category("Z Mode")]
-        public bool EnableDepthUpdate { get { return _zMode.EnableDepthUpdate; } }
+        public bool EnableDepthUpdate { get { return _zMode.EnableDepthUpdate; } set { _zMode.EnableDepthUpdate = value; SignalPropertyChange(); } }
         [Category("Z Mode")]
-        public GXCompare DepthFunction { get { return _zMode.DepthFunction; } }
+        public GXCompare DepthFunction { get { return _zMode.DepthFunction; } set { _zMode.DepthFunction = value; SignalPropertyChange(); } }
 
         [Category("Blend Mode")]
-        public bool EnableBlend { get { return _blendMode.EnableBlend; } }
+        public bool EnableBlend { get { return _blendMode.EnableBlend; } set { _blendMode.EnableBlend = value; SignalPropertyChange(); } }
         [Category("Blend Mode")]
-        public bool EnableBlendLogic { get { return _blendMode.EnableLogicOp; } }
+        public bool EnableBlendLogic { get { return _blendMode.EnableLogicOp; } set { _blendMode.EnableLogicOp = value; SignalPropertyChange(); } }
         //These are disabled via mask
         //[Category("Blend Mode")]
         //public bool EnableDither { get { return _blendMode.EnableDither; } }
@@ -338,8 +338,8 @@ namespace BrawlLib.SSBB.ResourceNodes
             foreach (string s in _part4Entries)
                 table.Add(s);
 
-            //foreach (MDL0MaterialRefNode n in Children)
-            //    n.GetStrings(table);
+            foreach (MDL0MaterialRefNode n in Children)
+                n.GetStrings(table);
         }
 
         //protected override int OnCalculateSize(bool force)

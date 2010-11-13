@@ -2,11 +2,14 @@
 using BrawlLib.Imaging;
 using BrawlLib.SSBBTypes;
 using BrawlLib.Wii.Textures;
+using System.Collections.Generic;
+using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace BrawlLib.Wii.Models
 {
     public unsafe delegate void ColorConverter(ref byte* pIn, ref byte* pOut);
-    public unsafe class ColorCodec
+    public unsafe class ColorCodec : IDisposable
     {
         #region Encoders
 
@@ -134,84 +137,110 @@ namespace BrawlLib.Wii.Models
         public WiiColorComponentType _outType;
         public bool _hasAlpha;
         public int _dataLen;
-        public int _entries;
-        public int _outStride;
-        public int _outLength;
 
-        public static ColorCodec Evaluate(RGBAPixel[] pixels)
+        public int _srcCount;
+        public int _dstCount, _dstStride;
+
+        private GCHandle _handle;
+        private RGBAPixel* _pData;
+
+        public Remapper _remapData;
+
+        public ColorCodec(RGBAPixel[] pixels)
         {
-            ColorCodec codec = new ColorCodec();
-            bool hasAlpha = false;
-            int count = pixels.Length;
-            byte* pData, pCeil, sPtr;
+            _srcCount = pixels.Length;
+            _handle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
+            _pData = (RGBAPixel*)_handle.AddrOfPinnedObject();
+            Evaluate();
+        }
+        public ColorCodec(RGBAPixel* sPtr, int count)
+        {
+            _pData = sPtr;
+            _srcCount = count;
+            Evaluate();
+        }
+        ~ColorCodec() { Dispose(); }
 
-            codec._entries = count;
+        public void Dispose()
+        {
+            if (_handle.IsAllocated)
+                _handle.Free();
+            _pData = null;
+            GC.SuppressFinalize(this);
+        }
+
+        private void Evaluate()
+        {
+            //Colors will almost always need remapping
+            _remapData = new Remapper();
+            _remapData.Remap<RGBAPixel>(new MemoryList<RGBAPixel>(_pData, _srcCount), null); //Don't bother sorting
+
+            int[] imp = _remapData._impTable;
+            int impLen = imp.Length;
+
+            _dstCount = impLen;
 
             //Do we have alpha?
-            fixed (RGBAPixel* p = pixels)
-            {
-                pData = (byte*)p;
-                pCeil = (byte*)p + (count << 2);
+            int i = 0;
+            while ((i < _dstCount) && (_pData[imp[i]].A == 255)) i++;
 
-                for (sPtr = pData + 3; sPtr < pCeil; sPtr += 4)
-                    if (*sPtr != 255)
-                    { codec._hasAlpha = hasAlpha = true; break; }
+            _hasAlpha = i < _srcCount;
 
-                //Determine format
-                if (hasAlpha)
-                    codec._outType = WiiColorComponentType.RGBA8;
-                else
-                    codec._outType = WiiColorComponentType.RGB8;
-            }
+            //Determine format
+            if (_hasAlpha)
+                _outType = WiiColorComponentType.RGBA8;
+            else
+                _outType = WiiColorComponentType.RGB8;
 
-            switch (codec._outType)
+            switch (_outType)
             {
                 case WiiColorComponentType.RGB565:
                 case WiiColorComponentType.RGBA4:
-                    codec._outStride = 2; break;
+                    _dstStride = 2; break;
                 case WiiColorComponentType.RGB8:
                 case WiiColorComponentType.RGBA6:
-                    codec._outStride = 3; break;
+                    _dstStride = 3; break;
                 case WiiColorComponentType.RGBA8:
                 case WiiColorComponentType.RGBX8:
-                    codec._outStride = 4; break;
+                    _dstStride = 4; break;
             }
 
-            codec._outLength = codec._outStride * count;
-            return codec;
+            _dataLen = _dstStride * _dstCount;
         }
 
-        public void Write(RGBAPixel[] colors, byte* pOut)
+        public void Write(byte* pOut)
         {
-            fixed (RGBAPixel* p = colors)
-                Write((byte*)p, pOut);
-        }
-
-        private void Write(byte* pIn, byte* pOut)
-        {
-            ColorConverter enc;
-            byte* sPtr = pIn;
-            int i = 0, ceil = _outLength.Align(0x20);
-
-            //Get encoder
-            switch (_outType)
+            try
             {
-                case WiiColorComponentType.RGB565: enc = Color_RGBA_wRGB565; break;
-                case WiiColorComponentType.RGB8: enc = Color_RGBA_RGB; break;
-                case WiiColorComponentType.RGBX8: enc = Color_RGBA_RGBX; break;
-                case WiiColorComponentType.RGBA4: enc = Color_RGBA_wRGBA4; break;
-                case WiiColorComponentType.RGBA6: enc = Color_RGBA_wRGBA6; break;
-                case WiiColorComponentType.RGBA8: enc = Color_RGBA_RGBA; break;
-                default: return;
+                //Get encoder
+                ColorConverter enc;
+                switch (_outType)
+                {
+                    case WiiColorComponentType.RGB565: enc = Color_RGBA_wRGB565; break;
+                    case WiiColorComponentType.RGB8: enc = Color_RGBA_RGB; break;
+                    case WiiColorComponentType.RGBX8: enc = Color_RGBA_RGBX; break;
+                    case WiiColorComponentType.RGBA4: enc = Color_RGBA_wRGBA4; break;
+                    case WiiColorComponentType.RGBA6: enc = Color_RGBA_wRGBA6; break;
+                    case WiiColorComponentType.RGBA8: enc = Color_RGBA_RGBA; break;
+                    default: return;
+                }
+
+                //Write colors
+                byte* sPtr;
+                foreach (int i in _remapData._impTable)
+                {
+                    sPtr = (byte*)(_pData + i);
+                    enc(ref sPtr, ref pOut);
+                }
+
+                //Zero-fill
+                for (int x = _dataLen; (x & 0x1F) != 0; x++)
+                    *pOut++ = 0;
             }
-
-            //Write data using encoder
-            while (i++ < _entries)
-                enc(ref sPtr, ref pOut);
-
-            //Zero-fill
-            while (i++ < ceil)
-                *pOut++ = 0;
+            finally
+            {
+                Dispose();
+            }
         }
 
 

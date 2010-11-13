@@ -167,7 +167,7 @@ namespace BrawlLib.Imaging
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct RGBAPixel
+    public unsafe struct RGBAPixel
     {
         public const float ColorFactor = 1.0f / 255.0f;
 
@@ -179,6 +179,31 @@ namespace BrawlLib.Imaging
         public override string ToString()
         {
             return String.Format("R:{0:X2} G:{1:X2} B:{2:X2} A:{3:X2}", R, G, B, A);
+        }
+
+        public override int GetHashCode()
+        {
+            fixed (RGBAPixel* p = &this)
+                return *(int*)p;
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is RGBAPixel)
+                return this == (RGBAPixel)obj;
+            return false;
+        }
+        public static bool operator ==(RGBAPixel p1, RGBAPixel p2) { return *(int*)&p1 == *(int*)&p2; }
+        public static bool operator !=(RGBAPixel p1, RGBAPixel p2) { return *(int*)&p1 != *(int*)&p2; }
+        public static int Compare(RGBAPixel p1, RGBAPixel p2)
+        {
+            int v1 = *(int*)&p1;
+            int v2 = *(int*)&p2;
+
+            if (v1 > v2)
+                return 1;
+            if (v1 < v2)
+                return -1;
+            return 1;
         }
     }
 

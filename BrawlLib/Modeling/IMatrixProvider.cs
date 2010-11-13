@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using BrawlLib.Wii.Models;
 
 namespace BrawlLib.Modeling
 {
-    public interface IMatrixProvider
+    public interface IMatrixNode
     {
-        Matrix FrameMatrix { get; }
-        Matrix InverseBindMatrix { get; }
-        void CalcBase();
-        void CalcWeighted();
+        int ReferenceCount { get; set; }
+        int NodeIndex { get; }
+        Matrix Matrix { get; }
+        bool IsPrimaryNode { get; }
+        BoneWeight[] Weights { get; }
     }
 }

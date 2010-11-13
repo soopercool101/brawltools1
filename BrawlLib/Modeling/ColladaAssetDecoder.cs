@@ -115,15 +115,25 @@ namespace BrawlLib.Modeling
                     }
                 }
 
-                //Match with manager
-                inf = infManager.AddOrCreateInc(inf);
+                Vertex3 v;
+                if (inf._weights.Length > 1)
+                {
+                    //Match with manager
+                    inf = infManager.AddOrCreate(inf);
+                    v = new Vertex3(skin._bindMatrix * pVert[i], inf); //World position
+                }
+                else
+                {
+                    bone = inf._weights[0].Bone; 
+                    v = new Vertex3(bone._inverseBindMatrix * skin._bindMatrix * pVert[i], bone); //Local position
+                }
 
                 //Create Vertex, set to world position.
-                Vertex3 v = new Vertex3(skin._bindMatrix * pVert[i], inf);
+                //Vertex3 v = new Vertex3(skin._bindMatrix * pVert[i], inf);
 
                 //Fix single-bind vertices
-                if (inf._weights.Length == 1)
-                    v.Position = inf._weights[0].Bone._inverseBindMatrix * v.Position;
+                //if (inf._weights.Length == 1)
+                //    v.Position = inf._weights[0].Bone._inverseBindMatrix * v.Position;
 
                 ushort index = 0;
                 while (index < vertList.Count)

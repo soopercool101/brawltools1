@@ -58,6 +58,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         //[Category("Polygon Data")]
         //public int Part1Offset { get { return Header->_part1Offset; } }
 
+        //Cannot use MDL0BoneNode because weighted nodes are valid targets!
         //#region Bone linkage
         //internal MDL0BoneNode _singleBind;
         //[Browsable(false)]
@@ -91,8 +92,25 @@ namespace BrawlLib.SSBB.ResourceNodes
         //    }
         //}
         //#endregion
+        internal short[] _elementIndices = new short[16];
 
-        internal Influence _singleBind;
+        internal IMatrixNode _singleBind;
+
+        public IMatrixNode Influence
+        {
+            get { return _singleBind; }
+            set
+            {
+                if (_singleBind == value)
+                    return;
+
+                if (_singleBind != null)
+                    _singleBind.ReferenceCount--;
+
+                if ((_singleBind = value) != null)
+                    _singleBind.ReferenceCount++;
+            }
+        }
 
         #region Material linkage
         internal MDL0MaterialNode _material;
@@ -137,19 +155,12 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         internal bool _render = true;
         internal PrimitiveManager _manager;
-        //private Primitive[] _primitives;
-        //public Primitive[] Primitives
-        //{
-        //    get { return _primitives == null ? _primitives = PrimitiveCodec.Decode(Header) : _primitives; }
-        //    set { _primitives = value; SignalPropertyChange(); }
-        //}
-
 
         public override void Dispose()
         {
-            //if (_primitives != null)
-            //    foreach (Primitive prim in _primitives)
-            //        prim.Dispose();
+            if (_manager != null)
+            { _manager.Dispose(); _manager = null; }
+
             base.Dispose();
         }
 
@@ -160,27 +171,83 @@ namespace BrawlLib.SSBB.ResourceNodes
 
             ModelLinker linker = Model._linker;
 
-            //Attach node
+            //Attach single bind. Doesn't have to be bone node.
             if (nodeId >= 0)
+                Influence = linker.NodeCache[nodeId];
+
+            if (header->_defFlags != 0x80)
             {
-                _singleBind = linker.NodeCache[nodeId];
-                _singleBind._refCount++;
+                Console.WriteLine("OMG!");
+            }
+            if (header->_defSize != 0xE0)
+            {
+                Console.WriteLine("OMG!");
+            }
+            if (header->_dataLen1 != header->_dataLen2)
+            {
+                Console.WriteLine("DataLen deviation!");
+            }
+            if (header->_unk3 != 0)
+            {
+                Console.WriteLine("OMG!");
             }
 
             if (header != null)
             {
+                //Conditional name assignment
                 if ((_name == null) && (header->_stringOffset != 0))
                     _name = header->ResourceString;
 
+                //Create primitive manager
                 if (_parent != null)
                     _manager = new PrimitiveManager(header, Model._assets, linker.NodeCache);
 
-                //if (_parent != null)
-                //    _manager = new AssetManager(Header);
-                //GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
             }
 
             return false;
+        }
+
+        private int[] _nodeCache;
+        //This should be done after node indices have been asssigned
+        protected override int OnCalculateSize(bool force)
+        {
+            int size = (int)MDL0Polygon.Size;
+
+            //May be best to ensure this is done after assets have been merged.
+
+            //Create node table
+            HashSet<int> nodes = new HashSet<int>();
+            foreach (Vertex3 v in _manager._vertices)
+                nodes.Add(v._influence.NodeIndex);
+
+            //Copy to array and sort
+            _nodeCache = new int[nodes.Count];
+            nodes.CopyTo(_nodeCache);
+            Array.Sort(_nodeCache);
+
+            //Add table length
+            size += _nodeCache.Length * 4 + 4;
+            size.Align(0x20);
+
+            //Add def length
+            size += 0xE0;
+
+            //Combine primitives
+            //Merge vertices
+            //Group faces based on shared sides
+
+            //Build display list
+
+            //Texture matrices (0x30) start at 0x78, max 11
+            //Pos matrices (0x20) start at 0x00, max 10
+            //Normal matrices (0x28) start at 0x400, max 10
+
+            return base.OnCalculateSize(force);
+        }
+
+        protected internal override void OnRebuild(VoidPtr address, int length, bool force)
+        {
+            base.OnRebuild(address, length, force);
         }
 
         public override unsafe void Export(string outPath)
@@ -212,65 +279,14 @@ namespace BrawlLib.SSBB.ResourceNodes
             //    ctx.glPolygonMode(GLFace.FrontAndBack, GLPolygonMode.Fill);
 
 
-            //Enable arrays
-            //ctx.glEnableClientState(GLArrayType.VERTEX_ARRAY);
-
             _manager.PrepareStream(ctx);
-
-            //if (_normalNode != null)
-            //    ctx.glEnableClientState(GLArrayType.NORMAL_ARRAY);
-
-            //if (_colorSet[0] != null)
-            //    ctx.glEnableClientState(GLArrayType.COLOR_ARRAY);
 
             if (_singleBind != null)
             {
                 ctx.glPushMatrix();
-                Matrix m = _singleBind._matrix;
+                Matrix m = _singleBind.Matrix;
                 ctx.glMultMatrix((float*)&m);
             }
-
-            //if (_material != null)
-            //{
-            //    if (_material.Children.Count == 0)
-            //    {
-            //        ctx.glDisable((uint)GLEnableCap.Texture2D);
-            //        //foreach (Primitive prim in Primitives)
-            //        //{
-            //        //    prim.PreparePointers(ctx);
-            //        //    prim.Render(ctx, -1);
-            //        //}
-            //    }
-            //    else
-            //    {
-            //        ctx.glEnableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
-            //        ctx.glEnable(GLEnableCap.Texture2D);
-            //        foreach (MDL0MaterialRefNode mr in _material.Children)
-            //        {
-            //            //if ((mr._layerId1 == 0) || (!mr._textureReference.Enabled))
-            //            //    continue;
-            //            if (!mr._texture.Enabled)
-            //                continue;
-
-            //            mr.Bind(ctx);
-            //            //foreach (Primitive prim in Primitives)
-            //            //{
-            //            //    prim.PreparePointers(ctx);
-            //            //    prim.Render(ctx, 0);
-            //            //}
-            //        }
-            //        ctx.glDisable((uint)GLEnableCap.Texture2D);
-            //        ctx.glDisableClientState(GLArrayType.TEXTURE_COORD_ARRAY);
-            //    }
-            //}
-            //else
-            //{
-            //    //foreach (Primitive prim in Primitives)
-            //    //{
-            //    //    prim.PreparePointers(ctx);
-            //    //    prim.Render(ctx, 0);
-            //    //}
-            //}
 
             if ((_material != null) && (_material._children.Count > 0))
             {
@@ -287,13 +303,6 @@ namespace BrawlLib.SSBB.ResourceNodes
                 _manager.Render(ctx, -1);
 
             _manager.DetachStreams(ctx);
-            //if (_normalNode != null)
-            //    ctx.glDisableClientState(GLArrayType.NORMAL_ARRAY);
-
-            //if (_colorSet[0] != null)
-            //    ctx.glDisableClientState(GLArrayType.COLOR_ARRAY);
-
-            //ctx.glDisableClientState(GLArrayType.VERTEX_ARRAY);
 
             if (_singleBind != null)
                 ctx.glPopMatrix();
@@ -305,13 +314,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         internal void WeightVertices()
         {
-            //if (_singleBind != null)
-            //    _singleBind.CalcWeighted();
-
-            //if (_singleBind == null)
             _manager.Weight();
-            //foreach (Primitive prim in Primitives)
-            //    prim.Precalc(this, nodes);
         }
 
         internal override void Bind(GLContext ctx)

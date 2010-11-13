@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using BrawlLib.SSBB.ResourceNodes;
+using BrawlLib.Modeling;
 
 namespace BrawlLib.Wii.Models
 {
+    /// <summary>
+    /// Managed collection of influences. Only influences with references should be used.
+    /// It is up to the implementation to properly manage this collection.
+    /// </summary>
     public class InfluenceManager
     {
         internal List<Influence> _influences = new List<Influence>();
@@ -11,42 +16,106 @@ namespace BrawlLib.Wii.Models
 
         public Influence AddOrCreate(Influence inf)
         {
+            //Search for influence in list. If it exists, return it.
             foreach (Influence i in _influences)
                 if (i.Equals(inf))
                     return i;
+
+            //Not found, add it to the list.
             _influences.Add(inf);
             return inf;
         }
 
+        public int Count { get { return _influences.Count; } }
+        //public int CountPrimary
+        //{
+        //    get
+        //    {
+        //        int count = 0;
+        //        foreach (Influence i in _influences)
+        //            if (i.IsPrimary)
+        //                count++;
+        //        return count;
+        //    }
+        //}
+        //public int CountWeighted
+        //{
+        //    get
+        //    {
+        //        int count = 0;
+        //        foreach (Influence i in _influences)
+        //            if (i.IsWeighted)
+        //                count++;
+        //        return count;
+        //    }
+        //}
+
         //Increases reference count
-        public Influence AddOrCreateInc(Influence inf)
+        //public Influence AddOrCreateInc(Influence inf)
+        //{
+        //    Influence i = AddOrCreate(inf);
+        //    i._refCount++;
+        //    return i;
+        //}
+
+        //public void Remove(Influence inf)
+        //{
+        //    for (int i = 0; i < _influences.Count; i++)
+        //        if (object.ReferenceEquals(_influences[i], inf))
+        //        {
+        //            if (inf._refCount-- <= 0)
+        //                _influences.RemoveAt(i);
+        //            break;
+        //        }
+        //}
+
+        //Get all weighted influences
+        //public Influence[] GetWeighted()
+        //{
+        //    List<Influence> list = new List<Influence>(_influences.Count);
+        //    foreach (Influence i in _influences)
+        //        if (i.IsWeighted)
+        //            list.Add(i);
+
+        //    return list.ToArray();
+        //}
+
+        //Remove all influences without references
+        public void Clean()
         {
-            Influence i = AddOrCreate(inf);
-            i._refCount++;
-            return i;
+            int i = 0;
+            while (i < _influences.Count)
+            {
+                if (_influences[i]._refCount <= 0)
+                    _influences.RemoveAt(i);
+                else
+                    i++;
+            }
         }
 
-        public void Remove(Influence inf)
+        //Sorts influences
+        public void Sort()
         {
-            for (int i = 0; i < _influences.Count; i++)
-                if (object.ReferenceEquals(_influences[i], inf))
-                {
-                    if (inf._refCount-- <= 0)
-                        _influences.RemoveAt(i);
-                    break;
-                }
+            _influences.Sort(Influence.Compare);
         }
     }
 
-    public class Influence
+    public class Influence : IMatrixNode
     {
-        internal int _refCount = 0;
-
+        internal int _refCount;
+        internal int _index;
+        internal Matrix _matrix;
         internal BoneWeight[] _weights;
+
         public BoneWeight[] Weights { get { return _weights; } }
 
-        internal Matrix _matrix;
+        public int ReferenceCount { get { return _refCount; } set { _refCount = value; } }
+        public int NodeIndex { get { return _index; } }
         public Matrix Matrix { get { return _matrix; } }
+        public bool IsPrimaryNode { get { return false; } }
+
+        //public bool IsWeighted { get { return _weights.Length > 1; } }
+        //public MDL0BoneNode Bone { get { return _weights[0].Bone; } }
 
         public Influence(int capacity) { _weights = new BoneWeight[capacity]; }
         public Influence(BoneWeight[] weights) { _weights = weights; }
@@ -73,10 +142,10 @@ namespace BrawlLib.Wii.Models
             {
                 _matrix = new Matrix();
                 foreach (BoneWeight w in _weights)
-                    _matrix += (w.Bone.FrameMatrix * w.Bone.InverseBindMatrix) * w.Weight;
+                    _matrix += (w.Bone.Matrix * w.Bone.InverseBindMatrix) * w.Weight;
             }
             else if (_weights.Length == 1)
-                _matrix = _weights[0].Bone.FrameMatrix;
+                _matrix = _weights[0].Bone.Matrix;
             else
                 _matrix = Matrix.Identity;
         }
@@ -87,6 +156,20 @@ namespace BrawlLib.Wii.Models
         //        return Equals(obj as Influence);
         //    return false;
         //}
+        public static int Compare(Influence i1, Influence i2)
+        {
+            if (i1._weights.Length < i2._weights.Length)
+                return -1;
+            if (i1._weights.Length > i2._weights.Length)
+                return 1;
+
+            if (i1._refCount > i2._refCount)
+                return -1;
+            if (i1._refCount < i2._refCount)
+                return 1;
+
+            return 0;
+        }
 
         public bool Equals(Influence inf)
         {

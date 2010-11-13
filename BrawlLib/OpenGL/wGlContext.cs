@@ -1110,6 +1110,7 @@ namespace BrawlLib.OpenGL
         internal override void gluSphere(int quad, double radius, int slices, int stacks) { wGL.gluSphere(quad, radius, slices, stacks); }
 
         internal override void gluQuadricDrawStyle(int quad, GLUQuadricDrawStyle draw) { wGL.gluQuadricDrawStyle(quad, draw); }
+        internal override void gluQuadricOrientation(int quad, GLUQuadricOrientation orientation) { wGL.gluQuadricOrientation(quad, orientation); }
 
         internal override void gluLookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ) { wGL.gluLookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ); }
         internal override void gluUnProject(double winX, double winY, double winZ, double* model, double* proj, int* view, double* objX, double* objY, double* objZ) { wGL.gluUnProject(winX, winY, winZ, model, proj, view, objX, objY, objZ); }
